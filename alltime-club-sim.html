@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ALL-TIME CLUB SIMULATOR</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b0b0f;
+      --panel: #13131a;
+      --accent: #ffd700;
+      --accent2: #00ffff;
+      --accent3: #ff4d4d;
+      --text: #e8e6e3;
+      --sub: #a7a7a7;
+      --border-subtle: #2a2a32;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, "Helvetica Neue", Arial, sans-serif;
+      background:
+        radial-gradient(1200px 800px at 20% -10%, rgba(0, 255, 255, 0.06), transparent),
+        radial-gradient(1000px 700px at 120% 20%, rgba(255, 215, 0, 0.06), transparent),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .app-shell {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    header .title {
+      font-size: 30px;
+      font-weight: 900;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+    }
+
+    header .subtitle {
+      font-size: 12px;
+      color: var(--sub);
+      margin-top: 4px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid rgba(255, 215, 0, 0.13);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .card + .card {
+      margin-top: 10px;
+    }
+
+    .btn,
+    .btn-ghost,
+    .tab-btn {
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+    }
+
+    .btn {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #000;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--accent);
+      border-color: rgba(255, 215, 0, 0.53);
+    }
+
+    .btn-danger {
+      background: var(--accent3);
+      border-color: var(--accent3);
+      color: #fff;
+    }
+
+    .btn:hover,
+    .btn-ghost:hover,
+    .tab-btn:hover {
+      filter: brightness(1.08);
+    }
+
+    .tab-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      border-radius: 999px;
+      padding: 8px 12px;
+      border-color: rgba(255, 215, 0, 0.4);
+      color: var(--accent);
+    }
+
+    .tab-btn.tab-active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+
+    .tab-toggle {
+      margin-left: auto;
+      display: flex;
+      gap: 8px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      background: #0f0f13;
+      color: var(--text);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 215, 0, 0.33);
+      padding: 8px;
+      font-size: 0.85rem;
+      width: 100%;
+      outline: none;
+    }
+
+    input[type="text"]:focus,
+    select:focus {
+      border-color: var(--accent2);
+      box-shadow: 0 0 0 1px rgba(0, 255, 255, 0.4);
+    }
+
+    input[type="range"] {
+      width: 100%;
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    .label-sm {
+      font-size: 12px;
+      color: var(--sub);
+      margin-bottom: 4px;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--accent);
+      color: #000;
+    }
+
+    .badge-cyan {
+      background: var(--accent2);
+      color: #000;
+    }
+
+    .badge-red {
+      background: var(--accent3);
+      color: #fff;
+    }
+
+    /* Tabs content */
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    /* Groups */
+    .groups-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 12px;
+    }
+
+    .group-title {
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: var(--accent2);
+    }
+
+    .group-list {
+      margin: 0;
+      padding-left: 18px;
+      list-style: decimal;
+    }
+
+    .group-list li {
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .star-btn {
+      border-radius: 999px;
+      border: 1px solid rgba(255, 215, 0, 0.53);
+      background: transparent;
+      color: var(--accent);
+      padding: 2px 8px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .star-btn.active {
+      background: var(--accent);
+      color: #000;
+    }
+
+    /* Matches */
+    .matches-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .round-card {
+      border-radius: 12px;
+    }
+
+    .round-title {
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: var(--accent2);
+    }
+
+    .match-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .match-card {
+      border-radius: 10px;
+      border: 1px solid rgba(255, 215, 0, 0.2);
+      background: #0f0f13;
+      padding: 10px;
+    }
+
+    .match-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .match-summary {
+      color: var(--sub);
+      font-size: 0.85rem;
+      margin-top: 4px;
+    }
+
+    .star-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .star-chip {
+      background: #0b0b10;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 215, 0, 0.2);
+      padding: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+    }
+
+    /* Awards */
+    .awards-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .award-section-title {
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: var(--accent2);
+    }
+
+    .round-awards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 10px;
+    }
+
+    .round-award-card {
+      border-radius: 10px;
+      border: 1px solid rgba(255, 215, 0, 0.2);
+      padding: 10px;
+    }
+
+    .round-award-title {
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .simple-list {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 0.85rem;
+    }
+
+    .week-card {
+      border-radius: 10px;
+      border: 1px solid rgba(255, 215, 0, 0.2);
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+
+    /* Dashboard */
+    .leaders-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    .leaders-table th,
+    .leaders-table td {
+      border-bottom: 1px solid #1f1f26;
+      padding: 6px 6px;
+      text-align: left;
+    }
+
+    .leaders-table th {
+      color: var(--accent2);
+      font-weight: 700;
+      border-bottom: 1px solid rgba(0, 255, 255, 0.5);
+    }
+
+    .bar-cell {
+      position: relative;
+      min-width: 120px;
+    }
+
+    .bar-bg {
+      position: absolute;
+      inset: 0;
+      background: #181820;
+      border-radius: 999px;
+    }
+
+    .bar-fill {
+      position: absolute;
+      top: 1px;
+      bottom: 1px;
+      left: 1px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+    }
+
+    .bar-label {
+      position: relative;
+      z-index: 1;
+      padding: 0 6px;
+    }
+
+    /* Manual sim */
+    .manual-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .manual-row select {
+      max-width: 260px;
+    }
+
+    .manual-score-card {
+      border-radius: 10px;
+      border: 1px solid rgba(255, 215, 0, 0.25);
+      padding: 10px;
+      font-size: 0.9rem;
+    }
+
+    /* Bracket */
+    .bracket-card {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+    }
+
+    .bracket-col {
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .bracket-title {
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: var(--accent2);
+    }
+
+    .bracket-ties {
+      display: grid;
+      gap: 8px;
+    }
+
+    .tie-card {
+      border-radius: 10px;
+      border: 1px solid rgba(255, 215, 0, 0.2);
+      padding: 10px;
+      font-size: 0.82rem;
+    }
+
+    .tie-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .tie-winner {
+      margin-top: 6px;
+      font-size: 0.78rem;
+      color: var(--sub);
+    }
+
+    footer {
+      text-align: center;
+      color: var(--sub);
+      font-size: 0.8rem;
+      margin-top: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header>
+      <div class="title">ALL-TIME CLUB SIMULATOR</div>
+      <div class="subtitle">R to re-roll • S to sim • Randomized by design</div>
+    </header>
+
+    <!-- CONTROL PANEL -->
+    <section class="card" style="margin-bottom: 12px;">
+      <div class="controls-grid">
+        <div>
+          <div class="label-sm">Seed</div>
+          <input type="text" id="seed-input" />
+        </div>
+        <div>
+          <div class="label-sm">Goal Environment: <span id="goal-env-label"></span></div>
+          <input type="range" id="goal-env-range" min="0.8" max="2" step="0.1" />
+        </div>
+        <div>
+          <div class="label-sm">Home Advantage: <span id="home-adv-label"></span></div>
+          <input type="range" id="home-adv-range" min="0" max="0.3" step="0.05" />
+        </div>
+        <div class="btn-row">
+          <button class="btn-ghost" id="quick-resim-btn">Quick Re-Sim</button>
+          <button class="btn" id="randomize-groups-btn">🎲 Randomize Groups</button>
+          <button class="btn btn-danger" id="run-tournament-btn">▶️ Run Tournament</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn-ghost" id="export-matches-btn">⬇️ Matches CSV</button>
+          <button class="btn-ghost" id="export-leaders-btn">⬇️ Leaders CSV</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn-ghost" id="sound-btn">🔊 Sound On</button>
+          <button class="btn-ghost" id="export-save-btn">💾 Export Save</button>
+          <button class="btn-ghost" id="import-save-btn">📂 Import Save</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TABS -->
+    <nav class="tab-nav">
+      <button class="tab-btn tab-active" data-tab="groups">GROUPS</button>
+      <button class="tab-btn" data-tab="matches">MATCHES</button>
+      <button class="tab-btn" data-tab="awards">AWARDS</button>
+      <button class="tab-btn" data-tab="dashboard">DASHBOARD</button>
+      <button class="tab-btn" data-tab="manual">MANUAL</button>
+      <button class="tab-btn" data-tab="bracket">BRACKET</button>
+
+      <div class="tab-toggle">
+        <button class="btn-ghost" id="ui-mode-btn">🧭 Classic Tabs</button>
+      </div>
+    </nav>
+
+    <!-- GROUPS TAB -->
+    <section id="tab-groups" class="tab-panel active">
+      <div id="groups-container" class="groups-grid">
+        <!-- Filled by JS -->
+      </div>
+    </section>
+
+    <!-- MATCHES TAB -->
+    <section id="tab-matches" class="tab-panel">
+      <div id="matches-container" class="matches-grid">
+        <!-- Filled by JS -->
+      </div>
+    </section>
+
+    <!-- AWARDS TAB -->
+    <section id="tab-awards" class="tab-panel">
+      <div class="awards-grid">
+        <div class="card">
+          <div class="award-section-title">Team of Each Round</div>
+          <div id="team-of-round-container" class="round-awards-grid"></div>
+        </div>
+        <div class="card">
+          <div class="award-section-title">Player of the Matchweek</div>
+          <div id="player-of-week-container" class="round-awards-grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DASHBOARD TAB -->
+    <section id="tab-dashboard" class="tab-panel">
+      <div class="card">
+        <div class="award-section-title">Performance Dashboard</div>
+        <div style="margin-bottom:6px;font-size:0.8rem;color:var(--sub);">
+          Top 15 players by average rating. Bars show combined impact (Goals + Assists + Avg).
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="leaders-table" id="leaders-table">
+            <!-- Filled by JS -->
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- MANUAL TAB -->
+    <section id="tab-manual" class="tab-panel">
+      <div class="card">
+        <div class="award-section-title">Manual Match Simulator</div>
+        <div class="manual-row">
+          <select id="manual-home-select"></select>
+          <span style="color:var(--accent);font-weight:700;">vs</span>
+          <select id="manual-away-select"></select>
+          <button class="btn" id="manual-sim-btn">Simulate</button>
+        </div>
+        <div id="manual-result-container"></div>
+      </div>
+    </section>
+
+    <!-- BRACKET TAB -->
+    <section id="tab-bracket" class="tab-panel">
+      <div class="card">
+        <div id="bracket-container" class="bracket-card"></div>
+      </div>
+    </section>
+
+    <footer>
+      © Retro Football Sim — full tournament • bracket &amp; tabs • CSV • sliders • manual sim
+    </footer>
+  </div>
+
+  <script>
+    // THEME & HELPERS
+    const THEME = {
+      bg: "#0b0b0f",
+      panel: "#13131a",
+      accent: "#FFD700",
+      accent2: "#00FFFF",
+      accent3: "#FF4D4D",
+      text: "#e8e6e3",
+      sub: "#a7a7a7"
+    };
+
+    const saveLocal = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+    const loadLocal = (k, fb) => {
+      try {
+        const raw = localStorage.getItem(k);
+        return raw ? JSON.parse(raw) : fb;
+      } catch {
+        return fb;
+      }
+    };
+    const clamp = (x, lo, hi) => Math.max(lo, Math.min(hi, x));
+    const normal = (mu = 0, sigma = 1) => {
+      let u = 0, v = 0;
+      while (!u) u = Math.random();
+      while (!v) v = Math.random();
+      const z = Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+      return z * sigma + mu;
+    };
+    const fact = n => (n <= 1 ? 1 : n * fact(n - 1));
+    const poisson = (lambda, cap = 7) => {
+      const probs = Array.from({ length: cap + 1 }, (_, k) =>
+        Math.exp(-lambda) * (lambda ** k) / fact(k)
+      );
+      const tot = probs.reduce((a, b) => a + b, 0);
+      let r = Math.random(), c = 0;
+      for (let k = 0; k <= cap; k++) {
+        c += probs[k] / tot;
+        if (r <= c) return k;
+      }
+      return cap;
+    };
+
+    const DEFAULT_TEAMS = [/* === your team list unchanged === */ 
+      { name: "2015 Barcelona", stars: [{ name: "Lionel Messi", quality: 100 }, { name: "Andrés Iniesta", quality: 95 }, { name: "Xavi", quality: 94 }, { name: "Neymar", quality: 95 }, { name: "Luis Suárez", quality: 96 }], teamStrength: 96, goalie: { name: "Claudio Bravo" } },
+      { name: "2017 Real Madrid", stars: [{ name: "Cristiano Ronaldo", quality: 98 }, { name: "Luka Modrić", quality: 94 }, { name: "Sergio Ramos", quality: 91 }, { name: "Toni Kroos", quality: 93 }, { name: "Marcelo", quality: 90 }], teamStrength: 95, goalie: { name: "Keylor Navas" } },
+      { name: "2013 Bayern Munich", stars: [{ name: "Arjen Robben", quality: 92 }, { name: "Franck Ribéry", quality: 91 }, { name: "Thomas Müller", quality: 90 }, { name: "Bastian Schweinsteiger", quality: 90 }, { name: "Philipp Lahm", quality: 91 }], teamStrength: 94, goalie: { name: "Manuel Neuer" } },
+      { name: "2023 Manchester City", stars: [{ name: "Erling Haaland", quality: 95 }, { name: "Kevin De Bruyne", quality: 94 }, { name: "Bernardo Silva", quality: 90 }, { name: "Rodri", quality: 93 }, { name: "Rúben Dias", quality: 90 }], teamStrength: 95, goalie: { name: "Ederson" } },
+      { name: "1989 AC Milan", stars: [{ name: "Marco van Basten", quality: 96 }, { name: "Ruud Gullit", quality: 94 }, { name: "Franco Baresi", quality: 92 }, { name: "Paolo Maldini", quality: 92 }, { name: "Frank Rijkaard", quality: 93 }], teamStrength: 94, goalie: { name: "Giovanni Galli" } },
+      { name: "2010 Inter Milan", stars: [{ name: "Diego Milito", quality: 90 }, { name: "Wesley Sneijder", quality: 92 }, { name: "Samuel Eto'o", quality: 93 }, { name: "Javier Zanetti", quality: 90 }, { name: "Esteban Cambiasso", quality: 89 }], teamStrength: 90, goalie: { name: "Julio Cesar" } },
+      { name: "2004 Arsenal", stars: [{ name: "Thierry Henry", quality: 96 }, { name: "Dennis Bergkamp", quality: 93 }, { name: "Patrick Vieira", quality: 92 }, { name: "Robert Pires", quality: 90 }, { name: "Sol Campbell", quality: 89 }], teamStrength: 90, goalie: { name: "Jens Lehmann" } },
+      { name: "1984 Liverpool", stars: [{ name: "Kenny Dalglish", quality: 91 }, { name: "Ian Rush", quality: 92 }, { name: "Graeme Souness", quality: 90 }, { name: "Alan Hansen", quality: 88 }, { name: "Phil Neal", quality: 86 }], teamStrength: 90, goalie: { name: "Bruce Grobbelaar" } },
+      { name: "1971 Ajax", stars: [{ name: "Johan Cruyff", quality: 97 }, { name: "Johan Neeskens", quality: 92 }, { name: "Arie Haan", quality: 88 }, { name: "Ruud Krol", quality: 90 }, { name: "Sjaak Swart", quality: 86 }], teamStrength: 92, goalie: { name: "Heinz Stuy" } },
+      { name: "2012 Chelsea", stars: [{ name: "Didier Drogba", quality: 92 }, { name: "Frank Lampard", quality: 91 }, { name: "John Terry", quality: 88 }, { name: "Eden Hazard", quality: 90 }, { name: "Ashley Cole", quality: 88 }], teamStrength: 88, goalie: { name: "Petr Čech" } },
+      { name: "1997 Borussia Dortmund", stars: [{ name: "Karl-Heinz Riedle", quality: 88 }, { name: "Andreas Möller", quality: 90 }, { name: "Lars Ricken", quality: 86 }, { name: "Matthias Sammer", quality: 90 }, { name: "Jürgen Kohler", quality: 88 }], teamStrength: 88, goalie: { name: "Stefan Klos" } },
+      { name: "1996 Juventus", stars: [{ name: "Zinedine Zidane", quality: 95 }, { name: "Didier Deschamps", quality: 89 }, { name: "Alessandro Del Piero", quality: 93 }, { name: "Antonio Conte", quality: 87 }, { name: "Ciro Ferrara", quality: 87 }], teamStrength: 92, goalie: { name: "Angelo Peruzzi" } },
+      { name: "2014 Atlético Madrid", stars: [{ name: "Diego Godín", quality: 89 }, { name: "Antoine Griezmann", quality: 90 }, { name: "Koke", quality: 89 }, { name: "Gabi", quality: 87 }, { name: "Felipe Luis", quality: 86 }], teamStrength: 90, goalie: { name: "Jan Oblak" } },
+      { name: "1963 Santos", stars: [{ name: "Pelé", quality: 99 }, { name: "Coutinho", quality: 92 }, { name: "Pepe", quality: 92 }, { name: "Zito", quality: 90 }, { name: "Carlos Alberto", quality: 92 }], teamStrength: 93, goalie: { name: "Gilmar" } },
+      { name: "1962 Benfica", stars: [{ name: "Eusébio", quality: 96 }, { name: "Mário Coluna", quality: 92 }, { name: "José Águas", quality: 90 }, { name: "Germano", quality: 88 }, { name: "Ántonio Simões", quality: 88 }], teamStrength: 92, goalie: { name: "Costa Pereira" } },
+      { name: "1979 Nottingham Forest", stars: [{ name: "Trevor Francis", quality: 88 }, { name: "John Robertson", quality: 87 }, { name: "Peter Shilton", quality: 89 }, { name: "Viv Anderson", quality: 87 }, { name: "Kenny Burns", quality: 86 }], teamStrength: 87, goalie: { name: "Peter Shilton" } },
+      { name: "1988 PSV Eindhoven", stars: [{ name: "Romário", quality: 96 }, { name: "Eric Gerets", quality: 88 }, { name: "Gerald Vanenburg", quality: 88 }, { name: "Ronald Koeman", quality: 90 }, { name: "Hans Gillhaus", quality: 87 }], teamStrength: 89, goalie: { name: "Hans van Breukelen" } },
+      { name: "2019 Flamengo", stars: [{ name: "Gabigol", quality: 89 }, { name: "Bruno Henrique", quality: 88 }, { name: "Gerson", quality: 86 }, { name: "Arrascaeta", quality: 88 }, { name: "Rafinha", quality: 86 }], teamStrength: 88, goalie: { name: "Diego Alves" } },
+      { name: "2012 Corinthians", stars: [{ name: "Paulinho", quality: 86 }, { name: "Cássio", quality: 88 }, { name: "Emerson", quality: 85 }, { name: "Danilo", quality: 85 }, { name: "Ralf", quality: 85 }], teamStrength: 86, goalie: { name: "Cássio" } },
+      { name: "1992 São Paulo", stars: [{ name: "Raí", quality: 90 }, { name: "Cafu", quality: 90 }, { name: "Toninho Cerezo", quality: 88 }, { name: "Müller", quality: 87 }, { name: "Leonardo", quality: 86 }], teamStrength: 89, goalie: { name: "Zetti" } },
+      { name: "1986 Steaua București", stars: [{ name: "Gheorghe Hagi", quality: 92 }, { name: "Helmuth Duckadam", quality: 88 }, { name: "Lăcătuș", quality: 88 }, { name: "Marius Lăcătuș", quality: 88 }, { name: "Victor Pițurcă", quality: 87 }], teamStrength: 87, goalie: { name: "Helmuth Duckadam" } },
+      { name: "1991 Red Star Belgrade", stars: [{ name: "Dejan Savićević", quality: 90 }, { name: "Robert Prosinečki", quality: 90 }, { name: "Darko Pančev", quality: 90 }, { name: "Vladimir Jugović", quality: 88 }, { name: "Miodrag Belodedici", quality: 88 }], teamStrength: 88, goalie: { name: "Stevan Stojanović" } },
+      { name: "1966 Peñarol", stars: [{ name: "Alberto Spencer", quality: 92 }, { name: "Pedro Rocha", quality: 90 }, { name: "Ladislao Mazurkiewicz", quality: 90 }, { name: "Luis Cubilla", quality: 88 }, { name: "Roque Máspoli", quality: 87 }], teamStrength: 88, goalie: { name: "Ladislao Mazurkiewicz" } },
+      { name: "1973 Independiente", stars: [{ name: "Ricardo Bochini", quality: 90 }, { name: "Daniel Bertoni", quality: 88 }, { name: "Miguel Santoro", quality: 86 }, { name: "Jorge Burruchaga", quality: 88 }, { name: "Ricardo Pavoni", quality: 87 }], teamStrength: 90, goalie: { name: "Miguel Santoro" } },
+      { name: "1968 Estudiantes", stars: [{ name: "Juan Ramón Verón", quality: 88 }, { name: "Carlos Bilardo", quality: 86 }, { name: "Oscar Malbernat", quality: 85 }, { name: "Raúl Madero", quality: 85 }, { name: "Juan Echecopar", quality: 84 }], teamStrength: 87, goalie: { name: "Alberto Poletti" } },
+      { name: "2018 River Plate", stars: [{ name: "Pity Martínez", quality: 86 }, { name: "Juanfer Quintero", quality: 87 }, { name: "Franco Armani", quality: 86 }, { name: "Gonzalo Martínez", quality: 86 }, { name: "Lucas Pratto", quality: 86 }], teamStrength: 88, goalie: { name: "Franco Armani" } },
+      { name: "2003 Boca Juniors", stars: [{ name: "Juan Román Riquelme", quality: 93 }, { name: "Carlos Tevez", quality: 90 }, { name: "Roberto Abbondanzieri", quality: 87 }, { name: "Martín Palermo", quality: 89 }, { name: "Clemente Rodríguez", quality: 86 }], teamStrength: 90, goalie: { name: "Roberto Abbondanzieri" } },
+      { name: "1991 Sampdoria", stars: [{ name: "Gianluca Vialli", quality: 90 }, { name: "Roberto Mancini", quality: 90 }, { name: "Attilio Lombardo", quality: 88 }, { name: "Pietro Vierchowod", quality: 88 }, { name: "Toninho Cerezo", quality: 88 }], teamStrength: 85, goalie: { name: "Gianluca Pagliuca" } },
+      { name: "1971 Celtic", stars: [{ name: "Jimmy Johnstone", quality: 89 }, { name: "Billy McNeill", quality: 88 }, { name: "Bobby Lennox", quality: 88 }, { name: "Tommy Gemmell", quality: 88 }, { name: "Bertie Auld", quality: 87 }], teamStrength: 86, goalie: { name: "Evan Williams" } },
+      { name: "1972 Derby County", stars: [{ name: "Kevin Hector", quality: 85 }, { name: "Roy McFarland", quality: 86 }, { name: "Colin Todd", quality: 86 }, { name: "Alan Hinton", quality: 85 }, { name: "Archie Gemmill", quality: 86 }], teamStrength: 84, goalie: { name: "Colin Boulton" } },
+      { name: "1978 Club Brugge", stars: [{ name: "Jan Ceulemans", quality: 88 }, { name: "Birger Jensen", quality: 86 }, { name: "Robbie Rensenbrink", quality: 88 }, { name: "Raoul Lambert", quality: 86 }, { name: "Franky Van der Elst", quality: 86 }], teamStrength: 85, goalie: { name: "Birger Jensen" } },
+      { name: "1995 Ajax", stars: [{ name: "Patrick Kluivert", quality: 90 }, { name: "Clarence Seedorf", quality: 90 }, { name: "Edgar Davids", quality: 89 }, { name: "Marc Overmars", quality: 89 }, { name: "Frank de Boer", quality: 89 }], teamStrength: 92, goalie: { name: "Edwin van der Sar" } },
+      { name: "1999 Manchester United", stars: [{ name: "Ryan Giggs", quality: 90 }, { name: "Paul Scholes", quality: 90 }, { name: "David Beckham", quality: 90 }, { name: "Roy Keane", quality: 91 }, { name: "Jaap Stam", quality: 90 }], teamStrength: 92, goalie: { name: "Peter Schmeichel" } },
+      { name: "1994 AC Milan", stars: [{ name: "George Weah", quality: 92 }, { name: "Dejan Savićević", quality: 90 }, { name: "Paolo Maldini", quality: 93 }, { name: "Franco Baresi", quality: 94 }, { name: "Roberto Donadoni", quality: 88 }], teamStrength: 94, goalie: { name: "Sebastiano Rossi" } },
+      { name: "1993 Marseille", stars: [{ name: "Didier Deschamps", quality: 89 }, { name: "Marcel Desailly", quality: 90 }, { name: "Abedi Pelé", quality: 90 }, { name: "Rudi Völler", quality: 89 }, { name: "Fabien Barthez", quality: 90 }], teamStrength: 90, goalie: { name: "Fabien Barthez" } }
+    ];
+
+    // STATE
+    let teams = loadLocal("teams", DEFAULT_TEAMS);
+    let favorites = loadLocal("favorites", []);
+    let seed = loadLocal("seed", "42");
+    let goalEnv = typeof loadLocal("goalEnv", null) === "number" ? loadLocal("goalEnv", 1.2) : 1.2;
+    let homeAdv = typeof loadLocal("homeAdv", null) === "number" ? loadLocal("homeAdv", 0.1) : 0.1;
+    let soundOn = loadLocal("soundOn", true);
+    let groups = {};
+    let matches = [];
+    let teamOfRound = {};
+    let playerOfWeek = {};
+    let bracket = { r16: [], qf: [], sf: [], final: [] };
+    let leaders = [];
+    let manualHome = "2015 Barcelona";
+    let manualAway = "2017 Real Madrid";
+    let manualResult = null;
+    let uiMode = "tabs";
+
+    const teamMap = () => Object.fromEntries(teams.map(t => [t.name, t]));
+
+    // DOM refs
+    const seedInput = document.getElementById("seed-input");
+    const goalEnvRange = document.getElementById("goal-env-range");
+    const goalEnvLabel = document.getElementById("goal-env-label");
+    const homeAdvRange = document.getElementById("home-adv-range");
+    const homeAdvLabel = document.getElementById("home-adv-label");
+    const quickResimBtn = document.getElementById("quick-resim-btn");
+    const randomizeGroupsBtn = document.getElementById("randomize-groups-btn");
+    const runTournamentBtn = document.getElementById("run-tournament-btn");
+    const exportMatchesBtn = document.getElementById("export-matches-btn");
+    const exportLeadersBtn = document.getElementById("export-leaders-btn");
+    const soundBtn = document.getElementById("sound-btn");
+    const exportSaveBtn = document.getElementById("export-save-btn");
+    const importSaveBtn = document.getElementById("import-save-btn");
+    const uiModeBtn = document.getElementById("ui-mode-btn");
+
+    const groupsContainer = document.getElementById("groups-container");
+    const matchesContainer = document.getElementById("matches-container");
+    const teamOfRoundContainer = document.getElementById("team-of-round-container");
+    const playerOfWeekContainer = document.getElementById("player-of-week-container");
+    const leadersTable = document.getElementById("leaders-table");
+    const manualHomeSelect = document.getElementById("manual-home-select");
+    const manualAwaySelect = document.getElementById("manual-away-select");
+    const manualSimBtn = document.getElementById("manual-sim-btn");
+    const manualResultContainer = document.getElementById("manual-result-container");
+    const bracketContainer = document.getElementById("bracket-container");
+
+    // Initial UI values
+    seedInput.value = seed;
+    goalEnvRange.value = goalEnv;
+    homeAdvRange.value = homeAdv;
+    goalEnvLabel.textContent = goalEnv.toFixed(2);
+    homeAdvLabel.textContent = homeAdv.toFixed(2);
+    soundBtn.textContent = soundOn ? "🔊 Sound On" : "🔇 Sound Off";
+
+    // TABS
+    const tabButtons = document.querySelectorAll(".tab-btn");
+    const tabPanels = document.querySelectorAll(".tab-panel");
+    function switchTab(tabName) {
+      tabButtons.forEach(btn => {
+        btn.classList.toggle("tab-active", btn.dataset.tab === tabName);
+      });
+      tabPanels.forEach(panel => {
+        panel.classList.toggle("active", panel.id === "tab-" + tabName);
+      });
+      // bracket focus hides matches tab when uiMode = bracket
+      if (tabName === "matches" && uiMode === "bracket") {
+        document.getElementById("tab-matches").style.display = "none";
+      } else {
+        document.getElementById("tab-matches").style.display = "";
+      }
+    }
+    tabButtons.forEach(btn => {
+      btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+    });
+
+    uiModeBtn.addEventListener("click", () => {
+      uiMode = uiMode === "tabs" ? "bracket" : "tabs";
+      uiModeBtn.textContent = uiMode === "tabs" ? "🧭 Classic Tabs" : "🧩 Bracket Focus";
+      if (uiMode === "bracket") {
+        if (matches.length) switchTab("bracket");
+      }
+    });
+
+    // CORE SIM LOGIC (from your React code)
+
+    function simulateScore(a, b, goalEnv, homeAdv) {
+      if (!a || !b) return [0, 0];
+      const sA = a.teamStrength, sB = b.teamStrength;
+      const lamA = Math.max(0.2, goalEnv * ((sA / (sA + sB)) * 2 + homeAdv));
+      const lamB = Math.max(0.2, goalEnv * ((sB / (sA + sB)) * 2));
+      return [poisson(lamA), poisson(lamB)];
+    }
+
+    function starLine(team, goals) {
+      const star = team.stars[Math.floor(Math.random() * team.stars.length)];
+      const q = star.quality;
+      const expGoals = goals * (0.40 + (q - 85) / 220);
+      let g = Math.max(0, Math.round(normal(expGoals, 0.8)));
+      g = Math.min(g, goals);
+      let a = Math.max(0, Math.round(normal(g * 0.6, 0.8)));
+      const base = 6.2 + (q - 85) / 10;
+      const rating = clamp(normal(base + 0.5 * g + 0.3 * a, 0.6), 5.5, 10);
+      return { who: star.name, goals: g, assists: a, rating: +rating.toFixed(2) };
+    }
+
+    function keeperSaves(goalsAgainst) {
+      const shots = goalsAgainst + Math.max(0, Math.round(normal(5, 2)));
+      const saves = Math.max(0, shots - goalsAgainst);
+      return saves;
+    }
+
+    function makeSummary(a, b, gA, gB, leg, keys) {
+      const tone = gA === gB
+        ? "couldn’t be split"
+        : Math.abs(gA - gB) === 1
+        ? "edged it"
+        : gA > gB
+        ? "overpowered"
+        : "dominated";
+      const leader = gA > gB ? a.name : gB > gA ? b.name : "Both sides";
+      const legTxt = leg ? ` (Leg ${leg})` : "";
+      const spice =
+        gA + gB >= 5
+          ? " A five-goal barnburner lit up the round."
+          : gA + gB <= 1
+          ? " A cagey tactical duel decided by inches."
+          : "";
+      const keyStr = keys && keys.length ? ` Key performers: ${keys.join(", ")}.` : "";
+      const color =
+        Math.random() < 0.5
+          ? `${leader} pressed high and disrupted build-up.`
+          : `${leader} won the midfield with crisp triangles.`;
+      return `${a.name} vs ${b.name}${legTxt} finished ${gA}-${gB}. ${leader} ${tone} as moments swung the tie. ${color}${spice}${keyStr}`;
+    }
+
+    function groupSchedule(ts) {
+      if (!ts || ts.length < 4) return [];
+      const [A, B, C, D] = ts;
+      return [
+        [{ home: A, away: B }, { home: C, away: D }],
+        [{ home: A, away: C }, { home: B, away: D }],
+        [{ home: A, away: D }, { home: B, away: C }]
+      ];
+    }
+
+    function shuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function twoLeg(all, A, B, roundName) {
+      const [l1A, l1B] = simulateScore(A, B, goalEnv, homeAdv);
+      const s1A = starLine(A, l1A), s1B = starLine(B, l1B);
+      const sum1 = makeSummary(
+        A, B, l1A, l1B, 1,
+        [`${s1A.who} ${s1A.goals}G/${s1A.assists}A`, `${s1B.who} ${s1B.goals}G/${s1B.assists}A`]
+      );
+      all.push({
+        id: `${roundName}-${A.name}-${B.name}-L1`,
+        round: roundName,
+        leg: 1,
+        week: 0,
+        home: A.name,
+        away: B.name,
+        homeGoals: l1A,
+        awayGoals: l1B,
+        summary: sum1,
+        starInvolvement: {
+          [s1A.who]: { goals: s1A.goals, assists: s1A.assists, rating: s1A.rating, team: A.name },
+          [s1B.who]: { goals: s1B.goals, assists: s1B.assists, rating: s1B.rating, team: B.name }
+        }
+      });
+
+      const [l2A, l2B] = simulateScore(B, A, goalEnv, homeAdv);
+      const s2A = starLine(B, l2A), s2B = starLine(A, l2B);
+      const sum2 = makeSummary(
+        B, A, l2A, l2B, 2,
+        [`${s2A.who} ${s2A.goals}G/${s2A.assists}A`, `${s2B.who} ${s2B.goals}G/${s2B.assists}A`]
+      );
+      all.push({
+        id: `${roundName}-${A.name}-${B.name}-L2`,
+        round: roundName,
+        leg: 2,
+        week: 0,
+        home: B.name,
+        away: A.name,
+        homeGoals: l2A,
+        awayGoals: l2B,
+        summary: sum2,
+        starInvolvement: {
+          [s2A.who]: { goals: s2A.goals, assists: s2A.assists, rating: s2A.rating, team: B.name },
+          [s2B.who]: { goals: s2B.goals, assists: s2B.assists, rating: s2B.rating, team: A.name }
+        }
+      });
+
+      const aggA = l1A + l2B, aggB = l1B + l2A;
+      const winner =
+        aggA === aggB ? (Math.random() < 0.5 ? A.name : B.name) : aggA > aggB ? A.name : B.name;
+      return { winner, aggA, aggB };
+    }
+
+    // RANDOMIZE GROUPS
+    function randomizeGroups() {
+      const favs = new Set(favorites);
+      const favTeams = teams.filter(t => favs.has(t.name));
+      const others = teams.filter(t => !favs.has(t.name));
+      const shuffled = shuffle(others);
+      const selected = favTeams.concat(shuffled).slice(0, 32);
+      while (selected.length < 32) {
+        const pool = shuffled.length ? shuffled : teams;
+        selected.push(pool[Math.floor(Math.random() * pool.length)]);
+      }
+      const out = {};
+      for (let i = 0; i < 8; i++) {
+        out[String.fromCharCode(65 + i)] = selected
+          .slice(i * 4, (i + 1) * 4)
+          .map(t => t.name);
+      }
+      groups = out;
+      matches = [];
+      teamOfRound = {};
+      playerOfWeek = {};
+      bracket = { r16: [], qf: [], sf: [], final: [] };
+      renderGroups();
+      renderMatches();
+      renderAwards();
+      renderBracket();
+      renderDashboard();
+    }
+
+    // RUN TOURNAMENT
+    function runTournament() {
+      const tMap = teamMap();
+      if (Object.keys(groups).length !== 8) return;
+      for (const g of Object.keys(groups)) {
+        if ((groups[g] || []).length !== 4) return;
+      }
+
+      const all = [];
+      let week = 1;
+      const standings = {};
+      const teamOfRoundLocal = {};
+      const playerOfWeekLocal = {};
+
+      for (const g of Object.keys(groups)) {
+        const gt = groups[g];
+        const sched = groupSchedule(gt);
+        standings[g] = Object.fromEntries(
+          gt.map(t => [t, { pts: 0, gf: 0, ga: 0, gd: 0 }])
+        );
+        for (let w = 0; w < sched.length; w++) {
+          const roundTag = `Group ${g} — Week ${w + 1}`;
+          const roundRatings = [];
+          let best = null;
+          for (const p of sched[w]) {
+            const A = tMap[p.home], B = tMap[p.away];
+            if (!A || !B) continue;
+            const [gA, gB] = simulateScore(A, B, goalEnv, homeAdv);
+            const sA = starLine(A, gA), sB = starLine(B, gB);
+
+            const recA = standings[g][A.name], recB = standings[g][B.name];
+            recA.gf += gA; recA.ga += gB; recA.gd = recA.gf - recA.ga;
+            recB.gf += gB; recB.ga += gA; recB.gd = recB.gf - recB.ga;
+            if (gA > gB) recA.pts += 3;
+            else if (gB > gA) recB.pts += 3;
+            else { recA.pts++; recB.pts++; }
+
+            const summary = makeSummary(
+              A, B, gA, gB, undefined,
+              [`${sA.who} ${sA.goals}G/${sA.assists}A`, `${sB.who} ${sB.goals}G/${sB.assists}A`]
+            );
+            all.push({
+              id: `G-${g}-${w}-${A.name}-${B.name}`,
+              round: `Group ${g}`,
+              week,
+              home: A.name,
+              away: B.name,
+              homeGoals: gA,
+              awayGoals: gB,
+              summary,
+              starInvolvement: {
+                [sA.who]: { goals: sA.goals, assists: sA.assists, rating: sA.rating, team: A.name },
+                [sB.who]: { goals: sB.goals, assists: sB.assists, rating: sB.rating, team: B.name }
+              }
+            });
+
+            const prs = [
+              { player: sA.who, rating: sA.rating, team: A.name },
+              { player: sB.who, rating: sB.rating, team: B.name }
+            ];
+            for (const pr of prs) {
+              if (!best || pr.rating > best.rating) best = pr;
+            }
+            roundRatings.push(...prs);
+            week++;
+          }
+          roundRatings.sort((x, y) => y.rating - x.rating);
+          teamOfRoundLocal[roundTag] = roundRatings.slice(0, 11);
+          if (best) playerOfWeekLocal[week - 1] = best;
+        }
+      }
+
+      function rankGroup(g) {
+        const arr = Object.entries(standings[g]);
+        arr.sort((a, b) =>
+          b[1].pts - a[1].pts ||
+          b[1].gd - a[1].gd ||
+          b[1].gf - a[1].gf ||
+          (Math.random() < 0.5 ? -1 : 1)
+        );
+        return arr.map(x => x[0]);
+      }
+
+      const order = Object.keys(groups).sort();
+      const ranks = {};
+      for (const g of order) ranks[g] = rankGroup(g);
+
+      const r16Pairs = [];
+      for (let i = 0; i < 8; i += 2) {
+        const g1 = order[i], g2 = order[i + 1];
+        r16Pairs.push([ranks[g1][0], ranks[g2][1]]);
+        r16Pairs.push([ranks[g2][0], ranks[g1][1]]);
+      }
+
+      const r16Ties = [];
+      const winnersR16 = r16Pairs.map(([a, b]) => {
+        const t = twoLeg(all, tMap[a], tMap[b], "Round of 16");
+        r16Ties.push({ a, b, aggA: t.aggA, aggB: t.aggB, winner: t.winner });
+        return t.winner;
+      });
+
+      const qfPool = shuffle(winnersR16);
+      const qfPairs = [];
+      for (let i = 0; i < 8; i += 2) qfPairs.push([qfPool[i], qfPool[i + 1]]);
+      const qfTies = [];
+      const winnersQF = qfPairs.map(([a, b]) => {
+        const t = twoLeg(all, tMap[a], tMap[b], "Quarterfinals");
+        qfTies.push({ a, b, aggA: t.aggA, aggB: t.aggB, winner: t.winner });
+        return t.winner;
+      });
+
+      const sfPool = shuffle(winnersQF);
+      const sfPairs = [[sfPool[0], sfPool[1]], [sfPool[2], sfPool[3]]];
+      const sfTies = [];
+      const winnersSF = sfPairs.map(([a, b]) => {
+        const t = twoLeg(all, tMap[a], tMap[b], "Semifinals");
+        sfTies.push({ a, b, aggA: t.aggA, aggB: t.aggB, winner: t.winner });
+        return t.winner;
+      });
+
+      const [fa, fb] = winnersSF;
+      const A = tMap[fa], B = tMap[fb];
+      const [gA, gB] = simulateScore(A, B, goalEnv, 0);
+      const sA = starLine(A, gA), sB = starLine(B, gB);
+      const finalSummary = makeSummary(
+        A, B, gA, gB, undefined,
+        [`${sA.who} ${sA.goals}G/${sA.assists}A`, `${sB.who} ${sB.goals}G/${sB.assists}A`]
+      );
+      all.push({
+        id: `Final-${A.name}-${B.name}`,
+        round: "Final",
+        week,
+        home: A.name,
+        away: B.name,
+        homeGoals: gA,
+        awayGoals: gB,
+        summary: finalSummary,
+        starInvolvement: {
+          [sA.who]: { goals: sA.goals, assists: sA.assists, rating: sA.rating, team: A.name },
+          [sB.who]: { goals: sB.goals, assists: sB.assists, rating: sB.rating, team: B.name }
+        }
+      });
+
+      const finalTie = {
+        a: A.name,
+        b: B.name,
+        aggA: gA,
+        aggB: gB,
+        winner:
+          gA === gB ? (Math.random() < 0.5 ? A.name : B.name) : gA > gB ? A.name : B.name
+      };
+
+      matches = all;
+      bracket = { r16: r16Ties, qf: qfTies, sf: sfTies, final: [finalTie] };
+
+      const stats = {};
+      for (const m of all) {
+        for (const [p, s] of Object.entries(m.starInvolvement)) {
+          if (!stats[p]) {
+            stats[p] = {
+              team: s.team,
+              matches: 0,
+              goals: 0,
+              assists: 0,
+              ratingSum: 0,
+              Saves: 0
+            };
+          }
+          const t = stats[p];
+          t.team = s.team;
+          t.matches++;
+          t.goals += s.goals;
+          t.assists += s.assists;
+          t.ratingSum += s.rating;
+        }
+      }
+
+      const leadersList = Object.entries(stats).map(([Player, v]) => ({
+        Player,
+        Team: v.team,
+        Matches: v.matches,
+        Goals: v.goals,
+        Assists: v.assists,
+        Avg: +(v.ratingSum / v.matches).toFixed(2),
+        Saves: v.Saves
+      }));
+      leadersList.sort((a, b) => b.Avg - a.Avg || b.Goals - a.Goals);
+
+      leaders = leadersList;
+      teamOfRound = teamOfRoundLocal;
+      playerOfWeek = playerOfWeekLocal;
+
+      renderMatches();
+      renderAwards();
+      renderDashboard();
+      renderBracket();
+    }
+
+    // RENDERING FUNCTIONS
+
+    function renderGroups() {
+      groupsContainer.innerHTML = "";
+      const groupKeys = Object.keys(groups);
+      if (!groupKeys.length) {
+        const div = document.createElement("div");
+        div.className = "card";
+        div.textContent = "Click ";
+        div.innerHTML = 'Click <strong>Randomize Groups</strong> to generate eight historic groups.';
+        groupsContainer.appendChild(div);
+        return;
+      }
+      groupKeys.sort().forEach(g => {
+        const card = document.createElement("div");
+        card.className = "card";
+        const title = document.createElement("div");
+        title.className = "group-title";
+        title.textContent = "Group " + g;
+        card.appendChild(title);
+
+        const ol = document.createElement("ol");
+        ol.className = "group-list";
+        groups[g].forEach(tname => {
+          const li = document.createElement("li");
+          const span = document.createElement("span");
+          span.textContent = tname;
+          const btn = document.createElement("button");
+          btn.className = "star-btn" + (favorites.includes(tname) ? " active" : "");
+          btn.textContent = favorites.includes(tname) ? "★" : "☆";
+          btn.addEventListener("click", () => {
+            if (favorites.includes(tname)) {
+              favorites = favorites.filter(x => x !== tname);
+            } else {
+              favorites.push(tname);
+            }
+            saveLocal("favorites", favorites);
+            renderGroups();
+          });
+          li.appendChild(span);
+          li.appendChild(btn);
+          ol.appendChild(li);
+        });
+        card.appendChild(ol);
+        groupsContainer.appendChild(card);
+      });
+    }
+
+    function groupedMatches() {
+      const m = {};
+      for (const x of matches) {
+        (m[x.round] ||= []).push(x);
+      }
+      for (const k of Object.keys(m)) {
+        m[k].sort((a, b) => a.week - b.week || (a.leg || 0) - (b.leg || 0));
+      }
+      return m;
+    }
+
+    function renderMatches() {
+      matchesContainer.innerHTML = "";
+      if (!matches.length) {
+        const div = document.createElement("div");
+        div.className = "card";
+        div.textContent = "No matches yet — run the tournament.";
+        matchesContainer.appendChild(div);
+        return;
+      }
+
+      const grouped = groupedMatches();
+      Object.keys(grouped).forEach(round => {
+        const roundCard = document.createElement("div");
+        roundCard.className = "card round-card";
+        const title = document.createElement("div");
+        title.className = "round-title";
+        title.textContent = round;
+        roundCard.appendChild(title);
+
+        const list = document.createElement("div");
+        list.className = "match-list";
+
+        grouped[round].forEach(m => {
+          const mc = document.createElement("div");
+          mc.className = "match-card";
+
+          const head = document.createElement("div");
+          head.className = "match-header";
+          const main = document.createElement("div");
+          main.textContent = `${m.home} ${m.homeGoals}–${m.awayGoals} ${m.away}`;
+          head.appendChild(main);
+          if (m.leg) {
+            const legBadge = document.createElement("span");
+            legBadge.className = "badge badge-cyan";
+            legBadge.textContent = "Leg " + m.leg;
+            head.appendChild(legBadge);
+          }
+          mc.appendChild(head);
+
+          const summary = document.createElement("div");
+          summary.className = "match-summary";
+          summary.textContent = m.summary;
+          mc.appendChild(summary);
+
+          const starGrid = document.createElement("div");
+          starGrid.className = "star-grid";
+          Object.entries(m.starInvolvement).forEach(([player, s]) => {
+            const chip = document.createElement("div");
+            chip.className = "star-chip";
+            const left = document.createElement("div");
+            left.innerHTML = `<strong>${player}</strong> — ${s.team}`;
+            const right = document.createElement("div");
+            const gSpan = document.createElement("span");
+            gSpan.className = "badge";
+            gSpan.textContent = `${s.goals}G`;
+            const aSpan = document.createElement("span");
+            aSpan.className = "badge badge-cyan";
+            aSpan.textContent = `${s.assists}A`;
+            const rSpan = document.createElement("span");
+            rSpan.className = "badge badge-red";
+            rSpan.textContent = s.rating.toFixed(2);
+            right.appendChild(gSpan);
+            right.appendChild(aSpan);
+            right.appendChild(rSpan);
+            chip.appendChild(left);
+            chip.appendChild(right);
+            starGrid.appendChild(chip);
+          });
+          mc.appendChild(starGrid);
+
+          list.appendChild(mc);
+        });
+
+        roundCard.appendChild(list);
+        matchesContainer.appendChild(roundCard);
+      });
+    }
+
+    function renderAwards() {
+      // Team of Round
+      teamOfRoundContainer.innerHTML = "";
+      const keys = Object.keys(teamOfRound);
+      if (!keys.length) {
+        teamOfRoundContainer.textContent = "No data yet — run the tournament.";
+      } else {
+        keys.forEach(k => {
+          const card = document.createElement("div");
+          card.className = "round-award-card";
+          const title = document.createElement("div");
+          title.className = "round-award-title";
+          title.textContent = k;
+          card.appendChild(title);
+
+          const ol = document.createElement("ol");
+          ol.className = "simple-list";
+          teamOfRound[k].forEach(p => {
+            const li = document.createElement("li");
+            li.innerHTML = `<strong>${p.player}</strong> — ${p.team} 
+              <span class="badge badge-cyan" style="margin-left:6px;">${p.rating.toFixed(2)}</span>`;
+            ol.appendChild(li);
+          });
+          card.appendChild(ol);
+          teamOfRoundContainer.appendChild(card);
+        });
+      }
+
+      // Player of Week
+      playerOfWeekContainer.innerHTML = "";
+      const wKeys = Object.keys(playerOfWeek);
+      if (!wKeys.length) {
+        playerOfWeekContainer.textContent = "No data yet — run the tournament.";
+      } else {
+        wKeys.forEach(wk => {
+          const p = playerOfWeek[wk];
+          const card = document.createElement("div");
+          card.className = "week-card";
+          const left = document.createElement("div");
+          left.innerHTML = `<div style="font-size:12px;color:${THEME.sub};">Matchweek ${wk}</div>
+            <div style="font-weight:700;">${p.player} — ${p.team}</div>`;
+          const right = document.createElement("span");
+          right.className = "badge badge-red";
+          right.textContent = p.rating.toFixed(2);
+          card.appendChild(left);
+          card.appendChild(right);
+          playerOfWeekContainer.appendChild(card);
+        });
+      }
+    }
+
+    function renderDashboard() {
+      leadersTable.innerHTML = "";
+      const headerRow = document.createElement("tr");
+      headerRow.innerHTML = `
+        <th>#</th>
+        <th>Player</th>
+        <th>Team</th>
+        <th>M</th>
+        <th>G</th>
+        <th>A</th>
+        <th>Avg</th>
+        <th>Impact</th>
+      `;
+      leadersTable.appendChild(headerRow);
+
+      if (!leaders.length) {
+        const row = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = 8;
+        td.textContent = "No leader data yet — run the tournament.";
+        row.appendChild(td);
+        leadersTable.appendChild(row);
+        return;
+      }
+
+      const top = leaders.slice(0, 15);
+      const maxImpact = Math.max(
+        ...top.map(l => l.Goals + l.Assists + l.Avg)
+      );
+
+      top.forEach((l, idx) => {
+        const tr = document.createElement("tr");
+        const impact = l.Goals + l.Assists + l.Avg;
+        const width = maxImpact ? (impact / maxImpact) * 100 : 0;
+
+        tr.innerHTML = `
+          <td>${idx + 1}</td>
+          <td>${l.Player}</td>
+          <td>${l.Team}</td>
+          <td>${l.Matches}</td>
+          <td>${l.Goals}</td>
+          <td>${l.Assists}</td>
+          <td>${l.Avg.toFixed(2)}</td>
+        `;
+
+        const impactTd = document.createElement("td");
+        impactTd.className = "bar-cell";
+        const bg = document.createElement("div");
+        bg.className = "bar-bg";
+        const fill = document.createElement("div");
+        fill.className = "bar-fill";
+        fill.style.width = width.toFixed(1) + "%";
+        const label = document.createElement("div");
+        label.className = "bar-label";
+        label.textContent = impact.toFixed(1);
+        impactTd.appendChild(bg);
+        impactTd.appendChild(fill);
+        impactTd.appendChild(label);
+        tr.appendChild(impactTd);
+
+        leadersTable.appendChild(tr);
+      });
+    }
+
+    function renderManual() {
+      manualHomeSelect.innerHTML = "";
+      manualAwaySelect.innerHTML = "";
+      teams.forEach(t => {
+        const opt1 = document.createElement("option");
+        opt1.value = t.name;
+        opt1.textContent = t.name;
+        const opt2 = document.createElement("option");
+        opt2.value = t.name;
+        opt2.textContent = t.name;
+        manualHomeSelect.appendChild(opt1);
+        manualAwaySelect.appendChild(opt2);
+      });
+      manualHomeSelect.value = manualHome;
+      manualAwaySelect.value = manualAway;
+      renderManualResult();
+    }
+
+    function renderManualResult() {
+      manualResultContainer.innerHTML = "";
+      if (!manualResult) return;
+      const div = document.createElement("div");
+      div.className = "manual-score-card";
+      const score = document.createElement("div");
+      score.style.fontWeight = "700";
+      score.textContent = manualResult.score;
+      const sum = document.createElement("div");
+      sum.style.color = THEME.sub;
+      sum.style.fontSize = "14px";
+      sum.style.marginTop = "4px";
+      sum.textContent = manualResult.summary;
+      div.appendChild(score);
+      div.appendChild(sum);
+      manualResultContainer.appendChild(div);
+    }
+
+    function renderBracket() {
+      bracketContainer.innerHTML = "";
+      const colTitles = ["Round of 16", "Quarterfinals", "Semifinals", "Final"];
+      const cols = [bracket.r16, bracket.qf, bracket.sf, bracket.final];
+
+      colTitles.forEach((title, idx) => {
+        const ties = cols[idx] || [];
+        const col = document.createElement("div");
+        col.className = "bracket-col";
+        const tTitle = document.createElement("div");
+        tTitle.className = "bracket-title";
+        tTitle.textContent = title;
+        col.appendChild(tTitle);
+
+        const wrap = document.createElement("div");
+        wrap.className = "bracket-ties";
+
+        ties.forEach((t, i) => {
+          const tieCard = document.createElement("div");
+          tieCard.className = "tie-card";
+
+          const rowA = document.createElement("div");
+          rowA.className = "tie-row";
+          rowA.innerHTML = `<div style="font-weight:700;">${t.a}</div>
+            <div class="badge">${t.aggA}</div>`;
+          const rowB = document.createElement("div");
+          rowB.className = "tie-row";
+          rowB.innerHTML = `<div style="font-weight:700;">${t.b}</div>
+            <div class="badge">${t.aggB}</div>`;
+          const winner = document.createElement("div");
+          winner.className = "tie-winner";
+          winner.innerHTML = `Winner: <span style="font-weight:800;color:${THEME.accent};">${t.winner}</span>`;
+
+          tieCard.appendChild(rowA);
+          tieCard.appendChild(rowB);
+          tieCard.appendChild(winner);
+          wrap.appendChild(tieCard);
+        });
+
+        col.appendChild(wrap);
+        bracketContainer.appendChild(col);
+      });
+    }
+
+    // CSV EXPORT
+    function downloadCSV(text, filename) {
+      const blob = new Blob([text], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function exportMatchesCSV() {
+      if (!matches.length) return;
+      const rows = matches.map(m =>
+        [
+          m.round,
+          m.leg || "",
+          m.week,
+          m.home,
+          m.homeGoals,
+          m.awayGoals,
+          m.away,
+          `"${(m.summary || "").replace(/"/g, '""')}"`
+        ].join(",")
+      );
+      const csv =
+        "round,leg,week,home,homeGoals,awayGoals,away,summary\n" +
+        rows.join("\n");
+      downloadCSV(csv, "matches.csv");
+    }
+
+    function exportLeadersCSV() {
+      if (!leaders.length) return;
+      const rows = leaders.map(l =>
+        [
+          l.Player,
+          l.Team,
+          l.Matches,
+          l.Goals,
+          l.Assists,
+          l.Saves,
+          l.Avg
+        ].join(",")
+      );
+      const csv =
+        "Player,Team,Matches,Goals,Assists,Saves,Avg\n" +
+        rows.join("\n");
+      downloadCSV(csv, "leaders.csv");
+    }
+
+    // MANUAL SIM
+    function simulateManual() {
+      const tMap = teamMap();
+      const A = tMap[manualHome];
+      const B = tMap[manualAway];
+      if (!A || !B) return;
+      const [gA, gB] = simulateScore(A, B, goalEnv, homeAdv);
+      const sum = makeSummary(
+        A, B, gA, gB, undefined,
+        [`${A.stars[0].name}`, `${B.stars[0].name}`]
+      );
+      manualResult = {
+        score: `${A.name} ${gA}-${gB} ${B.name}`,
+        summary: sum
+      };
+      renderManualResult();
+    }
+
+    // SAVE / LOAD BUNDLE
+    function exportSave() {
+      saveLocal("saveData", { teams, favorites, seed, goalEnv, homeAdv });
+      alert("Save exported to localStorage.");
+    }
+
+    function importSave() {
+      const s = loadLocal("saveData", null);
+      if (!s) return alert("No saved data.");
+      teams = s.teams || teams;
+      favorites = s.favorites || [];
+      seed = s.seed || "42";
+      if (typeof s.goalEnv === "number") goalEnv = s.goalEnv;
+      if (typeof s.homeAdv === "number") homeAdv = s.homeAdv;
+      // refresh UI
+      seedInput.value = seed;
+      goalEnvRange.value = goalEnv;
+      homeAdvRange.value = homeAdv;
+      goalEnvLabel.textContent = goalEnv.toFixed(2);
+      homeAdvLabel.textContent = homeAdv.toFixed(2);
+      renderGroups();
+      renderManual();
+      alert("Save imported.");
+    }
+
+    // EVENT LISTENERS UI
+    seedInput.addEventListener("input", () => {
+      seed = seedInput.value;
+      saveLocal("seed", seed);
+    });
+
+    goalEnvRange.addEventListener("input", () => {
+      goalEnv = parseFloat(goalEnvRange.value);
+      goalEnvLabel.textContent = goalEnv.toFixed(2);
+      saveLocal("goalEnv", goalEnv);
+    });
+
+    homeAdvRange.addEventListener("input", () => {
+      homeAdv = parseFloat(homeAdvRange.value);
+      homeAdvLabel.textContent = homeAdv.toFixed(2);
+      saveLocal("homeAdv", homeAdv);
+    });
+
+    quickResimBtn.addEventListener("click", () => {
+      randomizeGroups();
+      runTournament();
+    });
+
+    randomizeGroupsBtn.addEventListener("click", () => {
+      randomizeGroups();
+    });
+
+    runTournamentBtn.addEventListener("click", () => {
+      runTournament();
+    });
+
+    exportMatchesBtn.addEventListener("click", exportMatchesCSV);
+    exportLeadersBtn.addEventListener("click", exportLeadersCSV);
+
+    soundBtn.addEventListener("click", () => {
+      soundOn = !soundOn;
+      saveLocal("soundOn", soundOn);
+      soundBtn.textContent = soundOn ? "🔊 Sound On" : "🔇 Sound Off";
+    });
+
+    exportSaveBtn.addEventListener("click", exportSave);
+    importSaveBtn.addEventListener("click", importSave);
+
+    manualHomeSelect.addEventListener("change", () => {
+      manualHome = manualHomeSelect.value;
+    });
+    manualAwaySelect.addEventListener("change", () => {
+      manualAway = manualAwaySelect.value;
+    });
+    manualSimBtn.addEventListener("click", simulateManual);
+
+    // Keyboard shortcuts
+    window.addEventListener("keydown", e => {
+      const key = e.key.toLowerCase();
+      if (key === "r") {
+        randomizeGroups();
+        runTournament();
+      } else if (key === "s") {
+        runTournament();
+      }
+    });
+
+    // INITIAL BOOT
+    randomizeGroups();
+    renderManual();
+    renderDashboard();
+    renderBracket();
+  </script>
+</body>
+</html>

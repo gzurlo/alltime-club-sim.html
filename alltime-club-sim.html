@@ -59,7 +59,9 @@
       <button class="btn" onclick="startTournament()">Generate Groups</button>
       <button class="btn" onclick="runGroupStage()">Simulate Group Stage</button>
       <button class="btn" onclick="runKnockouts()">Run Knockout Stage</button>
+      <button class="btn" onclick="showPlayerStats()">Player Statistics</button>
       <button class="btn" onclick="exportTournament(tournamentState)">Export JSON</button>
+      <button class="btn" onclick="resetTournament()">Reset</button>
       
       <input type="file" id="importSave" style="margin-left:10px;">
       <button class="btn" onclick="handleImport()">Load Save</button>
@@ -77,10 +79,99 @@
     const TEAMS_PER_GROUP = 8;
     const TEAM_MAP = new Map();
     let playerStats = new Map();
-// JS will follow in next chunks
-// Chunk 2: Expanded Team Database (UEFA, CONMEBOL, Wildcards)
-const TEAM_POOL = [
+
+    // Initialize TEAM_POOL with your 64 teams
+    const TEAM_POOL = [
       {
+        name: "2009 Barcelona",
+        season: 2009,
+        strength: 95,
+        startingXI: [
+          { name: "Víctor Valdés", pos: "GK", quality: 90 },
+          { name: "Dani Alves", pos: "RB", quality: 94 },
+          { name: "Carles Puyol", pos: "CB", quality: 96 },
+          { name: "Gerard Piqué", pos: "CB", quality: 94 },
+          { name: "Eric Abidal", pos: "LB", quality: 90 },
+          { name: "Sergio Busquets", pos: "DM", quality: 92 },
+          { name: "Xavi Hernández", pos: "CM", quality: 97 },
+          { name: "Andrés Iniesta", pos: "CM", quality: 96 },
+          { name: "Lionel Messi", pos: "RW", quality: 99 },
+          { name: "Samuel Eto'o", pos: "ST", quality: 95 },
+          { name: "Thierry Henry", pos: "LW", quality: 95 }
+        ],
+        bench: [
+          { name: "José Manuel Pinto", pos: "GK", quality: 80 },
+          { name: "Rafael Márquez", pos: "CB", quality: 88 },
+          { name: "Seydou Keita", pos: "CM", quality: 86 },
+          { name: "Yaya Touré", pos: "DM", quality: 90 },
+          { name: "Bojan Krkić", pos: "ST", quality: 82 },
+          { name: "Pedro", pos: "RW", quality: 84 },
+          { name: "Martin Cáceres", pos: "CB", quality: 80 }
+        ]
+      },
+      // ... (include all your other 63 teams here)
+      // For brevity, I'll include just a few more examples
+
+      {
+        name: "2011 Barcelona",
+        season: 2011,
+        strength: 96,
+        startingXI: [
+          { name: "Víctor Valdés", pos: "GK", quality: 91 },
+          { name: "Dani Alves", pos: "RB", quality: 95 },
+          { name: "Gerard Piqué", pos: "CB", quality: 95 },
+          { name: "Javier Mascherano", pos: "CB", quality: 90 },
+          { name: "Eric Abidal", pos: "LB", quality: 89 },
+          { name: "Sergio Busquets", pos: "DM", quality: 94 },
+          { name: "Xavi Hernández", pos: "CM", quality: 97 },
+          { name: "Andrés Iniesta", pos: "CM", quality: 96 },
+          { name: "Lionel Messi", pos: "FW", quality: 99 },
+          { name: "David Villa", pos: "ST", quality: 93 },
+          { name: "Pedro", pos: "RW", quality: 87 }
+        ],
+        bench: [
+          { name: "José Manuel Pinto", pos: "GK", quality: 80 },
+          { name: "Carles Puyol", pos: "CB", quality: 92 },
+          { name: "Seydou Keita", pos: "CM", quality: 86 },
+          { name: "Thiago Alcântara", pos: "CM", quality: 84 },
+          { name: "Ibrahim Afellay", pos: "RW", quality: 82 },
+          { name: "Bojan Krkić", pos: "ST", quality: 82 },
+          { name: "Maxwell", pos: "LB", quality: 82 }
+        ]
+      },
+      {
+        name: "2019 Liverpool",
+        season: 2019,
+        strength: 96,
+        startingXI: [
+          { name: "Alisson", pos: "GK", quality: 95 },
+          { name: "Trent Alexander-Arnold", pos: "RB", quality: 94 },
+          { name: "Virgil van Dijk", pos: "CB", quality: 98 },
+          { name: "Joël Matip", pos: "CB", quality: 88 },
+          { name: "Andrew Robertson", pos: "LB", quality: 93 },
+          { name: "Fabinho", pos: "DM", quality: 92 },
+          { name: "Jordan Henderson", pos: "CM", quality: 88 },
+          { name: "Georginio Wijnaldum", pos: "CM", quality: 89 },
+          { name: "Mohamed Salah", pos: "RW", quality: 96 },
+          { name: "Sadio Mané", pos: "LW", quality: 95 },
+          { name: "Roberto Firmino", pos: "ST", quality: 92 }
+        ],
+        bench: [
+          { name: "Adrián", pos: "GK", quality: 80 },
+          { name: "James Milner", pos: "CM", quality: 84 },
+          { name: "Alex Oxlade-Chamberlain", pos: "CM", quality: 83 },
+          { name: "Divock Origi", pos: "ST", quality: 82 },
+          { name: "Xherdan Shaqiri", pos: "RW", quality: 84 },
+          { name: "Joe Gomez", pos: "CB", quality: 85 },
+          { name: "Naby Keïta", pos: "CM", quality: 84 }
+        ]
+      }
+      // Add the remaining 61 teams here...
+    ];
+
+   
+    // PART 2 — Teams 33 to 64
+    TEAM_POOL.push({
         name: "2009 Barcelona",
         season: 2009,
         strength: 95,
@@ -724,7 +815,6 @@ const TEAM_POOL = [
   },
 
   // END OF PART 1 — 32 TEAMS
-];
 // PART 2 — Teams 33 to 64
 
 teams.push(
@@ -811,8 +901,7 @@ teams.push(
       { name: "Nwankwo Kanu", pos: "ST", quality: 86 }
     ]
   },
-
-  {
+        {
     name: "2009 Chelsea",
     season: 2009,
     strength: 92,
@@ -1425,273 +1514,658 @@ teams.push(
       { name: "Yuri Djorkaeff", pos: "AM", quality: 86 },
       { name: "Karl-Heinz Förster", pos: "CB", quality: 82 },
       { name: "Bernard Casoni", pos: "CB", quality: 81 }
-    ]
-  }
+      ]
+    }
+  )
 );
 
-  // Initialize TEAM_MAP
-  TEAM_POOL.forEach(t => TEAM_MAP.set(t.name, t));
-
-// Utility functions
-function randInt(max) {
-  return Math.floor(Math.random() * max);
-}
-
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = randInt(i + 1);
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-function shuffleArray(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
-function findTeam(name) {
-  return TEAM_POOL.find(t => t.name === name);
-}
-
-function deepClone(obj) {
-  return JSON.parse(JSON.stringify(obj));
-}
-
-// -------------------------------------------------------------
-// PART 1 — AUTO GROUP DRAW
-// -------------------------------------------------------------
-
-function createPots() {
-  const sorted = [...TEAM_POOL].sort((a, b) => b.strength - a.strength);
-  const pot1 = sorted.slice(0, 16);
-  const pot2 = sorted.slice(16, 32);
-  const pot3 = sorted.slice(32, 48);
-  const pot4 = sorted.slice(48, 64);
-  return [pot1, pot2, pot3, pot4];
-}
-
-function generateGroups() {
-  const [pot1, pot2, pot3, pot4] = createPots();
-  shuffleArray(pot1);
-  shuffleArray(pot2);
-  shuffleArray(pot3);
-  shuffleArray(pot4);
-
-  const groups = [];
-  for (let i = 0; i < 16; i++) {
-    groups.push({
-      name: `Group ${String.fromCharCode(65 + i)}`,
-      teams: [pot1[i], pot2[i], pot3[i], pot4[i]]
-    });
-  }
-  return groups;
-}
-
-function renderGroups(groups) {
-  const out = document.getElementById("output");
-  out.innerHTML = "";
-
-  groups.forEach(group => {
-    const div = document.createElement("div");
-    div.style.border = "1px solid #334155";
-    div.style.padding = "12px";
-    div.style.margin = "10px 0";
-    div.style.borderRadius = "8px";
-    div.style.background = "#1e293b";
-
-    let html = `<h2 style="color:#60a5fa">${group.name}</h2><ul>`;
-    group.teams.forEach(t => {
-      html += `<li>${t.name} <span style="color:#94a3b8">(Strength: ${t.strength})</span></li>`;
-    });
-    html += "</ul>";
-
-    div.innerHTML = html;
-    out.appendChild(div);
-  });
-}
-
-// Combined function for button
-function startTournament() {
-  const groups = generateGroups();
-  window.GROUPS = groups; // store globally for next phases
-  renderGroups(groups);
-  console.log("Groups generated:", groups);
-}
-
-// -------------------------------------------------------------
-// PART 2 — GROUP STAGE MATCH ENGINE
-// -------------------------------------------------------------
-
-function simulateGoals(teamA, teamB) {
-  const baseA = teamA.strength / 20;
-  const baseB = teamB.strength / 20;
-  const goalsA = Math.max(0, Math.round((Math.random() * baseA) ** 1.15));
-  const goalsB = Math.max(0, Math.round((Math.random() * baseB) ** 1.15));
-  return [goalsA, goalsB];
-}
-
-function newTableEntry(team) {
-  return {
-    name: team.name,
-    P: 0, W: 0, D: 0, L: 0,
-    GF: 0, GA: 0, GD: 0, PTS: 0
-  };
-}
-
-function simulateGroupMatches(group) {
-  const teams = group.teams;
-  const standings = {};
-  teams.forEach(t => standings[t.name] = newTableEntry(t));
-
-  const matches = [];
-  const pairs = [[0, 1], [2, 3], [0, 2], [1, 3], [0, 3], [1, 2]];
-
-  for (let i = 0; i < pairs.length; i++) {
-    const [a, b] = pairs[i];
-    const teamA = teams[a];
-    const teamB = teams[b];
-    const [gA, gB] = simulateGoals(teamA, teamB);
-
-    const SA = standings[teamA.name];
-    const SB = standings[teamB.name];
-
-    SA.P++; SB.P++;
-    SA.GF += gA; SA.GA += gB;
-    SB.GF += gB; SB.GA += gA;
-    SA.GD = SA.GF - SA.GA;
-    SB.GD = SB.GF - SB.GA;
-
-    if (gA > gB) {
-      SA.W++; SA.PTS += 3; SB.L++;
-    } else if (gB > gA) {
-      SB.W++; SB.PTS += 3; SA.L++;
-    } else {
-      SA.D++; SB.D++; SA.PTS++; SB.PTS++;
+// Initialize TEAM_MAP
+TEAM_POOL.forEach(t => TEAM_MAP.set(t.name, t));
+console.log(`Loaded ${TEAM_POOL.length} teams`);
+    // Utility functions
+    function randInt(max) {
+      return Math.floor(Math.random() * max);
     }
 
-    matches.push({
-      groupName: group.name,
-      home: teamA.name,
-      away: teamB.name,
-      score: `${gA} - ${gB}`
-    });
-  }
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = randInt(i + 1);
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
 
-  const sorted = Object.values(standings).sort((a, b) => {
-    if (b.PTS !== a.PTS) return b.PTS - a.PTS;
-    if (b.GD !== a.GD) return b.GD - a.GD;
-    if (b.GF !== a.GF) return b.GF - a.GF;
-    return 0;
-  });
+    function shuffleArray(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
 
-  return { standings: sorted, matches };
-}
+    function findTeam(name) {
+      return TEAM_POOL.find(t => t.name === name);
+    }
 
-function renderStandingsForAllGroups(groups) {
-  const out = document.getElementById("output");
-  out.innerHTML = "";
+    function deepClone(obj) {
+      return JSON.parse(JSON.stringify(obj));
+    }
 
-  groups.forEach(G => {
-    const div = document.createElement("div");
-    div.style.margin = "20px 0";
-    div.style.padding = "16px";
-    div.style.background = "#1e293b";
-    div.style.borderRadius = "8px";
+    // -------------------------------------------------------------
+    // PART 1 — AUTO GROUP DRAW
+    // -------------------------------------------------------------
 
-    let html = `<h2 style="color:#38bdf8">${G.name}</h2>`;
-    html += `
-      <table style="width:100%; color:#e2e8f0; border-collapse: collapse;">
-        <tr style="color:#60a5fa;">
-          <th align="left">Team</th>
-          <th>P</th><th>W</th><th>D</th><th>L</th>
-          <th>GF</th><th>GA</th><th>GD</th><th>PTS</th>
-        </tr>
-    `;
+    function createPots() {
+      const sorted = [...TEAM_POOL].sort((a, b) => b.strength - a.strength);
+      const pot1 = sorted.slice(0, 16);
+      const pot2 = sorted.slice(16, 32);
+      const pot3 = sorted.slice(32, 48);
+      const pot4 = sorted.slice(48, 64);
+      return [pot1, pot2, pot3, pot4];
+    }
 
-    G.standings.forEach(team => {
-      html += `
-        <tr>
-          <td>${team.name}</td>
-          <td>${team.P}</td><td>${team.W}</td><td>${team.D}</td><td>${team.L}</td>
-          <td>${team.GF}</td><td>${team.GA}</td><td>${team.GD}</td><td>${team.PTS}</td>
-        </tr>
+    function generateGroups() {
+      const [pot1, pot2, pot3, pot4] = createPots();
+      shuffleArray(pot1);
+      shuffleArray(pot2);
+      shuffleArray(pot3);
+      shuffleArray(pot4);
+
+      const groups = [];
+      for (let i = 0; i < 16; i++) {
+        groups.push({
+          name: `Group ${String.fromCharCode(65 + i)}`,
+          teams: [pot1[i], pot2[i], pot3[i], pot4[i]]
+        });
+      }
+      return groups;
+    }
+
+    function renderGroups(groups) {
+      const out = document.getElementById("output");
+      out.innerHTML = "";
+
+      groups.forEach(group => {
+        const div = document.createElement("div");
+        div.style.border = "1px solid #334155";
+        div.style.padding = "12px";
+        div.style.margin = "10px 0";
+        div.style.borderRadius = "8px";
+        div.style.background = "#1e293b";
+
+        let html = `<h2 style="color:#60a5fa">${group.name}</h2><ul>`;
+        group.teams.forEach(t => {
+          html += `<li>${t.name} <span style="color:#94a3b8">(Strength: ${t.strength})</span></li>`;
+        });
+        html += "</ul>";
+
+        div.innerHTML = html;
+        out.appendChild(div);
+      });
+    }
+
+    // Combined function for button
+    function startTournament() {
+      const groups = generateGroups();
+      window.GROUPS = groups;
+      renderGroups(groups);
+      console.log("Groups generated:", groups);
+    }
+
+    // -------------------------------------------------------------
+    // PART 2 — GROUP STAGE MATCH ENGINE
+    // -------------------------------------------------------------
+
+    function simulateGoals(teamA, teamB) {
+      const baseA = teamA.strength / 20;
+      const baseB = teamB.strength / 20;
+      const goalsA = Math.max(0, Math.round((Math.random() * baseA) ** 1.15));
+      const goalsB = Math.max(0, Math.round((Math.random() * baseB) ** 1.15));
+      return [goalsA, goalsB];
+    }
+
+    function newTableEntry(team) {
+      return {
+        name: team.name,
+        P: 0, W: 0, D: 0, L: 0,
+        GF: 0, GA: 0, GD: 0, PTS: 0
+      };
+    }
+
+    function simulateGroupMatches(group) {
+      const teams = group.teams;
+      const standings = {};
+      teams.forEach(t => standings[t.name] = newTableEntry(t));
+
+      const matches = [];
+      const pairs = [[0, 1], [2, 3], [0, 2], [1, 3], [0, 3], [1, 2]];
+
+      for (let i = 0; i < pairs.length; i++) {
+        const [a, b] = pairs[i];
+        const teamA = teams[a];
+        const teamB = teams[b];
+        const [gA, gB] = simulateGoals(teamA, teamB);
+
+        const SA = standings[teamA.name];
+        const SB = standings[teamB.name];
+
+        SA.P++; SB.P++;
+        SA.GF += gA; SA.GA += gB;
+        SB.GF += gB; SB.GA += gA;
+        SA.GD = SA.GF - SA.GA;
+        SB.GD = SB.GF - SB.GA;
+
+        if (gA > gB) {
+          SA.W++; SA.PTS += 3; SB.L++;
+        } else if (gB > gA) {
+          SB.W++; SB.PTS += 3; SA.L++;
+        } else {
+          SA.D++; SB.D++; SA.PTS++; SB.PTS++;
+        }
+
+        matches.push({
+          groupName: group.name,
+          home: teamA.name,
+          away: teamB.name,
+          score: `${gA} - ${gB}`
+        });
+      }
+
+      const sorted = Object.values(standings).sort((a, b) => {
+        if (b.PTS !== a.PTS) return b.PTS - a.PTS;
+        if (b.GD !== a.GD) return b.GD - a.GD;
+        if (b.GF !== a.GF) return b.GF - a.GF;
+        return 0;
+      });
+
+      return { standings: sorted, matches };
+    }
+
+    function renderStandingsForAllGroups(groups) {
+      const out = document.getElementById("output");
+      out.innerHTML = "";
+
+      groups.forEach(G => {
+        const div = document.createElement("div");
+        div.style.margin = "20px 0";
+        div.style.padding = "16px";
+        div.style.background = "#1e293b";
+        div.style.borderRadius = "8px";
+
+        let html = `<h2 style="color:#38bdf8">${G.name}</h2>`;
+        html += `
+          <table style="width:100%; color:#e2e8f0; border-collapse: collapse;">
+            <tr style="color:#60a5fa;">
+              <th align="left">Team</th>
+              <th>P</th><th>W</th><th>D</th><th>L</th>
+              <th>GF</th><th>GA</th><th>GD</th><th>PTS</th>
+            </tr>
+        `;
+
+        G.standings.forEach(team => {
+          html += `
+            <tr>
+              <td>${team.name}</td>
+              <td>${team.P}</td><td>${team.W}</td><td>${team.D}</td><td>${team.L}</td>
+              <td>${team.GF}</td><td>${team.GA}</td><td>${team.GD}</td><td>${team.PTS}</td>
+            </tr>
+          `;
+        });
+
+        html += `</table><br><strong style="color:#94a3b8;">Matches:</strong><ul>`;
+        G.matches.forEach(m => {
+          html += `<li>${m.home} vs ${m.away} — <span style="color:#38bdf8">${m.score}</span></li>`;
+        });
+        html += `</ul>`;
+
+        div.innerHTML = html;
+        out.appendChild(div);
+      });
+    }
+
+    // Master function: Simulate full group stage
+    function runGroupStage() {
+      if (!window.GROUPS) {
+        alert("Please generate groups first!");
+        return;
+      }
+      const groups = window.GROUPS;
+      const results = [];
+
+      groups.forEach(G => {
+        const res = simulateGroupMatches(G);
+        G.standings = res.standings;
+        G.matches = res.matches;
+        results.push(G);
+      });
+
+      window.GROUP_RESULTS = results;
+      renderStandingsForAllGroups(results);
+    }
+
+    // ----------------------------------------------------------------------
+    // PART 3 — FULL KNOCKOUT ENGINE
+    // ----------------------------------------------------------------------
+
+    function simulateKnockoutGoals(teamA, teamB) {
+      const baseA = Math.random() * (teamA.strength / 18);
+      const baseB = Math.random() * (teamB.strength / 18);
+      const gA = Math.max(0, Math.round(baseA ** 1.1));
+      const gB = Math.max(0, Math.round(baseB ** 1.1));
+      return [gA, gB];
+    }
+
+    function simulatePenalties(teamA, teamB) {
+      let aScore = 0, bScore = 0;
+      for (let i = 0; i < 5; i++) {
+        if (Math.random() < (teamA.strength / 120)) aScore++;
+        if (Math.random() < (teamB.strength / 120)) bScore++;
+      }
+
+      let i = 0;
+      while (aScore === bScore && i < 10) {
+        if (Math.random() < (teamA.strength / 120)) aScore++;
+        if (Math.random() < (teamB.strength / 120)) bScore++;
+        i++;
+      }
+      return [aScore, bScore];
+    }
+
+    function knockoutSingleMatch(teamA, teamB) {
+      let [gA, gB] = simulateKnockoutGoals(teamA, teamB);
+
+      if (gA === gB) {
+        const [etA, etB] = [Math.round(Math.random()), Math.round(Math.random())];
+        gA += etA; gB += etB;
+
+        if (gA === gB) {
+          const [pA, pB] = simulatePenalties(teamA, teamB);
+          return {
+            score: `${gA} - ${gB}`,
+            wentToET: true,
+            penalties: `${pA} - ${pB}`,
+            winner: pA > pB ? teamA : teamB
+          };
+        }
+      }
+
+      return {
+        score: `${gA} - ${gB}`,
+        wentToET: false,
+        penalties: null,
+        winner: gA > gB ? teamA : teamB
+      };
+    }
+
+    function knockoutTwoLegs(teamA, teamB) {
+      const leg1 = simulateKnockoutGoals(teamA, teamB);
+      const leg2 = simulateKnockoutGoals(teamB, teamA);
+      const aggA = leg1[0] + leg2[1];
+      const aggB = leg1[1] + leg2[0];
+
+      let winner, penalties = null;
+      if (aggA === aggB) {
+        const [pA, pB] = simulatePenalties(teamA, teamB);
+        winner = pA > pB ? teamA : teamB;
+        penalties = `${pA} - ${pB}`;
+      } else {
+        winner = aggA > aggB ? teamA : teamB;
+      }
+
+      return {
+        leg1: `${teamA.name} ${leg1[0]} - ${leg1[1]} ${teamB.name}`,
+        leg2: `${teamB.name} ${leg2[0]} - ${leg2[1]} ${teamA.name}`,
+        aggregate: `${aggA} - ${aggB}`,
+        penalties,
+        winner
+      };
+    }
+
+    function generateR32() {
+      const qualified = [];
+      window.GROUP_RESULTS.forEach(G => {
+        qualified.push(G.standings[0]);
+        qualified.push(G.standings[1]);
+      });
+
+      qualified.sort(() => Math.random() - 0.5);
+      const pairs = [];
+      for (let i = 0; i < qualified.length; i += 2) {
+        pairs.push([qualified[i], qualified[i + 1]]);
+      }
+      return pairs;
+    }
+
+    function simulateR32(bracket) {
+      const results = [];
+      bracket.forEach(match => {
+        const [teamA, teamB] = match;
+        const res = knockoutTwoLegs(findTeam(teamA.name), findTeam(teamB.name));
+        results.push({
+          home: teamA.name,
+          away: teamB.name,
+          ...res
+        });
+      });
+      return results;
+    }
+
+    function simulateKnockoutTwoLegRound(teams) {
+      const bracket = [];
+      for (let i = 0; i < teams.length; i += 2) {
+        bracket.push([teams[i], teams[i + 1]]);
+      }
+
+      const results = [];
+      const winners = [];
+      bracket.forEach(pair => {
+        const A = findTeam(pair[0]);
+        const B = findTeam(pair[1]);
+        const res = knockoutTwoLegs(A, B);
+        results.push({
+          home: A.name,
+          away: B.name,
+          ...res
+        });
+        winners.push(res.winner.name);
+      });
+      return { results, winners };
+    }
+
+    function simulateSingleLegRound(teams) {
+      const bracket = [];
+      for (let i = 0; i < teams.length; i += 2)
+        bracket.push([teams[i], teams[i + 1]]);
+
+      const results = [];
+      const winners = [];
+      bracket.forEach(pair => {
+        const A = findTeam(pair[0]);
+        const B = findTeam(pair[1]);
+        const res = knockoutSingleMatch(A, B);
+        results.push({
+          home: A.name,
+          away: B.name,
+          score: res.score,
+          extraTime: res.wentToET,
+          penalties: res.penalties,
+          winner: res.winner.name
+        });
+        winners.push(res.winner.name);
+      });
+      return { results, winners };
+    }
+
+    function runKnockouts() {
+      if (!window.GROUP_RESULTS) {
+        alert("Please run the group stage first!");
+        return;
+      }
+
+      const R32 = generateR32();
+      const R32_res = simulateR32(R32);
+      const R16_input = R32_res.map(r => r.winner.name);
+
+      const R16 = simulateKnockoutTwoLegRound(R16_input);
+      const QF = simulateKnockoutTwoLegRound(R16.winners);
+      const SF = simulateSingleLegRound(QF.winners);
+      const FINAL = simulateSingleLegRound(SF.winners);
+
+      window.TOURNAMENT = {
+        R32: R32_res,
+        R16: R16.results,
+        QF: QF.results,
+        SF: SF.results,
+        FINAL: FINAL.results,
+        champion: FINAL.winners[0]
+      };
+
+      renderKnockoutBracket(window.TOURNAMENT);
+      return window.TOURNAMENT;
+    }
+
+    function renderKnockoutBracket(tournament) {
+      const out = document.getElementById("output");
+      out.innerHTML = `<h2 style="color:#60a5fa">🏆 Knockout Stage</h2>`;
+
+      // Render Round of 32
+      out.innerHTML += `<h3 style="color:#38bdf8">Round of 32</h3>`;
+      tournament.R32.forEach(match => {
+        const div = document.createElement("div");
+        div.style.background = "#1e293b";
+        div.style.padding = "10px";
+        div.style.margin = "5px 0";
+        div.style.borderRadius = "5px";
+        div.innerHTML = `
+          <strong>${match.home}</strong> vs <strong>${match.away}</strong><br>
+          ${match.leg1} | ${match.leg2}<br>
+          Aggregate: <strong>${match.aggregate}</strong> ${match.penalties ? `(Pen: ${match.penalties})` : ''}<br>
+          Winner: <strong style="color:#22c55e">${match.winner.name}</strong>
+        `;
+        out.appendChild(div);
+      });
+
+      // Render Final and Champion
+      out.innerHTML += `<h3 style="color:#fbbf24">Final</h3>`;
+      const final = tournament.FINAL[0];
+      const finalDiv = document.createElement("div");
+      finalDiv.style.background = "#1e293b";
+      finalDiv.style.padding = "15px";
+      finalDiv.style.margin = "10px 0";
+      finalDiv.style.borderRadius = "8px";
+      finalDiv.style.border = "2px solid #fbbf24";
+      finalDiv.innerHTML = `
+        <div style="text-align:center; font-size:1.2em">
+          <strong>${final.home}</strong> vs <strong>${final.away}</strong><br>
+          <div style="font-size:1.5em; margin:10px 0">${final.score}</div>
+          ${final.extraTime ? '<small>After Extra Time</small><br>' : ''}
+          ${final.penalties ? `<small>Penalties: ${final.penalties}</small><br>` : ''}
+          <h2 style="color:#fbbf24">🏆 CHAMPION: ${final.winner} 🏆</h2>
+        </div>
       `;
-    });
-
-    html += `</table><br><strong style="color:#94a3b8;">Matches:</strong><ul>`;
-    G.matches.forEach(m => {
-      html += `<li>${m.home} vs ${m.away} — <span style="color:#38bdf8">${m.score}</span></li>`;
-    });
-    html += `</ul>`;
-
-    div.innerHTML = html;
-    out.appendChild(div);
-  });
-}
-
-// Master function: Simulate full group stage
-function runGroupStage() {
-  const groups = window.GROUPS;
-  const results = [];
-
-  groups.forEach(G => {
-    const res = simulateGroupMatches(G);
-    G.standings = res.standings;
-    G.matches = res.matches;
-    results.push(G);
-  });
-
-  window.GROUP_RESULTS = results;
-  renderStandingsForAllGroups(results);
-}
-
-// Export/Import functions
-function exportTournament(state) {
-  if (!state) {
-    alert("No tournament generated yet!");
-    return;
-  }
-
-  const json = JSON.stringify(state, null, 2);
-  const blob = new Blob([json], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "tournament-save.json";
-  a.click();
-
-  URL.revokeObjectURL(url);
-}
-
-function handleImport() {
-  const input = document.getElementById("importSave");
-  const file = input.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    try {
-      const data = JSON.parse(e.target.result);
-      tournamentState = data;
-      document.getElementById("output").innerHTML =
-        "<pre>" + JSON.stringify(data, null, 2) + "</pre>";
-    } catch (err) {
-      console.error(err);
-      alert("Invalid save file");
+      out.appendChild(finalDiv);
     }
-  };
-  reader.readAsText(file);
-}
 
-// Continue with the rest of your functions (knockout engine, player stats, etc.)...
-// Copy all remaining functions from your original code here
+    // ------------------------------------------------------------
+    // PART 4 — PLAYER PERFORMANCE ENGINE
+    // ------------------------------------------------------------
 
-</script>
+    window.PLAYER_DB = {};
+
+    function ensurePlayer(player, teamName) {
+      if (!PLAYER_DB[player.name]) {
+        PLAYER_DB[player.name] = {
+          team: teamName,
+          goals: 0,
+          assists: 0,
+          cleanSheets: 0,
+          ratingSum: 0,
+          games: 0
+        };
+      }
+    }
+
+    function weightedRandomPlayer(players) {
+      const weights = players.map(p => p.quality);
+      const sum = weights.reduce((a, b) => a + b, 0);
+      let r = Math.random() * sum;
+      for (let i = 0; i < players.length; i++) {
+        if (r < weights[i]) return players[i];
+        r -= weights[i];
+      }
+      return players[0];
+    }
+
+    function registerMatchStats(team, goals, lineup, gkCleanSheet) {
+      lineup.forEach(p => ensurePlayer(p, team.name));
+
+      for (let i = 0; i < goals; i++) {
+        const scorer = weightedRandomPlayer(lineup);
+        PLAYER_DB[scorer.name].goals += 1;
+        const assisterCandidates = lineup.filter(p => p.name !== scorer.name);
+        const assist = assisterCandidates[Math.floor(Math.random() * assisterCandidates.length)];
+        PLAYER_DB[assist.name].assists += 1;
+      }
+
+      if (gkCleanSheet) {
+        const gk = lineup.find(p => p.pos === "GK");
+        if (gk) PLAYER_DB[gk.name].cleanSheets++;
+      }
+
+      lineup.forEach(p => {
+        const base = 6 + Math.random() * 2;
+        const qualityBonus = (p.quality - 70) / 50;
+        const rating = Math.min(10, base + qualityBonus + Math.random());
+        PLAYER_DB[p.name].ratingSum += rating;
+        PLAYER_DB[p.name].games++;
+      });
+    }
+
+    function getPlayerPosition(name) {
+      for (const t of TEAM_POOL) {
+        const all = [...t.startingXI, ...t.bench];
+        const p = all.find(pl => pl.name === name);
+        if (p) return p.pos;
+      }
+      return "CM";
+    }
+
+    function getTopScorers() {
+      return Object.entries(PLAYER_DB)
+        .map(([name, p]) => ({ name, ...p }))
+        .sort((a, b) => b.goals - a.goals)
+        .slice(0, 10);
+    }
+
+    function getTopAssists() {
+      return Object.entries(PLAYER_DB)
+        .map(([n, p]) => ({ name: n, ...p }))
+        .sort((a, b) => b.assists - a.assists)
+        .slice(0, 10);
+    }
+
+    function getBestXI() {
+      const players = Object.keys(PLAYER_DB).map(name => {
+        const p = PLAYER_DB[name];
+        return {
+          name,
+          team: p.team,
+          rating: p.ratingSum / p.games,
+          goals: p.goals,
+          assists: p.assists,
+          pos: getPlayerPosition(name)
+        };
+      });
+
+      const pick = (pos, limit = 1) =>
+        players
+          .filter(p => p.pos === pos)
+          .sort((a, b) => b.rating - a.rating)
+          .slice(0, limit);
+
+      return {
+        GK: pick("GK")[0],
+        DEF: [...pick("RB"), ...pick("CB", 2), ...pick("LB")],
+        MID: pick("CM", 3),
+        FWD: pick("FW", 3)
+      };
+    }
+
+    function showPlayerStats() {
+      const out = document.getElementById("output");
+      out.innerHTML = `<h2 style="color:#60a5fa">🎖 Player Statistics</h2>`;
+
+      // Top Scorers
+      out.innerHTML += `<h3 style="color:#38bdf8">Golden Boot (Top Scorers)</h3>`;
+      const scorers = getTopScorers();
+      if (scorers.length > 0) {
+        scorers.forEach((player, index) => {
+          out.innerHTML += `<div style="background:#1e293b; padding:8px; margin:2px; border-radius:4px">
+            ${index + 1}. ${player.name} (${player.team}) - ${player.goals} goals
+          </div>`;
+        });
+      }
+
+      // Top Assists
+      out.innerHTML += `<h3 style="color:#38bdf8; margin-top:20px">Playmaker Award (Top Assists)</h3>`;
+      const assisters = getTopAssists();
+      if (assisters.length > 0) {
+        assisters.forEach((player, index) => {
+          out.innerHTML += `<div style="background:#1e293b; padding:8px; margin:2px; border-radius:4px">
+            ${index + 1}. ${player.name} (${player.team}) - ${player.assists} assists
+          </div>`;
+        });
+      }
+
+      // Best XI
+      out.innerHTML += `<h3 style="color:#38bdf8; margin-top:20px">Team of the Tournament</h3>`;
+      const bestXI = getBestXI();
+      if (bestXI.GK) {
+        out.innerHTML += `
+          <div style="background:#1e293b; padding:15px; margin:10px 0; border-radius:8px">
+            <strong>GK:</strong> ${bestXI.GK.name} (${bestXI.GK.team}) - Rating: ${bestXI.GK.rating.toFixed(2)}<br>
+            <strong>DEF:</strong> ${bestXI.DEF.map(d => `${d.name} (${d.team})`).join(', ')}<br>
+            <strong>MID:</strong> ${bestXI.MID.map(m => `${m.name} (${m.team})`).join(', ')}<br>
+            <strong>FWD:</strong> ${bestXI.FWD.map(f => `${f.name} (${f.team})`).join(', ')}
+          </div>
+        `;
+      }
+    }
+
+    // ------------------------------------------------------------
+    // EXPORT / IMPORT SYSTEM
+    // ------------------------------------------------------------
+
+    function exportTournament(state) {
+      if (!state) {
+        alert("No tournament generated yet!");
+        return;
+      }
+
+      const data = JSON.stringify(state, null, 2);
+      const blob = new Blob([data], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "tournament-save.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function handleImport() {
+      const input = document.getElementById("importSave");
+      const file = input.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          tournamentState = data;
+          document.getElementById("output").innerHTML = `
+            <h2>Loaded Tournament</h2>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          `;
+        } catch (err) {
+          console.error(err);
+          alert("Invalid save file");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function resetTournament() {
+      tournamentState = null;
+      window.GROUPS = null;
+      window.GROUP_RESULTS = null;
+      window.TOURNAMENT = null;
+      window.PLAYER_DB = {};
+      playerStats = new Map();
+      document.getElementById("output").innerHTML = "<p>Tournament reset. Ready for new simulation.</p>";
+    }
+
+  </script>
 </body>
 </html>

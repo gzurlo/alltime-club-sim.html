@@ -3660,14 +3660,20 @@ function shuffleArray(arr) {
 }
 
 function createPots() {
-  const sorted = [...TEAM_POOL].sort((a, b) => b.strength - a.strength);
+  // First, randomly select 64 teams from the 78 available
+  const shuffledAllTeams = shuffleArray([...TEAM_POOL]);
+  const selectedTeams = shuffledAllTeams.slice(0, 64);
+  
+  // Sort the selected 64 teams by strength for pot allocation
+  const sorted = selectedTeams.sort((a, b) => b.strength - a.strength);
+  
   const pot1 = sorted.slice(0, 16);
   const pot2 = sorted.slice(16, 32);
   const pot3 = sorted.slice(32, 48);
   const pot4 = sorted.slice(48, 64);
+  
   return [pot1, pot2, pot3, pot4];
 }
-
 function generateGroups() {
   const [pot1, pot2, pot3, pot4] = createPots();
   shuffleArray(pot1);
@@ -3727,11 +3733,21 @@ function renderGroups(groups) {
 // ================== MAIN BUTTON FUNCTIONS ================
 function startTournament() {
   console.log("startTournament called");
+  console.log("Total teams available:", TEAM_POOL.length);
+  
   const groups = generateGroups();
+  
+  // Log which teams were selected
+  const allSelectedTeams = groups.flatMap(group => group.teams);
+  console.log("Teams selected for tournament:", allSelectedTeams.length);
+  console.log("Teams not selected:", TEAM_POOL.length - allSelectedTeams.length);
+  
   window.GROUPS = groups;
   window.GROUP_RESULTS = null;
   window.TOURNAMENT = null;
   renderGroups(groups);
+  
+  console.log("Tournament started successfully");
 }
 
 function runGroupStage() {

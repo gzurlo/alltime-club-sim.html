@@ -175,3 +175,15 @@ body {
     background: linear-gradient(135deg, #3b82f6, #1d4ed8);
     transform: translateY(-1px);
   }
+  /* Force enabled button styles */
+#btnGroupStage:not(:disabled) {
+    cursor: pointer !important;
+    opacity: 1 !important;
+    pointer-events: all !important;
+  }
+  
+  #btnGroupStage:disabled {
+    cursor: not-allowed !important;
+    opacity: 0.5 !important;
+    pointer-events: none !important;
+  }

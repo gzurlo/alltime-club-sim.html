@@ -3741,6 +3741,27 @@ function renderGroups(groups) {
   if (btnGroup) btnGroup.disabled = false;
   if (btnKO) btnKO.disabled = true;
   if (btnStats) btnStats.disabled = true;
+  // TEMPORARY DEBUG - Test runGroupStage directly
+setTimeout(function() {
+  console.log("=== DEBUG: Testing runGroupStage function ===");
+  console.log("runGroupStage function exists:", typeof runGroupStage);
+  console.log("window.GROUPS exists:", !!window.GROUPS);
+  
+  // Test if we can call runGroupStage directly
+  if (window.GROUPS && typeof runGroupStage === 'function') {
+    console.log("DEBUG: All conditions met, runGroupStage should work");
+    
+    // Add a direct test button
+    const testBtn = document.createElement('button');
+    testBtn.textContent = "TEST: Run Group Stage";
+    testBtn.style.cssText = "position: fixed; top: 10px; right: 10px; z-index: 1000; padding: 10px; background: red; color: white;";
+    testBtn.onclick = function() {
+      console.log("TEST BUTTON CLICKED - Calling runGroupStage directly");
+      runGroupStage();
+    };
+    document.body.appendChild(testBtn);
+  }
+}, 2000);
 
 
 // ================== MAIN BUTTON FUNCTIONS ================
@@ -3775,9 +3796,21 @@ function startTournament() {
   
   console.log("Tournament started successfully");
 }
-
 function runGroupStage() {
-  console.log("runGroupStage called");
+  console.log("runGroupStage CALLED - function is executing!");
+  
+  // Visual feedback
+  const btnGroup = document.getElementById("btnGroupStage");
+  if (btnGroup) {
+    btnGroup.style.background = "linear-gradient(135deg, #1e40af, #1e3a8a)";
+    btnGroup.innerHTML = `
+      <div class="ctrl-btn-main">
+        <span class="ctrl-btn-title">Simulating...</span>
+        <span class="ctrl-btn-subtitle">Running group stage matches</span>
+      </div>
+      <span class="ctrl-btn-tag">⏳</span>
+    `;
+  }
   
   if (!window.GROUPS) {
     alert("Please generate groups first!");
@@ -3785,7 +3818,6 @@ function runGroupStage() {
   }
   
   // Disable the button while simulating
-  const btnGroup = document.getElementById("btnGroupStage");
   if (btnGroup) btnGroup.disabled = true;
   
   // Simulate group stage matches
@@ -3804,7 +3836,6 @@ function runGroupStage() {
   
   console.log("Group stage completed");
 }
-
 function simulateGroupStage(groups) {
   console.log("Simulating group stage...");
   const results = {};

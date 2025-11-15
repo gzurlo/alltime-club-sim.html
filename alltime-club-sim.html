@@ -831,7 +831,7 @@
       <div class="control-column">
         <div>
           <div class="step-label">Step 1</div>
-          <button class="ctrl-btn btn-green" id="btnDraw">
+          <button class="ctrl-btn btn-green" id="btnDraw" onclick="startTournament()">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Generate Groups</span>
               <span class="ctrl-btn-subtitle">Draw all 16 groups from seeded pots</span>
@@ -3747,9 +3747,197 @@ function startTournament() {
   window.TOURNAMENT = null;
   renderGroups(groups);
   
-  console.log("Tournament started successfully");
+  // Enable the group stage button
+  const btnGroup = document.getElementById("btnGroupStage");
+  if (btnGroup) {
+    btnGroup.disabled = false;
+    btnGroup.onclick = runGroupStage; function runGroupStage() {
+  console.log("runGroupStage called");
+  
+  if (!window.GROUPS) {
+    alert("Please generate groups first!");
+    return;
+  }
+  
+  // Disable the button while simulating
+  const btnGroup = document.getElementById("btnGroupStage");
+  if (btnGroup) btnGroup.disabled = true;
+  
+  // Simulate group stage matches
+  const groupResults = simulateGroupStage(window.GROUPS);
+  
+  // Store results and render them
+  window.GROUP_RESULTS = groupResults;
+  renderGroupResults(groupResults);
+  
+  // Enable knockouts button
+  const btnKO = document.getElementById("btnKnockouts");
+  if (btnKO) {
+    btnKO.disabled = false;
+    btnKO.onclick = runKnockouts;
+  }
+  
+  console.log("Group stage completed");
 }
 
+function simulateGroupStage(groups) {
+  console.log("Simulating group stage...");
+  const results = {};
+  
+  groups.forEach(group => {
+    const groupName = group.name;
+    results[groupName] = {
+      name: groupName,
+      teams: [],
+      matches: []
+    };
+    
+    // Simulate matches between all teams in the group
+    const teams = group.teams;
+    for (let i = 0; i < teams.length; i++) {
+      for (let j = i + 1; j < teams.length; j++) {
+        // Simulate home and away matches
+        const homeMatch = simulateMatch(teams[i], teams[j], true);
+        const awayMatch = simulateMatch(teams[i], teams[j], false);
+        
+        results[groupName].matches.push(homeMatch, awayMatch);
+      }
+    }
+    
+    // Calculate standings
+    results[groupName].teams = calculateStandings(results[groupName].matches, teams);
+  });
+  
+  return results;
+}
+
+function simulateMatch(teamA, teamB, isHome) {
+  // Simple match simulation based on team strength
+  const baseScoreA = Math.random() * (teamA.strength / 20);
+  const baseScoreB = Math.random() * (teamB.strength / 20);
+  
+  // Home advantage
+  const homeAdvantage = isHome ? 0.3 : -0.3;
+  
+  const goalsA = Math.max(0, Math.floor(baseScoreA + homeAdvantage + (Math.random() * RNG_SETTINGS.groupChaos)));
+  const goalsB = Math.max(0, Math.floor(baseScoreB - homeAdvantage + (Math.random() * RNG_SETTINGS.groupChaos)));
+  
+  return {
+    teamA: teamA.name,
+    teamB: teamB.name,
+    scoreA: goalsA,
+    scoreB: goalsB,
+    isHome: isHome
+  };
+}
+
+function calculateStandings(matches, teams) {
+  const standings = {};
+  
+  // Initialize standings
+  teams.forEach(team => {
+    standings[team.name] = {
+      team: team,
+      played: 0,
+      wins: 0,
+      draws: 0,
+      losses: 0,
+      goalsFor: 0,
+      goalsAgainst: 0,
+      points: 0
+    };
+  });
+  
+  // Process matches
+  matches.forEach(match => {
+    const home = standings[match.teamA];
+    const away = standings[match.teamB];
+    
+    home.played++;
+    away.played++;
+    home.goalsFor += match.scoreA;
+    home.goalsAgainst += match.scoreB;
+    away.goalsFor += match.scoreB;
+    away.goalsAgainst += match.scoreA;
+    
+    if (match.scoreA > match.scoreB) {
+      home.wins++;
+      home.points += 3;
+      away.losses++;
+    } else if (match.scoreA < match.scoreB) {
+      home.losses++;
+      away.wins++;
+      away.points += 3;
+    } else {
+      home.draws++;
+      away.draws++;
+      home.points += 1;
+      away.points += 1;
+    }
+  });
+  
+  // Convert to array and sort
+  return Object.values(standings).sort((a, b) => {
+    if (b.points !== a.points) return b.points - a.points;
+    if ((b.goalsFor - b.goalsAgainst) !== (a.goalsFor - a.goalsAgainst)) 
+      return (b.goalsFor - b.goalsAgainst) - (a.goalsFor - a.goalsAgainst);
+    return b.goalsFor - a.goalsFor;
+  });
+}
+
+function renderGroupResults(results) {
+  const out = document.getElementById("output");
+  if (!out) return;
+  
+  let html = `<h2>🏆 Group Stage Results</h2>`;
+  
+  Object.values(results).forEach(group => {
+    html += `
+      <div class="group-card">
+        <div class="group-title">${group.name}</div>
+        <table class="standings-table">
+          <thead>
+            <tr>
+              <th>Team</th>
+              <th>P</th>
+              <th>W</th>
+              <th>D</th>
+              <th>L</th>
+              <th>GF</th>
+              <th>GA</th>
+              <th>GD</th>
+              <th>Pts</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+    
+    group.teams.forEach((team, index) => {
+      const qualifier = index < 2 ? "✅" : "";
+      html += `
+        <tr class="${index < 2 ? 'qualified' : ''}">
+          <td>${qualifier} ${team.team.name}</td>
+          <td>${team.played}</td>
+          <td>${team.wins}</td>
+          <td>${team.draws}</td>
+          <td>${team.losses}</td>
+          <td>${team.goalsFor}</td>
+          <td>${team.goalsAgainst}</td>
+          <td>${team.goalsFor - team.goalsAgainst}</td>
+          <td><strong>${team.points}</strong></td>
+        </tr>
+      `;
+    });
+    
+    html += `</tbody></table></div>`;
+  });
+  
+  out.innerHTML = html;
+}
+  }
+  
+  console.log("Tournament started successfully");
+}
 function runGroupStage() {
   alert("Group stage would run here");
 }
@@ -3881,23 +4069,49 @@ window.closeMatchDetail  = closeMatchDetail;
 window.closeTeamDetail   = closeTeamDetail;
 
  // ================== INITIALIZATION =======================
- document.addEventListener('DOMContentLoaded', function() {
-    console.log("Initializing app...");
-    
-    // Initialize teams
-    initTeamsAndPlayers();
-    
-    // Set team count
-    const teamCountEl = document.getElementById('teamCount');
-    if (teamCountEl) teamCountEl.textContent = TEAM_POOL.length.toString();
-    
-    // Initialize RNG
-    const rngSlider = document.getElementById('rngSlider');
-    if (rngSlider) {
-      updateRNG(rngSlider.value);
-    }
-    
-    console.log("App initialized successfully");
-    console.log("startTournament is now:", typeof startTournament);
-  });
+document.addEventListener('DOMContentLoaded', function() {
+  console.log("Initializing app...");
+  
+  // Initialize teams
+  initTeamsAndPlayers();
+  
+  // Set team count
+  const teamCountEl = document.getElementById('teamCount');
+  if (teamCountEl) teamCountEl.textContent = TEAM_POOL.length.toString();
+  
+  // Initialize RNG
+  const rngSlider = document.getElementById('rngSlider');
+  if (rngSlider) {
+    updateRNG(rngSlider.value);
+  }
+  
+  // DEBUG: Test button connection
+  const generateBtn = document.getElementById('btnDraw');
+  console.log("Generate Groups button found:", !!generateBtn);
+  
+  if (generateBtn) {
+    generateBtn.addEventListener('click', function() {
+      console.log("Generate Groups button CLICKED");
+      startTournament();
+    });
+  }
+  
+  console.log("App initialized successfully");
+});
+// TEMPORARY DEBUG - Force button to work
+setTimeout(function() {
+  const btn = document.getElementById('btnGenerateGroups');
+  if (btn) {
+    console.log("DEBUG: Found Generate Groups button, adding click handler");
+    btn.onclick = function() {
+      console.log("DEBUG: Button clicked via forced handler");
+      startTournament();
+    };
+  } else {
+    console.log("DEBUG: Could not find button with ID 'btnGenerateGroups'");
+    // List all buttons to see what's available
+    const allButtons = document.querySelectorAll('button');
+    console.log("All buttons on page:", Array.from(allButtons).map(b => b.id || b.textContent));
+  }
+}, 1000);
 </script>

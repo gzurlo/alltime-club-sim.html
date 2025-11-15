@@ -4112,7 +4112,7 @@ function showClubHistory() {
       Based on every completed tournament you've run and imported into this browser session.
     </p>
     <div class="club-history-wrapper">
-      <table class="club-history-table legacy-table">
+      <table class="legacy-table">
         <tr>
           <th>#</th>
           <th>Club</th>
@@ -4126,7 +4126,7 @@ function showClubHistory() {
     </div>
   `;
 
-  const table = out.querySelector(".club-history-table");
+  const table = out.querySelector(".legacy-table");
 
   records.forEach((rec, idx) => {
     const tr = document.createElement("tr");
@@ -4144,7 +4144,7 @@ function showClubHistory() {
 }
 
 function showClubLegacy() {
-  // called from the HTML button
+  // This is the function the HTML button calls
   showClubHistory();
 }
 

@@ -3840,7 +3840,43 @@ function openHistory() {
   const modal = document.getElementById('historyModal');
   if (modal) modal.classList.add('active');
 }
-
+// ================== IMPORT/EXPORT FUNCTIONS ==================
+function handleImport() {
+  console.log("handleImport called");
+  const fileInput = document.getElementById('importSave');
+  if (fileInput) {
+    fileInput.click();
+    fileInput.onchange = function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const data = JSON.parse(e.target.result);
+            // Load the tournament data
+            window.GROUPS = data.groups;
+            window.GROUP_RESULTS = data.groupResults;
+            window.TOURNAMENT = data.knockoutResults;
+            
+            // Re-render based on what data is available
+            if (window.TOURNAMENT) {
+              renderKnockoutResults(window.TOURNAMENT);
+            } else if (window.GROUP_RESULTS) {
+              renderGroupResults(window.GROUP_RESULTS);
+            } else if (window.GROUPS) {
+              renderGroups(window.GROUPS);
+            }
+            
+            alert("Tournament loaded successfully!");
+          } catch (error) {
+            alert("Error loading tournament file: " + error.message);
+          }
+        };
+        reader.readAsText(file);
+      }
+    };
+  }
+}
 // ================== MAIN BUTTON FUNCTIONS ================
 // ================== MAIN BUTTON FUNCTIONS ================
 function startTournament() {
@@ -4385,13 +4421,50 @@ function setRNGPreset(value, btn) {
 }
 
 // ================== MODAL FUNCTIONS ======================
+f// ================== MODAL FUNCTIONS ======================
 function closeCustomMatch() {
   const modal = document.getElementById('customMatchModal');
   if (modal) modal.classList.remove('active');
 }
 
 function simulateCustomMatch() {
-  alert("Custom match simulation");
+  console.log("simulateCustomMatch called");
+  const teamASelect = document.getElementById('customTeamA');
+  const teamBSelect = document.getElementById('customTeamB');
+  const resultDiv = document.getElementById('customMatchResult');
+  
+  if (!teamASelect || !teamBSelect || !resultDiv) return;
+  
+  const teamAName = teamASelect.value;
+  const teamBName = teamBSelect.value;
+  
+  if (!teamAName || !teamBName) {
+    resultDiv.innerHTML = '<p style="color: red;">Please select both teams</p>';
+    return;
+  }
+  
+  const teamA = TEAM_MAP.get(teamAName);
+  const teamB = TEAM_MAP.get(teamBName);
+  
+  if (!teamA || !teamB) {
+    resultDiv.innerHTML = '<p style="color: red;">Teams not found</p>';
+    return;
+  }
+  
+  const match = simulateMatch(teamA, teamB, true);
+  
+  resultDiv.innerHTML = `
+    <div style="background: #2d3748; padding: 15px; border-radius: 8px; text-align: center;">
+      <h3>Custom Match Result</h3>
+      <div style="font-size: 24px; font-weight: bold; margin: 10px 0;">
+        ${teamA.name} ${match.scoreA} - ${match.scoreB} ${teamB.name}
+      </div>
+      <div style="color: #10b981; font-weight: bold;">
+        ${match.scoreA > match.scoreB ? teamA.name + ' wins!' : 
+          match.scoreA < match.scoreB ? teamB.name + ' wins!' : 'Draw!'}
+      </div>
+    </div>
+  `;
 }
 
 function closeHistory() {

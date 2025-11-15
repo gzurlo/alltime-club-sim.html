@@ -3903,7 +3903,183 @@ function calculateStandings(matches, teams) {
       points: 0
     };
   });
+  function runKnockouts() {
+  console.log("runKnockouts called");
   
+  if (!window.GROUP_RESULTS) {
+    alert("Please run the group stage first!");
+    return;
+  }
+  
+  // Disable the button while simulating
+  const btnKO = document.getElementById("btnKnockouts");
+  if (btnKO) btnKO.disabled = true;
+  
+  // Get qualified teams from group stage
+  const qualifiedTeams = getQualifiedTeams(window.GROUP_RESULTS);
+  
+  // Simulate knockout rounds
+  const knockoutResults = simulateKnockoutRounds(qualifiedTeams);
+  
+  // Store results and render them
+  window.TOURNAMENT = knockoutResults;
+  renderKnockoutResults(knockoutResults);
+  
+  console.log("Knockout stage completed");
+}
+
+function getQualifiedTeams(groupResults) {
+  const qualified = [];
+  Object.values(groupResults).forEach(group => {
+    // Top 2 teams from each group qualify
+    qualified.push(group.teams[0].team); // 1st place
+    qualified.push(group.teams[1].team); // 2nd place
+  });
+  return qualified;
+}
+
+function simulateKnockoutRounds(teams) {
+  console.log("Simulating knockout rounds with", teams.length, "teams");
+  
+  const results = {
+    roundOf32: simulateKnockoutRound(teams, "Round of 32"),
+    roundOf16: [],
+    quarterFinals: [],
+    semiFinals: [],
+    final: null,
+    champion: null
+  };
+  
+  // Simulate subsequent rounds
+  results.roundOf16 = simulateKnockoutRound(results.roundOf32.map(match => match.winner), "Round of 16");
+  results.quarterFinals = simulateKnockoutRound(results.roundOf16.map(match => match.winner), "Quarter Finals");
+  results.semiFinals = simulateKnockoutRound(results.quarterFinals.map(match => match.winner), "Semi Finals");
+  results.final = simulateKnockoutRound(results.semiFinals.map(match => match.winner), "Final")[0];
+  results.champion = results.final.winner;
+  
+  return results;
+}
+
+function simulateKnockoutRound(teams, roundName) {
+  console.log("Simulating", roundName);
+  const matches = [];
+  
+  // Shuffle and pair teams
+  const shuffled = shuffleArray([...teams]);
+  
+  for (let i = 0; i < shuffled.length; i += 2) {
+    if (i + 1 < shuffled.length) {
+      const teamA = shuffled[i];
+      const teamB = shuffled[i + 1];
+      
+      // Two-legged tie for early rounds, single match for final
+      let match;
+      if (roundName === "Final") {
+        match = simulateMatch(teamA, teamB, true); // Neutral venue for final
+      } else {
+        // Two-legged tie
+        const firstLeg = simulateMatch(teamA, teamB, false); // Team B home first
+        const secondLeg = simulateMatch(teamA, teamB, true); // Team A home second
+        
+        const aggScoreA = firstLeg.scoreA + secondLeg.scoreA;
+        const aggScoreB = firstLeg.scoreB + secondLeg.scoreB;
+        
+        let winner;
+        if (aggScoreA > aggScoreB) winner = teamA;
+        else if (aggScoreA < aggScoreB) winner = teamB;
+        else {
+          // Away goals rule
+          if (firstLeg.scoreA > secondLeg.scoreB) winner = teamA;
+          else if (firstLeg.scoreA < secondLeg.scoreB) winner = teamB;
+          else winner = Math.random() > 0.5 ? teamA : teamB; // Random if still tied
+        }
+        
+        match = {
+          teamA: teamA,
+          teamB: teamB,
+          firstLeg: firstLeg,
+          secondLeg: secondLeg,
+          aggScoreA: aggScoreA,
+          aggScoreB: aggScoreB,
+          winner: winner,
+          round: roundName
+        };
+      }
+      
+      matches.push(match);
+    }
+  }
+  
+  return matches;
+}
+
+function renderKnockoutResults(results) {
+  const out = document.getElementById("output");
+  if (!out) return;
+  
+  let html = `<h2>🏆 Knockout Stage Results</h2>`;
+  
+  // Show champion
+  html += `
+    <div style="background: #2d3748; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; border: 2px solid gold;">
+      <h3 style="color: gold; margin: 0;">🏆 TOURNAMENT CHAMPION 🏆</h3>
+      <h2 style="color: white; margin: 10px 0;">${results.champion.name}</h2>
+      <p style="color: #c4b5a0; margin: 0;">${results.champion.season} • OVR ${results.champion.strength}</p>
+    </div>
+  `;
+  
+  // Show final
+  if (results.final) {
+    html += `
+      <div class="group-card">
+        <div class="group-title">Final</div>
+        <div style="padding: 15px; text-align: center;">
+          <div style="font-size: 18px; margin-bottom: 10px;">
+            ${results.final.teamA.name} ${results.final.scoreA} - ${results.final.scoreB} ${results.final.teamB.name}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  
+  // Show semi-finals
+  if (results.semiFinals.length > 0) {
+    html += `<div class="group-card"><div class="group-title">Semi Finals</div>`;
+    results.semiFinals.forEach(match => {
+      html += `
+        <div style="padding: 10px; border-bottom: 1px solid #374151;">
+          ${match.teamA.name} ${match.aggScoreA} - ${match.aggScoreB} ${match.teamB.name}
+          <span style="color: #10b981;">→ ${match.winner.name}</span>
+        </div>
+      `;
+    });
+    html += `</div>`;
+  }
+  
+  out.innerHTML = html;
+}
+function exportTournament() {
+  console.log("Export tournament called");
+  // Basic implementation - you can expand this later
+  const tournamentData = {
+    groups: window.GROUPS,
+    groupResults: window.GROUP_RESULTS,
+    knockoutResults: window.TOURNAMENT,
+    timestamp: new Date().toISOString()
+  };
+  
+  const dataStr = JSON.stringify(tournamentData, null, 2);
+  const dataBlob = new Blob([dataStr], {type: 'application/json'});
+  
+  const url = URL.createObjectURL(dataBlob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'tournament-export.json';
+  link.click();
+  
+  URL.revokeObjectURL(url);
+}
+
   // Process matches
   matches.forEach(match => {
     const home = standings[match.teamA];

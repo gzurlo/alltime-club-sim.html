@@ -831,7 +831,7 @@
       <div class="control-column">
         <div>
           <div class="step-label">Step 1</div>
-          <button class="ctrl-btn btn-green" onclick="startTournament()" id="btnDraw">
+          <button class="ctrl-btn btn-green" id="btnDraw">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Generate Groups</span>
               <span class="ctrl-btn-subtitle">Draw all 16 groups from seeded pots</span>
@@ -842,7 +842,7 @@
 
         <div>
           <div class="step-label">Step 2</div>
-          <button class="ctrl-btn btn-blue" onclick="runGroupStage()" id="btnGroupStage" disabled>
+          <button class="ctrl-btn btn-blue" id="btnGroupStage" disabled>
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Simulate Group Stage</span>
               <span class="ctrl-btn-subtitle">Home-and-away round-robin</span>
@@ -853,7 +853,7 @@
 
         <div>
           <div class="step-label">Step 3</div>
-          <button class="ctrl-btn btn-orange" onclick="runKnockouts()" id="btnKnockouts" disabled>
+          <button class="ctrl-btn btn-orange" id="btnKnockouts" disabled>
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Run Knockouts</span>
               <span class="ctrl-btn-subtitle">R32 → R16 → QF → SF → Final</span>
@@ -865,7 +865,7 @@
 
       <div class="side-section-title">Views</div>
       <div class="control-column">
-        <button class="ctrl-btn btn-purple" onclick="showPlayerStats()" id="btnStats" disabled>
+        <button class="ctrl-btn btn-purple" id="btnStats" disabled>
           <div class="ctrl-btn-main">
             <span class="ctrl-btn-title">Player & Match Stats</span>
             <span class="ctrl-btn-subtitle">Top scorers & quick tournament log</span>
@@ -873,7 +873,7 @@
           <span class="ctrl-btn-tag">View</span>
         </button>
 
-        <button class="ctrl-btn btn-purple" onclick="showClubLegacy()">
+        <button class="ctrl-btn btn-purple" id="btnClubLegacy">
           <div class="ctrl-btn-main">
             <span class="ctrl-btn-title">Club Legacy</span>
             <span class="ctrl-btn-subtitle">Most successful clubs over all saves</span>
@@ -881,7 +881,7 @@
           <span class="ctrl-btn-tag">Legacy</span>
         </button>
 
-        <button class="ctrl-btn btn-purple" onclick="openCustomMatch()">
+        <button class="ctrl-btn btn-purple" id="btnCustomMatch">
           <div class="ctrl-btn-main">
             <span class="ctrl-btn-title">Custom Match</span>
             <span class="ctrl-btn-subtitle">One-off clash between any two sides</span>
@@ -889,7 +889,7 @@
           <span class="ctrl-btn-tag">Friendly</span>
         </button>
 
-        <button class="ctrl-btn btn-purple" onclick="openHistory()">
+        <button class="ctrl-btn btn-purple" id="btnHistory">
           <div class="ctrl-btn-main">
             <span class="ctrl-btn-title">Tournament History</span>
             <span class="ctrl-btn-subtitle">List of all past champions</span>
@@ -1004,7 +1004,440 @@
     <div id="historyBody"></div>
   </div>
 </div>
+// Add event listeners after DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+  const btnDraw = document.getElementById('btnDraw');
+  const btnGroupStage = document.getElementById('btnGroupStage');
+  const btnKnockouts = document.getElementById('btnKnockouts');
+  const btnStats = document.getElementById('btnStats');
+  
+  if (btnDraw) btnDraw.addEventListener('click', startTournament);
+  if (btnGroupStage) btnGroupStage.addEventListener('click', runGroupStage);
+  if (btnKnockouts) btnKnockouts.addEventListener('click', runKnockouts);
+  if (btnStats) btnStats.addEventListener('click', showPlayerStats);
+  
+  // Also initialize theme toggle
+  const themeBtn = document.getElementById('themeToggle');
+  if (themeBtn) {
+    themeBtn.addEventListener('click', toggleTheme);
+  }
+  
+  // Initialize RNG settings
+  const rngSlider = document.getElementById('rngSlider');
+  if (rngSlider) {
+    updateRNG(rngSlider.value);
+  }
+});
+// ================== MISSING FUNCTIONS ============================
 
+function startTournament() {
+  const groups = generateGroups();
+  window.GROUPS = groups;
+  window.GROUP_RESULTS = null;
+  window.TOURNAMENT = null;
+  renderGroups(groups);
+}
+
+function runGroupStage() {
+  if (!window.GROUPS) {
+    alert("Please generate groups first!");
+    return;
+  }
+
+  const groups = window.GROUPS;
+  const results = [];
+
+  groups.forEach(G => {
+    const res = simulateGroupMatches(G);
+    G.standings = res.standings;
+    G.matches = res.matches;
+    results.push(G);
+  });
+
+  window.GROUP_RESULTS = results;
+  renderStandingsForAllGroups(results);
+}
+
+function runKnockouts() {
+  if (!window.GROUP_RESULTS) {
+    alert("Please run the group stage first!");
+    return;
+  }
+
+  const R32Pairs = generateR32Pairs();
+  const R32_res = simulateR32(R32Pairs);
+  const R16_input = R32_res.map(r => r.winner.name);
+
+  const R16 = simulateKnockoutTwoLegRound(R16_input, "R16");
+  const QF = simulateKnockoutTwoLegRound(R16.winners, "QF");
+  const SF = simulateSingleLegRound(QF.winners, "SF");
+  const FINAL = simulateSingleLegRound(SF.winners, "FINAL");
+
+  window.TOURNAMENT = {
+    R32: R32_res,
+    R16: R16.results,
+    QF: QF.results,
+    SF: SF.results,
+    FINAL: FINAL.results,
+    champion: FINAL.winners[0]
+  };
+
+  updateClubHistoryFromTournament(window.TOURNAMENT);
+  renderKnockoutBracket(window.TOURNAMENT);
+
+  const btnStats = document.getElementById("btnStats");
+  if (btnStats) btnStats.disabled = false;
+}
+
+function showPlayerStats() {
+  const out = document.getElementById("output");
+  if (!out) return;
+
+  const players = Object.values(PLAYER_DB);
+  if (!players.length) {
+    out.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📊</div>
+        <h2>No stats yet</h2>
+        <p class="output-sub">Run a group stage or full tournament to generate player statistics.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const byGoals = [...players].sort((a, b) => {
+    if (b.goals !== a.goals) return b.goals - a.goals;
+    if (b.assists !== a.assists) return b.assists - a.assists;
+    return b.quality - a.quality;
+  }).slice(0, 15);
+
+  const byAssists = [...players].sort((a, b) => {
+    if (b.assists !== a.assists) return b.assists - a.assists;
+    return b.goals - a.goals;
+  }).slice(0, 15);
+
+  const mostApps = [...players].sort((a, b) => b.apps - a.apps).slice(0, 15);
+
+  out.innerHTML = `<h2>📊 All-Time-Sim Player Stats</h2><div class="stats-grid"></div>`;
+  const grid = out.querySelector(".stats-grid");
+
+  function renderList(title, list, formatter) {
+    const card = document.createElement("div");
+    card.className = "stat-card";
+    let html = `<div class="stat-title">${title}</div>`;
+    list.forEach((p, idx) => {
+      html += `
+        <div class="player-row">
+          <span>${idx + 1}. ${p.name} <small style="opacity:0.8">(${p.team})</small></span>
+          <span>${formatter(p)}</span>
+        </div>
+      `;
+    });
+    card.innerHTML = html;
+    grid.appendChild(card);
+  }
+
+  renderList("Top Scorers", byGoals, p => `${p.goals} ⚽ | ${p.assists} 🅰`);
+  renderList("Most Assists", byAssists, p => `${p.assists} 🅰 | ${p.goals} ⚽`);
+  renderList("Most Appearances", mostApps, p => `${p.apps} apps`);
+}
+
+function showClubLegacy() {
+  const out = document.getElementById("output");
+  if (!out) return;
+
+  const records = Object.values(CLUB_HISTORY);
+  if (!records.length) {
+    out.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🏟️</div>
+        <h2>No long-term history yet</h2>
+        <p class="output-sub">Play at least one full tournament (through the final) to build club rankings.</p>
+      </div>
+    `;
+    return;
+  }
+
+  records.sort((a, b) => {
+    if (b.titles !== a.titles) return b.titles - a.titles;
+    if (b.finals !== a.finals) return b.finals - a.finals;
+    if (b.semis !== a.semis) return b.semis - a.semis;
+    if (b.quarters !== a.quarters) return b.quarters - a.quarters;
+    return a.name.localeCompare(b.name);
+  });
+
+  out.innerHTML = `
+    <h2>🏟️ Most Successful Clubs (All Saves)</h2>
+    <p class="output-sub">
+      Based on every completed tournament you've run and imported into this browser session.
+    </p>
+    <div class="club-history-wrapper">
+      <table class="legacy-table">
+        <tr>
+          <th>#</th>
+          <th>Club</th>
+          <th>Titles</th>
+          <th>Finals</th>
+          <th>Semis</th>
+          <th>Quarters</th>
+          <th>Tournaments Played</th>
+        </tr>
+      </table>
+    </div>
+  `;
+
+  const table = out.querySelector(".legacy-table");
+
+  records.forEach((rec, idx) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${idx + 1}</td>
+      <td>${rec.name}</td>
+      <td>${rec.titles}</td>
+      <td>${rec.finals}</td>
+      <td>${rec.semis}</td>
+      <td>${rec.quarters}</td>
+      <td>${rec.tournamentsPlayed}</td>
+    `;
+    table.appendChild(tr);
+  });
+}
+
+function openCustomMatch() {
+  const modal = document.getElementById('customMatchModal');
+  if (modal) modal.classList.add('active');
+  
+  // Populate team selects
+  const selectA = document.getElementById('customTeamA');
+  const selectB = document.getElementById('customTeamB');
+  
+  if (selectA && selectB) {
+    selectA.innerHTML = '';
+    selectB.innerHTML = '';
+    
+    TEAM_POOL.forEach(team => {
+      const option = document.createElement('option');
+      option.value = team.name;
+      option.textContent = team.name;
+      selectA.appendChild(option.cloneNode(true));
+      selectB.appendChild(option);
+    });
+  }
+}
+
+function closeCustomMatch() {
+  const modal = document.getElementById('customMatchModal');
+  if (modal) modal.classList.remove('active');
+}
+
+function simulateCustomMatch() {
+  const teamA = document.getElementById('customTeamA')?.value;
+  const teamB = document.getElementById('customTeamB')?.value;
+  const venue = document.querySelector('input[name="customVenue"]:checked')?.value;
+  
+  if (!teamA || !teamB) {
+    alert('Please select both teams');
+    return;
+  }
+  
+  const teamAObj = findTeam(teamA);
+  const teamBObj = findTeam(teamB);
+  
+  if (!teamAObj || !teamBObj) {
+    alert('Team not found');
+    return;
+  }
+  
+  const [goalsA, goalsB] = simulateGoals(teamAObj, teamBObj, RNG_SETTINGS.groupChaos);
+  
+  const resultDiv = document.getElementById('customMatchResult');
+  if (resultDiv) {
+    resultDiv.innerHTML = `
+      <div style="background: rgba(15,23,42,0.9); padding: 10px; border-radius: 8px; margin-top: 10px;">
+        <h4>Match Result</h4>
+        <p><strong>${teamA}</strong> ${goalsA} - ${goalsB} <strong>${teamB}</strong></p>
+        <p>Venue: ${venue === 'homeAdv' ? 'Slight home advantage for ' + teamA : 'Neutral'}</p>
+      </div>
+    `;
+  }
+}
+
+function openHistory() {
+  const modal = document.getElementById('historyModal');
+  if (modal) modal.classList.add('active');
+  
+  const historyBody = document.getElementById('historyBody');
+  if (historyBody) {
+    if (TOURNAMENT_HISTORY.length === 0) {
+      historyBody.innerHTML = '<p>No tournament history yet. Run a full tournament to see champions here.</p>';
+    } else {
+      let html = '<div class="history-list">';
+      TOURNAMENT_HISTORY.forEach((tourney, idx) => {
+        html += `
+          <div class="history-card">
+            <strong>Tournament ${idx + 1}</strong><br>
+            🏆 Champion: ${tourney.champion}<br>
+            🥈 Runner-up: ${tourney.runnerUp}<br>
+            <small>${new Date(tourney.time).toLocaleDateString()}</small>
+          </div>
+        `;
+      });
+      html += '</div>';
+      historyBody.innerHTML = html;
+    }
+  }
+}
+
+function closeHistory() {
+  const modal = document.getElementById('historyModal');
+  if (modal) modal.classList.remove('active');
+}
+
+function closeMatchDetail() {
+  const modal = document.getElementById('matchDetailModal');
+  if (modal) modal.classList.remove('active');
+}
+
+function closeTeamDetail() {
+  const modal = document.getElementById('teamDetailModal');
+  if (modal) modal.classList.remove('active');
+}
+
+function toggleTheme() {
+  document.body.classList.toggle('light');
+  const btn = document.getElementById('themeToggle');
+  if (btn) {
+    btn.textContent = document.body.classList.contains('light') ? '🌙 Dark / ☀️ Light' : '🌙 Dark / ☀️ Light';
+  }
+}
+
+function exportTournament() {
+  if (!window.TOURNAMENT && !window.GROUP_RESULTS) {
+    alert("No tournament data to export. Run at least the group stage first.");
+    return;
+  }
+
+  const payload = {
+    groups: window.GROUPS || null,
+    groupResults: window.GROUP_RESULTS || null,
+    knockout: window.TOURNAMENT || null,
+    players: PLAYER_DB,
+    clubHistory: CLUB_HISTORY,
+    tournamentHistory: TOURNAMENT_HISTORY
+  };
+
+  const data = JSON.stringify(payload, null, 2);
+  const blob = new Blob([data], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "all-time-sim-tournament.json";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function handleImport() {
+  const input = document.getElementById("importSave");
+  const file = input?.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+
+      window.GROUPS = data.groups || null;
+      window.GROUP_RESULTS = data.groupResults || null;
+      window.TOURNAMENT = data.knockout || null;
+
+      // Restore player DB
+      Object.keys(PLAYER_DB).forEach(k => delete PLAYER_DB[k]);
+      if (data.players) {
+        Object.keys(data.players).forEach(k => {
+          PLAYER_DB[k] = data.players[k];
+        });
+      }
+
+      // Restore club history
+      Object.keys(CLUB_HISTORY).forEach(k => delete CLUB_HISTORY[k]);
+      if (data.clubHistory) {
+        Object.keys(data.clubHistory).forEach(k => {
+          CLUB_HISTORY[k] = data.clubHistory[k];
+        });
+      }
+
+      // Restore tournament history
+      TOURNAMENT_HISTORY.length = 0;
+      if (Array.isArray(data.tournamentHistory)) {
+        data.tournamentHistory.forEach(t => TOURNAMENT_HISTORY.push(t));
+      }
+
+      if (window.TOURNAMENT) {
+        renderKnockoutBracket(window.TOURNAMENT);
+      } else if (window.GROUP_RESULTS) {
+        renderStandingsForAllGroups(window.GROUP_RESULTS);
+      } else if (window.GROUPS) {
+        renderGroups(window.GROUPS);
+      }
+
+      alert("Save loaded successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Invalid save file!");
+    }
+  };
+  reader.readAsText(file);
+}
+
+function resetTournament() {
+  window.GROUPS = null;
+  window.GROUP_RESULTS = null;
+  window.TOURNAMENT = null;
+
+  // Clear player DB and re-register from TEAM_POOL
+  Object.keys(PLAYER_DB).forEach(k => delete PLAYER_DB[k]);
+  TEAM_POOL.forEach(team => registerTeamPlayers(team));
+
+  const btnGroup = document.getElementById("btnGroupStage");
+  const btnKO = document.getElementById("btnKnockouts");
+  const btnStats = document.getElementById("btnStats");
+
+  if (btnGroup) btnGroup.disabled = true;
+  if (btnKO) btnKO.disabled = true;
+  if (btnStats) btnStats.disabled = true;
+
+  const out = document.getElementById("output");
+  if (out) {
+    out.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚽️</div>
+        <h2>Welcome to All-Time Sim</h2>
+        <p class="output-sub">
+          Click "Generate Groups" to begin your new all-eras tournament.
+        </p>
+      </div>
+    `;
+  }
+}
+
+// ================== INITIALIZATION ===============================
+
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize teams
+  initTeamsAndPlayers();
+  
+  // Initialize RNG settings
+  const rngSlider = document.getElementById('rngSlider');
+  if (rngSlider) {
+    updateRNG(rngSlider.value);
+  }
+  
+  // Set team count
+  const teamCountEl = document.getElementById('teamCount');
+  if (teamCountEl) teamCountEl.textContent = TEAM_POOL.length.toString();
+});
 <script>
      console.log("MAIN SCRIPT LOADED");
  /************* GLOBAL STATE *************/
@@ -3230,12 +3663,15 @@ function setRNGPreset(value, btn) {
 }
 
 // One-time init: map teams & seed players
-(function initTeamsAndPlayers() {
+function initTeamsAndPlayers() {
   TEAM_POOL.forEach(team => {
     TEAM_MAP.set(team.name, team);
     registerTeamPlayers(team);
   });
-})();
+}
+
+// Initialize teams and players
+initTeamsAndPlayers();
 
 // ================== PLAYER DB & HELPERS ==========================
 function safeSquad(team) {

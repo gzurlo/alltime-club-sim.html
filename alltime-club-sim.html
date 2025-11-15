@@ -1006,7 +1006,7 @@
 </div>
 
 <script>
-    
+     console.log("MAIN SCRIPT LOADED");
  /************* GLOBAL STATE *************/
  const TEAM_MAP = new Map();
   const PLAYER_DB = {};
@@ -3457,6 +3457,19 @@ function startTournament() {
   window.TOURNAMENT = null;
   renderGroups(groups);
 }
+// Make functions available to inline onclick handlers
+window.startTournament   = startTournament;
+window.runGroupStage     = runGroupStage;
+window.runKnockouts      = runKnockouts;
+window.showPlayerStats   = showPlayerStats;
+window.showClubLegacy    = showClubLegacy;
+window.openCustomMatch   = openCustomMatch;
+window.openHistory       = openHistory;
+window.exportTournament  = exportTournament;
+window.resetTournament   = resetTournament;
+window.handleImport      = handleImport;
+window.updateRNG         = updateRNG;
+window.setRNGPreset      = setRNGPreset;
 
 // ================== MATCH SIMULATION =============================
 

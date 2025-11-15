@@ -3750,9 +3750,14 @@ function startTournament() {
   
   // Enable the group stage button
   const btnGroup = document.getElementById("btnGroupStage");
+  console.log("Group stage button found:", !!btnGroup);
   if (btnGroup) {
     btnGroup.disabled = false;
-    btnGroup.onclick = runGroupStage; // Connect the function
+    // Remove any existing onclick and add the new one
+    btnGroup.onclick = runGroupStage;
+    console.log("Group stage button enabled and connected");
+  } else {
+    console.error("Group stage button not found!");
   }
   
   console.log("Tournament started successfully");

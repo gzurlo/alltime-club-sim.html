@@ -3824,7 +3824,61 @@ function showClubLegacy() {
   if (!out) return;
   
   let html = `<h2>🏛️ Club Legacy</h2>`;
-  html += `<p>Club legacy tracking will be implemented in future updates.</p>`;
+  
+  // Count tournament wins from previous tournaments
+  const clubWins = {};
+  
+  if (window.TOURNAMENT && window.TOURNAMENT.champion) {
+    const champion = window.TOURNAMENT.champion.name;
+    clubWins[champion] = (clubWins[champion] || 0) + 1;
+  }
+  
+  // Add more legacy data as tournaments are run
+  const legacyClubs = Object.entries(clubWins)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10);
+  
+  if (legacyClubs.length > 0) {
+    html += `
+      <div class="group-card">
+        <div class="group-title">Tournament Champions</div>
+        <table class="standings-table">
+          <thead>
+            <tr>
+              <th>Club</th>
+              <th>Titles</th>
+              <th>Latest Win</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+    
+    legacyClubs.forEach(([club, wins]) => {
+      html += `
+        <tr>
+          <td>${club}</td>
+          <td><strong>${wins}</strong></td>
+          <td>Current Tournament</td>
+        </tr>
+      `;
+    });
+    
+    html += `</tbody></table></div>`;
+  } else {
+    html += `
+      <div class="group-card">
+        <div class="group-title">No Tournament History Yet</div>
+        <p>Run a full tournament to see club legacy data here.</p>
+        <p>This will track:</p>
+        <ul>
+          <li>Tournament championships</li>
+          <li>Final appearances</li>
+          <li>Semi-final appearances</li>
+          <li>Total matches won</li>
+        </ul>
+      </div>
+    `;
+  }
   
   out.innerHTML = html;
 }
@@ -4220,6 +4274,9 @@ function simulateMatch(teamA, teamB, isHome) {
   const goalsA = Math.max(0, Math.floor(baseScoreA + homeAdvantage + (Math.random() * RNG_SETTINGS.groupChaos)));
   const goalsB = Math.max(0, Math.floor(baseScoreB - homeAdvantage + (Math.random() * RNG_SETTINGS.groupChaos)));
   
+  // Track player appearances and goals
+  trackPlayerStats(teamA, goalsA, teamB, goalsB);
+  
   return {
     teamA: teamA.name,
     teamB: teamB.name,
@@ -4227,6 +4284,46 @@ function simulateMatch(teamA, teamB, isHome) {
     scoreB: goalsB,
     isHome: isHome
   };
+}
+
+function trackPlayerStats(teamA, goalsA, teamB, goalsB) {
+  // Track appearances for all starting players
+  [...teamA.startingXI, ...(teamA.bench || [])].forEach(player => {
+    const key = `${teamA.name}::${player.name}`;
+    if (PLAYER_DB[key]) {
+      PLAYER_DB[key].apps++;
+    }
+  });
+  
+  [...teamB.startingXI, ...(teamB.bench || [])].forEach(player => {
+    const key = `${teamB.name}::${player.name}`;
+    if (PLAYER_DB[key]) {
+      PLAYER_DB[key].apps++;
+    }
+  });
+  
+  // Randomly assign goals to players (simplified)
+  for (let i = 0; i < goalsA; i++) {
+    const scorers = teamA.startingXI.filter(p => p.pos !== 'GK');
+    if (scorers.length > 0) {
+      const scorer = scorers[Math.floor(Math.random() * scorers.length)];
+      const key = `${teamA.name}::${scorer.name}`;
+      if (PLAYER_DB[key]) {
+        PLAYER_DB[key].goals++;
+      }
+    }
+  }
+  
+  for (let i = 0; i < goalsB; i++) {
+    const scorers = teamB.startingXI.filter(p => p.pos !== 'GK');
+    if (scorers.length > 0) {
+      const scorer = scorers[Math.floor(Math.random() * scorers.length)];
+      const key = `${teamB.name}::${scorer.name}`;
+      if (PLAYER_DB[key]) {
+        PLAYER_DB[key].goals++;
+      }
+    }
+  }
 }
 
 function calculateStandings(matches, teams) {
@@ -4505,6 +4602,10 @@ window.closeTeamDetail   = closeTeamDetail;
 document.addEventListener('DOMContentLoaded', function() {
   console.log("Initializing app...");
   
+  // ================== INITIALIZATION =======================
+document.addEventListener('DOMContentLoaded', function() {
+  console.log("Initializing app...");
+  
   // Initialize teams
   initTeamsAndPlayers();
   
@@ -4518,6 +4619,39 @@ document.addEventListener('DOMContentLoaded', function() {
     updateRNG(rngSlider.value);
   }
   
+  // Populate custom match dropdowns
+  populateCustomMatchDropdowns();
+  
+  // ... rest of your button connection code
+});
+
+function populateCustomMatchDropdowns() {
+  const teamASelect = document.getElementById('customTeamA');
+  const teamBSelect = document.getElementById('customTeamB');
+  
+  if (teamASelect && teamBSelect) {
+    // Clear existing options
+    teamASelect.innerHTML = '';
+    teamBSelect.innerHTML = '';
+    
+    // Add teams sorted by name
+    const sortedTeams = [...TEAM_POOL].sort((a, b) => a.name.localeCompare(b.name));
+    
+    sortedTeams.forEach(team => {
+      const optionA = document.createElement('option');
+      optionA.value = team.name;
+      optionA.textContent = team.name;
+      teamASelect.appendChild(optionA);
+      
+      const optionB = document.createElement('option');
+      optionB.value = team.name;
+      optionB.textContent = team.name;
+      teamBSelect.appendChild(optionB);
+    });
+    
+    console.log("Custom match dropdowns populated with", sortedTeams.length, "teams");
+  }
+} 
   // Connect all buttons
   console.log("Connecting buttons...");
   
@@ -4539,7 +4673,33 @@ document.addEventListener('DOMContentLoaded', function() {
   if (knockoutsBtn) {
     knockoutsBtn.onclick = runKnockouts;
   }
+  function populateCustomMatchDropdowns() {
+  const teamASelect = document.getElementById('customTeamA');
+  const teamBSelect = document.getElementById('customTeamB');
   
+  if (teamASelect && teamBSelect) {
+    // Clear existing options
+    teamASelect.innerHTML = '';
+    teamBSelect.innerHTML = '';
+    
+    // Add teams sorted by name
+    const sortedTeams = [...TEAM_POOL].sort((a, b) => a.name.localeCompare(b.name));
+    
+    sortedTeams.forEach(team => {
+      const optionA = document.createElement('option');
+      optionA.value = team.name;
+      optionA.textContent = team.name;
+      teamASelect.appendChild(optionA);
+      
+      const optionB = document.createElement('option');
+      optionB.value = team.name;
+      optionB.textContent = team.name;
+      teamBSelect.appendChild(optionB);
+    });
+    
+    console.log("Custom match dropdowns populated with", sortedTeams.length, "teams");
+  }
+}
   // View buttons
   const statsBtn = document.getElementById('btnStats');
   console.log("Stats button found:", !!statsBtn);
@@ -4583,6 +4743,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   console.log("App initialized successfully");
+
 });
 
 // Remove the temporary debug code since we're properly connecting all buttons now

@@ -187,3 +187,18 @@ body {
     opacity: 0.5 !important;
     pointer-events: none !important;
   }
+  .ctrl-btn {
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+  }
+  
+  .ctrl-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  
+  .ctrl-btn:not(:disabled):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }

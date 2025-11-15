@@ -4095,7 +4095,7 @@ function showPlayerStats() {
 
 // ============ MOST SUCCESSFUL CLUBS OVER ALL SAVES ===============
 
-function showClubHistory() {
+function showClubLegacy() {
   const out = document.getElementById("output");
   if (!out) return;
 
@@ -4105,7 +4105,9 @@ function showClubHistory() {
       <div class="empty-state">
         <div class="empty-icon">🏟️</div>
         <h2>No long-term history yet</h2>
-        <p class="output-sub">Play at least one full tournament (through the final) to build club rankings.</p>
+        <p class="output-sub">
+          Play at least one full tournament (through the final) to build club rankings.
+        </p>
       </div>
     `;
     return;
@@ -4125,7 +4127,7 @@ function showClubHistory() {
       Based on every completed tournament you've run and imported into this browser session.
     </p>
     <div class="club-history-wrapper">
-      <table class="legacy-table">
+      <table class="club-history-table">
         <tr>
           <th>#</th>
           <th>Club</th>
@@ -4139,7 +4141,7 @@ function showClubHistory() {
     </div>
   `;
 
-  const table = out.querySelector(".legacy-table");
+  const table = out.querySelector(".club-history-table");
 
   records.forEach((rec, idx) => {
     const tr = document.createElement("tr");
@@ -4155,12 +4157,6 @@ function showClubHistory() {
     table.appendChild(tr);
   });
 }
-
-function showClubLegacy() {
-  // This is the function the HTML button calls
-  showClubHistory();
-}
-
 // ================== EXPORT / IMPORT / RESET ======================
 
 function exportTournament() {

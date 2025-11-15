@@ -3763,6 +3763,83 @@ setTimeout(function() {
   }
 }, 2000);
 
+// ================== VIEW FUNCTIONS ==================
+function showPlayerStats() {
+  console.log("showPlayerStats called");
+  
+  const out = document.getElementById("output");
+  if (!out) return;
+  
+  // Get top scorers from player database
+  const topScorers = Object.values(PLAYER_DB)
+    .filter(player => player.goals > 0)
+    .sort((a, b) => b.goals - a.goals)
+    .slice(0, 10);
+  
+  let html = `<h2>📊 Player Statistics</h2>`;
+  
+  if (topScorers.length > 0) {
+    html += `
+      <div class="group-card">
+        <div class="group-title">Top Scorers</div>
+        <table class="standings-table">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Team</th>
+              <th>Position</th>
+              <th>Goals</th>
+              <th>Assists</th>
+              <th>Apps</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+    
+    topScorers.forEach(player => {
+      html += `
+        <tr>
+          <td>${player.name}</td>
+          <td>${player.team}</td>
+          <td>${player.pos}</td>
+          <td><strong>${player.goals}</strong></td>
+          <td>${player.assists}</td>
+          <td>${player.apps}</td>
+        </tr>
+      `;
+    });
+    
+    html += `</tbody></table></div>`;
+  } else {
+    html += `<p>No player statistics available yet. Run some matches first!</p>`;
+  }
+  
+  out.innerHTML = html;
+}
+
+function showClubLegacy() {
+  console.log("showClubLegacy called");
+  
+  const out = document.getElementById("output");
+  if (!out) return;
+  
+  let html = `<h2>🏛️ Club Legacy</h2>`;
+  html += `<p>Club legacy tracking will be implemented in future updates.</p>`;
+  
+  out.innerHTML = html;
+}
+
+function openCustomMatch() {
+  console.log("openCustomMatch called");
+  const modal = document.getElementById('customMatchModal');
+  if (modal) modal.classList.add('active');
+}
+
+function openHistory() {
+  console.log("openHistory called");
+  const modal = document.getElementById('historyModal');
+  if (modal) modal.classList.add('active');
+}
 
 // ================== MAIN BUTTON FUNCTIONS ================
 // ================== MAIN BUTTON FUNCTIONS ================
@@ -3853,7 +3930,6 @@ function simulateKnockoutRounds(teams) {
   
   return results;
 }
-
 function simulateKnockoutRound(teams, roundName) {
   console.log("Simulating", roundName);
   const matches = [];
@@ -3869,11 +3945,17 @@ function simulateKnockoutRound(teams, roundName) {
       // Two-legged tie for early rounds, single match for final
       let match;
       if (roundName === "Final") {
-        match = simulateMatch(teamA, teamB, true); // Neutral venue for final
-        match.winner = match.scoreA > match.scoreB ? teamA : teamB;
-        match.round = roundName;
+        const finalMatch = simulateMatch(teamA, teamB, true); // Neutral venue for final
+        match = {
+          teamA: teamA,
+          teamB: teamB,
+          scoreA: finalMatch.scoreA,
+          scoreB: finalMatch.scoreB,
+          winner: finalMatch.scoreA > finalMatch.scoreB ? teamA : teamB,
+          round: roundName
+        };
       } else {
-        // Two-legged tie
+        // Two-legged tie for other rounds
         const firstLeg = simulateMatch(teamA, teamB, false); // Team B home first
         const secondLeg = simulateMatch(teamA, teamB, true); // Team A home second
         
@@ -3933,6 +4015,7 @@ function renderKnockoutResults(results) {
           <div style="font-size: 18px; margin-bottom: 10px;">
             ${results.final.teamA.name} ${results.final.scoreA} - ${results.final.scoreB} ${results.final.teamB.name}
           </div>
+          <div style="color: #10b981; font-weight: bold;">Winner: ${results.champion.name}</div>
         </div>
       </div>
     `;
@@ -3942,6 +4025,48 @@ function renderKnockoutResults(results) {
   if (results.semiFinals.length > 0) {
     html += `<div class="group-card"><div class="group-title">Semi Finals</div>`;
     results.semiFinals.forEach(match => {
+      html += `
+        <div style="padding: 10px; border-bottom: 1px solid #374151;">
+          ${match.teamA.name} ${match.aggScoreA} - ${match.aggScoreB} ${match.teamB.name}
+          <span style="color: #10b981;">→ ${match.winner.name}</span>
+        </div>
+      `;
+    });
+    html += `</div>`;
+  }
+  
+  // Show quarter-finals
+  if (results.quarterFinals.length > 0) {
+    html += `<div class="group-card"><div class="group-title">Quarter Finals</div>`;
+    results.quarterFinals.forEach(match => {
+      html += `
+        <div style="padding: 10px; border-bottom: 1px solid #374151;">
+          ${match.teamA.name} ${match.aggScoreA} - ${match.aggScoreB} ${match.teamB.name}
+          <span style="color: #10b981;">→ ${match.winner.name}</span>
+        </div>
+      `;
+    });
+    html += `</div>`;
+  }
+  
+  // Show round of 16
+  if (results.roundOf16.length > 0) {
+    html += `<div class="group-card"><div class="group-title">Round of 16</div>`;
+    results.roundOf16.forEach(match => {
+      html += `
+        <div style="padding: 10px; border-bottom: 1px solid #374151;">
+          ${match.teamA.name} ${match.aggScoreA} - ${match.aggScoreB} ${match.teamB.name}
+          <span style="color: #10b981;">→ ${match.winner.name}</span>
+        </div>
+      `;
+    });
+    html += `</div>`;
+  }
+  
+  // Show round of 32
+  if (results.roundOf32.length > 0) {
+    html += `<div class="group-card"><div class="group-title">Round of 32</div>`;
+    results.roundOf32.forEach(match => {
       html += `
         <div style="padding: 10px; border-bottom: 1px solid #374151;">
           ${match.teamA.name} ${match.aggScoreA} - ${match.aggScoreB} ${match.teamB.name}
@@ -4320,33 +4445,72 @@ document.addEventListener('DOMContentLoaded', function() {
     updateRNG(rngSlider.value);
   }
   
-  // DEBUG: Test button connection
+  // Connect all buttons
+  console.log("Connecting buttons...");
+  
+  // Tournament control buttons
   const generateBtn = document.getElementById('btnDraw');
   console.log("Generate Groups button found:", !!generateBtn);
-  
   if (generateBtn) {
-    generateBtn.addEventListener('click', function() {
-      console.log("Generate Groups button CLICKED");
-      startTournament();
-    });
+    generateBtn.onclick = startTournament;
+  }
+  
+  const groupStageBtn = document.getElementById('btnGroupStage');
+  console.log("Group Stage button found:", !!groupStageBtn);
+  if (groupStageBtn) {
+    groupStageBtn.onclick = runGroupStage;
+  }
+  
+  const knockoutsBtn = document.getElementById('btnKnockouts');
+  console.log("Knockouts button found:", !!knockoutsBtn);
+  if (knockoutsBtn) {
+    knockoutsBtn.onclick = runKnockouts;
+  }
+  
+  // View buttons
+  const statsBtn = document.getElementById('btnStats');
+  console.log("Stats button found:", !!statsBtn);
+  if (statsBtn) {
+    statsBtn.onclick = showPlayerStats;
+  }
+  
+  const legacyBtn = document.getElementById('btnClubLegacy');
+  console.log("Club Legacy button found:", !!legacyBtn);
+  if (legacyBtn) {
+    legacyBtn.onclick = showClubLegacy;
+  }
+  
+  const customMatchBtn = document.getElementById('btnCustomMatch');
+  console.log("Custom Match button found:", !!customMatchBtn);
+  if (customMatchBtn) {
+    customMatchBtn.onclick = openCustomMatch;
+  }
+  
+  const historyBtn = document.getElementById('btnHistory');
+  console.log("History button found:", !!historyBtn);
+  if (historyBtn) {
+    historyBtn.onclick = openHistory;
+  }
+  
+  // Save/Reset buttons (these should already have onclick in HTML)
+  const exportBtn = document.querySelector('button[onclick="exportTournament()"]');
+  console.log("Export button found:", !!exportBtn);
+  
+  const resetBtn = document.querySelector('button[onclick="resetTournament()"]');
+  console.log("Reset button found:", !!resetBtn);
+  
+  const importBtn = document.querySelector('button[onclick="handleImport()"]');
+  console.log("Import button found:", !!importBtn);
+  
+  // Theme toggle
+  const themeBtn = document.getElementById('themeToggle');
+  console.log("Theme button found:", !!themeBtn);
+  if (themeBtn) {
+    themeBtn.onclick = toggleTheme;
   }
   
   console.log("App initialized successfully");
 });
-// TEMPORARY DEBUG - Force button to work
-setTimeout(function() {
-  const btn = document.getElementById('btnGenerateGroups');
-  if (btn) {
-    console.log("DEBUG: Found Generate Groups button, adding click handler");
-    btn.onclick = function() {
-      console.log("DEBUG: Button clicked via forced handler");
-      startTournament();
-    };
-  } else {
-    console.log("DEBUG: Could not find button with ID 'btnGenerateGroups'");
-    // List all buttons to see what's available
-    const allButtons = document.querySelectorAll('button');
-    console.log("All buttons on page:", Array.from(allButtons).map(b => b.id || b.textContent));
-  }
-}, 1000);
+
+// Remove the temporary debug code since we're properly connecting all buttons now
 </script>

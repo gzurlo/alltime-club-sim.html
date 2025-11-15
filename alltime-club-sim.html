@@ -1439,49 +1439,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (teamCountEl) teamCountEl.textContent = TEAM_POOL.length.toString();
 });
 <script>
-  // ================== DEBUG START ==========================
-console.log("=== SCRIPT START ===");
-
-try {
-  // Test basic JavaScript
-  console.log("Basic JS working");
-  
-  // Test your TEAM_POOL
-  console.log("TEAM_POOL length:", window.TEAM_POOL ? window.TEAM_POOL.length : "NOT DEFINED");
-  
-  // Test function definition
-  window.testFunction = function() {
-    console.log("testFunction works!");
-  };
-  console.log("testFunction defined:", typeof window.testFunction);
-  
-} catch (error) {
-  console.error("ERROR in initial script:", error);
-  alert("JavaScript error: " + error.message);
-}
-    console.log("Script started loading...");
-
-// Test function definition
-function testFunction() {
-  console.log("testFunction is working!");
-}
-
-console.log("testFunction defined:", typeof testFunction);
-     console.log("MAIN SCRIPT LOADED");
- // ================== GLOBAL STATE =========================
-const TEAM_MAP = new Map();
-const PLAYER_DB = {};
-const MATCH_DB = {};
-const TOURNAMENT_HISTORY = [];
-const CLUB_HISTORY = {};
-
-// RNG settings
-const RNG_SETTINGS = {
-  groupChaos: 1.0,
-  knockoutChaos: 1.1
-};
-
-  /************* TEAM POOL *************/
+      /************* TEAM POOL *************/
   // 👉 IMPORTANT: paste your full TEAM_POOL array in place of the placeholder below.
   // Make sure each team has: name, season, strength, startingXI (and optional bench).
     // ===== TEAM POOL =====
@@ -3649,15 +3607,26 @@ const RNG_SETTINGS = {
 }
 ];
 // === END OF TEAM_POOL DEFINITION =================================
+  /************* GLOBAL VARIABLES *************/
+  const TEAM_MAP = new Map();
+  const PLAYER_DB = {};
+  const MATCH_DB = {};
+  const TOURNAMENT_HISTORY = [];
+  const CLUB_HISTORY = {};
 
-// ================== CORE FUNCTIONS =======================
-function initTeamsAndPlayers() {
-  TEAM_POOL.forEach(team => {
-    TEAM_MAP.set(team.name, team);
-    registerTeamPlayers(team);
-  });
-  console.log("Teams initialized:", TEAM_POOL.length);
-}
+  const RNG_SETTINGS = {
+    groupChaos: 1.0,
+    knockoutChaos: 1.1
+  };
+
+  // ================== CORE FUNCTIONS =======================
+  function initTeamsAndPlayers() {
+    TEAM_POOL.forEach(team => {
+      TEAM_MAP.set(team.name, team);
+      registerTeamPlayers(team);
+    });
+    console.log("Teams initialized:", TEAM_POOL.length);
+  }
 
 function registerTeamPlayers(team) {
   const allPlayers = [
@@ -3682,80 +3651,14 @@ function registerTeamPlayers(team) {
   });
 }
 
-// ================== MAIN BUTTON FUNCTIONS ================
-function startTournament() {
-  console.log("startTournament called");
-  const groups = generateGroups();
-  window.GROUPS = groups;
-  window.GROUP_RESULTS = null;
-  window.TOURNAMENT = null;
-  renderGroups(groups);
-}
-
-function runGroupStage() {
-  if (!window.GROUPS) {
-    alert("Please generate groups first!");
-    return;
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
-  alert("Group stage simulation would run here");
+  return arr;
 }
 
-function runKnockouts() {
-  if (!window.GROUP_RESULTS) {
-    alert("Please run the group stage first!");
-    return;
-  }
-  alert("Knockout simulation would run here");
-}
-
-function showPlayerStats() {
-  alert("Player stats would show here");
-}
-
-function showClubLegacy() {
-  alert("Club legacy would show here");
-}
-
-function openCustomMatch() {
-  alert("Custom match modal would open here");
-}
-
-function openHistory() {
-  alert("History modal would open here");
-}
-
-function exportTournament() {
-  alert("Export would happen here");
-}
-
-function handleImport() {
-  alert("Import would happen here");
-}
-
-function resetTournament() {
-  window.GROUPS = null;
-  window.GROUP_RESULTS = null;
-  window.TOURNAMENT = null;
-  
-  const out = document.getElementById("output");
-  if (out) {
-    out.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">⚽️</div>
-        <h2>Welcome to All-Time Sim</h2>
-        <p class="output-sub">
-          Click "Generate Groups" to begin your new all-eras tournament.
-        </p>
-      </div>
-    `;
-  }
-}
-
-function toggleTheme() {
-  document.body.classList.toggle('light');
-}
-
-// ================== TOURNAMENT FUNCTIONS =================
 function createPots() {
   const sorted = [...TEAM_POOL].sort((a, b) => b.strength - a.strength);
   const pot1 = sorted.slice(0, 16);
@@ -3821,17 +3724,69 @@ function renderGroups(groups) {
   if (btnStats) btnStats.disabled = true;
 }
 
-// ================== UTILITY FUNCTIONS ====================
-function shuffleArray(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
+// ================== MAIN BUTTON FUNCTIONS ================
+function startTournament() {
+  console.log("startTournament called");
+  const groups = generateGroups();
+  window.GROUPS = groups;
+  window.GROUP_RESULTS = null;
+  window.TOURNAMENT = null;
+  renderGroups(groups);
 }
 
-function findTeam(name) {
-  return TEAM_MAP.get(name) || TEAM_POOL.find(t => t.name === name) || null;
+function runGroupStage() {
+  alert("Group stage would run here");
+}
+
+function runKnockouts() {
+  alert("Knockouts would run here");
+}
+
+function showPlayerStats() {
+  alert("Player stats would show here");
+}
+
+function showClubLegacy() {
+  alert("Club legacy would show here");
+}
+
+function openCustomMatch() {
+  alert("Custom match modal would open here");
+}
+
+function openHistory() {
+  alert("History modal would open here");
+}
+
+function exportTournament() {
+  alert("Export would happen here");
+}
+
+function handleImport() {
+  alert("Import would happen here");
+}
+
+function resetTournament() {
+  window.GROUPS = null;
+  window.GROUP_RESULTS = null;
+  window.TOURNAMENT = null;
+  
+  const out = document.getElementById("output");
+  if (out) {
+    out.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚽️</div>
+        <h2>Welcome to All-Time Sim</h2>
+        <p class="output-sub">
+          Click "Generate Groups" to begin your new all-eras tournament.
+        </p>
+      </div>
+    `;
+  }
+}
+
+function toggleTheme() {
+  document.body.classList.toggle('light');
 }
 
 // ================== RNG FUNCTIONS ========================
@@ -3891,7 +3846,6 @@ function closeTeamDetail() {
 }
 
 // ================== GLOBAL EXPORTS =======================
-// Make functions available to inline onclick handlers
 window.startTournament   = startTournament;
 window.runGroupStage     = runGroupStage;
 window.runKnockouts      = runKnockouts;
@@ -3910,42 +3864,24 @@ window.closeHistory      = closeHistory;
 window.closeMatchDetail  = closeMatchDetail;
 window.closeTeamDetail   = closeTeamDetail;
 
-// ================== INITIALIZATION =======================
-function initializeApp() {
-  console.log("Initializing app...");
-  
-  // Initialize teams
-  initTeamsAndPlayers();
-  
-  // Set team count
-  const teamCountEl = document.getElementById('teamCount');
-  if (teamCountEl) teamCountEl.textContent = TEAM_POOL.length.toString();
-  
-  // Initialize RNG
-  const rngSlider = document.getElementById('rngSlider');
-  if (rngSlider) {
-    updateRNG(rngSlider.value);
-  }
-  
-  // Add event listeners to main buttons
-  const btnDraw = document.getElementById('btnDraw');
-  const btnClubLegacy = document.getElementById('btnClubLegacy');
-  const btnCustomMatch = document.getElementById('btnCustomMatch');
-  const btnHistory = document.getElementById('btnHistory');
-  const themeBtn = document.getElementById('themeToggle');
-  
-  if (btnDraw) btnDraw.addEventListener('click', startTournament);
-  if (btnClubLegacy) btnClubLegacy.addEventListener('click', showClubLegacy);
-  if (btnCustomMatch) btnCustomMatch.addEventListener('click', openCustomMatch);
-  if (btnHistory) btnHistory.addEventListener('click', openHistory);
-  if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
-  
-  console.log("App initialized successfully");
-  console.log("startTournament is now:", typeof startTournament);
-}
-
-// Start the app when DOM is loaded
-document.addEventListener('DOMContentLoaded', initializeApp);
-
-console.log("JavaScript loading completed");
+ // ================== INITIALIZATION =======================
+ document.addEventListener('DOMContentLoaded', function() {
+    console.log("Initializing app...");
+    
+    // Initialize teams
+    initTeamsAndPlayers();
+    
+    // Set team count
+    const teamCountEl = document.getElementById('teamCount');
+    if (teamCountEl) teamCountEl.textContent = TEAM_POOL.length.toString();
+    
+    // Initialize RNG
+    const rngSlider = document.getElementById('rngSlider');
+    if (rngSlider) {
+      updateRNG(rngSlider.value);
+    }
+    
+    console.log("App initialized successfully");
+    console.log("startTournament is now:", typeof startTournament);
+  });
 </script>

@@ -1439,6 +1439,26 @@ document.addEventListener('DOMContentLoaded', function() {
   if (teamCountEl) teamCountEl.textContent = TEAM_POOL.length.toString();
 });
 <script>
+  // ================== DEBUG START ==========================
+console.log("=== SCRIPT START ===");
+
+try {
+  // Test basic JavaScript
+  console.log("Basic JS working");
+  
+  // Test your TEAM_POOL
+  console.log("TEAM_POOL length:", window.TEAM_POOL ? window.TEAM_POOL.length : "NOT DEFINED");
+  
+  // Test function definition
+  window.testFunction = function() {
+    console.log("testFunction works!");
+  };
+  console.log("testFunction defined:", typeof window.testFunction);
+  
+} catch (error) {
+  console.error("ERROR in initial script:", error);
+  alert("JavaScript error: " + error.message);
+}
     console.log("Script started loading...");
 
 // Test function definition
@@ -1448,18 +1468,18 @@ function testFunction() {
 
 console.log("testFunction defined:", typeof testFunction);
      console.log("MAIN SCRIPT LOADED");
- /************* GLOBAL STATE *************/
- const TEAM_MAP = new Map();
-  const PLAYER_DB = {};
-  const MATCH_DB = {};
-  const TOURNAMENT_HISTORY = [];
-  const CLUB_HISTORY = {}; // cross-save club success tracker
+ // ================== GLOBAL STATE =========================
+const TEAM_MAP = new Map();
+const PLAYER_DB = {};
+const MATCH_DB = {};
+const TOURNAMENT_HISTORY = [];
+const CLUB_HISTORY = {};
 
-  // RNG settings (tuned by the slider / presets)
-  const RNG_SETTINGS = {
-    groupChaos: 1.0,      // used for group stage
-    knockoutChaos: 1.1    // used for knockout rounds
-  };
+// RNG settings
+const RNG_SETTINGS = {
+  groupChaos: 1.0,
+  knockoutChaos: 1.1
+};
 
   /************* TEAM POOL *************/
   // 👉 IMPORTANT: paste your full TEAM_POOL array in place of the placeholder below.
@@ -3630,68 +3650,21 @@ console.log("testFunction defined:", typeof testFunction);
 ];
 // === END OF TEAM_POOL DEFINITION =================================
 
-// Core data structures
-// (all global objects are declared once at the top of the script)
-
-// Map slider value -> chaos & label and update RNG_SETTINGS
-function applyRNGLevel(rawValue) {
-  const v = Math.max(0.5, Math.min(1.5, parseFloat(rawValue) || 1.0));
-
-  // Tight ↔ chaos directly from slider
-  RNG_SETTINGS.groupChaos = v;
-  RNG_SETTINGS.knockoutChaos = v * 1.1;
-
-  let txt;
-  if (v <= 0.75) txt = "Tight: favourites usually win";
-  else if (v <= 1.15) txt = "Balanced: mix of favourites and shocks";
-  else txt = "Chaos: big swings & upsets";
-
-  const label = document.getElementById("rngLabel");
-  const labelMini = document.getElementById("rngLabelMini");
-  if (label) label.textContent = txt;
-  if (labelMini) labelMini.textContent = txt;
-}
-
-// Called directly by the slider in the HTML: oninput="updateRNG(this.value)"
-function updateRNG(value) {
-  applyRNGLevel(value);
-}
-
-// Called by preset buttons in the HTML: setRNGPreset(0.7, this) etc.
-function setRNGPreset(value, btn) {
-  const slider = document.getElementById("rngSlider");
-  if (slider) slider.value = value;
-  applyRNGLevel(value);
-
-  // highlight the active pill
-  document.querySelectorAll(".rng-pill").forEach(el =>
-    el.classList.remove("active")
-  );
-  if (btn) btn.classList.add("active");
-}
-
-// One-time init: map teams & seed players
+// ================== CORE FUNCTIONS =======================
 function initTeamsAndPlayers() {
   TEAM_POOL.forEach(team => {
     TEAM_MAP.set(team.name, team);
     registerTeamPlayers(team);
   });
-}
-
-// Initialize teams and players
-initTeamsAndPlayers();
-
-// ================== PLAYER DB & HELPERS ==========================
-function safeSquad(team) {
-  return [
-    ...(team?.startingXI || []),
-    ...(team?.bench || [])
-  ];
+  console.log("Teams initialized:", TEAM_POOL.length);
 }
 
 function registerTeamPlayers(team) {
-  const allPlayers = safeSquad(team);
-
+  const allPlayers = [
+    ...(team?.startingXI || []),
+    ...(team?.bench || [])
+  ];
+  
   allPlayers.forEach(p => {
     const key = `${team.name}::${p.name}`;
     if (!PLAYER_DB[key]) {
@@ -3709,124 +3682,81 @@ function registerTeamPlayers(team) {
   });
 }
 
-function ensurePlayerRecord(teamName, playerName) {
-  const team = TEAM_MAP.get(teamName);
-  if (!team) return null;
+// ================== MAIN BUTTON FUNCTIONS ================
+function startTournament() {
+  console.log("startTournament called");
+  const groups = generateGroups();
+  window.GROUPS = groups;
+  window.GROUP_RESULTS = null;
+  window.TOURNAMENT = null;
+  renderGroups(groups);
+}
 
-  const allPlayers = safeSquad(team);
-  const found = allPlayers.find(p => p.name === playerName);
-  if (!found) return null;
-
-  const key = `${teamName}::${playerName}`;
-  if (!PLAYER_DB[key]) {
-    PLAYER_DB[key] = {
-      id: key,
-      name: found.name,
-      team: teamName,
-      pos: found.pos,
-      quality: found.quality,
-      apps: 0,
-      goals: 0,
-      assists: 0
-    };
+function runGroupStage() {
+  if (!window.GROUPS) {
+    alert("Please generate groups first!");
+    return;
   }
-  return PLAYER_DB[key];
+  alert("Group stage simulation would run here");
 }
 
-function recordMatchAppearances(teamName) {
-  const team = TEAM_MAP.get(teamName);
-  if (!team) return;
-
-  (team.startingXI || []).forEach(p => {
-    const key = `${teamName}::${p.name}`;
-    if (!PLAYER_DB[key]) {
-      PLAYER_DB[key] = {
-        id: key,
-        name: p.name,
-        team: teamName,
-        pos: p.pos,
-        quality: p.quality,
-        apps: 0,
-        goals: 0,
-        assists: 0
-      };
-    }
-    PLAYER_DB[key].apps += 1;
-  });
-}
-
-function recordGoalsForTeam(teamName, goals, contextTag = "") {
-  if (goals <= 0) return [];
-
-  const team = TEAM_MAP.get(teamName);
-  if (!team) return [];
-
-  const attackers = safeSquad(team).filter(p =>
-    ["ST", "SS", "CF", "LW", "RW", "AM", "CM"].includes(p.pos)
-  );
-
-  if (!attackers.length) return [];
-
-  const events = [];
-
-  for (let i = 0; i < goals; i++) {
-    // Weighted by quality
-    const totalQ = attackers.reduce((sum, p) => sum + p.quality, 0);
-    let r = Math.random() * totalQ;
-    let scorer = attackers[0];
-
-    for (const p of attackers) {
-      if (r < p.quality) {
-        scorer = p;
-        break;
-      }
-      r -= p.quality;
-    }
-
-    const scorerRec = ensurePlayerRecord(teamName, scorer.name);
-    if (scorerRec) scorerRec.goals += 1;
-
-    const helpers = attackers.filter(p => p.name !== scorer.name);
-    let assisterName = null;
-
-    if (helpers.length && Math.random() < 0.65) {
-      const assister = helpers[Math.floor(Math.random() * helpers.length)];
-      const assistRec = ensurePlayerRecord(teamName, assister.name);
-      if (assistRec) assistRec.assists += 1;
-      assisterName = assister.name;
-    }
-
-    events.push({
-      scorer: scorer.name,
-      assister: assisterName,
-      context: contextTag
-    });
+function runKnockouts() {
+  if (!window.GROUP_RESULTS) {
+    alert("Please run the group stage first!");
+    return;
   }
-
-  return events;
+  alert("Knockout simulation would run here");
 }
 
-// ================== GENERIC UTILITIES ============================
+function showPlayerStats() {
+  alert("Player stats would show here");
+}
 
-function shuffleArray(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+function showClubLegacy() {
+  alert("Club legacy would show here");
+}
+
+function openCustomMatch() {
+  alert("Custom match modal would open here");
+}
+
+function openHistory() {
+  alert("History modal would open here");
+}
+
+function exportTournament() {
+  alert("Export would happen here");
+}
+
+function handleImport() {
+  alert("Import would happen here");
+}
+
+function resetTournament() {
+  window.GROUPS = null;
+  window.GROUP_RESULTS = null;
+  window.TOURNAMENT = null;
+  
+  const out = document.getElementById("output");
+  if (out) {
+    out.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚽️</div>
+        <h2>Welcome to All-Time Sim</h2>
+        <p class="output-sub">
+          Click "Generate Groups" to begin your new all-eras tournament.
+        </p>
+      </div>
+    `;
   }
-  return arr;
 }
 
-function findTeam(name) {
-  return TEAM_MAP.get(name) || TEAM_POOL.find(t => t.name === name) || null;
+function toggleTheme() {
+  document.body.classList.toggle('light');
 }
 
-// ================== GROUPS / POTS ================================
-
+// ================== TOURNAMENT FUNCTIONS =================
 function createPots() {
-  if (TEAM_POOL.length !== 64) {
-    console.warn("TEAM_POOL length is not 64 – pots will still be created but draw may be uneven.");
-  }
-
   const sorted = [...TEAM_POOL].sort((a, b) => b.strength - a.strength);
   const pot1 = sorted.slice(0, 16);
   const pot2 = sorted.slice(16, 32);
@@ -3865,11 +3795,9 @@ function renderGroups(groups) {
   `;
 
   const container = out.querySelector("#groupGrid");
-
   groups.forEach(group => {
     const div = document.createElement("div");
     div.className = "group-card";
-
     let html = `<div class="group-title">${group.name}</div><ul class="team-list">`;
     group.teams.forEach((t, idx) => {
       if (!t) return;
@@ -3881,7 +3809,6 @@ function renderGroups(groups) {
       `;
     });
     html += "</ul>";
-
     div.innerHTML = html;
     container.appendChild(div);
   });
@@ -3894,13 +3821,76 @@ function renderGroups(groups) {
   if (btnStats) btnStats.disabled = true;
 }
 
-function startTournament() {
-  const groups = generateGroups();
-  window.GROUPS = groups;
-  window.GROUP_RESULTS = null;
-  window.TOURNAMENT = null;
-  renderGroups(groups);
+// ================== UTILITY FUNCTIONS ====================
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
 }
+
+function findTeam(name) {
+  return TEAM_MAP.get(name) || TEAM_POOL.find(t => t.name === name) || null;
+}
+
+// ================== RNG FUNCTIONS ========================
+function applyRNGLevel(rawValue) {
+  const v = Math.max(0.5, Math.min(1.5, parseFloat(rawValue) || 1.0));
+  RNG_SETTINGS.groupChaos = v;
+  RNG_SETTINGS.knockoutChaos = v * 1.1;
+
+  let txt;
+  if (v <= 0.75) txt = "Tight: favourites usually win";
+  else if (v <= 1.15) txt = "Balanced: mix of favourites and shocks";
+  else txt = "Chaos: big swings & upsets";
+
+  const label = document.getElementById("rngLabel");
+  const labelMini = document.getElementById("rngLabelMini");
+  if (label) label.textContent = txt;
+  if (labelMini) labelMini.textContent = txt;
+}
+
+function updateRNG(value) {
+  applyRNGLevel(value);
+}
+
+function setRNGPreset(value, btn) {
+  const slider = document.getElementById("rngSlider");
+  if (slider) slider.value = value;
+  applyRNGLevel(value);
+  document.querySelectorAll(".rng-pill").forEach(el =>
+    el.classList.remove("active")
+  );
+  if (btn) btn.classList.add("active");
+}
+
+// ================== MODAL FUNCTIONS ======================
+function closeCustomMatch() {
+  const modal = document.getElementById('customMatchModal');
+  if (modal) modal.classList.remove('active');
+}
+
+function simulateCustomMatch() {
+  alert("Custom match simulation");
+}
+
+function closeHistory() {
+  const modal = document.getElementById('historyModal');
+  if (modal) modal.classList.remove('active');
+}
+
+function closeMatchDetail() {
+  const modal = document.getElementById('matchDetailModal');
+  if (modal) modal.classList.remove('active');
+}
+
+function closeTeamDetail() {
+  const modal = document.getElementById('teamDetailModal');
+  if (modal) modal.classList.remove('active');
+}
+
+// ================== GLOBAL EXPORTS =======================
 // Make functions available to inline onclick handlers
 window.startTournament   = startTournament;
 window.runGroupStage     = runGroupStage;
@@ -3914,821 +3904,48 @@ window.resetTournament   = resetTournament;
 window.handleImport      = handleImport;
 window.updateRNG         = updateRNG;
 window.setRNGPreset      = setRNGPreset;
-
-// ================== MATCH SIMULATION =============================
-
-function simulateGoals(teamA, teamB, chaosFactor) {
-  // Simple Poisson-ish model based on strength & chaos
-  const baseA = teamA.strength / 22;
-  const baseB = teamB.strength / 22;
-
-  const rawA = Math.random() * baseA * chaosFactor;
-  const rawB = Math.random() * baseB * chaosFactor;
-
-  const goalsA = Math.max(0, Math.round(Math.pow(rawA, 1.08)));
-  const goalsB = Math.max(0, Math.round(Math.pow(rawB, 1.08)));
-  return [goalsA, goalsB];
-}
-
-function newTableEntry(team) {
-  return {
-    name: team.name,
-    P: 0,
-    W: 0,
-    D: 0,
-    L: 0,
-    GF: 0,
-    GA: 0,
-    GD: 0,
-    PTS: 0
-  };
-}
-
-function simulateGroupMatches(group) {
-  const teams = group.teams;
-  const standings = {};
-  teams.forEach(t => (standings[t.name] = newTableEntry(t)));
-
-  const matches = [];
-  const pairs = [
-    [0, 1], [2, 3],
-    [0, 2], [1, 3],
-    [0, 3], [1, 2]
-  ];
-
-  pairs.forEach(([aIdx, bIdx], matchIndex) => {
-    const teamA = teams[aIdx];
-    const teamB = teams[bIdx];
-    const [gA, gB] = simulateGoals(teamA, teamB, RNG_SETTINGS.groupChaos);
-
-    const SA = standings[teamA.name];
-    const SB = standings[teamB.name];
-
-    SA.P++; SB.P++;
-    SA.GF += gA; SA.GA += gB;
-    SB.GF += gB; SB.GA += gA;
-    SA.GD = SA.GF - SA.GA;
-    SB.GD = SB.GF - SB.GA;
-
-    if (gA > gB) {
-      SA.W++; SA.PTS += 3; SB.L++;
-    } else if (gB > gA) {
-      SB.W++; SB.PTS += 3; SA.L++;
-    } else {
-      SA.D++; SB.D++; SA.PTS++; SB.PTS++;
-    }
-
-    recordMatchAppearances(teamA.name);
-    recordMatchAppearances(teamB.name);
-
-    const scorersA = recordGoalsForTeam(
-      teamA.name,
-      gA,
-      `${group.name} MD${matchIndex + 1}`
-    );
-    const scorersB = recordGoalsForTeam(
-      teamB.name,
-      gB,
-      `${group.name} MD${matchIndex + 1}`
-    );
-
-    matches.push({
-      home: teamA.name,
-      away: teamB.name,
-      score: `${gA} - ${gB}`,
-      scorersHome: scorersA,
-      scorersAway: scorersB
-    });
-  });
-
-  const sorted = Object.values(standings).sort((a, b) => {
-    if (b.PTS !== a.PTS) return b.PTS - a.PTS;
-    if (b.GD !== a.GD) return b.GD - a.GD;
-    if (b.GF !== a.GF) return b.GF - a.GF;
-    return 0;
-  });
-
-  return { standings: sorted, matches };
-}
-
-function renderStandingsForAllGroups(groups) {
-  const out = document.getElementById("output");
-  if (!out) return;
-
-  out.innerHTML = `
-    <h2>📊 Group Stage Results</h2>
-    <p style="margin-bottom:10px; color:#c4b5a0">
-      Top two from each group advance to the Round of 32.
-      Tiebreakers: points → goal difference → goals scored.
-    </p>
-  `;
-
-  const wrapper = document.createElement("div");
-  wrapper.className = "group-grid";
-  out.appendChild(wrapper);
-
-  groups.forEach(G => {
-    const div = document.createElement("div");
-    div.className = "group-card";
-
-    let html = `<div class="group-title">${G.name}</div>`;
-    html += `
-      <table>
-        <tr>
-          <th>Team</th>
-          <th>P</th><th>W</th><th>D</th><th>L</th>
-          <th>GF</th><th>GA</th><th>GD</th><th>PTS</th>
-        </tr>
-    `;
-
-    G.standings.forEach((team, idx) => {
-      const promote = idx < 2 ? ' style="font-weight:700;color:#d4a574;"' : "";
-      html += `
-        <tr${promote}>
-          <td>${idx < 2 ? "⬆️ " : ""}${team.name}</td>
-          <td>${team.P}</td><td>${team.W}</td><td>${team.D}</td><td>${team.L}</td>
-          <td>${team.GF}</td><td>${team.GA}</td><td>${team.GD}</td><td>${team.PTS}</td>
-        </tr>
-      `;
-    });
-
-    html += `</table><br><strong>Matches:</strong><ul class="match-list">`;
-    G.matches.forEach(m => {
-      html += `
-        <li class="match-item">
-          ${m.home} vs ${m.away} —
-          <span class="match-score">${m.score}</span>
-        </li>
-      `;
-    });
-    html += `</ul>`;
-
-    div.innerHTML = html;
-    wrapper.appendChild(div);
-  });
-
-  const btnKO = document.getElementById("btnKnockouts");
-  const btnStats = document.getElementById("btnStats");
-  if (btnKO) btnKO.disabled = false;
-  if (btnStats) btnStats.disabled = false;
-}
-
-function runGroupStage() {
-  if (!window.GROUPS) {
-    alert("Please generate groups first!");
-    return;
-  }
-
-  const groups = window.GROUPS;
-  const results = [];
-
-  groups.forEach(G => {
-    const res = simulateGroupMatches(G);
-    G.standings = res.standings;
-    G.matches = res.matches;
-    results.push(G);
-  });
-
-  window.GROUP_RESULTS = results;
-  renderStandingsForAllGroups(results);
-}
-
-// ================== KNOCKOUTS ====================================
-
-function simulateKnockoutGoals(teamA, teamB) {
-  return simulateGoals(teamA, teamB, RNG_SETTINGS.knockoutChaos);
-}
-
-function simulatePenalties(teamA, teamB) {
-  let aScore = 0, bScore = 0;
-
-  for (let i = 0; i < 5; i++) {
-    if (Math.random() < teamA.strength / 120) aScore++;
-    if (Math.random() < teamB.strength / 120) bScore++;
-  }
-
-  let sudden = 0;
-  while (aScore === bScore && sudden < 10) {
-    if (Math.random() < teamA.strength / 120) aScore++;
-    if (Math.random() < teamB.strength / 120) bScore++;
-    sudden++;
-  }
-  return [aScore, bScore];
-}
-
-// Basic natural-language summary for a single match
-function buildMatchStory(homeName, awayName, score, scorersHome, scorersAway, wentToET, pens) {
-  const [gH, gA] = score.split("-").map(s => parseInt(s.trim(), 10));
-
-  function listGoals(events) {
-    if (!events || !events.length) return "no goalscorers recorded";
-    return events
-      .map(e => e.assister
-        ? `${e.scorer} (assist ${e.assister})`
-        : e.scorer)
-      .join(", ");
-  }
-
-  let line;
-
-  if (gH > gA) {
-    line = `${homeName} edged out ${awayName} ${score}, powered by ${listGoals(scorersHome)}.`;
-  } else if (gA > gH) {
-    line = `${awayName} stunned ${homeName} with a ${score} win, thanks to ${listGoals(scorersAway)}.`;
-  } else {
-    line = `${homeName} and ${awayName} played out a ${score} draw. Key contributors: ${listGoals(scorersHome.concat(scorersAway))}.`;
-  }
-
-  if (wentToET) {
-    line += " The tie had to be settled in extra time";
-    if (pens) line += " and then on penalties.";
-    else line += ".";
-  } else if (pens) {
-    line += " The match was ultimately decided in a tense penalty shootout.";
-  }
-
-  return line;
-}
-
-function knockoutSingleMatch(teamA, teamB, label) {
-  let [gA, gB] = simulateKnockoutGoals(teamA, teamB);
-
-  recordMatchAppearances(teamA.name);
-  recordMatchAppearances(teamB.name);
-
-  const scorersA = recordGoalsForTeam(teamA.name, gA, label);
-  const scorersB = recordGoalsForTeam(teamB.name, gB, label);
-
-  let wentToET = false;
-  let penScore = null;
-  let winnerObj;
-
-  if (gA === gB) {
-    wentToET = true;
-    const etA = Math.round(Math.random());
-    const etB = Math.round(Math.random());
-    gA += etA;
-    gB += etB;
-
-    if (etA) recordGoalsForTeam(teamA.name, etA, `${label} (ET)`);
-    if (etB) recordGoalsForTeam(teamB.name, etB, `${label} (ET)`);
-
-    if (gA === gB) {
-      const [pA, pB] = simulatePenalties(teamA, teamB);
-      penScore = `${pA} - ${pB}`;
-      winnerObj = pA > pB ? teamA : teamB;
-    } else {
-      winnerObj = gA > gB ? teamA : teamB;
-    }
-  } else {
-    winnerObj = gA > gB ? teamA : teamB;
-  }
-
-  const finalScore = `${gA} - ${gB}`;
-  const story = buildMatchStory(teamA.name, teamB.name, finalScore, scorersA, scorersB, wentToET, penScore);
-
-  return {
-    score: finalScore,
-    wentToET,
-    penalties: penScore,
-    winner: winnerObj,
-    scorersHome: scorersA,
-    scorersAway: scorersB,
-    story
-  };
-}
-
-function knockoutTwoLegs(teamA, teamB, label) {
-  const [l1A, l1B] = simulateKnockoutGoals(teamA, teamB);
-  const [l2B, l2A] = simulateKnockoutGoals(teamB, teamA);
-
-  recordMatchAppearances(teamA.name);
-  recordMatchAppearances(teamB.name);
-  recordGoalsForTeam(teamA.name, l1A, `${label} L1`);
-  recordGoalsForTeam(teamB.name, l1B, `${label} L1`);
-  recordGoalsForTeam(teamA.name, l2A, `${label} L2`);
-  recordGoalsForTeam(teamB.name, l2B, `${label} L2`);
-
-  const aggA = l1A + l2A;
-  const aggB = l1B + l2B;
-
-  let winnerObj;
-  let penalties = null;
-
-  if (aggA === aggB) {
-    const [pA, pB] = simulatePenalties(teamA, teamB);
-    penalties = `${pA} - ${pB}`;
-    winnerObj = pA > pB ? teamA : teamB;
-  } else {
-    winnerObj = aggA > aggB ? teamA : teamB;
-  }
-
-  const story = `
-    Over two legs, ${winnerObj.name} advanced ${
-      aggA > aggB ? aggA + "–" + aggB : aggB + "–" + aggA
-    } on aggregate against ${winnerObj.name === teamA.name ? teamB.name : teamA.name}${
-      penalties ? `, needing penalties (${penalties}) after a level tie.` : "."
-    }
-  `.trim();
-
-  return {
-    leg1: `${teamA.name} ${l1A} - ${l1B} ${teamB.name}`,
-    leg2: `${teamB.name} ${l2B} - ${l2A} ${teamA.name}`,
-    aggregate: `${aggA} - ${aggB}`,
-    penalties,
-    winner: winnerObj,
-    story
-  };
-}
-
-function generateR32Pairs() {
-  const qualified = [];
-  window.GROUP_RESULTS.forEach(G => {
-    qualified.push(G.standings[0]);
-    qualified.push(G.standings[1]);
-  });
-
-  shuffleArray(qualified);
-  const pairs = [];
-  for (let i = 0; i < qualified.length; i += 2) {
-    pairs.push([qualified[i], qualified[i + 1]]);
-  }
-  return pairs;
-}
-
-function simulateR32(bracket) {
-  const results = [];
-  bracket.forEach((match, idx) => {
-    const [teamAEntry, teamBEntry] = match;
-    const teamA = findTeam(teamAEntry.name);
-    const teamB = findTeam(teamBEntry.name);
-    const res = knockoutTwoLegs(teamA, teamB, `R32 T${idx + 1}`);
-    results.push({
-      home: teamA.name,
-      away: teamB.name,
-      ...res
-    });
-  });
-  return results;
-}
-
-function simulateKnockoutTwoLegRound(teamNames, label) {
-  const bracket = [];
-  for (let i = 0; i < teamNames.length; i += 2) {
-    bracket.push([teamNames[i], teamNames[i + 1]]);
-  }
-
-  const results = [];
-  const winners = [];
-  bracket.forEach((pair, idx) => {
-    const A = findTeam(pair[0]);
-    const B = findTeam(pair[1]);
-    const res = knockoutTwoLegs(A, B, `${label} T${idx + 1}`);
-    results.push({
-      home: A.name,
-      away: B.name,
-      ...res
-    });
-    winners.push(res.winner.name);
-  });
-  return { results, winners };
-}
-
-function simulateSingleLegRound(teamNames, label) {
-  const bracket = [];
-  for (let i = 0; i < teamNames.length; i += 2) {
-    bracket.push([teamNames[i], teamNames[i + 1]]);
-  }
-
-  const results = [];
-  const winners = [];
-  bracket.forEach((pair, idx) => {
-    const A = findTeam(pair[0]);
-    const B = findTeam(pair[1]);
-    const res = knockoutSingleMatch(A, B, `${label} T${idx + 1}`);
-    results.push({
-      home: A.name,
-      away: B.name,
-      score: res.score,
-      extraTime: res.wentToET,
-      penalties: res.penalties,
-      winner: res.winner.name,
-      story: res.story
-    });
-    winners.push(res.winner.name);
-  });
-  return { results, winners };
-}
-
-// ======= CLUB HISTORY (MOST SUCCESSFUL CLUBS ACROSS SAVES) =======
-
-function ensureClubRecord(name) {
-  if (!CLUB_HISTORY[name]) {
-    CLUB_HISTORY[name] = {
-      name,
-      tournamentsPlayed: 0,
-      titles: 0,
-      finals: 0,
-      semis: 0,
-      quarters: 0
-    };
-  }
-  return CLUB_HISTORY[name];
-}
-
-function updateClubHistoryFromTournament(tournament) {
-  if (!tournament || !tournament.FINAL || !tournament.QF || !tournament.SF) return;
-
-  const qfTeams = new Set();
-  tournament.QF.forEach(m => {
-    qfTeams.add(m.home);
-    qfTeams.add(m.away);
-  });
-
-  const sfTeams = new Set();
-  tournament.SF.forEach(m => {
-    sfTeams.add(m.home);
-    sfTeams.add(m.away);
-  });
-
-  const final = tournament.FINAL[0];
-  if (!final) return;
-
-  const finalTeams = new Set([final.home, final.away]);
-  const champion = final.winner;
-  const runnerUp = final.home === champion ? final.away : final.home;
-
-  qfTeams.forEach(name => {
-    const rec = ensureClubRecord(name);
-    rec.tournamentsPlayed += 1;
-    rec.quarters += 1;
-  });
-
-  sfTeams.forEach(name => {
-    const rec = ensureClubRecord(name);
-    rec.semis += 1;
-  });
-
-  finalTeams.forEach(name => {
-    const rec = ensureClubRecord(name);
-    rec.finals += 1;
-  });
-
-  const champRec = ensureClubRecord(champion);
-  champRec.titles += 1;
-
-  TOURNAMENT_HISTORY.push({
-    champion,
-    runnerUp,
-    time: new Date().toISOString()
-  });
-}
-
-// ================== RUN KNOCKOUTS + BRACKET RENDER ===============
-
-function runKnockouts() {
-  if (!window.GROUP_RESULTS) {
-    alert("Please run the group stage first!");
-    return;
-  }
-
-  const R32Pairs = generateR32Pairs();
-  const R32_res = simulateR32(R32Pairs);
-  const R16_input = R32_res.map(r => r.winner.name);
-
-  const R16 = simulateKnockoutTwoLegRound(R16_input, "R16");
-  const QF = simulateKnockoutTwoLegRound(R16.winners, "QF");
-  const SF = simulateSingleLegRound(QF.winners, "SF");
-  const FINAL = simulateSingleLegRound(SF.winners, "FINAL");
-
-  window.TOURNAMENT = {
-    R32: R32_res,
-    R16: R16.results,
-    QF: QF.results,
-    SF: SF.results,
-    FINAL: FINAL.results,
-    champion: FINAL.winners[0]
-  };
-
-  updateClubHistoryFromTournament(window.TOURNAMENT);
-  renderKnockoutBracket(window.TOURNAMENT);
-
-  const btnStats = document.getElementById("btnStats");
-  if (btnStats) btnStats.disabled = false;
-}
-
-function renderKnockoutBracket(tournament) {
-  const out = document.getElementById("output");
-  if (!out) return;
-
-  out.innerHTML = "<h2>🏆 Knockout Stage</h2>";
-
-  function renderTwoLegRound(label, roundArr) {
-    const h = document.createElement("h3");
-    h.textContent = label;
-    out.appendChild(h);
-    roundArr.forEach(match => {
-      const div = document.createElement("div");
-      div.className = "knockout-card";
-      div.innerHTML = `
-        <strong>${match.home}</strong> vs <strong>${match.away}</strong><br>
-        ${match.leg1}<br>
-        ${match.leg2}<br>
-        Aggregate: <strong>${match.aggregate}</strong>
-        ${match.penalties ? `<span> (Pens: ${match.penalties})</span>` : ""}<br>
-        <em>${match.story}</em><br>
-        Winner: <strong style="color:#90c695">${match.winner.name}</strong>
-      `;
-      out.appendChild(div);
-    });
-  }
-
-  function renderSingleRound(label, roundArr) {
-    const h = document.createElement("h3");
-    h.textContent = label;
-    out.appendChild(h);
-    roundArr.forEach(match => {
-      const div = document.createElement("div");
-      div.className = "knockout-card";
-      div.innerHTML = `
-        <strong>${match.home}</strong> vs <strong>${match.away}</strong><br>
-        Score: <strong>${match.score}</strong><br>
-        ${match.extraTime ? "<em>After Extra Time</em><br>" : ""}
-        ${match.penalties ? `<em>Penalties: ${match.penalties}</em><br>` : ""}
-        <em>${match.story}</em><br>
-        Winner: <strong style="color:#90c695">${match.winner}</strong>
-      `;
-      out.appendChild(div);
-    });
-  }
-
-  renderTwoLegRound("Round of 32", tournament.R32);
-  renderTwoLegRound("Round of 16", tournament.R16);
-  renderTwoLegRound("Quarter-finals", tournament.QF);
-  renderSingleRound("Semi-finals", tournament.SF);
-
-  const final = tournament.FINAL[0];
-  const banner = document.createElement("div");
-  banner.className = "final-banner";
-  banner.innerHTML = `
-    <h3>Grand Final</h3>
-    <div class="champion-line">${final.home} vs ${final.away}</div>
-    <div style="font-size:1.6rem; margin:6px 0;">${final.score}</div>
-    ${final.extraTime ? "<div><small>After Extra Time</small></div>" : ""}
-    ${final.penalties ? `<div><small>Penalties: ${final.penalties}</small></div>` : ""}
-    <div class="champion-line">🏆 ${final.winner} 🏆</div>
-    <p style="margin-top:6px;"><em>${final.story}</em></p>
-  `;
-  out.appendChild(banner);
-}
-
-// ================== PLAYER STATS VIEW ============================
-
-function showPlayerStats() {
-  const out = document.getElementById("output");
-  if (!out) return;
-
-  const players = Object.values(PLAYER_DB);
-  if (!players.length) {
-    out.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">📊</div>
-        <h2>No stats yet</h2>
-        <p class="output-sub">Run a group stage or full tournament to generate player statistics.</p>
-      </div>
-    `;
-    return;
-  }
-
-  const byGoals = [...players].sort((a, b) => {
-    if (b.goals !== a.goals) return b.goals - a.goals;
-    if (b.assists !== a.assists) return b.assists - a.assists;
-    return b.quality - a.quality;
-  }).slice(0, 15);
-
-  const byAssists = [...players].sort((a, b) => {
-    if (b.assists !== a.assists) return b.assists - a.assists;
-    return b.goals - a.goals;
-  }).slice(0, 15);
-
-  const mostApps = [...players].sort((a, b) => b.apps - a.apps).slice(0, 15);
-
-  out.innerHTML = `<h2>📊 All-Time-Sim Player Stats</h2><div class="stats-grid"></div>`;
-  const grid = out.querySelector(".stats-grid");
-
-  function renderList(title, list, formatter) {
-    const card = document.createElement("div");
-    card.className = "stat-card";
-    let html = `<div class="stat-title">${title}</div>`;
-    list.forEach((p, idx) => {
-      html += `
-        <div class="player-row">
-          <span>${idx + 1}. ${p.name} <small style="opacity:0.8">(${p.team})</small></span>
-          <span>${formatter(p)}</span>
-        </div>
-      `;
-    });
-    card.innerHTML = html;
-    grid.appendChild(card);
-  }
-
-  renderList("Top Scorers", byGoals, p => `${p.goals} ⚽ | ${p.assists} 🅰`);
-  renderList("Most Assists", byAssists, p => `${p.assists} 🅰 | ${p.goals} ⚽`);
-  renderList("Most Appearances", mostApps, p => `${p.apps} apps`);
-}
-
-// ============ MOST SUCCESSFUL CLUBS OVER ALL SAVES ===============
-
-function showClubLegacy() {
-  const out = document.getElementById("output");
-  if (!out) return;
-
-  const records = Object.values(CLUB_HISTORY);
-  if (!records.length) {
-    out.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">🏟️</div>
-        <h2>No long-term history yet</h2>
-        <p class="output-sub">
-          Play at least one full tournament (through the final) to build club rankings.
-        </p>
-      </div>
-    `;
-    return;
-  }
-
-  records.sort((a, b) => {
-    if (b.titles !== a.titles) return b.titles - a.titles;
-    if (b.finals !== a.finals) return b.finals - a.finals;
-    if (b.semis !== a.semis) return b.semis - a.semis;
-    if (b.quarters !== a.quarters) return b.quarters - a.quarters;
-    return a.name.localeCompare(b.name);
-  });
-
-  out.innerHTML = `
-    <h2>🏟️ Most Successful Clubs (All Saves)</h2>
-    <p class="output-sub">
-      Based on every completed tournament you've run and imported into this browser session.
-    </p>
-    <div class="club-history-wrapper">
-      <table class="club-history-table">
-        <tr>
-          <th>#</th>
-          <th>Club</th>
-          <th>Titles</th>
-          <th>Finals</th>
-          <th>Semis</th>
-          <th>Quarters</th>
-          <th>Tournaments Played</th>
-        </tr>
-      </table>
-    </div>
-  `;
-
-  const table = out.querySelector(".club-history-table");
-
-  records.forEach((rec, idx) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${idx + 1}</td>
-      <td>${rec.name}</td>
-      <td>${rec.titles}</td>
-      <td>${rec.finals}</td>
-      <td>${rec.semis}</td>
-      <td>${rec.quarters}</td>
-      <td>${rec.tournamentsPlayed}</td>
-    `;
-    table.appendChild(tr);
-  });
-}
-// ================== EXPORT / IMPORT / RESET ======================
-
-function exportTournament() {
-  if (!window.TOURNAMENT && !window.GROUP_RESULTS) {
-    alert("No tournament data to export. Run at least the group stage first.");
-    return;
-  }
-
-  const payload = {
-    groups: window.GROUPS || null,
-    groupResults: window.GROUP_RESULTS || null,
-    knockout: window.TOURNAMENT || null,
-    players: PLAYER_DB,
-    clubHistory: CLUB_HISTORY,
-    tournamentHistory: TOURNAMENT_HISTORY
-  };
-
-  const data = JSON.stringify(payload, null, 2);
-  const blob = new Blob([data], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "all-time-sim-tournament.json";
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-function handleImport() {
-  const input = document.getElementById("importSave");
-  const file = input?.files?.[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const data = JSON.parse(e.target.result);
-
-      window.GROUPS = data.groups || null;
-      window.GROUP_RESULTS = data.groupResults || null;
-      window.TOURNAMENT = data.knockout || null;
-
-      // Restore player DB
-      Object.keys(PLAYER_DB).forEach(k => delete PLAYER_DB[k]);
-      if (data.players) {
-        Object.keys(data.players).forEach(k => {
-          PLAYER_DB[k] = data.players[k];
-        });
-      }
-
-      // Restore club history
-      Object.keys(CLUB_HISTORY).forEach(k => delete CLUB_HISTORY[k]);
-      if (data.clubHistory) {
-        Object.keys(data.clubHistory).forEach(k => {
-          CLUB_HISTORY[k] = data.clubHistory[k];
-        });
-      }
-
-      // Restore tournament history
-      TOURNAMENT_HISTORY.length = 0;
-      if (Array.isArray(data.tournamentHistory)) {
-        data.tournamentHistory.forEach(t => TOURNAMENT_HISTORY.push(t));
-      }
-
-      if (window.TOURNAMENT) {
-        renderKnockoutBracket(window.TOURNAMENT);
-      } else if (window.GROUP_RESULTS) {
-        renderStandingsForAllGroups(window.GROUP_RESULTS);
-      } else if (window.GROUPS) {
-        renderGroups(window.GROUPS);
-      }
-
-      alert("Save loaded successfully!");
-    } catch (err) {
-      console.error(err);
-      alert("Invalid save file!");
-    }
-  };
-  reader.readAsText(file);
-}
-
-function resetTournament() {
-  window.GROUPS = null;
-  window.GROUP_RESULTS = null;
-  window.TOURNAMENT = null;
-
-  // Clear player DB and re-register from TEAM_POOL
-  Object.keys(PLAYER_DB).forEach(k => delete PLAYER_DB[k]);
-  TEAM_POOL.forEach(team => registerTeamPlayers(team));
-
-  const btnGroup = document.getElementById("btnGroupStage");
-  const btnKO = document.getElementById("btnKnockouts");
-  const btnStats = document.getElementById("btnStats");
-
-  if (btnGroup) btnGroup.disabled = true;
-  if (btnKO) btnKO.disabled = true;
-  if (btnStats) btnStats.disabled = true;
-
-  const out = document.getElementById("output");
-  if (out) {
-    out.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">⚽️</div>
-        <h2>Welcome to All-Time Sim</h2>
-        <p class="output-sub">
-          Click "Generate Groups" to begin your new all-eras tournament.
-        </p>
-      </div>
-    `;
-  }
-}
-
-// ================== BASIC INIT ===================================
-document.addEventListener("DOMContentLoaded", () => {
-  const btnGroup = document.getElementById("btnGroupStage");
-  const btnKO = document.getElementById("btnKnockouts");
-  const btnStats = document.getElementById("btnStats");
-  const teamCountEl = document.getElementById("teamCount");
-  const rngSlider = document.getElementById("rngSlider");
-
-  if (btnGroup) btnGroup.disabled = true;
-  if (btnKO) btnKO.disabled = true;
-  if (btnStats) btnStats.disabled = true;
-
+window.toggleTheme       = toggleTheme;
+window.closeCustomMatch  = closeCustomMatch;
+window.closeHistory      = closeHistory;
+window.closeMatchDetail  = closeMatchDetail;
+window.closeTeamDetail   = closeTeamDetail;
+
+// ================== INITIALIZATION =======================
+function initializeApp() {
+  console.log("Initializing app...");
+  
+  // Initialize teams
+  initTeamsAndPlayers();
+  
+  // Set team count
+  const teamCountEl = document.getElementById('teamCount');
   if (teamCountEl) teamCountEl.textContent = TEAM_POOL.length.toString();
-
-  // initialise RNG label and settings from the current slider value
+  
+  // Initialize RNG
+  const rngSlider = document.getElementById('rngSlider');
   if (rngSlider) {
     updateRNG(rngSlider.value);
   }
-});
+  
+  // Add event listeners to main buttons
+  const btnDraw = document.getElementById('btnDraw');
+  const btnClubLegacy = document.getElementById('btnClubLegacy');
+  const btnCustomMatch = document.getElementById('btnCustomMatch');
+  const btnHistory = document.getElementById('btnHistory');
+  const themeBtn = document.getElementById('themeToggle');
+  
+  if (btnDraw) btnDraw.addEventListener('click', startTournament);
+  if (btnClubLegacy) btnClubLegacy.addEventListener('click', showClubLegacy);
+  if (btnCustomMatch) btnCustomMatch.addEventListener('click', openCustomMatch);
+  if (btnHistory) btnHistory.addEventListener('click', openHistory);
+  if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
+  
+  console.log("App initialized successfully");
+  console.log("startTournament is now:", typeof startTournament);
+}
+
+// Start the app when DOM is loaded
+document.addEventListener('DOMContentLoaded', initializeApp);
+
+console.log("JavaScript loading completed");
+</script>

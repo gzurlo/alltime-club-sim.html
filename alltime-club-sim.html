@@ -831,7 +831,7 @@
       <div class="control-column">
         <div>
           <div class="step-label">Step 1</div>
-          <button class="ctrl-btn btn-green" id="btnDraw" onclick="startTournament()">
+          <button class="ctrl-btn btn-green" id="btnDraw">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Generate Groups</span>
               <span class="ctrl-btn-subtitle">Draw all 16 groups from seeded pots</span>
@@ -4298,59 +4298,55 @@ function trackEnhancedPlayerStats(teamA, goalsA, teamB, goalsB) {
     };
   });
   
-  // Simulate goals with detailed events
-  function simulateGoalsWithAssists(team, numGoals, isTeamA) {
-      const fieldPlayers = team.startingXI.filter(p => p.pos !== 'GK');
-      const goalEvents = [];
-      
-      for (let i = 0; i < numGoals; i++) {
-        // Select scorer (weighted by position and quality)
-        const scorer = selectPlayerByWeight(fieldPlayers, true);
-        const scorerKey = `${team.name}::${scorer.name}`;
-        
-        // Select assister (50% chance of assist)
-        let assister = null;
-        if (Math.random() > 0.5 && numGoals > 1) {
-          const potentialAssisters = fieldPlayers.filter(p => p.name !== scorer.name);
-          if (potentialAssisters.length > 0) {
-            assister = selectPlayerByWeight(potentialAssisters, false);
-          }
-        }
-        
-        // Record goal event
-        goalEvents.push({
-          minute: Math.floor(Math.random() * 90) + 1,
-          scorer: scorer.name,
-          assister: assister ? assister.name : null,
-          team: team.name
-        });
-        
-        // Update player stats
-        PLAYER_DB[scorerKey].goals++;
-        matchEvents.playerPerformances[scorerKey].goals++;
-        
-        if (assister) {
-          const assisterKey = `${team.name}::${assister.name}`;
-          PLAYER_DB[assisterKey].assists++;
-          matchEvents.playerPerformances[assisterKey].assists++;
-          matchEvents.assists.push({
-            player: assister.name,
-            team: team.name,
-            assisted: scorer.name
-          });
-        }
-        
-        matchEvents.goals.push({
-          player: scorer.name,
-          team: team.name,
-          minute: goalEvents[i].minute,
-          assisted: assister ? assister.name : false
-        });
+  // Simulate goals for Team A
+  simulateTeamGoals(teamA, goalsA, matchEvents);
+  
+  // Simulate goals for Team B
+  simulateTeamGoals(teamB, goalsB, matchEvents);
+  
+  return matchEvents;
+}
+
+function simulateTeamGoals(team, numGoals, matchEvents) {
+  const fieldPlayers = team.startingXI.filter(p => p.pos !== 'GK');
+  
+  for (let i = 0; i < numGoals; i++) {
+    // Select scorer (weighted by position and quality)
+    const scorer = selectPlayerByWeight(fieldPlayers, true);
+    const scorerKey = `${team.name}::${scorer.name}`;
+    
+    // Select assister (50% chance of assist)
+    let assister = null;
+    if (Math.random() > 0.5 && numGoals > 1) {
+      const potentialAssisters = fieldPlayers.filter(p => p.name !== scorer.name);
+      if (potentialAssisters.length > 0) {
+        assister = selectPlayerByWeight(potentialAssisters, false);
       }
-      
-      return goalEvents;
     }
+    
+    // Update player stats
+    PLAYER_DB[scorerKey].goals++;
+    matchEvents.playerPerformances[scorerKey].goals++;
+    
+    if (assister) {
+      const assisterKey = `${team.name}::${assister.name}`;
+      PLAYER_DB[assisterKey].assists++;
+      matchEvents.playerPerformances[assisterKey].assists++;
+      matchEvents.assists.push({
+        player: assister.name,
+        team: team.name,
+        assisted: scorer.name
+      });
+    }
+    
+    matchEvents.goals.push({
+      player: scorer.name,
+      team: team.name,
+      minute: Math.floor(Math.random() * 90) + 1,
+      assisted: assister ? assister.name : false
+    });
   }
+}
   
   function calculateStandings(matches, teams) {
   const standings = {};
@@ -4673,46 +4669,47 @@ document.addEventListener('DOMContentLoaded', function() {
   // Populate custom match dropdowns
   populateCustomMatchDropdowns();
   
-  // Connect all buttons - FIXED VERSION
+  // Connect all buttons
   console.log("Connecting buttons...");
   
-  // Tournament control buttons
+  // Tournament control buttons - FIXED: Use proper event listeners
   const generateBtn = document.getElementById('btnDraw');
   if (generateBtn) {
-    generateBtn.onclick = startTournament;
+    generateBtn.addEventListener('click', startTournament);
+    console.log("Generate groups button connected");
   }
   
   const groupStageBtn = document.getElementById('btnGroupStage');
   if (groupStageBtn) {
-    groupStageBtn.onclick = runGroupStage;
+    groupStageBtn.addEventListener('click', runGroupStage);
   }
   
   const knockoutsBtn = document.getElementById('btnKnockouts');
   if (knockoutsBtn) {
-    knockoutsBtn.onclick = runKnockouts;
+    knockoutsBtn.addEventListener('click', runKnockouts);
   }
   
-  // View buttons - FIXED: Enable stats button from start
+  // View buttons
   const statsBtn = document.getElementById('btnStats');
   if (statsBtn) {
-    statsBtn.disabled = false; // Enable it immediately
-    statsBtn.onclick = showPlayerStats;
+    statsBtn.disabled = false;
+    statsBtn.addEventListener('click', showPlayerStats);
     console.log("Stats button connected and enabled");
   }
   
   const legacyBtn = document.getElementById('btnClubLegacy');
   if (legacyBtn) {
-    legacyBtn.onclick = showClubLegacy;
+    legacyBtn.addEventListener('click', showClubLegacy);
   }
   
   const customMatchBtn = document.getElementById('btnCustomMatch');
   if (customMatchBtn) {
-    customMatchBtn.onclick = openCustomMatch;
+    customMatchBtn.addEventListener('click', openCustomMatch);
   }
   
   const historyBtn = document.getElementById('btnHistory');
   if (historyBtn) {
-    historyBtn.onclick = openHistory;
+    historyBtn.addEventListener('click', openHistory);
   }
   
   // Add Match Results button to the Views section
@@ -4726,7 +4723,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
     <span class="ctrl-btn-tag">📋</span>
   `;
-  matchResultsBtn.onclick = showMatchResults;
+  matchResultsBtn.addEventListener('click', showMatchResults);
   
   // Insert after the existing view buttons
   const viewsColumn = document.querySelector('.control-column:nth-child(2)');
@@ -4739,47 +4736,22 @@ document.addEventListener('DOMContentLoaded', function() {
   // Theme toggle
   const themeBtn = document.getElementById('themeToggle');
   if (themeBtn) {
-    themeBtn.onclick = toggleTheme;
+    themeBtn.addEventListener('click', toggleTheme);
   }
   
   console.log("App initialized successfully");
 });
+// Debug helper - remove after testing
+window.debugApp = function() {
+  console.log("=== APP DEBUG INFO ===");
+  console.log("TEAM_POOL length:", TEAM_POOL.length);
+  console.log("startTournament function:", typeof startTournament);
+  console.log("generateGroups function:", typeof generateGroups);
+  console.log("renderGroups function:", typeof renderGroups);
+  console.log("Groups button:", document.getElementById('btnDraw'));
+  console.log("======================");
+};
 
-function populateCustomMatchDropdowns() {
-  const teamASelect = document.getElementById('customTeamA');
-  const teamBSelect = document.getElementById('customTeamB');
-  
-  console.log("Looking for custom match dropdowns...");
-  console.log("Team A select found:", !!teamASelect);
-  console.log("Team B select found:", !!teamBSelect);
-  
-  if (teamASelect && teamBSelect) {
-    // Clear existing options
-    teamASelect.innerHTML = '<option value="">Select Team A</option>';
-    teamBSelect.innerHTML = '<option value="">Select Team B</option>';
-    
-    // Add teams sorted by name
-    const sortedTeams = [...TEAM_POOL].sort((a, b) => a.name.localeCompare(b.name));
-    
-    sortedTeams.forEach(team => {
-      const optionA = document.createElement('option');
-      optionA.value = team.name;
-      optionA.textContent = `${team.name} (${team.season})`;
-      teamASelect.appendChild(optionA);
-      
-      const optionB = document.createElement('option');
-      optionB.value = team.name;
-      optionB.textContent = `${team.name} (${team.season})`;
-      teamBSelect.appendChild(optionB);
-    });
-    
-    console.log("Custom match dropdowns populated with", sortedTeams.length, "teams");
-    
-    // Verify the options were added
-    console.log("Team A options count:", teamASelect.options.length);
-    console.log("Team B options count:", teamBSelect.options.length);
-  } else {
-    console.error("Custom match dropdown elements not found!");
-  }
-}
+// Call debug after a short delay
+setTimeout(window.debugApp, 1000);
 </script>

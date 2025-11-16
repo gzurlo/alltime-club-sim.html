@@ -3608,6 +3608,12 @@ document.addEventListener('DOMContentLoaded', function() {
 ];
 // === END OF TEAM_POOL DEFINITION =================================
   /************* GLOBAL VARIABLES *************/
+  const CLUB_LEGACY_DB = {
+  champions: {}, // { "Team Name": count }
+  finals: {},    // { "Team Name": count }
+  semiFinals: {}, // { "Team Name": count }
+  totalWins: {}  // { "Team Name": wins }
+};
   const TEAM_MAP = new Map();
   const PLAYER_DB = {};
   const MATCH_DB = {};
@@ -3764,14 +3770,22 @@ setTimeout(function() {
 }, 2000);
 
 // ================== VIEW FUNCTIONS ==================
+// Enhanced player stats tracking
 function showPlayerStats() {
   console.log("showPlayerStats called");
-  console.log("PLAYER_DB entries:", Object.keys(PLAYER_DB).length);
+  console.log("Total players in DB:", Object.keys(PLAYER_DB).length);
+  
+  // Debug: log some player data
+  const playersWithData = Object.values(PLAYER_DB).filter(p => p.apps > 0 || p.goals > 0);
+  console.log("Players with stats:", playersWithData.length);
+  if (playersWithData.length > 0) {
+    console.log("Sample player stats:", playersWithData.slice(0, 3));
+  }
   
   const out = document.getElementById("output");
   if (!out) return;
 
-  // Get all players with stats
+  // Get all players with any stats
   const playersWithStats = Object.values(PLAYER_DB)
     .filter(player => player.apps > 0 || player.goals > 0 || player.assists > 0)
     .sort((a, b) => {
@@ -3784,32 +3798,68 @@ function showPlayerStats() {
   let html = `<h2>📊 Player Statistics</h2>`;
   
   if (playersWithStats.length > 0) {
+    // Top Scorers
     html += `
       <div class="group-card">
-        <div class="group-title">Player Statistics</div>
+        <div class="group-title">Top Scorers</div>
         <table class="standings-table">
           <thead>
             <tr>
+              <th>Rank</th>
               <th>Player</th>
               <th>Team</th>
               <th>Position</th>
-              <th>Apps</th>
               <th>Goals</th>
               <th>Assists</th>
+              <th>Apps</th>
             </tr>
           </thead>
           <tbody>
     `;
     
-    playersWithStats.forEach(player => {
+    playersWithStats.slice(0, 15).forEach((player, index) => {
+      const rank = index + 1;
+      const medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : rank;
+      
+      html += `
+        <tr>
+          <td>${medal}</td>
+          <td>${player.name}</td>
+          <td>${player.team}</td>
+          <td>${player.pos}</td>
+          <td><strong>${player.goals}</strong></td>
+          <td>${player.assists}</td>
+          <td>${player.apps}</td>
+        </tr>
+      `;
+    });
+    
+    html += `</tbody></table></div>`;
+    
+    // Most Appearances
+    const mostApps = [...playersWithStats].sort((a, b) => b.apps - a.apps).slice(0, 10);
+    html += `
+      <div class="group-card">
+        <div class="group-title">Most Appearances</div>
+        <table class="standings-table">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Team</th>
+              <th>Apps</th>
+              <th>Goals</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+    
+    mostApps.forEach(player => {
       html += `
         <tr>
           <td>${player.name}</td>
           <td>${player.team}</td>
-          <td>${player.pos}</td>
           <td>${player.apps}</td>
-          <td><strong>${player.goals}</strong></td>
-          <td>${player.assists}</td>
+          <td>${player.goals}</td>
         </tr>
       `;
     });
@@ -3819,13 +3869,14 @@ function showPlayerStats() {
     html += `
       <div class="group-card">
         <div class="group-title">No Player Statistics Yet</div>
-        <p>Run the group stage or knockout rounds to generate player statistics.</p>
-        <p>Stats tracked:</p>
+        <p>Player statistics are tracked during matches. Run the group stage or knockout rounds to generate data.</p>
+        <p><strong>Why no stats?</strong></p>
         <ul>
-          <li>Appearances (Apps) - Times player featured in matches</li>
-          <li>Goals - Goals scored</li>
-          <li>Assists - Goal assists (coming soon)</li>
+          <li>Run "Generate Groups" to create a tournament</li>
+          <li>Run "Simulate Group Stage" to play matches</li>
+          <li>Run "Run Knockouts" to complete the tournament</li>
         </ul>
+        <p>Each match tracks player appearances and goals scored.</p>
       </div>
     `;
   }
@@ -3839,58 +3890,85 @@ function showClubLegacy() {
   const out = document.getElementById("output");
   if (!out) return;
   
-  let html = `<h2>🏛️ Club Legacy</h2>`;
+  let html = `<h2>🏛️ Club Legacy Leaderboard</h2>`;
   
-  // Count tournament wins from previous tournaments
-  const clubWins = {};
+  // Calculate total points (Championships are worth more)
+  const legacyRanking = [];
   
-  if (window.TOURNAMENT && window.TOURNAMENT.champion) {
-    const champion = window.TOURNAMENT.champion.name;
-    clubWins[champion] = (clubWins[champion] || 0) + 1;
-  }
+  Object.keys(CLUB_LEGACY_DB.champions).forEach(team => {
+    const championships = CLUB_LEGACY_DB.champions[team] || 0;
+    const finals = CLUB_LEGACY_DB.finals[team] || 0;
+    const semiFinals = CLUB_LEGACY_DB.semiFinals[team] || 0;
+    
+    // Weighted scoring: 5 points for championship, 3 for final, 1 for semi-final
+    const totalPoints = (championships * 5) + (finals * 3) + (semiFinals * 1);
+    
+    legacyRanking.push({
+      team: team,
+      championships: championships,
+      finals: finals,
+      semiFinals: semiFinals,
+      totalPoints: totalPoints
+    });
+  });
   
-  // Add more legacy data as tournaments are run
-  const legacyClubs = Object.entries(clubWins)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 10);
+  // Sort by total points
+  legacyRanking.sort((a, b) => b.totalPoints - a.totalPoints);
   
-  if (legacyClubs.length > 0) {
+  if (legacyRanking.length > 0) {
     html += `
       <div class="group-card">
-        <div class="group-title">Tournament Champions</div>
+        <div class="group-title">All-Time Club Rankings</div>
         <table class="standings-table">
           <thead>
             <tr>
+              <th>Rank</th>
               <th>Club</th>
-              <th>Titles</th>
-              <th>Latest Win</th>
+              <th>🏆 Titles</th>
+              <th>🥈 Finals</th>
+              <th>🥉 Semi-Finals</th>
+              <th>Total Points</th>
             </tr>
           </thead>
           <tbody>
     `;
     
-    legacyClubs.forEach(([club, wins]) => {
+    legacyRanking.forEach((club, index) => {
+      const rank = index + 1;
+      const medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : rank;
+      
       html += `
         <tr>
-          <td>${club}</td>
-          <td><strong>${wins}</strong></td>
-          <td>Current Tournament</td>
+          <td><strong>${medal}</strong></td>
+          <td>${club.team}</td>
+          <td>${club.championships}</td>
+          <td>${club.finals}</td>
+          <td>${club.semiFinals}</td>
+          <td><strong>${club.totalPoints}</strong></td>
         </tr>
       `;
     });
     
     html += `</tbody></table></div>`;
+    
+    // Show current tournament champion if available
+    if (window.TOURNAMENT && window.TOURNAMENT.champion) {
+      html += `
+        <div style="background: #2d3748; padding: 10px; border-radius: 8px; margin-top: 20px; border-left: 4px solid gold;">
+          <strong>Current Tournament Champion:</strong> ${window.TOURNAMENT.champion.name}
+        </div>
+      `;
+    }
   } else {
     html += `
       <div class="group-card">
         <div class="group-title">No Tournament History Yet</div>
-        <p>Run a full tournament to see club legacy data here.</p>
-        <p>This will track:</p>
+        <p>Run tournaments to build club legacy data. Each tournament run adds to the all-time rankings.</p>
+        <p><strong>Scoring System:</strong></p>
         <ul>
-          <li>Tournament championships</li>
-          <li>Final appearances</li>
-          <li>Semi-final appearances</li>
-          <li>Total matches won</li>
+          <li>🏆 Championship: 5 points</li>
+          <li>🥈 Runner-up: 3 points</li>
+          <li>🥉 Semi-final: 1 point</li>
         </ul>
       </div>
     `;
@@ -4000,11 +4078,42 @@ function runKnockouts() {
   
   // Store results and render them
   window.TOURNAMENT = knockoutResults;
+  
+  // Update club legacy with this tournament's results
+  updateClubLegacy(knockoutResults);
+  
   renderKnockoutResults(knockoutResults);
   
   console.log("Knockout stage completed");
 }
-
+function updateClubLegacy(tournamentResults) {
+  if (!tournamentResults.champion) return;
+  
+  // Track champion
+  const champion = tournamentResults.champion.name;
+  CLUB_LEGACY_DB.champions[champion] = (CLUB_LEGACY_DB.champions[champion] || 0) + 1;
+  
+  // Track finalist
+  if (tournamentResults.final) {
+    const runnerUp = tournamentResults.final.teamA.name === champion ? 
+                     tournamentResults.final.teamB.name : tournamentResults.final.teamA.name;
+    CLUB_LEGACY_DB.finals[runnerUp] = (CLUB_LEGACY_DB.finals[runnerUp] || 0) + 1;
+  }
+  
+  // Track semi-finalists
+  if (tournamentResults.semiFinals) {
+    tournamentResults.semiFinals.forEach(match => {
+      const semiFinalists = [match.teamA.name, match.teamB.name];
+      semiFinalists.forEach(team => {
+        if (team !== champion) { // Don't double-count champion
+          CLUB_LEGACY_DB.semiFinals[team] = (CLUB_LEGACY_DB.semiFinals[team] || 0) + 1;
+        }
+      });
+    });
+  }
+  
+  console.log("Club legacy updated for tournament:", champion);
+}
 function getQualifiedTeams(groupResults) {
   const qualified = [];
   Object.values(groupResults).forEach(group => {
@@ -4487,10 +4596,16 @@ function renderGroupResults(results) {
 }
   console.log("Tournament started successfully");
 
-function resetTournament() {
+  function resetTournament() {
+  // Clear current tournament data but keep legacy
   window.GROUPS = null;
   window.GROUP_RESULTS = null;
   window.TOURNAMENT = null;
+  
+  // If you want to reset legacy too, uncomment:
+  // Object.keys(CLUB_LEGACY_DB).forEach(key => {
+  //   CLUB_LEGACY_DB[key] = {};
+  // });
   
   const out = document.getElementById("output");
   if (out) {
@@ -4504,6 +4619,12 @@ function resetTournament() {
       </div>
     `;
   }
+  
+  // Reset buttons
+  const btnGroup = document.getElementById("btnGroupStage");
+  const btnKO = document.getElementById("btnKnockouts");
+  if (btnGroup) btnGroup.disabled = true;
+  if (btnKO) btnKO.disabled = true;
 }
 
 function toggleTheme() {

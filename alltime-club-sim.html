@@ -3766,52 +3766,68 @@ setTimeout(function() {
 // ================== VIEW FUNCTIONS ==================
 function showPlayerStats() {
   console.log("showPlayerStats called");
+  console.log("PLAYER_DB entries:", Object.keys(PLAYER_DB).length);
   
   const out = document.getElementById("output");
   if (!out) return;
-  
-  // Get top scorers from player database
-  const topScorers = Object.values(PLAYER_DB)
-    .filter(player => player.goals > 0)
-    .sort((a, b) => b.goals - a.goals)
-    .slice(0, 10);
-  
+
+  // Get all players with stats
+  const playersWithStats = Object.values(PLAYER_DB)
+    .filter(player => player.apps > 0 || player.goals > 0 || player.assists > 0)
+    .sort((a, b) => {
+      // Sort by goals, then assists, then apps
+      if (b.goals !== a.goals) return b.goals - a.goals;
+      if (b.assists !== a.assists) return b.assists - a.assists;
+      return b.apps - a.apps;
+    });
+
   let html = `<h2>📊 Player Statistics</h2>`;
   
-  if (topScorers.length > 0) {
+  if (playersWithStats.length > 0) {
     html += `
       <div class="group-card">
-        <div class="group-title">Top Scorers</div>
+        <div class="group-title">Player Statistics</div>
         <table class="standings-table">
           <thead>
             <tr>
               <th>Player</th>
               <th>Team</th>
               <th>Position</th>
+              <th>Apps</th>
               <th>Goals</th>
               <th>Assists</th>
-              <th>Apps</th>
             </tr>
           </thead>
           <tbody>
     `;
     
-    topScorers.forEach(player => {
+    playersWithStats.forEach(player => {
       html += `
         <tr>
           <td>${player.name}</td>
           <td>${player.team}</td>
           <td>${player.pos}</td>
+          <td>${player.apps}</td>
           <td><strong>${player.goals}</strong></td>
           <td>${player.assists}</td>
-          <td>${player.apps}</td>
         </tr>
       `;
     });
     
     html += `</tbody></table></div>`;
   } else {
-    html += `<p>No player statistics available yet. Run some matches first!</p>`;
+    html += `
+      <div class="group-card">
+        <div class="group-title">No Player Statistics Yet</div>
+        <p>Run the group stage or knockout rounds to generate player statistics.</p>
+        <p>Stats tracked:</p>
+        <ul>
+          <li>Appearances (Apps) - Times player featured in matches</li>
+          <li>Goals - Goals scored</li>
+          <li>Assists - Goal assists (coming soon)</li>
+        </ul>
+      </div>
+    `;
   }
   
   out.innerHTML = html;
@@ -4287,11 +4303,14 @@ function simulateMatch(teamA, teamB, isHome) {
 }
 
 function trackPlayerStats(teamA, goalsA, teamB, goalsB) {
+  console.log(`Tracking stats: ${teamA.name} ${goalsA}-${goalsB} ${teamB.name}`);
+  
   // Track appearances for all starting players
   [...teamA.startingXI, ...(teamA.bench || [])].forEach(player => {
     const key = `${teamA.name}::${player.name}`;
     if (PLAYER_DB[key]) {
       PLAYER_DB[key].apps++;
+      console.log(`Tracked appearance: ${player.name} (${teamA.name})`);
     }
   });
   
@@ -4299,10 +4318,11 @@ function trackPlayerStats(teamA, goalsA, teamB, goalsB) {
     const key = `${teamB.name}::${player.name}`;
     if (PLAYER_DB[key]) {
       PLAYER_DB[key].apps++;
+      console.log(`Tracked appearance: ${player.name} (${teamB.name})`);
     }
   });
   
-  // Randomly assign goals to players (simplified)
+  // Randomly assign goals to players
   for (let i = 0; i < goalsA; i++) {
     const scorers = teamA.startingXI.filter(p => p.pos !== 'GK');
     if (scorers.length > 0) {
@@ -4310,6 +4330,7 @@ function trackPlayerStats(teamA, goalsA, teamB, goalsB) {
       const key = `${teamA.name}::${scorer.name}`;
       if (PLAYER_DB[key]) {
         PLAYER_DB[key].goals++;
+        console.log(`Tracked goal: ${scorer.name} (${teamA.name})`);
       }
     }
   }
@@ -4321,9 +4342,12 @@ function trackPlayerStats(teamA, goalsA, teamB, goalsB) {
       const key = `${teamB.name}::${scorer.name}`;
       if (PLAYER_DB[key]) {
         PLAYER_DB[key].goals++;
+        console.log(`Tracked goal: ${scorer.name} (${teamB.name})`);
       }
     }
   }
+  
+  console.log("Player stats tracking completed");
 }
 
 function calculateStandings(matches, teams) {
@@ -4597,12 +4621,7 @@ window.closeCustomMatch  = closeCustomMatch;
 window.closeHistory      = closeHistory;
 window.closeMatchDetail  = closeMatchDetail;
 window.closeTeamDetail   = closeTeamDetail;
-
- // ================== INITIALIZATION =======================
-document.addEventListener('DOMContentLoaded', function() {
-  console.log("Initializing app...");
-  
-  // ================== INITIALIZATION =======================
+// ================== INITIALIZATION =======================
 document.addEventListener('DOMContentLoaded', function() {
   console.log("Initializing app...");
   
@@ -4622,36 +4641,6 @@ document.addEventListener('DOMContentLoaded', function() {
   // Populate custom match dropdowns
   populateCustomMatchDropdowns();
   
-  // ... rest of your button connection code
-});
-
-function populateCustomMatchDropdowns() {
-  const teamASelect = document.getElementById('customTeamA');
-  const teamBSelect = document.getElementById('customTeamB');
-  
-  if (teamASelect && teamBSelect) {
-    // Clear existing options
-    teamASelect.innerHTML = '';
-    teamBSelect.innerHTML = '';
-    
-    // Add teams sorted by name
-    const sortedTeams = [...TEAM_POOL].sort((a, b) => a.name.localeCompare(b.name));
-    
-    sortedTeams.forEach(team => {
-      const optionA = document.createElement('option');
-      optionA.value = team.name;
-      optionA.textContent = team.name;
-      teamASelect.appendChild(optionA);
-      
-      const optionB = document.createElement('option');
-      optionB.value = team.name;
-      optionB.textContent = team.name;
-      teamBSelect.appendChild(optionB);
-    });
-    
-    console.log("Custom match dropdowns populated with", sortedTeams.length, "teams");
-  }
-} 
   // Connect all buttons
   console.log("Connecting buttons...");
   
@@ -4673,33 +4662,7 @@ function populateCustomMatchDropdowns() {
   if (knockoutsBtn) {
     knockoutsBtn.onclick = runKnockouts;
   }
-  function populateCustomMatchDropdowns() {
-  const teamASelect = document.getElementById('customTeamA');
-  const teamBSelect = document.getElementById('customTeamB');
   
-  if (teamASelect && teamBSelect) {
-    // Clear existing options
-    teamASelect.innerHTML = '';
-    teamBSelect.innerHTML = '';
-    
-    // Add teams sorted by name
-    const sortedTeams = [...TEAM_POOL].sort((a, b) => a.name.localeCompare(b.name));
-    
-    sortedTeams.forEach(team => {
-      const optionA = document.createElement('option');
-      optionA.value = team.name;
-      optionA.textContent = team.name;
-      teamASelect.appendChild(optionA);
-      
-      const optionB = document.createElement('option');
-      optionB.value = team.name;
-      optionB.textContent = team.name;
-      teamBSelect.appendChild(optionB);
-    });
-    
-    console.log("Custom match dropdowns populated with", sortedTeams.length, "teams");
-  }
-}
   // View buttons
   const statsBtn = document.getElementById('btnStats');
   console.log("Stats button found:", !!statsBtn);
@@ -4743,8 +4706,43 @@ function populateCustomMatchDropdowns() {
   }
   
   console.log("App initialized successfully");
-
 });
 
-// Remove the temporary debug code since we're properly connecting all buttons now
+function populateCustomMatchDropdowns() {
+  const teamASelect = document.getElementById('customTeamA');
+  const teamBSelect = document.getElementById('customTeamB');
+  
+  console.log("Looking for custom match dropdowns...");
+  console.log("Team A select found:", !!teamASelect);
+  console.log("Team B select found:", !!teamBSelect);
+  
+  if (teamASelect && teamBSelect) {
+    // Clear existing options
+    teamASelect.innerHTML = '<option value="">Select Team A</option>';
+    teamBSelect.innerHTML = '<option value="">Select Team B</option>';
+    
+    // Add teams sorted by name
+    const sortedTeams = [...TEAM_POOL].sort((a, b) => a.name.localeCompare(b.name));
+    
+    sortedTeams.forEach(team => {
+      const optionA = document.createElement('option');
+      optionA.value = team.name;
+      optionA.textContent = `${team.name} (${team.season})`;
+      teamASelect.appendChild(optionA);
+      
+      const optionB = document.createElement('option');
+      optionB.value = team.name;
+      optionB.textContent = `${team.name} (${team.season})`;
+      teamBSelect.appendChild(optionB);
+    });
+    
+    console.log("Custom match dropdowns populated with", sortedTeams.length, "teams");
+    
+    // Verify the options were added
+    console.log("Team A options count:", teamASelect.options.length);
+    console.log("Team B options count:", teamBSelect.options.length);
+  } else {
+    console.error("Custom match dropdown elements not found!");
+  }
+}
 </script>

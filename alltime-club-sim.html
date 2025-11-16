@@ -3338,32 +3338,21 @@ setTimeout(function() {
 // ================== VIEW FUNCTIONS ==================
 // Enhanced player stats tracking
 function showPlayerStats() {
-  console.log("showPlayerStats called");
-  console.log("Total players in DB:", Object.keys(PLAYER_DB).length);
+  console.log("showPlayerStats called - FIXED VERSION");
   
-  // Debug: log some player data
-  const playersWithData = Object.values(PLAYER_DB).filter(p => p.apps > 0 || p.goals > 0);
+  // Debug: Check what data we have
+  const playersWithData = Object.values(PLAYER_DB).filter(p => p.apps > 0 || p.goals > 0 || p.assists > 0);
   console.log("Players with stats:", playersWithData.length);
-  if (playersWithData.length > 0) {
-    console.log("Sample player stats:", playersWithData.slice(0, 3));
-  }
   
   const out = document.getElementById("output");
-  if (!out) return;
-
-  // Get all players with any stats
-  const playersWithStats = Object.values(PLAYER_DB)
-    .filter(player => player.apps > 0 || player.goals > 0 || player.assists > 0)
-    .sort((a, b) => {
-      // Sort by goals, then assists, then apps
-      if (b.goals !== a.goals) return b.goals - a.goals;
-      if (b.assists !== a.assists) return b.assists - a.assists;
-      return b.apps - a.apps;
-    });
+  if (!out) {
+    console.error("Output element not found!");
+    return;
+  }
 
   let html = `<h2>📊 Player Statistics</h2>`;
   
-  if (playersWithStats.length > 0) {
+  if (playersWithData.length > 0) {
     // Top Scorers
     html += `
       <div class="group-card">
@@ -3383,17 +3372,20 @@ function showPlayerStats() {
           <tbody>
     `;
     
-    playersWithStats.slice(0, 15).forEach((player, index) => {
+    // Sort by goals (descending)
+    const topScorers = [...playersWithData].sort((a, b) => b.goals - a.goals).slice(0, 15);
+    
+    topScorers.forEach((player, index) => {
       const rank = index + 1;
       const medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : rank;
       
       html += `
         <tr>
           <td>${medal}</td>
-          <td>${player.name}</td>
+          <td><strong>${player.name}</strong></td>
           <td>${player.team}</td>
           <td>${player.pos}</td>
-          <td><strong>${player.goals}</strong></td>
+          <td><strong style="color: #fbbf24;">${player.goals}</strong></td>
           <td>${player.assists}</td>
           <td>${player.apps}</td>
         </tr>
@@ -3403,7 +3395,7 @@ function showPlayerStats() {
     html += `</tbody></table></div>`;
     
     // Most Appearances
-    const mostApps = [...playersWithStats].sort((a, b) => b.apps - a.apps).slice(0, 10);
+    const mostApps = [...playersWithData].sort((a, b) => b.apps - a.apps).slice(0, 10);
     html += `
       <div class="group-card">
         <div class="group-title">Most Appearances</div>
@@ -3414,42 +3406,66 @@ function showPlayerStats() {
               <th>Team</th>
               <th>Apps</th>
               <th>Goals</th>
+              <th>Goals/Game</th>
             </tr>
           </thead>
           <tbody>
     `;
     
     mostApps.forEach(player => {
+      const goalsPerGame = player.apps > 0 ? (player.goals / player.apps).toFixed(2) : "0.00";
       html += `
         <tr>
-          <td>${player.name}</td>
+          <td><strong>${player.name}</strong></td>
           <td>${player.team}</td>
-          <td>${player.apps}</td>
+          <td><strong>${player.apps}</strong></td>
           <td>${player.goals}</td>
+          <td>${goalsPerGame}</td>
         </tr>
       `;
     });
     
     html += `</tbody></table></div>`;
+    
+    // Add summary
+    html += `
+      <div style="background: #2d3748; padding: 15px; border-radius: 8px; margin-top: 20px;">
+        <h3 style="margin: 0 0 10px 0;">📈 Statistics Summary</h3>
+        <p style="margin: 5px 0;">Total players tracked: <strong>${Object.keys(PLAYER_DB).length}</strong></p>
+        <p style="margin: 5px 0;">Players with match data: <strong>${playersWithData.length}</strong></p>
+        <p style="margin: 5px 0;">Total goals scored: <strong>${playersWithData.reduce((sum, p) => sum + p.goals, 0)}</strong></p>
+      </div>
+    `;
+    
   } else {
     html += `
       <div class="group-card">
         <div class="group-title">No Player Statistics Yet</div>
-        <p>Player statistics are tracked during matches. Run the group stage or knockout rounds to generate data.</p>
-        <p><strong>Why no stats?</strong></p>
-        <ul>
-          <li>Run "Generate Groups" to create a tournament</li>
-          <li>Run "Simulate Group Stage" to play matches</li>
-          <li>Run "Run Knockouts" to complete the tournament</li>
-        </ul>
-        <p>Each match tracks player appearances and goals scored.</p>
+        <div style="padding: 20px; text-align: center;">
+          <div style="font-size: 48px; margin-bottom: 20px;">📊</div>
+          <p><strong>Player statistics will appear after you simulate matches.</strong></p>
+          <p>Here's what to do:</p>
+          <ol style="text-align: left; max-width: 400px; margin: 20px auto;">
+            <li>Click <strong>"Generate Groups"</strong> to create the tournament</li>
+            <li>Click <strong>"Simulate Group Stage"</strong> to play all group matches</li>
+            <li>Click <strong>"Run Knockouts"</strong> to complete the tournament</li>
+            <li>Return here to see player statistics!</li>
+          </ol>
+          <p><em>Each match tracks player appearances, goals, and assists.</em></p>
+        </div>
       </div>
     `;
   }
   
   out.innerHTML = html;
 }
-
+function enableStatsButton() {
+  const btnStats = document.getElementById("btnStats");
+  if (btnStats) {
+    btnStats.disabled = false;
+    console.log("Stats button enabled");
+  }
+}
 function showClubLegacy() {
   console.log("showClubLegacy called");
   
@@ -3921,6 +3937,9 @@ function runGroupStage() {
     btnKO.onclick = runKnockouts;
   }
   
+  // Enable stats button (data is now available)
+  enableStatsButton();
+  
   console.log("Group stage completed");
 }
 function simulateGroupStage(groups) {
@@ -3980,47 +3999,75 @@ function simulateMatch(teamA, teamB, isHome) {
 function trackPlayerStats(teamA, goalsA, teamB, goalsB) {
   console.log(`Tracking stats: ${teamA.name} ${goalsA}-${goalsB} ${teamB.name}`);
   
+  // Helper function to register players if they don't exist
+  function ensurePlayerRegistered(team, player) {
+    const key = `${team.name}::${player.name}`;
+    if (!PLAYER_DB[key]) {
+      PLAYER_DB[key] = {
+        id: key,
+        name: player.name,
+        team: team.name,
+        pos: player.pos,
+        quality: player.quality,
+        apps: 0,
+        goals: 0,
+        assists: 0
+      };
+      console.log(`Registered new player: ${player.name} (${team.name})`);
+    }
+    return PLAYER_DB[key];
+  }
+  
   // Track appearances for all starting players
   [...teamA.startingXI, ...(teamA.bench || [])].forEach(player => {
-    const key = `${teamA.name}::${player.name}`;
-    if (PLAYER_DB[key]) {
-      PLAYER_DB[key].apps++;
-      console.log(`Tracked appearance: ${player.name} (${teamA.name})`);
-    }
+    const playerRecord = ensurePlayerRegistered(teamA, player);
+    playerRecord.apps++;
   });
   
   [...teamB.startingXI, ...(teamB.bench || [])].forEach(player => {
-    const key = `${teamB.name}::${player.name}`;
-    if (PLAYER_DB[key]) {
-      PLAYER_DB[key].apps++;
-      console.log(`Tracked appearance: ${player.name} (${teamB.name})`);
-    }
+    const playerRecord = ensurePlayerRegistered(teamB, player);
+    playerRecord.apps++;
   });
   
-  // Randomly assign goals to players
-  for (let i = 0; i < goalsA; i++) {
-    const scorers = teamA.startingXI.filter(p => p.pos !== 'GK');
-    if (scorers.length > 0) {
-      const scorer = scorers[Math.floor(Math.random() * scorers.length)];
-      const key = `${teamA.name}::${scorer.name}`;
-      if (PLAYER_DB[key]) {
-        PLAYER_DB[key].goals++;
-        console.log(`Tracked goal: ${scorer.name} (${teamA.name})`);
+  // Assign goals to players (weighted by player quality and position)
+  function assignGoals(team, numGoals) {
+    const fieldPlayers = team.startingXI.filter(p => p.pos !== 'GK');
+    
+    for (let i = 0; i < numGoals; i++) {
+      // Weight selection by player quality and position (attackers more likely to score)
+      const weightedPlayers = fieldPlayers.map(player => {
+        let weight = player.quality / 100;
+        
+        // Position-based weighting
+        if (['ST', 'CF', 'FW'].includes(player.pos)) weight *= 2.0;
+        else if (['LW', 'RW', 'SS'].includes(player.pos)) weight *= 1.5;
+        else if (['AM', 'CM'].includes(player.pos)) weight *= 1.2;
+        else if (['DM', 'CB', 'RB', 'LB'].includes(player.pos)) weight *= 0.5;
+        
+        return { player, weight };
+      });
+      
+      // Select scorer based on weights
+      const totalWeight = weightedPlayers.reduce((sum, wp) => sum + wp.weight, 0);
+      let random = Math.random() * totalWeight;
+      
+      for (const wp of weightedPlayers) {
+        random -= wp.weight;
+        if (random <= 0) {
+          const key = `${team.name}::${wp.player.name}`;
+          if (PLAYER_DB[key]) {
+            PLAYER_DB[key].goals++;
+            console.log(`Goal scored by: ${wp.player.name} (${team.name})`);
+          }
+          break;
+        }
       }
     }
   }
   
-  for (let i = 0; i < goalsB; i++) {
-    const scorers = teamB.startingXI.filter(p => p.pos !== 'GK');
-    if (scorers.length > 0) {
-      const scorer = scorers[Math.floor(Math.random() * scorers.length)];
-      const key = `${teamB.name}::${scorer.name}`;
-      if (PLAYER_DB[key]) {
-        PLAYER_DB[key].goals++;
-        console.log(`Tracked goal: ${scorer.name} (${teamB.name})`);
-      }
-    }
-  }
+  // Assign goals for both teams
+  assignGoals(teamA, goalsA);
+  assignGoals(teamB, goalsB);
   
   console.log("Player stats tracking completed");
 }
@@ -4328,66 +4375,50 @@ document.addEventListener('DOMContentLoaded', function() {
   // Populate custom match dropdowns
   populateCustomMatchDropdowns();
   
-  // Connect all buttons
+  // Connect all buttons - FIXED VERSION
   console.log("Connecting buttons...");
   
   // Tournament control buttons
   const generateBtn = document.getElementById('btnDraw');
-  console.log("Generate Groups button found:", !!generateBtn);
   if (generateBtn) {
     generateBtn.onclick = startTournament;
   }
   
   const groupStageBtn = document.getElementById('btnGroupStage');
-  console.log("Group Stage button found:", !!groupStageBtn);
   if (groupStageBtn) {
     groupStageBtn.onclick = runGroupStage;
   }
   
   const knockoutsBtn = document.getElementById('btnKnockouts');
-  console.log("Knockouts button found:", !!knockoutsBtn);
   if (knockoutsBtn) {
     knockoutsBtn.onclick = runKnockouts;
   }
   
-  // View buttons
+  // View buttons - FIXED: Enable stats button from start
   const statsBtn = document.getElementById('btnStats');
-  console.log("Stats button found:", !!statsBtn);
   if (statsBtn) {
+    statsBtn.disabled = false; // Enable it immediately
     statsBtn.onclick = showPlayerStats;
+    console.log("Stats button connected and enabled");
   }
   
   const legacyBtn = document.getElementById('btnClubLegacy');
-  console.log("Club Legacy button found:", !!legacyBtn);
   if (legacyBtn) {
     legacyBtn.onclick = showClubLegacy;
   }
   
   const customMatchBtn = document.getElementById('btnCustomMatch');
-  console.log("Custom Match button found:", !!customMatchBtn);
   if (customMatchBtn) {
     customMatchBtn.onclick = openCustomMatch;
   }
   
   const historyBtn = document.getElementById('btnHistory');
-  console.log("History button found:", !!historyBtn);
   if (historyBtn) {
     historyBtn.onclick = openHistory;
   }
   
-  // Save/Reset buttons (these should already have onclick in HTML)
-  const exportBtn = document.querySelector('button[onclick="exportTournament()"]');
-  console.log("Export button found:", !!exportBtn);
-  
-  const resetBtn = document.querySelector('button[onclick="resetTournament()"]');
-  console.log("Reset button found:", !!resetBtn);
-  
-  const importBtn = document.querySelector('button[onclick="handleImport()"]');
-  console.log("Import button found:", !!importBtn);
-  
   // Theme toggle
   const themeBtn = document.getElementById('themeToggle');
-  console.log("Theme button found:", !!themeBtn);
   if (themeBtn) {
     themeBtn.onclick = toggleTheme;
   }

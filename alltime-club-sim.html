@@ -3558,13 +3558,6 @@ function showPlayerStats() {
   
   out.innerHTML = html;
 }
-function enableStatsButton() {
-  const btnStats = document.getElementById("btnStats");
-  if (btnStats) {
-    btnStats.disabled = false;
-    console.log("Stats button enabled");
-  }
-}
 function showClubLegacy() {
   console.log("showClubLegacy called");
   
@@ -4506,7 +4499,13 @@ function getQualifiedTeams(groupResults) {
   });
   out.innerHTML = html;
 }
-
+function enableStatsButton() {
+  const btnStats = document.getElementById("btnStats");
+  if (btnStats) {
+    btnStats.disabled = false;
+    console.log("Stats button enabled");
+  }
+}
 
   function resetTournament() {
   // Clear current tournament data but keep legacy

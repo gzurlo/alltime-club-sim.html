@@ -4110,6 +4110,36 @@ function exportTournament() {
   
   URL.revokeObjectURL(url);
 }
+function simulateGroupStage(groups) {
+  console.log("Simulating group stage...");
+  const results = {};
+  
+  groups.forEach(group => {
+    const groupName = group.name;
+    results[groupName] = {
+      name: groupName,
+      teams: [],
+      matches: []
+    };
+    
+    // Simulate matches between all teams in the group
+    const teams = group.teams;
+    for (let i = 0; i < teams.length; i++) {
+      for (let j = i + 1; j < teams.length; j++) {
+        // Simulate home and away matches
+        const homeMatch = simulateMatch(teams[i], teams[j], true);
+        const awayMatch = simulateMatch(teams[i], teams[j], false);
+        
+        results[groupName].matches.push(homeMatch, awayMatch);
+      }
+    }
+    
+    // Calculate standings
+    results[groupName].teams = calculateStandings(results[groupName].matches, teams);
+  });
+  
+  return results;
+}
 function runGroupStage() {
   console.log("runGroupStage CALLED - function is executing!");
   
@@ -4329,8 +4359,7 @@ function trackEnhancedPlayerStats(teamA, goalsA, teamB, goalsB) {
     }
   }
   
-
-function calculateStandings(matches, teams) {
+  function calculateStandings(matches, teams) {
   const standings = {};
   
   // Initialize standings
@@ -4346,29 +4375,42 @@ function calculateStandings(matches, teams) {
       points: 0
     };
   });
-  function runKnockouts() {
-  console.log("runKnockouts called");
   
-  if (!window.GROUP_RESULTS) {
-    alert("Please run the group stage first!");
-    return;
-  }
+  // Process matches
+  matches.forEach(match => {
+    const home = standings[match.teamA];
+    const away = standings[match.teamB];
+    
+    home.played++;
+    away.played++;
+    home.goalsFor += match.scoreA;
+    home.goalsAgainst += match.scoreB;
+    away.goalsFor += match.scoreB;
+    away.goalsAgainst += match.scoreA;
+    
+    if (match.scoreA > match.scoreB) {
+      home.wins++;
+      home.points += 3;
+      away.losses++;
+    } else if (match.scoreA < match.scoreB) {
+      home.losses++;
+      away.wins++;
+      away.points += 3;
+    } else {
+      home.draws++;
+      away.draws++;
+      home.points += 1;
+      away.points += 1;
+    }
+  });
   
-  // Disable the button while simulating
-  const btnKO = document.getElementById("btnKnockouts");
-  if (btnKO) btnKO.disabled = true;
-  
-  // Get qualified teams from group stage
-  const qualifiedTeams = getQualifiedTeams(window.GROUP_RESULTS);
-  
-  // Simulate knockout rounds
-  const knockoutResults = simulateKnockoutRounds(qualifiedTeams);
-  
-  // Store results and render them
-  window.TOURNAMENT = knockoutResults;
-  renderKnockoutResults(knockoutResults);
-  
-  console.log("Knockout stage completed");
+  // Convert to array and sort
+  return Object.values(standings).sort((a, b) => {
+    if (b.points !== a.points) return b.points - a.points;
+    if ((b.goalsFor - b.goalsAgainst) !== (a.goalsFor - a.goalsAgainst)) 
+      return (b.goalsFor - b.goalsAgainst) - (a.goalsFor - a.goalsAgainst);
+    return b.goalsFor - a.goalsFor;
+  });
 }
 
 function getQualifiedTeams(groupResults) {
@@ -4415,9 +4457,8 @@ function getQualifiedTeams(groupResults) {
       return (b.goalsFor - b.goalsAgainst) - (a.goalsFor - a.goalsAgainst);
     return b.goalsFor - a.goalsFor;
   });
-}
 
-function renderGroupResults(results) {
+  function renderGroupResults(results) {
   const out = document.getElementById("output");
   if (!out) return;
   
@@ -4465,7 +4506,7 @@ function renderGroupResults(results) {
   });
   out.innerHTML = html;
 }
-  console.log("Tournament started successfully");
+
 
   function resetTournament() {
   // Clear current tournament data but keep legacy

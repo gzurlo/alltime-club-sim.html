@@ -3174,6 +3174,7 @@
 ];
 // === END OF TEAM_POOL DEFINITION =================================
   /************* GLOBAL VARIABLES *************/
+  const MATCH_DETAILS_DB  = {};
   const CLUB_LEGACY_DB = {
   champions: {}, // { "Team Name": count }
   finals: {},    // { "Team Name": count }
@@ -3336,63 +3337,161 @@ setTimeout(function() {
 }, 2000);
 
 // ================== VIEW FUNCTIONS ==================
+function showMatchResults() {
+  console.log("showMatchResults called");
+  
+  const out = document.getElementById("output");
+  if (!out) return;
+  
+  const matches = Object.values(MATCH_DETAILS_DB);
+  
+  let html = `<h2>📋 All Match Results</h2>`;
+  
+  if (matches.length > 0) {
+    // Sort matches by timestamp (most recent first)
+    matches.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    
+    html += `
+      <div style="background: #2d3748; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <h3 style="margin: 0 0 10px 0;">Match Summary</h3>
+        <p style="margin: 5px 0;">Total matches played: <strong>${matches.length}</strong></p>
+        <p style="margin: 5px 0;">Total goals scored: <strong>${matches.reduce((sum, m) => sum + m.scoreA + m.scoreB, 0)}</strong></p>
+      </div>
+    `;
+    
+    // Group matches by tournament phase if available
+    const groupMatches = matches.filter(m => !m.round);
+    const knockoutMatches = matches.filter(m => m.round);
+    
+    if (groupMatches.length > 0) {
+      html += `<div class="group-card"><div class="group-title">Group Stage Matches</div>`;
+      groupMatches.forEach(match => {
+        html += renderMatchCard(match);
+      });
+      html += `</div>`;
+    }
+    
+    if (knockoutMatches.length > 0) {
+      // Group knockout matches by round
+      const rounds = {};
+      knockoutMatches.forEach(match => {
+        if (!rounds[match.round]) rounds[match.round] = [];
+        rounds[match.round].push(match);
+      });
+      
+      Object.keys(rounds).sort().reverse().forEach(round => {
+        html += `<div class="group-card"><div class="group-title">${round} Matches</div>`;
+        rounds[round].forEach(match => {
+          html += renderMatchCard(match);
+        });
+        html += `</div>`;
+      });
+    }
+    
+  } else {
+    html += `
+      <div class="group-card">
+        <div class="group-title">No Matches Played Yet</div>
+        <div style="padding: 20px; text-align: center;">
+          <div style="font-size: 48px; margin-bottom: 20px;">⚽</div>
+          <p><strong>No matches have been simulated yet.</strong></p>
+          <p>Simulate the group stage or knockout rounds to see match results here.</p>
+        </div>
+      </div>
+    `;
+  }
+  
+  out.innerHTML = html;
+}
+function renderMatchCard(match) {
+  const potg = match.playerOfTheGame;
+  const potgBadge = potg ? `
+    <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 8px 12px; border-radius: 6px; margin-top: 10px;">
+      <strong>⭐ Player of the Game:</strong> ${potg.player} (${potg.rating}/10)
+      ${potg.goals > 0 ? ` • ${potg.goals} goal${potg.goals > 1 ? 's' : ''}` : ''}
+      ${potg.assists > 0 ? ` • ${potg.assists} assist${potg.assists > 1 ? 's' : ''}` : ''}
+    </div>
+  ` : '';
+  
+  const matchEvents = match.events ? `
+    <div style="margin-top: 10px; font-size: 0.9em; color: #cbd5e0;">
+      <strong>Match Events:</strong>
+      <div style="margin-top: 5px;">
+        ${match.events.goals.map(goal => `
+          <div>⚽ ${goal.minute}' - ${goal.player}${goal.assisted ? ` (assist: ${goal.assisted})` : ''}</div>
+        `).join('')}
+      </div>
+    </div>
+  ` : '';
+  
+  return `
+    <div class="match-card" style="background: rgba(15, 23, 42, 0.8); padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #3b82f6;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <div style="font-weight: bold; font-size: 1.1em;">
+          ${match.teamA} ${match.scoreA} - ${match.scoreB} ${match.teamB}
+        </div>
+        <div style="font-size: 0.9em; color: #9ca3af;">
+          ${match.venue} • ${new Date(match.timestamp).toLocaleDateString()}
+        </div>
+      </div>
+      ${potgBadge}
+      ${matchEvents}
+    </div>
+  `;
+}
 // Enhanced player stats tracking
 function showPlayerStats() {
-  console.log("showPlayerStats called - FIXED VERSION");
+  console.log("showPlayerStats called - ENHANCED VERSION");
   
-  // Debug: Check what data we have
   const playersWithData = Object.values(PLAYER_DB).filter(p => p.apps > 0 || p.goals > 0 || p.assists > 0);
   console.log("Players with stats:", playersWithData.length);
   
   const out = document.getElementById("output");
-  if (!out) {
-    console.error("Output element not found!");
-    return;
-  }
+  if (!out) return;
 
   let html = `<h2>📊 Player Statistics</h2>`;
   
   if (playersWithData.length > 0) {
-    // Top Scorers
-    html += `
-      <div class="group-card">
-        <div class="group-title">Top Scorers</div>
-        <table class="standings-table">
-          <thead>
-            <tr>
-              <th>Rank</th>
-              <th>Player</th>
-              <th>Team</th>
-              <th>Position</th>
-              <th>Goals</th>
-              <th>Assists</th>
-              <th>Apps</th>
-            </tr>
-          </thead>
-          <tbody>
-    `;
+    // Top Rated Players
+    const topRated = [...playersWithData]
+      .filter(p => p.apps >= 3) // Minimum 3 appearances for rating
+      .sort((a, b) => (b.avgRating || 0) - (a.avgRating || 0))
+      .slice(0, 10);
     
-    // Sort by goals (descending)
-    const topScorers = [...playersWithData].sort((a, b) => b.goals - a.goals).slice(0, 15);
-    
-    topScorers.forEach((player, index) => {
-      const rank = index + 1;
-      const medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : rank;
-      
+    if (topRated.length > 0) {
       html += `
-        <tr>
-          <td>${medal}</td>
-          <td><strong>${player.name}</strong></td>
-          <td>${player.team}</td>
-          <td>${player.pos}</td>
-          <td><strong style="color: #fbbf24;">${player.goals}</strong></td>
-          <td>${player.assists}</td>
-          <td>${player.apps}</td>
-        </tr>
+        <div class="group-card">
+          <div class="group-title">Top Rated Players</div>
+          <table class="standings-table">
+            <thead>
+              <tr>
+                <th>Player</th>
+                <th>Team</th>
+                <th>Position</th>
+                <th>Rating</th>
+                <th>Apps</th>
+                <th>⭐ POTG</th>
+              </tr>
+            </thead>
+            <tbody>
       `;
-    });
-    
-    html += `</tbody></table></div>`;
+      
+      topRated.forEach((player, index) => {
+        const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : "";
+        html += `
+          <tr>
+            <td>${medal} <strong>${player.name}</strong></td>
+            <td>${player.team}</td>
+            <td>${player.pos}</td>
+            <td><strong style="color: #f59e0b;">${player.avgRating || 'N/A'}/10</strong></td>
+            <td>${player.apps}</td>
+            <td>${player.playerOfTheGame || 0}</td>
+          </tr>
+        `;
+      });
+      
+      html += `</tbody></table></div>`;
+    }
     
     // Most Appearances
     const mostApps = [...playersWithData].sort((a, b) => b.apps - a.apps).slice(0, 10);
@@ -3569,6 +3668,118 @@ function openHistory() {
   console.log("openHistory called");
   const modal = document.getElementById('historyModal');
   if (modal) modal.classList.add('active');
+}
+// ================== HELPER FUNCTIONS ==================
+function selectPlayerByWeight(players, isScorer) {
+  const weightedPlayers = players.map(player => {
+    let weight = player.quality / 100;
+    
+    // Position-based weighting
+    if (isScorer) {
+      if (['ST', 'CF', 'FW'].includes(player.pos)) weight *= 2.5;
+      else if (['LW', 'RW', 'SS'].includes(player.pos)) weight *= 2.0;
+      else if (['AM', 'CM'].includes(player.pos)) weight *= 1.3;
+      else if (['DM', 'CB', 'RB', 'LB'].includes(player.pos)) weight *= 0.3;
+    } else {
+      // For assists, midfielders and wingers have higher weight
+      if (['AM', 'CM', 'LW', 'RW'].includes(player.pos)) weight *= 1.8;
+      else if (['ST', 'CF', 'FW'].includes(player.pos)) weight *= 1.2;
+      else if (['DM'].includes(player.pos)) weight *= 1.0;
+      else weight *= 0.5;
+    }
+    
+    return { player, weight };
+  });
+  
+  const totalWeight = weightedPlayers.reduce((sum, wp) => sum + wp.weight, 0);
+  let random = Math.random() * totalWeight;
+  
+  for (const wp of weightedPlayers) {
+    random -= wp.weight;
+    if (random <= 0) {
+      return wp.player;
+    }
+  }
+  
+  return weightedPlayers[0].player;
+}
+
+function calculateBaseRating(player, teamStrength) {
+  let rating = (player.quality / 10) * 0.6; // Base 60% from individual quality
+  rating += (teamStrength / 100) * 0.4; // 40% from team strength
+  
+  // Position-specific adjustments
+  if (['GK'].includes(player.pos)) rating += 0.2; // Keepers start higher
+  if (['ST', 'CF'].includes(player.pos)) rating += 0.1; // Strikers start higher
+  
+  return Math.min(10, Math.max(4, rating)); // Ensure rating between 4-10
+}
+
+function determinePlayerOfTheGame(matchEvents, teamA, teamB) {
+  let bestPlayer = null;
+  let bestRating = 0;
+  
+  Object.values(matchEvents.playerPerformances).forEach(performance => {
+    // Calculate final rating based on performance
+    let rating = performance.baseRating;
+    
+    // Goal bonus
+    rating += performance.goals * 1.2;
+    
+    // Assist bonus
+    rating += performance.assists * 0.8;
+    
+    // Clean sheet bonus for defenders/keepers (if team didn't concede)
+    const teamScored = performance.team === teamA.name ? matchEvents.goals.filter(g => g.team === teamB.name).length === 0 
+                      : matchEvents.goals.filter(g => g.team === teamA.name).length === 0;
+    
+    if (teamScored) {
+      if (['GK', 'CB', 'RB', 'LB'].includes(performance.position)) {
+        rating += 0.8;
+      } else if (['DM'].includes(performance.position)) {
+        rating += 0.4;
+      }
+    }
+    
+    // Winning team bonus
+    const teamWon = performance.team === teamA.name ? 
+                   matchEvents.goals.filter(g => g.team === teamA.name).length > matchEvents.goals.filter(g => g.team === teamB.name).length
+                   : matchEvents.goals.filter(g => g.team === teamB.name).length > matchEvents.goals.filter(g => g.team === teamA.name).length;
+    
+    if (teamWon) rating += 0.3;
+    
+    // Cap at 10
+    rating = Math.min(10, Math.max(1, rating));
+    
+    performance.finalRating = Math.round(rating * 10) / 10;
+    
+    if (rating > bestRating) {
+      bestRating = rating;
+      bestPlayer = {
+        player: performance.player,
+        team: performance.team,
+        position: performance.position,
+        rating: performance.finalRating,
+        goals: performance.goals,
+        assists: performance.assists
+      };
+    }
+  });
+  
+  // Update player's POTG count and rating
+  if (bestPlayer) {
+    const playerKey = `${bestPlayer.team}::${bestPlayer.player}`;
+    if (PLAYER_DB[playerKey]) {
+      PLAYER_DB[playerKey].playerOfTheGame = (PLAYER_DB[playerKey].playerOfTheGame || 0) + 1;
+      
+      // Update average rating
+      const currentTotal = (PLAYER_DB[playerKey].avgRating || 0) * (PLAYER_DB[playerKey].apps - 1);
+      PLAYER_DB[playerKey].avgRating = (currentTotal + bestPlayer.rating) / PLAYER_DB[playerKey].apps;
+      PLAYER_DB[playerKey].avgRating = Math.round(PLAYER_DB[playerKey].avgRating * 10) / 10;
+    }
+  }
+  
+  return bestPlayer;
 }
 // ================== IMPORT/EXPORT FUNCTIONS ==================
 function handleImport() {
@@ -3942,39 +4153,8 @@ function runGroupStage() {
   
   console.log("Group stage completed");
 }
-function simulateGroupStage(groups) {
-  console.log("Simulating group stage...");
-  const results = {};
-  
-  groups.forEach(group => {
-    const groupName = group.name;
-    results[groupName] = {
-      name: groupName,
-      teams: [],
-      matches: []
-    };
-    
-    // Simulate matches between all teams in the group
-    const teams = group.teams;
-    for (let i = 0; i < teams.length; i++) {
-      for (let j = i + 1; j < teams.length; j++) {
-        // Simulate home and away matches
-        const homeMatch = simulateMatch(teams[i], teams[j], true);
-        const awayMatch = simulateMatch(teams[i], teams[j], false);
-        
-        results[groupName].matches.push(homeMatch, awayMatch);
-      }
-    }
-    
-    // Calculate standings
-    results[groupName].teams = calculateStandings(results[groupName].matches, teams);
-  });
-  
-  return results;
-}
-
 function simulateMatch(teamA, teamB, isHome) {
-  // Simple match simulation based on team strength
+  // Enhanced match simulation with detailed player tracking
   const baseScoreA = Math.random() * (teamA.strength / 20);
   const baseScoreB = Math.random() * (teamB.strength / 20);
   
@@ -3984,93 +4164,171 @@ function simulateMatch(teamA, teamB, isHome) {
   const goalsA = Math.max(0, Math.floor(baseScoreA + homeAdvantage + (Math.random() * RNG_SETTINGS.groupChaos)));
   const goalsB = Math.max(0, Math.floor(baseScoreB - homeAdvantage + (Math.random() * RNG_SETTINGS.groupChaos)));
   
-  // Track player appearances and goals
-  trackPlayerStats(teamA, goalsA, teamB, goalsB);
+  // Enhanced player tracking with detailed match events
+  const matchEvents = trackEnhancedPlayerStats(teamA, goalsA, teamB, goalsB);
+  
+  // Generate match ID
+  const matchId = `${teamA.name}_vs_${teamB.name}_${Date.now()}`;
+  
+  // Store detailed match information
+  MATCH_DETAILS_DB[matchId] = {
+    id: matchId,
+    teamA: teamA.name,
+    teamB: teamB.name,
+    scoreA: goalsA,
+    scoreB: goalsB,
+    isHome: isHome,
+    events: matchEvents,
+    playerOfTheGame: determinePlayerOfTheGame(matchEvents, teamA, teamB),
+    timestamp: new Date().toISOString(),
+    venue: isHome ? `${teamA.name} Home` : 'Neutral'
+  };
   
   return {
     teamA: teamA.name,
     teamB: teamB.name,
     scoreA: goalsA,
     scoreB: goalsB,
-    isHome: isHome
+    isHome: isHome,
+    matchId: matchId
   };
 }
 
-function trackPlayerStats(teamA, goalsA, teamB, goalsB) {
-  console.log(`Tracking stats: ${teamA.name} ${goalsA}-${goalsB} ${teamB.name}`);
+function trackEnhancedPlayerStats(teamA, goalsA, teamB, goalsB) {
+  console.log(`Enhanced tracking: ${teamA.name} ${goalsA}-${goalsB} ${teamB.name}`);
   
-  // Helper function to register players if they don't exist
-  function ensurePlayerRegistered(team, player) {
-    const key = `${team.name}::${player.name}`;
+  const matchEvents = {
+    goals: [],
+    assists: [],
+    appearances: [],
+    playerPerformances: {}
+  };
+  
+  // Track appearances for all starting players
+  [...teamA.startingXI, ...(teamA.bench || [])].forEach(player => {
+    const key = `${teamA.name}::${player.name}`;
     if (!PLAYER_DB[key]) {
       PLAYER_DB[key] = {
         id: key,
         name: player.name,
-        team: team.name,
+        team: teamA.name,
         pos: player.pos,
         quality: player.quality,
         apps: 0,
         goals: 0,
-        assists: 0
+        assists: 0,
+        playerOfTheGame: 0,
+        avgRating: 0,
+        totalRating: 0
       };
-      console.log(`Registered new player: ${player.name} (${team.name})`);
     }
-    return PLAYER_DB[key];
-  }
-  
-  // Track appearances for all starting players
-  [...teamA.startingXI, ...(teamA.bench || [])].forEach(player => {
-    const playerRecord = ensurePlayerRegistered(teamA, player);
-    playerRecord.apps++;
+    PLAYER_DB[key].apps++;
+    matchEvents.appearances.push({
+      player: player.name,
+      team: teamA.name,
+      position: player.pos
+    });
+    
+    // Initialize performance tracking
+    matchEvents.playerPerformances[key] = {
+      player: player.name,
+      team: teamA.name,
+      position: player.pos,
+      goals: 0,
+      assists: 0,
+      baseRating: calculateBaseRating(player, teamA.strength)
+    };
   });
   
   [...teamB.startingXI, ...(teamB.bench || [])].forEach(player => {
-    const playerRecord = ensurePlayerRegistered(teamB, player);
-    playerRecord.apps++;
+    const key = `${teamB.name}::${player.name}`;
+    if (!PLAYER_DB[key]) {
+      PLAYER_DB[key] = {
+        id: key,
+        name: player.name,
+        team: teamB.name,
+        pos: player.pos,
+        quality: player.quality,
+        apps: 0,
+        goals: 0,
+        assists: 0,
+        playerOfTheGame: 0,
+        avgRating: 0,
+        totalRating: 0
+      };
+    }
+    PLAYER_DB[key].apps++;
+    matchEvents.appearances.push({
+      player: player.name,
+      team: teamB.name,
+      position: player.pos
+    });
+    
+    // Initialize performance tracking
+    matchEvents.playerPerformances[key] = {
+      player: player.name,
+      team: teamB.name,
+      position: player.pos,
+      goals: 0,
+      assists: 0,
+      baseRating: calculateBaseRating(player, teamB.strength)
+    };
   });
   
-  // Assign goals to players (weighted by player quality and position)
-  function assignGoals(team, numGoals) {
-    const fieldPlayers = team.startingXI.filter(p => p.pos !== 'GK');
-    
-    for (let i = 0; i < numGoals; i++) {
-      // Weight selection by player quality and position (attackers more likely to score)
-      const weightedPlayers = fieldPlayers.map(player => {
-        let weight = player.quality / 100;
-        
-        // Position-based weighting
-        if (['ST', 'CF', 'FW'].includes(player.pos)) weight *= 2.0;
-        else if (['LW', 'RW', 'SS'].includes(player.pos)) weight *= 1.5;
-        else if (['AM', 'CM'].includes(player.pos)) weight *= 1.2;
-        else if (['DM', 'CB', 'RB', 'LB'].includes(player.pos)) weight *= 0.5;
-        
-        return { player, weight };
-      });
+  // Simulate goals with detailed events
+  function simulateGoalsWithAssists(team, numGoals, isTeamA) {
+      const fieldPlayers = team.startingXI.filter(p => p.pos !== 'GK');
+      const goalEvents = [];
       
-      // Select scorer based on weights
-      const totalWeight = weightedPlayers.reduce((sum, wp) => sum + wp.weight, 0);
-      let random = Math.random() * totalWeight;
-      
-      for (const wp of weightedPlayers) {
-        random -= wp.weight;
-        if (random <= 0) {
-          const key = `${team.name}::${wp.player.name}`;
-          if (PLAYER_DB[key]) {
-            PLAYER_DB[key].goals++;
-            console.log(`Goal scored by: ${wp.player.name} (${team.name})`);
+      for (let i = 0; i < numGoals; i++) {
+        // Select scorer (weighted by position and quality)
+        const scorer = selectPlayerByWeight(fieldPlayers, true);
+        const scorerKey = `${team.name}::${scorer.name}`;
+        
+        // Select assister (50% chance of assist)
+        let assister = null;
+        if (Math.random() > 0.5 && numGoals > 1) {
+          const potentialAssisters = fieldPlayers.filter(p => p.name !== scorer.name);
+          if (potentialAssisters.length > 0) {
+            assister = selectPlayerByWeight(potentialAssisters, false);
           }
-          break;
         }
+        
+        // Record goal event
+        goalEvents.push({
+          minute: Math.floor(Math.random() * 90) + 1,
+          scorer: scorer.name,
+          assister: assister ? assister.name : null,
+          team: team.name
+        });
+        
+        // Update player stats
+        PLAYER_DB[scorerKey].goals++;
+        matchEvents.playerPerformances[scorerKey].goals++;
+        
+        if (assister) {
+          const assisterKey = `${team.name}::${assister.name}`;
+          PLAYER_DB[assisterKey].assists++;
+          matchEvents.playerPerformances[assisterKey].assists++;
+          matchEvents.assists.push({
+            player: assister.name,
+            team: team.name,
+            assisted: scorer.name
+          });
+        }
+        
+        matchEvents.goals.push({
+          player: scorer.name,
+          team: team.name,
+          minute: goalEvents[i].minute,
+          assisted: assister ? assister.name : false
+        });
       }
+      
+      return goalEvents;
     }
   }
   
-  // Assign goals for both teams
-  assignGoals(teamA, goalsA);
-  assignGoals(teamB, goalsB);
-  
-  console.log("Player stats tracking completed");
-}
 
 function calculateStandings(matches, teams) {
   const standings = {};
@@ -4416,6 +4674,27 @@ document.addEventListener('DOMContentLoaded', function() {
   if (historyBtn) {
     historyBtn.onclick = openHistory;
   }
+  
+  // Add Match Results button to the Views section
+  const matchResultsBtn = document.createElement('button');
+  matchResultsBtn.className = 'ctrl-btn btn-purple';
+  matchResultsBtn.id = 'btnMatchResults';
+  matchResultsBtn.innerHTML = `
+    <div class="ctrl-btn-main">
+      <span class="ctrl-btn-title">Match Results</span>
+      <span class="ctrl-btn-subtitle">All games with player ratings & events</span>
+    </div>
+    <span class="ctrl-btn-tag">📋</span>
+  `;
+  matchResultsBtn.onclick = showMatchResults;
+  
+  // Insert after the existing view buttons
+  const viewsColumn = document.querySelector('.control-column:nth-child(2)');
+  if (viewsColumn) {
+    viewsColumn.appendChild(matchResultsBtn);
+  }
+  
+  console.log("Match Results button added");
   
   // Theme toggle
   const themeBtn = document.getElementById('themeToggle');

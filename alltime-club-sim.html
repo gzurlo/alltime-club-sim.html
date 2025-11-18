@@ -3182,6 +3182,11 @@ const CLUB_LEGACY_DB = {
   quarterFinals: {},
   totalWins: {}
 };
+const MATCH_SCHEDULE = {
+  groupStage: [],
+  knockoutStage: []
+};
+const TOURNAMENT_TIMELINE = [];
 const TEAM_MAP = new Map();
 const PLAYER_DB = {}; // Current tournament only
 const ALL_TIME_PLAYER_DB = {}; // Across all simulations
@@ -3687,6 +3692,7 @@ function calculateStandings(matches, teams) {
 
 function simulateGroupStage(groups) {
   const results = {};
+  MATCH_SCHEDULE.groupStage = []; // Reset schedule
   
   groups.forEach(group => {
     const groupName = group.name;
@@ -3697,19 +3703,65 @@ function simulateGroupStage(groups) {
     };
     
     const teams = group.teams;
+    const groupMatches = [];
+    
+    // Create all possible match pairs
     for (let i = 0; i < teams.length; i++) {
       for (let j = i + 1; j < teams.length; j++) {
         const homeMatch = simulateMatch(teams[i], teams[j], true);
         const awayMatch = simulateMatch(teams[i], teams[j], false);
         
+        groupMatches.push({ type: 'home', match: homeMatch, teamA: teams[i], teamB: teams[j] });
+        groupMatches.push({ type: 'away', match: awayMatch, teamA: teams[i], teamB: teams[j] });
+        
         results[groupName].matches.push(homeMatch, awayMatch);
       }
     }
+    
+    // Organize into matchweeks (6 matchweeks for group stage)
+    const matchweeks = organizeGroupMatchesIntoWeeks(groupMatches, groupName);
+    MATCH_SCHEDULE.groupStage.push(...matchweeks);
     
     results[groupName].teams = calculateStandings(results[groupName].matches, teams);
   });
   
   return results;
+}
+function organizeGroupMatchesIntoWeeks(matches, groupName) {
+  const weeks = [];
+  
+  // Group stage has 6 matchweeks (each team plays 6 games)
+  for (let week = 1; week <= 6; week++) {
+    const weekMatches = [];
+    
+    // For simplicity, we'll distribute matches evenly across weeks
+    matches.forEach(matchData => {
+      const matchWeek = calculateMatchWeek(matchData, week, matches.length);
+      if (matchWeek === week) {
+        weekMatches.push({
+          ...matchData,
+          week: week,
+          group: groupName,
+          matchweek: `Group Stage - Matchweek ${week}`
+        });
+      }
+    });
+    
+    if (weekMatches.length > 0) {
+      weeks.push({
+        week: week,
+        name: `Group ${groupName} - Matchweek ${week}`,
+        matches: weekMatches
+      });
+    }
+  }
+  
+  return weeks;
+}
+function calculateMatchWeek(matchData, currentWeek, totalMatches) {
+  // Simple distribution - you can enhance this with more sophisticated scheduling
+  const matchHash = (matchData.teamA.name + matchData.teamB.name).length;
+  return (matchHash % 6) + 1; // Distribute across 6 weeks
 }
 
 function renderGroupResults(results) {
@@ -3827,7 +3879,9 @@ function simulateKnockoutRound(teams, roundName, matchImportance = 1.5) {
 }
 
 function simulateKnockoutRounds(teams) {
-  console.log("Simulating knockout rounds with", teams.length, "teams");
+  console.log("🏆 Simulating knockout tournament...");
+  
+  MATCH_SCHEDULE.knockoutStage = []; // Reset knockout schedule
   
   const results = {
     roundOf32: simulateKnockoutRound(teams, "Round of 32", 1.2),
@@ -3835,16 +3889,158 @@ function simulateKnockoutRounds(teams) {
     quarterFinals: [],
     semiFinals: [],
     final: null,
-    champion: null
+    champion: null,
+    bracket: [] // Store bracket progression
   };
   
+  // Track bracket visually
+  results.bracket.push({
+    round: "Round of 32",
+    matches: results.roundOf32
+  });
+  
   results.roundOf16 = simulateKnockoutRound(results.roundOf32.map(match => match.winner), "Round of 16", 1.4);
+  results.bracket.push({
+    round: "Round of 16", 
+    matches: results.roundOf16
+  });
+  
   results.quarterFinals = simulateKnockoutRound(results.roundOf16.map(match => match.winner), "Quarter Finals", 1.6);
+  results.bracket.push({
+    round: "Quarter Finals",
+    matches: results.quarterFinals
+  });
+  
   results.semiFinals = simulateKnockoutRound(results.quarterFinals.map(match => match.winner), "Semi Finals", 1.8);
+  results.bracket.push({
+    round: "Semi Finals",
+    matches: results.semiFinals
+  });
+  
   results.final = simulateKnockoutRound(results.semiFinals.map(match => match.winner), "Final")[0];
+  results.bracket.push({
+    round: "Final",
+    matches: [results.final]
+  });
+  
   results.champion = results.final.winner;
   
+  // Organize knockout matches into weeks
+  organizeKnockoutMatches(results);
+  
   return results;
+}
+function organizeKnockoutMatches(results) {
+  let currentWeek = 7; // Start after group stage
+  
+  // Round of 32 - 2 weeks (home and away legs)
+  MATCH_SCHEDULE.knockoutStage.push({
+    week: currentWeek++,
+    name: "Round of 32 - First Leg",
+    matches: results.roundOf32.map(match => ({
+      type: 'first-leg',
+      match: match.firstLeg,
+      teamA: match.teamA,
+      teamB: match.teamB,
+      round: "Round of 32"
+    }))
+  });
+  
+  MATCH_SCHEDULE.knockoutStage.push({
+    week: currentWeek++,
+    name: "Round of 32 - Second Leg", 
+    matches: results.roundOf32.map(match => ({
+      type: 'second-leg',
+      match: match.secondLeg,
+      teamA: match.teamA,
+      teamB: match.teamB,
+      round: "Round of 32",
+      aggregate: `${match.aggScoreA}-${match.aggScoreB}`,
+      winner: match.winner.name
+    }))
+  });
+  
+  // Continue for other rounds...
+  // Round of 16
+  MATCH_SCHEDULE.knockoutStage.push({
+    week: currentWeek++,
+    name: "Round of 16 - First Leg",
+    matches: results.roundOf16.map(match => ({
+      type: 'first-leg',
+      match: match.firstLeg,
+      teamA: match.teamA,
+      teamB: match.teamB,
+      round: "Round of 16"
+    }))
+  });
+  
+  MATCH_SCHEDULE.knockoutStage.push({
+    week: currentWeek++,
+    name: "Round of 16 - Second Leg",
+    matches: results.roundOf16.map(match => ({
+      type: 'second-leg', 
+      match: match.secondLeg,
+      teamA: match.teamA,
+      teamB: match.teamB,
+      round: "Round of 16",
+      aggregate: `${match.aggScoreA}-${match.aggScoreB}`,
+      winner: match.winner.name
+    }))
+  });
+  
+  // Quarter Finals
+  MATCH_SCHEDULE.knockoutStage.push({
+    week: currentWeek++,
+    name: "Quarter Finals - First Leg",
+    matches: results.quarterFinals.map(match => ({
+      type: 'first-leg',
+      match: match.firstLeg,
+      teamA: match.teamA,
+      teamB: match.teamB,
+      round: "Quarter Finals"
+    }))
+  });
+  
+  MATCH_SCHEDULE.knockoutStage.push({
+    week: currentWeek++,
+    name: "Quarter Finals - Second Leg",
+    matches: results.quarterFinals.map(match => ({
+      type: 'second-leg',
+      match: match.secondLeg,
+      teamA: match.teamA,
+      teamB: match.teamB,
+      round: "Quarter Finals", 
+      aggregate: `${match.aggScoreA}-${match.aggScoreB}`,
+      winner: match.winner.name
+    }))
+  });
+  
+  // Semi Finals
+  MATCH_SCHEDULE.knockoutStage.push({
+    week: currentWeek++,
+    name: "Semi Finals - First Leg",
+    matches: results.semiFinals.map(match => ({
+      type: 'first-leg',
+      match: match.firstLeg,
+      teamA: match.teamA,
+      teamB: match.teamB,
+      round: "Semi Finals"
+    }))
+  });
+  
+MATCH_SCHEDULE.knockoutStage.push({
+    week: currentWeek++,
+    name: "Semi Finals - Second Leg",
+    matches: results.semiFinals.map(match => ({
+      type: 'second-leg',
+      match: match.secondLeg,
+      teamA: match.teamA,
+      teamB: match.teamB,
+      round: "Semi Finals",
+      aggregate: `${match.aggScoreA}-${match.aggScoreB}`,
+      winner: match.winner.name
+    }))
+  });
 }
 function renderKnockoutResults(results) {
   const out = document.getElementById("output");

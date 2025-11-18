@@ -5176,6 +5176,376 @@ function showMatchResults() {
   out.innerHTML = html;
 }
 
+function displayMatchWeekResults(matchWeekNumber) {
+    const out = document.getElementById("output");
+    if (!out) return;
+    
+    let html = `<h2>📅 Match Week ${matchWeekNumber} Results</h2>`;
+    
+    // Get all matches for this matchweek
+    const weekMatches = [];
+    
+    if (window.GROUP_RESULTS) {
+        Object.values(window.GROUP_RESULTS).forEach(group => {
+            if (group.matches && group.matches.length > 0) {
+                group.matches.forEach(match => {
+                    // Simple distribution - you can enhance this with proper scheduling
+                    const matchHash = (match.teamA + match.teamB).length;
+                    const calculatedWeek = (matchHash % 6) + 1;
+                    
+                    if (calculatedWeek === matchWeekNumber) {
+                        weekMatches.push({
+                            ...match,
+                            groupName: group.name
+                        });
+                    }
+                });
+            }
+        });
+    }
+    
+    if (weekMatches.length === 0) {
+        html += `
+            <div class="group-card">
+                <div class="group-title">No Matches Found</div>
+                <p>No matches found for match week ${matchWeekNumber}.</p>
+            </div>
+        `;
+        out.innerHTML = html;
+        return;
+    }
+    
+    weekMatches.forEach(match => {
+        const matchDetails = MATCH_DETAILS_DB[match.matchId];
+        const potg = matchDetails?.playerOfTheGame;
+        const summary = generateMatchSummary(match, match.teamA, match.teamB);
+        
+        html += `
+            <div class="group-card" style="margin-bottom: 15px;">
+                <div class="group-title">${match.groupName} - ${match.isHome ? 'Home Leg' : 'Away Leg'}</div>
+                <div style="padding: 15px;">
+                    <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: center; margin-bottom: 15px;">
+                        <div style="text-align: right; font-weight: bold; font-size: 1.1em;">
+                            ${match.teamA}
+                        </div>
+                        <div style="text-align: center; background: #1e3a8a; padding: 10px 15px; border-radius: 8px; font-weight: bold; font-size: 1.2em; color: white;">
+                            ${match.scoreA} - ${match.scoreB}
+                        </div>
+                        <div style="font-weight: bold; font-size: 1.1em;">
+                            ${match.teamB}
+                        </div>
+                    </div>
+                    
+                    ${potg ? `
+                        <div style="background: rgba(245, 158, 11, 0.2); padding: 10px; border-radius: 6px; margin: 10px 0; border: 1px solid #f59e0b;">
+                            <strong style="color: #f59e0b;">⭐ Player of the Match: ${potg.player}</strong>
+                            <div style="font-size: 0.9em; margin-top: 5px;">
+                                Rating: ${potg.rating}/10 • 
+                                ${potg.goals > 0 ? `${potg.goals} goal${potg.goals > 1 ? 's' : ''} • ` : ''}
+                                ${potg.assists > 0 ? `${potg.assists} assist${potg.assists > 1 ? 's' : ''}` : ''}
+                                ${!potg.goals && !potg.assists ? 'Outstanding performance' : ''}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <div style="background: rgba(15, 23, 42, 0.8); padding: 10px; border-radius: 6px; margin-top: 10px;">
+                        <div style="color: #9ca3af; font-style: italic; font-size: 0.9em;">
+                            "${summary}"
+                        </div>
+                    </div>
+                    
+                    ${matchDetails?.events?.goals?.length > 0 ? `
+                        <div style="margin-top: 10px;">
+                            <div style="font-size: 0.8em; color: #6b7280; margin-bottom: 5px;">Match Events:</div>
+                            <div style="font-size: 0.8em;">
+                                ${matchDetails.events.goals.map(goal => 
+                                    `⚽ ${goal.minute}' - ${goal.player} (${goal.team})${goal.assisted ? ` assisted by ${goal.assisted}` : ''}`
+                                ).join('<br>')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    });
+    
+    out.innerHTML = html;
+}
+
+function generateMatchSummary(matchData, teamA, teamB) {
+    const scoreA = matchData.scoreA;
+    const scoreB = matchData.scoreB;
+    const potg = MATCH_DETAILS_DB[matchData.matchId]?.playerOfTheGame;
+    
+    const teamAName = typeof teamA === 'string' ? teamA : teamA.name;
+    const teamBName = typeof teamB === 'string' ? teamB : teamB.name;
+    
+    const homeTeam = matchData.isHome ? teamAName : teamBName;
+    const awayTeam = matchData.isHome ? teamBName : teamAName;
+    const homeScore = matchData.isHome ? scoreA : scoreB;
+    const awayScore = matchData.isHome ? scoreB : scoreA;
+    
+    const goalDiff = Math.abs(homeScore - awayScore);
+    const totalGoals = homeScore + awayScore;
+    
+    const summaries = [
+        `A ${homeScore}-${awayScore} ${homeScore === awayScore ? 'draw' : 'result'} saw ${homeTeam} and ${awayTeam} put on a show for the fans, with end-to-end action from start to finish.`,
+        `In a thrilling encounter, ${homeTeam} ${homeScore === awayScore ? 'shared the points with' : homeScore > awayScore ? 'overcame' : 'fell to'} ${awayTeam} in a match that saw ${Math.max(homeScore, awayScore)} goals.`,
+        `The clash between ${homeTeam} and ${awayTeam} delivered ${totalGoals} goals, with both teams showing attacking intent throughout the 90 minutes.`,
+        `${homeTeam} ${homeScore > awayScore ? 'secured an important victory against' : homeScore < awayScore ? 'suffered a defeat against' : 'played out an entertaining draw with'} ${awayTeam} in a match filled with chances.`,
+        `A ${homeScore}-${awayScore} ${homeScore === awayScore ? 'stalemate' : 'victory'} for ${homeScore > awayScore ? homeTeam : awayTeam} in a fiercely contested battle that could have gone either way.`,
+        `${homeTeam} and ${awayTeam} served up a ${totalGoals}-goal spectacle, with ${potg ? potg.player + ' stealing the show' : 'both teams giving their all'} in an unforgettable contest.`
+    ];
+    
+    // Special summaries for specific scorelines
+    if (homeScore === 0 && awayScore === 0) {
+        return `A goalless draw between ${homeTeam} and ${awayTeam} where both defenses came out on top in a tactical battle with few clear chances.`;
+    }
+    
+    if (goalDiff >= 4) {
+        return `${homeScore > awayScore ? homeTeam : awayTeam} produced a stunning performance, demolishing their opponents in a one-sided affair that showcased their attacking prowess.`;
+    }
+    
+    if (totalGoals >= 6) {
+        return `An absolute goal-fest at ${homeTeam}'s home ground! ${totalGoals} goals shared between the two sides in a match that will be remembered for its attacking fireworks.`;
+    }
+    
+    // Return a random summary from the appropriate ones
+    return summaries[Math.floor(Math.random() * summaries.length)];
+}
+
+function showMatchWeeksNavigation() {
+    const out = document.getElementById("output");
+    if (!out) return;
+    
+    let html = `<h2>📅 Tournament Match Weeks</h2>`;
+    html += `
+        <div style="background: #2d3748; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="margin: 0 0 15px 0; color: #e5e7eb;">Navigate Through the Tournament</h3>
+            <p style="margin: 5px 0; color: #cbd5e1;">Select a match week to view all games, player of the match awards, and detailed match summaries.</p>
+        </div>
+        
+        <div class="group-grid">
+    `;
+    
+    // Group Stage Weeks (1-6)
+    for (let week = 1; week <= 6; week++) {
+        html += `
+            <div class="group-card" onclick="displayMatchWeekResults(${week})" style="cursor: pointer; transition: transform 0.2s;">
+                <div class="group-title">Match Week ${week}</div>
+                <div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 2em; margin-bottom: 10px;">⚽</div>
+                    <p style="color: #9ca3af; font-size: 0.9em;">Group Stage</p>
+                    <p style="color: #cbd5e1; font-weight: bold;">View all matches</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Knockout Stage Weeks (7+)
+    if (window.TOURNAMENT) {
+        const knockoutRounds = [
+            { week: 7, name: "Round of 32", description: "First Knockout Round" },
+            { week: 8, name: "Round of 16", description: "Second Knockout Round" },
+            { week: 9, name: "Quarter Finals", description: "Elite Eight" },
+            { week: 10, name: "Semi Finals", description: "Final Four" },
+            { week: 11, name: "The Final", description: "Championship Match" }
+        ];
+        
+        knockoutRounds.forEach(round => {
+            html += `
+                <div class="group-card" onclick="displayKnockoutRound('${round.name}')" style="cursor: pointer; transition: transform 0.2s; border-color: #f59e0b;">
+                    <div class="group-title" style="color: #f59e0b;">${round.name}</div>
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="font-size: 2em; margin-bottom: 10px;">🎯</div>
+                        <p style="color: #9ca3af; font-size: 0.9em;">${round.description}</p>
+                        <p style="color: #fbbf24; font-weight: bold;">Knockout Stage</p>
+                    </div>
+                </div>
+            `;
+        });
+    }
+    
+    html += `</div>`;
+    out.innerHTML = html;
+}
+
+function displayKnockoutRound(roundName) {
+    const out = document.getElementById("output");
+    if (!out || !window.TOURNAMENT) return;
+    
+    let html = `<h2>🎯 ${roundName}</h2>`;
+    
+    let matches = [];
+    switch (roundName) {
+        case "Round of 32":
+            matches = window.TOURNAMENT.roundOf32 || [];
+            break;
+        case "Round of 16":
+            matches = window.TOURNAMENT.roundOf16 || [];
+            break;
+        case "Quarter Finals":
+            matches = window.TOURNAMENT.quarterFinals || [];
+            break;
+        case "Semi Finals":
+            matches = window.TOURNAMENT.semiFinals || [];
+            break;
+        case "The Final":
+            matches = window.TOURNAMENT.final ? [window.TOURNAMENT.final] : [];
+            break;
+    }
+    
+    if (matches.length === 0) {
+        html += `
+            <div class="group-card">
+                <div class="group-title">No Matches Available</div>
+                <p>No ${roundName} matches found in the tournament data.</p>
+            </div>
+        `;
+        out.innerHTML = html;
+        return;
+    }
+    
+    matches.forEach(match => {
+        if (roundName === "The Final") {
+            const finalMatch = match.matchDetails || match;
+            const potg = finalMatch.playerOfTheGame;
+            const summary = generateMatchSummary(finalMatch, match.teamA, match.teamB);
+            
+            html += `
+                <div class="group-card" style="border: 2px solid gold;">
+                    <div class="group-title" style="color: gold;">🏆 ${roundName}</div>
+                    <div style="padding: 20px; text-align: center;">
+                        <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: center; margin-bottom: 20px;">
+                            <div style="text-align: right; font-weight: bold; font-size: 1.2em;">
+                                ${match.teamA.name}
+                            </div>
+                            <div style="text-align: center; background: gold; padding: 15px 20px; border-radius: 10px; font-weight: bold; font-size: 1.5em; color: #1f2937;">
+                                ${finalMatch.scoreA} - ${finalMatch.scoreB}
+                            </div>
+                            <div style="font-weight: bold; font-size: 1.2em;">
+                                ${match.teamB.name}
+                            </div>
+                        </div>
+                        
+                        ${potg ? `
+                            <div style="background: rgba(245, 158, 11, 0.3); padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #f59e0b;">
+                                <strong style="color: #f59e0b; font-size: 1.1em;">⭐ Player of the Match: ${potg.player}</strong>
+                                <div style="margin-top: 8px;">
+                                    Rating: ${potg.rating}/10 • 
+                                    ${potg.goals > 0 ? `${potg.goals} goal${potg.goals > 1 ? 's' : ''} • ` : ''}
+                                    ${potg.assists > 0 ? `${potg.assists} assist${potg.assists > 1 ? 's' : ''}` : ''}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        <div style="background: rgba(15, 23, 42, 0.8); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                            <div style="color: #e5e7eb; font-style: italic; font-size: 1em;">
+                                "${summary}"
+                            </div>
+                        </div>
+                        
+                        <div style="color: gold; font-weight: bold; font-size: 1.3em; margin-top: 15px;">
+                            🏆 ${match.winner.name} wins the tournament! 🏆
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Two-leg knockout matches
+            const firstLegPOTG = match.firstLeg.playerOfTheGame;
+            const secondLegPOTG = match.secondLeg.playerOfTheGame;
+            const firstLegSummary = generateMatchSummary(match.firstLeg, match.teamA, match.teamB);
+            const secondLegSummary = generateMatchSummary(match.secondLeg, match.teamA, match.teamB);
+            
+            html += `
+                <div class="group-card">
+                    <div class="group-title">${roundName}</div>
+                    <div style="padding: 15px;">
+                        <div style="text-align: center; font-weight: bold; font-size: 1.1em; margin-bottom: 15px; background: #1e3a8a; padding: 10px; border-radius: 6px; color: white;">
+                            ${match.teamA.name} ${match.aggScoreA} - ${match.aggScoreB} ${match.teamB.name} (Aggregate)
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div style="background: rgba(15, 23, 42, 0.9); padding: 15px; border-radius: 8px;">
+                                <div style="color: #6b7280; font-size: 0.9em; margin-bottom: 8px;">First Leg</div>
+                                <div style="font-weight: bold; font-size: 1.1em; margin-bottom: 10px;">
+                                    ${match.teamB.name} ${match.firstLeg.scoreA} - ${match.firstLeg.scoreB} ${match.teamA.name}
+                                </div>
+                                
+                                ${firstLegPOTG ? `
+                                    <div style="background: rgba(245, 158, 11, 0.2); padding: 8px; border-radius: 4px; margin: 8px 0;">
+                                        <strong style="color: #f59e0b;">⭐ ${firstLegPOTG.player}</strong>
+                                        <div style="font-size: 0.8em;">
+                                            ${firstLegPOTG.rating}/10 • 
+                                            ${firstLegPOTG.goals > 0 ? `${firstLegPOTG.goals}G • ` : ''}
+                                            ${firstLegPOTG.assists > 0 ? `${firstLegPOTG.assists}A` : ''}
+                                        </div>
+                                    </div>
+                                ` : ''}
+                                
+                                <div style="color: #9ca3af; font-style: italic; font-size: 0.8em; margin-top: 8px;">
+                                    "${firstLegSummary}"
+                                </div>
+                            </div>
+                            
+                            <div style="background: rgba(15, 23, 42, 0.9); padding: 15px; border-radius: 8px;">
+                                <div style="color: #6b7280; font-size: 0.9em; margin-bottom: 8px;">Second Leg</div>
+                                <div style="font-weight: bold; font-size: 1.1em; margin-bottom: 10px;">
+                                    ${match.teamA.name} ${match.secondLeg.scoreA} - ${match.secondLeg.scoreB} ${match.teamB.name}
+                                </div>
+                                
+                                ${secondLegPOTG ? `
+                                    <div style="background: rgba(245, 158, 11, 0.2); padding: 8px; border-radius: 4px; margin: 8px 0;">
+                                        <strong style="color: #f59e0b;">⭐ ${secondLegPOTG.player}</strong>
+                                        <div style="font-size: 0.8em;">
+                                            ${secondLegPOTG.rating}/10 • 
+                                            ${secondLegPOTG.goals > 0 ? `${secondLegPOTG.goals}G • ` : ''}
+                                            ${secondLegPOTG.assists > 0 ? `${secondLegPOTG.assists}A` : ''}
+                                        </div>
+                                    </div>
+                                ` : ''}
+                                
+                                <div style="color: #9ca3af; font-style: italic; font-size: 0.8em; margin-top: 8px;">
+                                    "${secondLegSummary}"
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="text-align: center; color: #10b981; font-weight: bold; font-size: 1.1em; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 6px;">
+                            → ${match.winner.name} advances to the next round
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    });
+    
+    out.innerHTML = html;
+}
+
+function addMatchWeeksButton() {
+    const viewsColumn = document.querySelector('.control-column:nth-child(2)');
+    if (viewsColumn) {
+        // Check if button already exists
+        if (!document.getElementById('btnMatchWeeks')) {
+            const matchWeeksBtn = document.createElement('button');
+            matchWeeksBtn.className = 'ctrl-btn btn-purple';
+            matchWeeksBtn.id = 'btnMatchWeeks';
+            matchWeeksBtn.innerHTML = `
+                <div class="ctrl-btn-main">
+                    <span class="ctrl-btn-title">Match Weeks</span>
+                    <span class="ctrl-btn-subtitle">View all games with POTM & summaries</span>
+                </div>
+                <span class="ctrl-btn-tag">📅</span>
+            `;
+            matchWeeksBtn.addEventListener('click', showMatchWeeksNavigation);
+            viewsColumn.appendChild(matchWeeksBtn);
+            console.log("✅ Match Weeks button added");
+        }
+    }
+}
+
 function enableStatsButton() {
   const btnStats = document.getElementById("btnStats");
   if (btnStats) {
@@ -5437,21 +5807,24 @@ function closeTeamDetail() {
 
 /************* INITIALIZATION *************/
 document.addEventListener('DOMContentLoaded', function() {
-  console.log("🏁 Initializing All-Time Football Simulator...");
-  
-  // Initialize core systems
-  initTeamsAndPlayers();
-  
-  // Update UI elements
-  const teamCountEl = document.getElementById('teamCount');
-  if (teamCountEl) teamCountEl.textContent = TEAM_POOL.length.toString();
-  
-  const rngSlider = document.getElementById('rngSlider');
-  if (rngSlider) {
-    updateRNG(rngSlider.value);
-  }
-  
-  console.log("🔗 Connecting buttons and event handlers...");
+    console.log("🏁 Initializing All-Time Football Simulator...");
+    
+    // Initialize core systems
+    initTeamsAndPlayers();
+    
+    // Update UI elements
+    const teamCountEl = document.getElementById('teamCount');
+    if (teamCountEl) teamCountEl.textContent = TEAM_POOL.length.toString();
+    
+    const rngSlider = document.getElementById('rngSlider');
+    if (rngSlider) {
+        updateRNG(rngSlider.value);
+    }
+    
+    console.log("🔗 Connecting buttons and event handlers...");
+    
+    // ADD THIS LINE HERE:
+    addMatchWeeksButton();
   
   // Tournament Control Buttons
   const generateBtn = document.getElementById('btnDraw');
@@ -5675,4 +6048,8 @@ window.closeHistory = closeHistory;
 window.closeMatchDetail = closeMatchDetail;
 window.closeTeamDetail = closeTeamDetail;
 window.simulateCustomMatch = simulateCustomMatch;
+window.displayMatchWeekResults = displayMatchWeekResults;
+window.displayKnockoutRound = displayKnockoutRound;
+window.showMatchWeeksNavigation = showMatchWeeksNavigation;
+window.generateMatchSummary = generateMatchSummary;
 </script>

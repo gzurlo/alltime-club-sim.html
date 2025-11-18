@@ -1178,9 +1178,17 @@
         season: 2014,
         strength: 90,
         startingXI: [
-        { name: "Arda Turan", pos: "RW", quality: 88 },
-          { name: "Diego Costa", pos: "ST", quality: 92 },
-          { name: "David Villa", pos: "LW", quality: 89 }
+        { name: "Thibaut Courtois", pos: "GK", quality: 90 },
+    { name: "Juanfran", pos: "RB", quality: 85 },
+    { name: "Miranda", pos: "CB", quality: 88 },
+    { name: "Diego Godín", pos: "CB", quality: 89 },
+    { name: "Filipe Luís", pos: "LB", quality: 86 },
+    { name: "Gabi", pos: "CM", quality: 86 },
+    { name: "Tiago", pos: "CM", quality: 84 },
+    { name: "Koke", pos: "CM", quality: 87 },
+    { name: "Arda Turan", pos: "RW", quality: 88 },
+    { name: "Diego Costa", pos: "ST", quality: 92 },
+    { name: "David Villa", pos: "LW", quality: 89 }
         ],
         bench: [
           { name: "Daniel Aranzubia", pos: "GK", quality: 75 },
@@ -4205,56 +4213,62 @@ function runGroupStage() {
   }
   
   enableStatsButton();
+
   console.log("Group stage completed");
 }
 function runKnockouts() {
-  console.log("🎯 Starting knockout stage...");
-  
-  if (!window.GROUP_RESULTS) {
-    alert("Please run the group stage first!");
-    return;
-  }
-  
-  const btnKO = document.getElementById("btnKnockouts");
-  if (btnKO) {
-    btnKO.disabled = true;
-    btnKO.innerHTML = `
-      <div class="ctrl-btn-main">
-        <span class="ctrl-btn-title">Simulating KO...</span>
-        <span class="ctrl-btn-subtitle">Running knockout stages</span>
-      </div>
-      <span class="ctrl-btn-tag">⏳</span>
-    `;
-  }
-  
-  setTimeout(() => {
-    const qualifiedTeams = getQualifiedTeams(window.GROUP_RESULTS);
-    const knockoutResults = simulateKnockoutRounds(qualifiedTeams);
-    window.TOURNAMENT = knockoutResults;
+    console.log("🎯 Starting knockout stage...");
     
-    updateClubLegacy(knockoutResults);
-    
-    renderKnockoutResults(knockoutResults);
-    
-    console.log("✅ Knockout stage completed");
-    
-    // Update group stage button to allow viewing
-    const btnGroup = document.getElementById("btnGroupStage");
-    if (btnGroup) {
-      btnGroup.disabled = false;
-      btnGroup.innerHTML = `
-        <div class="ctrl-btn-main">
-          <span class="ctrl-btn-title">View Group Stage</span>
-          <span class="ctrl-btn-subtitle">Go back to group results</span>
-        </div>
-        <span class="ctrl-btn-tag">📊</span>
-      `;
-      btnGroup.onclick = function() {
-        showGroupStageResults();
-      };
+    if (!window.GROUP_RESULTS) {
+        alert("Please run the group stage first!");
+        return;
     }
-  }, 1000);
-}
+    
+    // Check if knockout stage already exists
+    if (window.TOURNAMENT && window.TOURNAMENT.champion) {
+        console.log("✅ Knockout stage already exists, displaying results...");
+        renderKnockoutResults(window.TOURNAMENT);
+        return;
+    }
+    
+    const btnKO = document.getElementById("btnKnockouts");
+    if (btnKO) {
+        btnKO.disabled = true;
+        btnKO.innerHTML = `
+            <div class="ctrl-btn-main">
+                <span class="ctrl-btn-title">Simulating KO...</span>
+                <span class="ctrl-btn-subtitle">Running knockout stages</span>
+            </div>
+            <span class="ctrl-btn-tag">⏳</span>
+        `;
+    }
+    
+    setTimeout(() => {
+  const qualifiedTeams = getQualifiedTeams(window.GROUP_RESULTS);
+  const knockoutResults = simulateKnockoutRounds(qualifiedTeams);
+  window.TOURNAMENT = knockoutResults;
+  
+  updateClubLegacy(knockoutResults);
+  
+  renderKnockoutResults(knockoutResults);
+  
+  console.log("✅ Knockout stage completed");
+        
+  const btnGroup = document.getElementById("btnGroupStage");
+  if (btnGroup) {
+    btnGroup.disabled = false;
+    btnGroup.innerHTML = `
+      <div class="ctrl-btn-main">
+        <span class="ctrl-btn-title">View Group Stage</span>
+        <span class="ctrl-btn-subtitle">Go back to group results</span>
+      </div>
+      <span class="ctrl-btn-tag">📊</span>
+    `;
+    btnGroup.onclick = function() {
+      showGroupStageResults();
+    };
+  }
+}, 1000);
 /************* VIEW FUNCTIONS *************/
 function showPlayerStats() {
   const playersWithData = Object.values(PLAYER_DB).filter(p => p.apps > 0 || p.goals > 0 || p.assists > 0);
@@ -4266,7 +4280,6 @@ function showPlayerStats() {
   if (playersWithData.length > 0) {
     const topScorers = [...playersWithData].sort((a, b) => b.goals - a.goals).slice(0, 10);
     const topAssists = [...playersWithData].sort((a, b) => b.assists - a.assists).slice(0, 10);
-    const topRated = [...playersWithData].filter(p => p.apps >= 3).sort((a, b) => (b.avgRating || 0) - (a.avgRating || 0)).slice(0, 10);
     
     html += `
       <div style="background: #2d3748; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
@@ -4277,66 +4290,38 @@ function showPlayerStats() {
       </div>
     `;
     
-    if (topScorers.length > 0) {
+    // Top Scorers table
+    html += `
+      <div class="group-card">
+        <div class="group-title">🥇 Top Scorers</div>
+        <table class="standings-table">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Team</th>
+              <th>Goals</th>
+              <th>Apps</th>
+              <th>Ratio</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+    topScorers.forEach((player, index) => {
+      const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : "";
+      const ratio = (player.goals / player.apps).toFixed(2);
       html += `
-        <div class="group-card">
-          <div class="group-title">🥇 Top Scorers</div>
-          <table class="standings-table">
-            <thead>
-              <tr>
-                <th>Player</th>
-                <th>Team</th>
-                <th>Goals</th>
-                <th>Apps</th>
-                <th>Ratio</th>
-              </tr>
-            </thead>
-            <tbody>
+        <tr>
+          <td>${medal} <strong>${player.name}</strong></td>
+          <td>${player.team}</td>
+          <td><strong style="color: #ef4444;">${player.goals}</strong></td>
+          <td>${player.apps}</td>
+          <td>${ratio}</td>
+        </tr>
       `;
-      topScorers.forEach((player, index) => {
-        const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : "";
-        const ratio = (player.goals / player.apps).toFixed(2);
-        html += `
-          <tr>
-            <td>${medal} <strong>${player.name}</strong></td>
-            <td>${player.team}</td>
-            <td><strong style="color: #ef4444;">${player.goals}</strong></td>
-            <td>${player.apps}</td>
-            <td>${ratio}</td>
-          </tr>
-        `;
-      });
-      html += `</tbody></table></div>`;
-    }
+    });
+    html += `</tbody></table></div>`;
     
-    if (topAssists.length > 0) {
-      html += `
-        <div class="group-card">
-          <div class="group-title">🎯 Top Assists</div>
-          <table class="standings-table">
-            <thead>
-              <tr>
-                <th>Player</th>
-                <th>Team</th>
-                <th>Assists</th>
-                <th>Apps</th>
-              </tr>
-            </thead>
-            <tbody>
-      `;
-      topAssists.forEach((player, index) => {
-        const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : "";
-        html += `
-          <tr>
-            <td>${medal} <strong>${player.name}</strong></td>
-            <td>${player.team}</td>
-            <td><strong style="color: #3b82f6;">${player.assists}</strong></td>
-            <td>${player.apps}</td>
-          </tr>
-        `;
-      });
-      html += `</tbody></table></div>`;
-    }
+    // Continue with other tables...
     
   } else {
     html += `
@@ -5176,102 +5161,6 @@ function showMatchResults() {
   out.innerHTML = html;
 }
 
-function displayMatchWeekResults(matchWeekNumber) {
-    const out = document.getElementById("output");
-    if (!out) return;
-    
-    let html = `<h2>📅 Match Week ${matchWeekNumber} Results</h2>`;
-    
-    // Get all matches for this matchweek
-    const weekMatches = [];
-    
-    if (window.GROUP_RESULTS) {
-        Object.values(window.GROUP_RESULTS).forEach(group => {
-            if (group.matches && group.matches.length > 0) {
-                group.matches.forEach(match => {
-                    // Simple distribution - you can enhance this with proper scheduling
-                    const matchHash = (match.teamA + match.teamB).length;
-                    const calculatedWeek = (matchHash % 6) + 1;
-                    
-                    if (calculatedWeek === matchWeekNumber) {
-                        weekMatches.push({
-                            ...match,
-                            groupName: group.name
-                        });
-                    }
-                });
-            }
-        });
-    }
-    
-    if (weekMatches.length === 0) {
-        html += `
-            <div class="group-card">
-                <div class="group-title">No Matches Found</div>
-                <p>No matches found for match week ${matchWeekNumber}.</p>
-            </div>
-        `;
-        out.innerHTML = html;
-        return;
-    }
-    
-    weekMatches.forEach(match => {
-        const matchDetails = MATCH_DETAILS_DB[match.matchId];
-        const potg = matchDetails?.playerOfTheGame;
-        const summary = generateMatchSummary(match, match.teamA, match.teamB);
-        
-        html += `
-            <div class="group-card" style="margin-bottom: 15px;">
-                <div class="group-title">${match.groupName} - ${match.isHome ? 'Home Leg' : 'Away Leg'}</div>
-                <div style="padding: 15px;">
-                    <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: center; margin-bottom: 15px;">
-                        <div style="text-align: right; font-weight: bold; font-size: 1.1em;">
-                            ${match.teamA}
-                        </div>
-                        <div style="text-align: center; background: #1e3a8a; padding: 10px 15px; border-radius: 8px; font-weight: bold; font-size: 1.2em; color: white;">
-                            ${match.scoreA} - ${match.scoreB}
-                        </div>
-                        <div style="font-weight: bold; font-size: 1.1em;">
-                            ${match.teamB}
-                        </div>
-                    </div>
-                    
-                    ${potg ? `
-                        <div style="background: rgba(245, 158, 11, 0.2); padding: 10px; border-radius: 6px; margin: 10px 0; border: 1px solid #f59e0b;">
-                            <strong style="color: #f59e0b;">⭐ Player of the Match: ${potg.player}</strong>
-                            <div style="font-size: 0.9em; margin-top: 5px;">
-                                Rating: ${potg.rating}/10 • 
-                                ${potg.goals > 0 ? `${potg.goals} goal${potg.goals > 1 ? 's' : ''} • ` : ''}
-                                ${potg.assists > 0 ? `${potg.assists} assist${potg.assists > 1 ? 's' : ''}` : ''}
-                                ${!potg.goals && !potg.assists ? 'Outstanding performance' : ''}
-                            </div>
-                        </div>
-                    ` : ''}
-                    
-                    <div style="background: rgba(15, 23, 42, 0.8); padding: 10px; border-radius: 6px; margin-top: 10px;">
-                        <div style="color: #9ca3af; font-style: italic; font-size: 0.9em;">
-                            "${summary}"
-                        </div>
-                    </div>
-                    
-                    ${matchDetails?.events?.goals?.length > 0 ? `
-                        <div style="margin-top: 10px;">
-                            <div style="font-size: 0.8em; color: #6b7280; margin-bottom: 5px;">Match Events:</div>
-                            <div style="font-size: 0.8em;">
-                                ${matchDetails.events.goals.map(goal => 
-                                    `⚽ ${goal.minute}' - ${goal.player} (${goal.team})${goal.assisted ? ` assisted by ${goal.assisted}` : ''}`
-                                ).join('<br>')}
-                            </div>
-                        </div>
-                    ` : ''}
-                </div>
-            </div>
-        `;
-    });
-    
-    out.innerHTML = html;
-}
-
 function generateMatchSummary(matchData, teamA, teamB) {
     const scoreA = matchData.scoreA;
     const scoreB = matchData.scoreB;
@@ -5369,7 +5258,259 @@ function showMatchWeeksNavigation() {
     html += `</div>`;
     out.innerHTML = html;
 }
+function showMatchWeeksView() {
+    const out = document.getElementById("output");
+    if (!out) return;
+    
+    let html = `<h2>📅 Tournament Match Weeks</h2>`;
+    
+    if (!window.GROUP_RESULTS && !window.TOURNAMENT) {
+        html += `
+            <div class="group-card">
+                <div class="group-title">No Tournament Data</div>
+                <p>Run a tournament first to see match weeks and results.</p>
+            </div>
+        `;
+        out.innerHTML = html;
+        return;
+    }
+    
+    html += `
+        <div style="background: #2d3748; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="margin: 0 0 15px 0; color: #e5e7eb;">Navigate Through the Tournament</h3>
+            <p style="margin: 5px 0; color: #cbd5e1;">Select a match week to view all games with player of the match awards and detailed summaries.</p>
+        </div>
+        
+        <div class="group-grid">
+    `;
+    
+    // Group Stage Weeks (1-6)
+    for (let week = 1; week <= 6; week++) {
+        html += `
+            <div class="group-card" onclick="displayMatchWeekResults(${week})" style="cursor: pointer; transition: transform 0.2s;">
+                <div class="group-title">Match Week ${week}</div>
+                <div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 2em; margin-bottom: 10px;">⚽</div>
+                    <p style="color: #9ca3af; font-size: 0.9em;">Group Stage</p>
+                    <p style="color: #cbd5e1; font-weight: bold;">View all matches</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Knockout Stage Weeks (7+)
+    if (window.TOURNAMENT) {
+        const knockoutRounds = [
+            { week: 7, name: "Round of 32", description: "First Knockout Round" },
+            { week: 8, name: "Round of 16", description: "Second Knockout Round" },
+            { week: 9, name: "Quarter Finals", description: "Elite Eight" },
+            { week: 10, name: "Semi Finals", description: "Final Four" },
+            { week: 11, name: "The Final", description: "Championship Match" }
+        ];
+        
+        knockoutRounds.forEach(round => {
+            html += `
+                <div class="group-card" onclick="displayKnockoutRound('${round.name}')" style="cursor: pointer; transition: transform 0.2s; border-color: #f59e0b;">
+                    <div class="group-title" style="color: #f59e0b;">${round.name}</div>
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="font-size: 2em; margin-bottom: 10px;">🎯</div>
+                        <p style="color: #9ca3af; font-size: 0.9em;">${round.description}</p>
+                        <p style="color: #fbbf24; font-weight: bold;">Knockout Stage</p>
+                    </div>
+                </div>
+            `;
+        });
+    }
+    
+    html += `</div>`;
+    out.innerHTML = html;
+}
+function addMatchWeeksButton() {
+    const viewsColumn = document.querySelector('.control-column:nth-child(2)');
+    if (viewsColumn) {
+        // Check if button already exists
+        if (!document.getElementById('btnMatchWeeks')) {
+            const matchWeeksBtn = document.createElement('button');
+            matchWeeksBtn.className = 'ctrl-btn btn-purple';
+            matchWeeksBtn.id = 'btnMatchWeeks';
+            matchWeeksBtn.innerHTML = `
+                <div class="ctrl-btn-main">
+                    <span class="ctrl-btn-title">Match Weeks</span>
+                    <span class="ctrl-btn-subtitle">View all games with POTM & summaries</span>
+                </div>
+                <span class="ctrl-btn-tag">📅</span>
+            `;
+            matchWeeksBtn.addEventListener('click', showMatchWeeksNavigation);
+            viewsColumn.appendChild(matchWeeksBtn);
+            console.log("✅ Match Weeks button added");
+        }
+    }
+}
+// Add this function to show match weeks navigation
+function showMatchWeeksView() {
+    const out = document.getElementById("output");
+    if (!out) return;
+    
+    let html = `<h2>📅 Tournament Match Weeks</h2>`;
+    
+    if (!window.GROUP_RESULTS && !window.TOURNAMENT) {
+        html += `
+            <div class="group-card">
+                <div class="group-title">No Tournament Data</div>
+                <p>Run a tournament first to see match weeks and results.</p>
+            </div>
+        `;
+        out.innerHTML = html;
+        return;
+    }
+    
+    html += `
+        <div style="background: #2d3748; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="margin: 0 0 15px 0; color: #e5e7eb;">Navigate Through the Tournament</h3>
+            <p style="margin: 5px 0; color: #cbd5e1;">Select a match week to view all games with player of the match awards and detailed summaries.</p>
+        </div>
+        
+        <div class="group-grid">
+    `;
+    
+    // Group Stage Weeks (1-6)
+    for (let week = 1; week <= 6; week++) {
+        html += `
+            <div class="group-card" onclick="displayMatchWeekResults(${week})" style="cursor: pointer; transition: transform 0.2s;">
+                <div class="group-title">Match Week ${week}</div>
+                <div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 2em; margin-bottom: 10px;">⚽</div>
+                    <p style="color: #9ca3af; font-size: 0.9em;">Group Stage</p>
+                    <p style="color: #cbd5e1; font-weight: bold;">View all matches</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Knockout Stage Weeks (7+)
+    if (window.TOURNAMENT) {
+        const knockoutRounds = [
+            { week: 7, name: "Round of 32", description: "First Knockout Round" },
+            { week: 8, name: "Round of 16", description: "Second Knockout Round" },
+            { week: 9, name: "Quarter Finals", description: "Elite Eight" },
+            { week: 10, name: "Semi Finals", description: "Final Four" },
+            { week: 11, name: "The Final", description: "Championship Match" }
+        ];
+        
+        knockoutRounds.forEach(round => {
+            html += `
+                <div class="group-card" onclick="displayKnockoutRound('${round.name}')" style="cursor: pointer; transition: transform 0.2s; border-color: #f59e0b;">
+                    <div class="group-title" style="color: #f59e0b;">${round.name}</div>
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="font-size: 2em; margin-bottom: 10px;">🎯</div>
+                        <p style="color: #9ca3af; font-size: 0.9em;">${round.description}</p>
+                        <p style="color: #fbbf24; font-weight: bold;">Knockout Stage</p>
+                    </div>
+                </div>
+            `;
+        });
+    }
+    
+    html += `</div>`;
+    out.innerHTML = html;
+}
 
+// Function to display individual match week results
+function displayMatchWeekResults(matchWeekNumber) {
+    const out = document.getElementById("output");
+    if (!out) return;
+    
+    let html = `<h2>📅 Match Week ${matchWeekNumber} Results</h2>`;
+    
+    // Get all matches for this matchweek
+    const weekMatches = [];
+    
+    if (window.GROUP_RESULTS) {
+        Object.values(window.GROUP_RESULTS).forEach(group => {
+            if (group.matches && group.matches.length > 0) {
+                group.matches.forEach(match => {
+                    // Simple distribution based on team names
+                    const matchHash = (match.teamA + match.teamB).length;
+                    const calculatedWeek = (matchHash % 6) + 1;
+                    
+                    if (calculatedWeek === matchWeekNumber) {
+                        weekMatches.push({
+                            ...match,
+                            groupName: group.name
+                        });
+                    }
+                });
+            }
+        });
+    }
+    
+    if (weekMatches.length === 0) {
+        html += `
+            <div class="group-card">
+                <div class="group-title">No Matches Found</div>
+                <p>No matches found for match week ${matchWeekNumber}.</p>
+            </div>
+        `;
+        out.innerHTML = html;
+        return;
+    }
+    
+    weekMatches.forEach(match => {
+        const matchDetails = MATCH_DETAILS_DB[match.matchId];
+        const potg = matchDetails?.playerOfTheGame;
+        const summary = generateMatchSummary(match, match.teamA, match.teamB);
+        
+        html += `
+            <div class="group-card" style="margin-bottom: 15px;">
+                <div class="group-title">${match.groupName} - ${match.isHome ? 'Home Leg' : 'Away Leg'}</div>
+                <div style="padding: 15px;">
+                    <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: center; margin-bottom: 15px;">
+                        <div style="text-align: right; font-weight: bold; font-size: 1.1em;">
+                            ${match.teamA}
+                        </div>
+                        <div style="text-align: center; background: #1e3a8a; padding: 10px 15px; border-radius: 8px; font-weight: bold; font-size: 1.2em; color: white;">
+                            ${match.scoreA} - ${match.scoreB}
+                        </div>
+                        <div style="font-weight: bold; font-size: 1.1em;">
+                            ${match.teamB}
+                        </div>
+                    </div>
+                    
+                    ${potg ? `
+                        <div style="background: rgba(245, 158, 11, 0.2); padding: 10px; border-radius: 6px; margin: 10px 0; border: 1px solid #f59e0b;">
+                            <strong style="color: #f59e0b;">⭐ Player of the Match: ${potg.player}</strong>
+                            <div style="font-size: 0.9em; margin-top: 5px;">
+                                Rating: ${potg.rating}/10 • 
+                                ${potg.goals > 0 ? `${potg.goals} goal${potg.goals > 1 ? 's' : ''} • ` : ''}
+                                ${potg.assists > 0 ? `${potg.assists} assist${potg.assists > 1 ? 's' : ''}` : ''}
+                                ${!potg.goals && !potg.assists ? 'Outstanding performance' : ''}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <div style="background: rgba(15, 23, 42, 0.8); padding: 10px; border-radius: 6px; margin-top: 10px;">
+                        <div style="color: #9ca3af; font-style: italic; font-size: 0.9em;">
+                            "${summary}"
+                        </div>
+                    </div>
+                    
+                    ${matchDetails?.events?.goals?.length > 0 ? `
+                        <div style="margin-top: 10px;">
+                            <div style="font-size: 0.8em; color: #6b7280; margin-bottom: 5px;">Match Events:</div>
+                            <div style="font-size: 0.8em;">
+                                ${matchDetails.events.goals.map(goal => 
+                                    `⚽ ${goal.minute}' - ${goal.player} (${goal.team})${goal.assisted ? ` assisted by ${goal.assisted}` : ''}`
+                                ).join('<br>')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    });
+    
+    out.innerHTML = html;
+}
 function displayKnockoutRound(roundName) {
     const out = document.getElementById("output");
     if (!out || !window.TOURNAMENT) return;
@@ -5523,29 +5664,6 @@ function displayKnockoutRound(roundName) {
     
     out.innerHTML = html;
 }
-
-function addMatchWeeksButton() {
-    const viewsColumn = document.querySelector('.control-column:nth-child(2)');
-    if (viewsColumn) {
-        // Check if button already exists
-        if (!document.getElementById('btnMatchWeeks')) {
-            const matchWeeksBtn = document.createElement('button');
-            matchWeeksBtn.className = 'ctrl-btn btn-purple';
-            matchWeeksBtn.id = 'btnMatchWeeks';
-            matchWeeksBtn.innerHTML = `
-                <div class="ctrl-btn-main">
-                    <span class="ctrl-btn-title">Match Weeks</span>
-                    <span class="ctrl-btn-subtitle">View all games with POTM & summaries</span>
-                </div>
-                <span class="ctrl-btn-tag">📅</span>
-            `;
-            matchWeeksBtn.addEventListener('click', showMatchWeeksNavigation);
-            viewsColumn.appendChild(matchWeeksBtn);
-            console.log("✅ Match Weeks button added");
-        }
-    }
-}
-
 function enableStatsButton() {
   const btnStats = document.getElementById("btnStats");
   if (btnStats) {
@@ -5804,7 +5922,6 @@ function closeTeamDetail() {
   const modal = document.getElementById('teamDetailModal');
   if (modal) modal.classList.remove('active');
 }
-
 /************* INITIALIZATION *************/
 document.addEventListener('DOMContentLoaded', function() {
     console.log("🏁 Initializing All-Time Football Simulator...");
@@ -5823,206 +5940,218 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log("🔗 Connecting buttons and event handlers...");
     
-    // ADD THIS LINE HERE:
-    addMatchWeeksButton();
-  
-  // Tournament Control Buttons
-  const generateBtn = document.getElementById('btnDraw');
-  if (generateBtn) {
-    generateBtn.addEventListener('click', startTournament);
-    console.log("✅ Generate Groups button connected");
-  }
-  
-  const groupStageBtn = document.getElementById('btnGroupStage');
-  if (groupStageBtn) {
-    groupStageBtn.addEventListener('click', runGroupStage);
-    console.log("✅ Group Stage button connected");
-  }
-  
-  const knockoutsBtn = document.getElementById('btnKnockouts');
-  if (knockoutsBtn) {
-    knockoutsBtn.addEventListener('click', runKnockouts);
-    console.log("✅ Knockouts button connected");
-  }
-  
-  // View Buttons
-  const statsBtn = document.getElementById('btnStats');
-  if (statsBtn) {
-    statsBtn.disabled = false;
-    statsBtn.addEventListener('click', showPlayerStats);
-    console.log("✅ Player Stats button connected");
-  }
-  
-  const legacyBtn = document.getElementById('btnClubLegacy');
-  if (legacyBtn) {
-    legacyBtn.addEventListener('click', showClubLegacy);
-    console.log("✅ Club Legacy button connected");
-  }
-  
-  const customMatchBtn = document.getElementById('btnCustomMatch');
-  if (customMatchBtn) {
-    customMatchBtn.addEventListener('click', openCustomMatch);
-    console.log("✅ Custom Match button connected");
-  }
-  
-  const historyBtn = document.getElementById('btnHistory');
-  if (historyBtn) {
-    historyBtn.addEventListener('click', openHistory);
-    console.log("✅ History button connected");
-  }
-  
-  // Dynamically created view buttons
-  const viewsColumn = document.querySelector('.control-column:nth-child(2)');
-  if (viewsColumn) {
-    // Clear any existing dynamically added buttons to avoid duplicates
-    const existingDynamicButtons = viewsColumn.querySelectorAll('[id^="btn"]');
-    existingDynamicButtons.forEach(btn => {
-      if (!btn.id.includes('btnStats') && !btn.id.includes('btnClubLegacy') && 
-          !btn.id.includes('btnCustomMatch') && !btn.id.includes('btnHistory')) {
-        btn.remove();
-      }
-    });
-    
-    // Group Stage Results Button
-    const groupStageResultsBtn = document.createElement('button');
-    groupStageResultsBtn.className = 'ctrl-btn btn-purple';
-    groupStageResultsBtn.id = 'btnGroupStageResults';
-    groupStageResultsBtn.innerHTML = `
-      <div class="ctrl-btn-main">
-        <span class="ctrl-btn-title">Group Stage Results</span>
-        <span class="ctrl-btn-subtitle">Final standings & qualified teams</span>
-      </div>
-      <span class="ctrl-btn-tag">📈</span>
-    `;
-    groupStageResultsBtn.addEventListener('click', showGroupStageResults);
-    viewsColumn.appendChild(groupStageResultsBtn);
-    console.log("✅ Group Stage Results button added");
-    
-    // Tournament Overview Button
-    const overviewBtn = document.createElement('button');
-    overviewBtn.className = 'ctrl-btn btn-purple';
-    overviewBtn.id = 'btnOverview';
-    overviewBtn.innerHTML = `
-      <div class="ctrl-btn-main">
-        <span class="ctrl-btn-title">Tournament Overview</span>
-        <span class="ctrl-btn-subtitle">Match-by-match results & summaries</span>
-      </div>
-      <span class="ctrl-btn-tag">📅</span>
-    `;
-    overviewBtn.addEventListener('click', showTournamentOverview);
-    viewsColumn.appendChild(overviewBtn);
-    console.log("✅ Tournament Overview button added");
-    
-    // Tournament Bracket Button
-    const bracketBtn = document.createElement('button');
-    bracketBtn.className = 'ctrl-btn btn-purple';
-    bracketBtn.id = 'btnBracket';
-    bracketBtn.innerHTML = `
-      <div class="ctrl-btn-main">
-        <span class="ctrl-btn-title">Tournament Bracket</span>
-        <span class="ctrl-btn-subtitle">Full knockout bracket visualization</span>
-      </div>
-      <span class="ctrl-btn-tag">🏆</span>
-    `;
-    bracketBtn.addEventListener('click', showTournamentBracket);
-    viewsColumn.appendChild(bracketBtn);
-    console.log("✅ Tournament Bracket button added");
-    
-    // Match Results Button
-    const matchResultsBtn = document.createElement('button');
-    matchResultsBtn.className = 'ctrl-btn btn-purple';
-    matchResultsBtn.id = 'btnMatchResults';
-    matchResultsBtn.innerHTML = `
-      <div class="ctrl-btn-main">
-        <span class="ctrl-btn-title">Match Results</span>
-        <span class="ctrl-btn-subtitle">All games with player ratings & events</span>
-      </div>
-      <span class="ctrl-btn-tag">📋</span>
-    `;
-    matchResultsBtn.addEventListener('click', showMatchResults);
-    viewsColumn.appendChild(matchResultsBtn);
-    console.log("✅ Match Results button added");
-  }
-  
-  // Utility Buttons
-  const themeBtn = document.getElementById('themeToggle');
-  if (themeBtn) {
-    themeBtn.addEventListener('click', toggleTheme);
-    console.log("✅ Theme Toggle button connected");
-  }
-  
-  const resetBtn = document.querySelector('.btn-red');
-  if (resetBtn) {
-    resetBtn.addEventListener('click', resetTournament);
-    console.log("✅ Reset Tournament button connected");
-  }
-  
-  const exportBtn = document.querySelector('.btn-gray');
-  if (exportBtn) {
-    exportBtn.addEventListener('click', exportTournament);
-    console.log("✅ Export Tournament button connected");
-  }
-  
-  const importBtn = document.querySelector('.small-btn');
-  if (importBtn) {
-    importBtn.addEventListener('click', handleImport);
-    console.log("✅ Import Save button connected");
-  }
-  
-  // Modal-specific buttons
-  const customMatchSimBtn = document.querySelector('#customMatchModal .small-btn');
-  if (customMatchSimBtn) {
-    customMatchSimBtn.addEventListener('click', simulateCustomMatch);
-    console.log("✅ Custom Match Simulate button connected");
-  }
-  
-  // RNG Preset Buttons
-  document.querySelectorAll('.rng-pill').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const value = parseFloat(this.textContent === 'Tight' ? '0.7' : 
-                              this.textContent === 'Balanced' ? '1.0' : '1.3');
-      setRNGPreset(value, this);
-    });
-  });
-  console.log("✅ RNG Preset buttons connected");
-  
-  // Modal Close Buttons
-  const modalCloseButtons = [
-    { id: 'customMatchModal', func: closeCustomMatch },
-    { id: 'historyModal', func: closeHistory },
-    { id: 'matchDetailModal', func: closeMatchDetail },
-    { id: 'teamDetailModal', func: closeTeamDetail }
-  ];
-  
-  modalCloseButtons.forEach(modal => {
-    const modalElement = document.getElementById(modal.id);
-    if (modalElement) {
-      const closeBtn = modalElement.querySelector('.modal-close');
-      if (closeBtn) {
-        closeBtn.addEventListener('click', modal.func);
-      }
+    // Tournament Control Buttons
+    const generateBtn = document.getElementById('btnDraw');
+    if (generateBtn) {
+        generateBtn.addEventListener('click', startTournament);
+        console.log("✅ Generate Groups button connected");
     }
-  });
-  console.log("✅ Modal close buttons connected");
-  
-  // Initialize custom match dropdowns
-  populateCustomMatchDropdowns();
-  console.log("✅ Custom match dropdowns populated");
-  
-  console.log("🎉 App initialized successfully!");
-  console.log("📊 Features available:");
-  console.log("   • Tournament generation with 64 teams");
-  console.log("   • Group stage simulation (home & away)");
-  console.log("   • Knockout stages with two-leg ties");
-  console.log("   • Player statistics & ratings");
-  console.log("   • Club legacy tracking with all-time records");
-  console.log("   • Custom match simulator");
-  console.log("   • Tournament overview with complete match summaries");
-  console.log("   • Tournament bracket visualization");
-  console.log("   • Group stage results preservation");
-  console.log("   • Export/import functionality");
-  console.log("   • Match-by-match results with player of the match");
-  console.log("   • Complete tournament journey navigation");
+    
+    const groupStageBtn = document.getElementById('btnGroupStage');
+    if (groupStageBtn) {
+        groupStageBtn.addEventListener('click', runGroupStage);
+        console.log("✅ Group Stage button connected");
+    }
+    
+    const knockoutsBtn = document.getElementById('btnKnockouts');
+    if (knockoutsBtn) {
+        knockoutsBtn.addEventListener('click', runKnockouts);
+        console.log("✅ Knockouts button connected");
+    }
+    
+    // View Buttons
+    const statsBtn = document.getElementById('btnStats');
+    if (statsBtn) {
+        statsBtn.disabled = true; // Start disabled until data exists
+        statsBtn.addEventListener('click', showPlayerStats);
+        console.log("✅ Player Stats button connected");
+    }
+    
+    const legacyBtn = document.getElementById('btnClubLegacy');
+    if (legacyBtn) {
+        legacyBtn.addEventListener('click', showClubLegacy);
+        console.log("✅ Club Legacy button connected");
+    }
+    
+    const customMatchBtn = document.getElementById('btnCustomMatch');
+    if (customMatchBtn) {
+        customMatchBtn.addEventListener('click', openCustomMatch);
+        console.log("✅ Custom Match button connected");
+    }
+    
+    const historyBtn = document.getElementById('btnHistory');
+    if (historyBtn) {
+        historyBtn.addEventListener('click', openHistory);
+        console.log("✅ History button connected");
+    }
+    
+    // Dynamically created view buttons
+    const viewsColumn = document.querySelector('.control-column:nth-child(2)');
+    if (viewsColumn) {
+        // Clear any existing dynamically added buttons to avoid duplicates
+        const existingDynamicButtons = viewsColumn.querySelectorAll('[id^="btn"]');
+        existingDynamicButtons.forEach(btn => {
+            if (!btn.id.includes('btnStats') && !btn.id.includes('btnClubLegacy') && 
+                !btn.id.includes('btnCustomMatch') && !btn.id.includes('btnHistory')) {
+                btn.remove();
+            }
+        });
+        
+        // Group Stage Results Button
+        const groupStageResultsBtn = document.createElement('button');
+        groupStageResultsBtn.className = 'ctrl-btn btn-purple';
+        groupStageResultsBtn.id = 'btnGroupStageResults';
+        groupStageResultsBtn.innerHTML = `
+            <div class="ctrl-btn-main">
+                <span class="ctrl-btn-title">Group Stage Results</span>
+                <span class="ctrl-btn-subtitle">Final standings & qualified teams</span>
+            </div>
+            <span class="ctrl-btn-tag">📈</span>
+        `;
+        groupStageResultsBtn.addEventListener('click', showGroupStageResults);
+        viewsColumn.appendChild(groupStageResultsBtn);
+        console.log("✅ Group Stage Results button added");
+        
+        // Tournament Overview Button
+        const overviewBtn = document.createElement('button');
+        overviewBtn.className = 'ctrl-btn btn-purple';
+        overviewBtn.id = 'btnOverview';
+        overviewBtn.innerHTML = `
+            <div class="ctrl-btn-main">
+                <span class="ctrl-btn-title">Tournament Overview</span>
+                <span class="ctrl-btn-subtitle">Match-by-match results & summaries</span>
+            </div>
+            <span class="ctrl-btn-tag">📅</span>
+        `;
+        overviewBtn.addEventListener('click', showTournamentOverview);
+        viewsColumn.appendChild(overviewBtn);
+        console.log("✅ Tournament Overview button added");
+        
+        // Tournament Bracket Button
+        const bracketBtn = document.createElement('button');
+        bracketBtn.className = 'ctrl-btn btn-purple';
+        bracketBtn.id = 'btnBracket';
+        bracketBtn.innerHTML = `
+            <div class="ctrl-btn-main">
+                <span class="ctrl-btn-title">Tournament Bracket</span>
+                <span class="ctrl-btn-subtitle">Full knockout bracket visualization</span>
+            </div>
+            <span class="ctrl-btn-tag">🏆</span>
+        `;
+        bracketBtn.addEventListener('click', showTournamentBracket);
+        viewsColumn.appendChild(bracketBtn);
+        console.log("✅ Tournament Bracket button added");
+        
+        // Match Results Button
+        const matchResultsBtn = document.createElement('button');
+        matchResultsBtn.className = 'ctrl-btn btn-purple';
+        matchResultsBtn.id = 'btnMatchResults';
+        matchResultsBtn.innerHTML = `
+            <div class="ctrl-btn-main">
+                <span class="ctrl-btn-title">Match Results</span>
+                <span class="ctrl-btn-subtitle">All games with player ratings & events</span>
+            </div>
+            <span class="ctrl-btn-tag">📋</span>
+        `;
+        matchResultsBtn.addEventListener('click', showMatchResults);
+        viewsColumn.appendChild(matchResultsBtn);
+        console.log("✅ Match Results button added");
+        
+        // Match Weeks Button
+        const matchWeeksBtn = document.createElement('button');
+        matchWeeksBtn.className = 'ctrl-btn btn-purple';
+        matchWeeksBtn.id = 'btnMatchWeeks';
+        matchWeeksBtn.innerHTML = `
+            <div class="ctrl-btn-main">
+                <span class="ctrl-btn-title">Match Weeks</span>
+                <span class="ctrl-btn-subtitle">View all games with POTM & summaries</span>
+            </div>
+            <span class="ctrl-btn-tag">📅</span>
+        `;
+        matchWeeksBtn.addEventListener('click', showMatchWeeksView);
+        viewsColumn.appendChild(matchWeeksBtn);
+        console.log("✅ Match Weeks button added");
+    }
+    
+    // Utility Buttons
+    const themeBtn = document.getElementById('themeToggle');
+    if (themeBtn) {
+        themeBtn.addEventListener('click', toggleTheme);
+        console.log("✅ Theme Toggle button connected");
+    }
+    
+    const resetBtn = document.querySelector('.btn-red');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', resetTournament);
+        console.log("✅ Reset Tournament button connected");
+    }
+    
+    const exportBtn = document.querySelector('.btn-gray');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', exportTournament);
+        console.log("✅ Export Tournament button connected");
+    }
+    
+    const importBtn = document.querySelector('.small-btn');
+    if (importBtn) {
+        importBtn.addEventListener('click', handleImport);
+        console.log("✅ Import Save button connected");
+    }
+    
+    // Modal-specific buttons
+    const customMatchSimBtn = document.querySelector('#customMatchModal .small-btn');
+    if (customMatchSimBtn) {
+        customMatchSimBtn.addEventListener('click', simulateCustomMatch);
+        console.log("✅ Custom Match Simulate button connected");
+    }
+    
+    // RNG Preset Buttons
+    document.querySelectorAll('.rng-pill').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const value = parseFloat(this.textContent === 'Tight' ? '0.7' : 
+                                    this.textContent === 'Balanced' ? '1.0' : '1.3');
+            setRNGPreset(value, this);
+        });
+    });
+    console.log("✅ RNG Preset buttons connected");
+    
+    // Modal Close Buttons
+    const modalCloseButtons = [
+        { id: 'customMatchModal', func: closeCustomMatch },
+        { id: 'historyModal', func: closeHistory },
+        { id: 'matchDetailModal', func: closeMatchDetail },
+        { id: 'teamDetailModal', func: closeTeamDetail }
+    ];
+    
+    modalCloseButtons.forEach(modal => {
+        const modalElement = document.getElementById(modal.id);
+        if (modalElement) {
+            const closeBtn = modalElement.querySelector('.modal-close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', modal.func);
+            }
+        }
+    });
+    console.log("✅ Modal close buttons connected");
+    
+    // Initialize custom match dropdowns
+    populateCustomMatchDropdowns();
+    console.log("✅ Custom match dropdowns populated");
+    
+    console.log("🎉 App initialized successfully!");
+    console.log("📊 Features available:");
+    console.log("   • Tournament generation with 64 teams");
+    console.log("   • Group stage simulation (home & away)");
+    console.log("   • Knockout stages with two-leg ties");
+    console.log("   • Player statistics & ratings");
+    console.log("   • Club legacy tracking with all-time records");
+    console.log("   • Custom match simulator");
+    console.log("   • Tournament overview with complete match summaries");
+    console.log("   • Tournament bracket visualization");
+    console.log("   • Group stage results preservation");
+    console.log("   • Export/import functionality");
+    console.log("   • Match-by-match results with player of the match");
+    console.log("   • Complete tournament journey navigation");
 });
 
 // Make functions available globally for HTML onclick handlers
@@ -6052,4 +6181,6 @@ window.displayMatchWeekResults = displayMatchWeekResults;
 window.displayKnockoutRound = displayKnockoutRound;
 window.showMatchWeeksNavigation = showMatchWeeksNavigation;
 window.generateMatchSummary = generateMatchSummary;
+// Ensure all opened braces are properly closed before this line
+}
 </script>

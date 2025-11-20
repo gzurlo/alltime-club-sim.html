@@ -3206,6 +3206,424 @@ window.GROUP_RESULTS = null;
 window.TOURNAMENT = null;
 window.CURRENT_TOURNAMENT_ID = null;
 
+/************* FIXED STYLE INJECTION FUNCTIONS *************/
+
+// Create a single function to inject all styles to avoid duplicate declarations
+function injectAllStyles() {
+    const existingStyle = document.getElementById('all-injected-styles');
+    if (existingStyle) {
+        existingStyle.remove();
+    }
+
+    const styleSheet = document.createElement('style');
+    styleSheet.id = 'all-injected-styles';
+    
+    // Combine all CSS from different functions
+    const allStyles = `
+        /* Enhanced CSS for utility functions */
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideDown {
+            from {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(-50%) translateY(100%);
+                opacity: 0;
+            }
+        }
+        
+        .rng-pill {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .rng-pill.active {
+            background: #3b82f6 !important;
+            color: white !important;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+        }
+        
+        .rng-pill:hover:not(.active) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        #rngSlider {
+            background: linear-gradient(90deg, #10b981 0%, #f59e0b 50%, #ef4444 100%);
+            height: 6px;
+            border-radius: 3px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        #rngSlider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 2px solid #3b82f6;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
+        }
+        
+        #rngSlider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal.active {
+            opacity: 1;
+        }
+        
+        .modal-content {
+            background: #1f2937;
+            border-radius: 12px;
+            max-width: 90vw;
+            max-height: 90vh;
+            width: 600px;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            border: 1px solid #374151;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 25px;
+            border-bottom: 1px solid #374151;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            color: #e5e7eb;
+            font-size: 1.4em;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.8em;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        
+        .modal-close:hover {
+            background: #374151;
+            color: #e5e7eb;
+        }
+        
+        .modal-body {
+            padding: 25px;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #374151;
+        }
+
+        /* Enhanced table styles */
+        .table-container {
+            overflow-x: auto;
+            margin: 0 -15px;
+            padding: 0 15px;
+        }
+        
+        .standings-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95em;
+        }
+        
+        .standings-table th {
+            background: rgba(30, 41, 59, 0.8);
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #e5e7eb;
+            border-bottom: 2px solid #374151;
+        }
+        
+        .standings-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid rgba(55, 65, 81, 0.5);
+        }
+        
+        .standings-table tr:hover {
+            background: rgba(55, 65, 81, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .standings-table {
+                font-size: 0.85em;
+            }
+            
+            .standings-table th,
+            .standings-table td {
+                padding: 8px 4px;
+            }
+        }
+    `;
+
+    styleSheet.textContent = allStyles;
+    document.head.appendChild(styleSheet);
+}
+
+/************* MISSING FUNCTION DEFINITIONS *************/
+
+// Define missing functions that buttons depend on
+function runFullTournament() {
+    console.log("🚀 Running full tournament...");
+    
+    // Generate groups first
+    if (!window.GROUPS) {
+        startTournament();
+    }
+    
+    // Wait a bit then run group stage
+    setTimeout(() => {
+        if (window.GROUPS && !window.GROUP_RESULTS) {
+            runGroupStage();
+        }
+        
+        // Wait more then run knockouts
+        setTimeout(() => {
+            if (window.GROUP_RESULTS && !window.TOURNAMENT) {
+                runKnockouts();
+            }
+            
+            // Show tournament overview when complete
+            setTimeout(() => {
+                if (window.TOURNAMENT) {
+                    showTournamentOverview();
+                    showUtilityMessage("Full tournament completed successfully!", "success");
+                }
+            }, 500);
+        }, 500);
+    }, 500);
+}
+
+function showEnhancedStatistics() {
+    const out = document.getElementById("output");
+    if (!out) return;
+    
+    out.innerHTML = `
+        <div class="group-card">
+            <div class="group-title">📊 Enhanced Statistics</div>
+            <div style="padding: 40px; text-align: center;">
+                <div style="font-size: 64px; margin-bottom: 20px;">📈</div>
+                <p style="font-size: 1.2em; margin-bottom: 10px;"><strong>Enhanced Statistics</strong></p>
+                <p style="color: #9ca3af; margin-bottom: 20px;">Advanced analytics and player comparisons coming soon!</p>
+                <button onclick="showPlayerStats()" class="btn-primary">View Basic Statistics</button>
+            </div>
+        </div>
+    `;
+}
+
+function viewTeamPlayers(teamName) {
+    const out = document.getElementById("output");
+    if (!out) return;
+    
+    const teamPlayers = Object.values(PLAYER_DB).filter(p => p.team === teamName && p.apps > 0);
+    
+    let html = `
+        <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 20px;">
+            <h2>👥 ${teamName} Squad</h2>
+            <button onclick="openTeamDetail('${teamName}')" class="btn-secondary">← Back to Team</button>
+        </div>
+        
+        <div class="group-card">
+            <div class="group-title">Player Statistics</div>
+    `;
+    
+    if (teamPlayers.length > 0) {
+        html += `
+            <div class="table-container">
+                <table class="standings-table">
+                    <thead>
+                        <tr>
+                            <th>Player</th>
+                            <th>Goals</th>
+                            <th>Assists</th>
+                            <th>Apps</th>
+                            <th>Rating</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        
+        teamPlayers.forEach(player => {
+            html += `
+                <tr>
+                    <td><strong>${player.name}</strong></td>
+                    <td>${player.goals}</td>
+                    <td>${player.assists}</td>
+                    <td>${player.apps}</td>
+                    <td>${player.avgRating ? player.avgRating.toFixed(1) : 'N/A'}</td>
+                </tr>
+            `;
+        });
+        
+        html += `</tbody></table></div>`;
+    } else {
+        html += `
+            <div style="padding: 40px; text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 20px;">👥</div>
+                <p><strong>No player data available</strong></p>
+                <p style="color: #9ca3af;">Player statistics will appear after simulating matches.</p>
+            </div>
+        `;
+    }
+    
+    html += `</div>`;
+    out.innerHTML = html;
+}
+
+function replaySavedMatch(matchId) {
+    console.log("Replaying saved match:", matchId);
+    showUtilityMessage("Match replay functionality coming soon!", "info");
+}
+
+function deleteSavedMatch(matchId) {
+    try {
+        const savedMatches = JSON.parse(localStorage.getItem('savedCustomMatches') || '[]');
+        const updatedMatches = savedMatches.filter(match => match.id !== matchId);
+        localStorage.setItem('savedCustomMatches', JSON.stringify(updatedMatches));
+        showCustomMatchHistory();
+        showUtilityMessage("Match deleted successfully!", "success");
+    } catch (error) {
+        showUtilityMessage("Error deleting match: " + error.message, "error");
+    }
+}
+
+function clearCustomMatchHistory() {
+    if (confirm("Are you sure you want to clear all saved custom matches?")) {
+        localStorage.removeItem('savedCustomMatches');
+        showCustomMatchHistory();
+        showUtilityMessage("Custom match history cleared!", "success");
+    }
+}
+
+function loadHistoryContent(filter = null) {
+    const modal = document.getElementById('historyModal');
+    if (!modal) return;
+    
+    let content = `
+        <div class="modal-header">
+            <h2>📋 Match History</h2>
+            <button class="modal-close" onclick="closeHistory()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div style="text-align: center; padding: 40px;">
+                <div style="font-size: 64px; margin-bottom: 20px;">📚</div>
+                <p style="font-size: 1.2em; margin-bottom: 10px;"><strong>Match History</strong></p>
+                <p style="color: #9ca3af;">Comprehensive match history coming soon!</p>
+            </div>
+        </div>
+    `;
+    
+    modal.querySelector('.modal-content').innerHTML = content;
+}
+
+function populateSettingsModal() {
+    const modal = document.getElementById('settingsModal');
+    if (!modal) return;
+    
+    const content = `
+        <div class="modal-header">
+            <h2>⚙️ Settings</h2>
+            <button class="modal-close" onclick="closeSettings()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div style="text-align: center; padding: 40px;">
+                <div style="font-size: 64px; margin-bottom: 20px;">⚙️</div>
+                <p style="font-size: 1.2em; margin-bottom: 10px;"><strong>Settings</strong></p>
+                <p style="color: #9ca3af;">Configuration options coming soon!</p>
+            </div>
+        </div>
+    `;
+    
+    modal.querySelector('.modal-content').innerHTML = content;
+}
+
+function populateStatisticsModal() {
+    const modal = document.getElementById('statisticsModal');
+    if (!modal) return;
+    
+    const content = `
+        <div class="modal-header">
+            <h2>📊 Statistics</h2>
+            <button class="modal-close" onclick="closeStatistics()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div style="text-align: center; padding: 40px;">
+                <div style="font-size: 64px; margin-bottom: 20px;">📈</div>
+                <p style="font-size: 1.2em; margin-bottom: 10px;"><strong>Advanced Statistics</strong></p>
+                <p style="color: #9ca3af;">Detailed analytics coming soon!</p>
+            </div>
+        </div>
+    `;
+    
+    modal.querySelector('.modal-content').innerHTML = content;
+}
+
+function enhanceSettingsModal() {
+    // Placeholder for future enhancements
+}
+
+function enhanceStatisticsModal() {
+    // Placeholder for future enhancements
+}
+
 /************* ENHANCED CORE FUNCTIONS *************/
 function initTeamsAndPlayers() {
   // Clear any existing data to prevent duplicates
@@ -8732,22 +9150,23 @@ if (document.readyState === 'loading') {
 } else {
   initializeModalSystem();
 }
-/************* ENHANCED INITIALIZATION *************/
+/************* FIXED INITIALIZATION *************/
 document.addEventListener('DOMContentLoaded', function() {
     console.log("🏁 Initializing All-Time Football Simulator...");
     
-    // Initialize core systems
-    initTeamsAndPlayers();
+    // Inject all styles first to avoid duplicate declarations
+    injectAllStyles();
     
-    // Initialize enhanced systems
-    initializeModalSystem();
-    initializeExportFeatures();
-    initializeUtilities();
-    initializeCustomMatchInterface();
+    // Initialize core systems
+    if (typeof initTeamsAndPlayers === 'function') {
+        initTeamsAndPlayers();
+    } else {
+        console.error("❌ initTeamsAndPlayers function not found!");
+    }
     
     // Update UI elements
     const teamCountEl = document.getElementById('teamCount');
-    if (teamCountEl) teamCountEl.textContent = TEAM_POOL.length.toString();
+    if (teamCountEl) teamCountEl.textContent = TEAM_POOL ? TEAM_POOL.length.toString() : "0";
     
     const rngSlider = document.getElementById('rngSlider');
     if (rngSlider) {
@@ -8759,19 +9178,40 @@ document.addEventListener('DOMContentLoaded', function() {
     // Tournament Control Buttons
     const generateBtn = document.getElementById('btnDraw');
     if (generateBtn) {
-        generateBtn.addEventListener('click', startTournament);
+        generateBtn.addEventListener('click', function() {
+            console.log("Generate button clicked");
+            if (typeof startTournament === 'function') {
+                startTournament();
+            } else {
+                console.error("startTournament function not found!");
+            }
+        });
         console.log("✅ Generate Groups button connected");
     }
     
     const groupStageBtn = document.getElementById('btnGroupStage');
     if (groupStageBtn) {
-        groupStageBtn.addEventListener('click', runGroupStage);
+        groupStageBtn.addEventListener('click', function() {
+            console.log("Group Stage button clicked");
+            if (typeof runGroupStage === 'function') {
+                runGroupStage();
+            } else {
+                console.error("runGroupStage function not found!");
+            }
+        });
         console.log("✅ Group Stage button connected");
     }
     
     const knockoutsBtn = document.getElementById('btnKnockouts');
     if (knockoutsBtn) {
-        knockoutsBtn.addEventListener('click', runKnockouts);
+        knockoutsBtn.addEventListener('click', function() {
+            console.log("Knockouts button clicked");
+            if (typeof runKnockouts === 'function') {
+                runKnockouts();
+            } else {
+                console.error("runKnockouts function not found!");
+            }
+        });
         console.log("✅ Knockouts button connected");
     }
     
@@ -8790,37 +9230,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 <span class="ctrl-btn-tag">🚀</span>
             `;
-            newFullTournamentBtn.addEventListener('click', runFullTournament);
+            newFullTournamentBtn.addEventListener('click', function() {
+                console.log("Full Tournament button clicked");
+                runFullTournament();
+            });
             controlsColumn.insertBefore(newFullTournamentBtn, controlsColumn.firstChild);
             console.log("✅ Full Tournament button added");
         }
     }
     
-    // View Buttons
-    const statsBtn = document.getElementById('btnStats');
-    if (statsBtn) {
-        statsBtn.disabled = true; // Start disabled until data exists
-        statsBtn.addEventListener('click', showPlayerStats);
-        console.log("✅ Player Stats button connected");
-    }
+    // View Buttons - Add proper error handling
+    const connectViewButton = (buttonId, clickHandler, buttonName) => {
+        const button = document.getElementById(buttonId);
+        if (button) {
+            button.addEventListener('click', function() {
+                console.log(`${buttonName} button clicked`);
+                if (typeof clickHandler === 'function') {
+                    clickHandler();
+                } else {
+                    console.error(`${buttonName} function not found!`);
+                    showUtilityMessage(`Error: ${buttonName} function not available`, "error");
+                }
+            });
+            console.log(`✅ ${buttonName} button connected`);
+            return true;
+        }
+        return false;
+    };
     
-    const legacyBtn = document.getElementById('btnClubLegacy');
-    if (legacyBtn) {
-        legacyBtn.addEventListener('click', showClubLegacy);
-        console.log("✅ Club Legacy button connected");
-    }
-    
-    const customMatchBtn = document.getElementById('btnCustomMatch');
-    if (customMatchBtn) {
-        customMatchBtn.addEventListener('click', openCustomMatch);
-        console.log("✅ Custom Match button connected");
-    }
-    
-    const historyBtn = document.getElementById('btnHistory');
-    if (historyBtn) {
-        historyBtn.addEventListener('click', openHistory);
-        console.log("✅ History button connected");
-    }
+    // Connect all view buttons with error handling
+    connectViewButton('btnStats', showPlayerStats, 'Player Stats');
+    connectViewButton('btnClubLegacy', showClubLegacy, 'Club Legacy');
+    connectViewButton('btnCustomMatch', openCustomMatch, 'Custom Match');
+    connectViewButton('btnHistory', openHistory, 'History');
     
     // Dynamically created view buttons
     const viewsColumn = document.querySelector('.control-column:nth-child(2)');
@@ -8834,179 +9276,172 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Group Stage Results Button
-        const groupStageResultsBtn = document.createElement('button');
-        groupStageResultsBtn.className = 'ctrl-btn btn-purple';
-        groupStageResultsBtn.id = 'btnGroupStageResults';
-        groupStageResultsBtn.innerHTML = `
-            <div class="ctrl-btn-main">
-                <span class="ctrl-btn-title">Group Stage Results</span>
-                <span class="ctrl-btn-subtitle">Final standings & qualified teams</span>
-            </div>
-            <span class="ctrl-btn-tag">📈</span>
-        `;
-        groupStageResultsBtn.addEventListener('click', showGroupStageResults);
-        viewsColumn.appendChild(groupStageResultsBtn);
-        console.log("✅ Group Stage Results button added");
+        // Create dynamic buttons with proper error handling
+        const createDynamicButton = (id, title, subtitle, icon, clickHandler) => {
+            const button = document.createElement('button');
+            button.className = 'ctrl-btn btn-purple';
+            button.id = id;
+            button.innerHTML = `
+                <div class="ctrl-btn-main">
+                    <span class="ctrl-btn-title">${title}</span>
+                    <span class="ctrl-btn-subtitle">${subtitle}</span>
+                </div>
+                <span class="ctrl-btn-tag">${icon}</span>
+            `;
+            button.addEventListener('click', function() {
+                console.log(`${title} button clicked`);
+                if (typeof clickHandler === 'function') {
+                    clickHandler();
+                } else {
+                    console.error(`${title} function not found!`);
+                    showUtilityMessage(`Error: ${title} function not available`, "error");
+                }
+            });
+            return button;
+        };
         
-        // Tournament Overview Button
-        const overviewBtn = document.createElement('button');
-        overviewBtn.className = 'ctrl-btn btn-purple';
-        overviewBtn.id = 'btnOverview';
-        overviewBtn.innerHTML = `
-            <div class="ctrl-btn-main">
-                <span class="ctrl-btn-title">Tournament Overview</span>
-                <span class="ctrl-btn-subtitle">Match-by-match results & summaries</span>
-            </div>
-            <span class="ctrl-btn-tag">📅</span>
-        `;
-        overviewBtn.addEventListener('click', showTournamentOverview);
-        viewsColumn.appendChild(overviewBtn);
-        console.log("✅ Tournament Overview button added");
+        // Add all dynamic buttons
+        viewsColumn.appendChild(createDynamicButton(
+            'btnGroupStageResults', 
+            'Group Stage Results', 
+            'Final standings & qualified teams', 
+            '📈', 
+            showGroupStageResults
+        ));
         
-        // Tournament Bracket Button
-        const bracketBtn = document.createElement('button');
-        bracketBtn.className = 'ctrl-btn btn-purple';
-        bracketBtn.id = 'btnBracket';
-        bracketBtn.innerHTML = `
-            <div class="ctrl-btn-main">
-                <span class="ctrl-btn-title">Tournament Bracket</span>
-                <span class="ctrl-btn-subtitle">Full knockout bracket visualization</span>
-            </div>
-            <span class="ctrl-btn-tag">🏆</span>
-        `;
-        bracketBtn.addEventListener('click', showTournamentBracket);
-        viewsColumn.appendChild(bracketBtn);
-        console.log("✅ Tournament Bracket button added");
+        viewsColumn.appendChild(createDynamicButton(
+            'btnOverview', 
+            'Tournament Overview', 
+            'Match-by-match results & summaries', 
+            '📅', 
+            showTournamentOverview
+        ));
         
-        // Match Results Button
-        const matchResultsBtn = document.createElement('button');
-        matchResultsBtn.className = 'ctrl-btn btn-purple';
-        matchResultsBtn.id = 'btnMatchResults';
-        matchResultsBtn.innerHTML = `
-            <div class="ctrl-btn-main">
-                <span class="ctrl-btn-title">Match Results</span>
-                <span class="ctrl-btn-subtitle">All games with player ratings & events</span>
-            </div>
-            <span class="ctrl-btn-tag">📋</span>
-        `;
-        matchResultsBtn.addEventListener('click', showMatchResults);
-        viewsColumn.appendChild(matchResultsBtn);
-        console.log("✅ Match Results button added");
+        viewsColumn.appendChild(createDynamicButton(
+            'btnBracket', 
+            'Tournament Bracket', 
+            'Full knockout bracket visualization', 
+            '🏆', 
+            showTournamentBracket
+        ));
         
-        // Match Weeks Button
-        const matchWeeksBtn = document.createElement('button');
-        matchWeeksBtn.className = 'ctrl-btn btn-purple';
-        matchWeeksBtn.id = 'btnMatchWeeks';
-        matchWeeksBtn.innerHTML = `
-            <div class="ctrl-btn-main">
-                <span class="ctrl-btn-title">Match Weeks</span>
-                <span class="ctrl-btn-subtitle">View all games with POTM & summaries</span>
-            </div>
-            <span class="ctrl-btn-tag">📅</span>
-        `;
-        matchWeeksBtn.addEventListener('click', showMatchWeeksView);
-        viewsColumn.appendChild(matchWeeksBtn);
-        console.log("✅ Match Weeks button added");
+        viewsColumn.appendChild(createDynamicButton(
+            'btnMatchResults', 
+            'Match Results', 
+            'All games with player ratings & events', 
+            '📋', 
+            showMatchResults
+        ));
         
-        // Enhanced Statistics Button
-        const enhancedStatsBtn = document.createElement('button');
-        enhancedStatsBtn.className = 'ctrl-btn btn-purple';
-        enhancedStatsBtn.id = 'btnEnhancedStats';
-        enhancedStatsBtn.innerHTML = `
-            <div class="ctrl-btn-main">
-                <span class="ctrl-btn-title">Enhanced Statistics</span>
-                <span class="ctrl-btn-subtitle">Advanced analytics & player comparisons</span>
-            </div>
-            <span class="ctrl-btn-tag">📊</span>
-        `;
-        enhancedStatsBtn.addEventListener('click', showEnhancedStatistics);
-        viewsColumn.appendChild(enhancedStatsBtn);
-        console.log("✅ Enhanced Statistics button added");
+        viewsColumn.appendChild(createDynamicButton(
+            'btnMatchWeeks', 
+            'Match Weeks', 
+            'View all games with POTM & summaries', 
+            '📅', 
+            showMatchWeeksView
+        ));
         
-        // Custom Matches History Button
-        const customHistoryBtn = document.createElement('button');
-        customHistoryBtn.className = 'ctrl-btn btn-purple';
-        customHistoryBtn.id = 'btnCustomHistory';
-        customHistoryBtn.innerHTML = `
-            <div class="ctrl-btn-main">
-                <span class="ctrl-btn-title">Custom Matches</span>
-                <span class="ctrl-btn-subtitle">Saved custom matches & replays</span>
-            </div>
-            <span class="ctrl-btn-tag">💾</span>
-        `;
-        customHistoryBtn.addEventListener('click', showCustomMatchHistory);
-        viewsColumn.appendChild(customHistoryBtn);
-        console.log("✅ Custom Matches History button added");
+        viewsColumn.appendChild(createDynamicButton(
+            'btnEnhancedStats', 
+            'Enhanced Statistics', 
+            'Advanced analytics & player comparisons', 
+            '📊', 
+            showEnhancedStatistics
+        ));
+        
+        viewsColumn.appendChild(createDynamicButton(
+            'btnCustomHistory', 
+            'Custom Matches', 
+            'Saved custom matches & replays', 
+            '💾', 
+            showCustomMatchHistory
+        ));
+        
+        console.log("✅ All dynamic view buttons added");
     }
     
-    // Utility Buttons
-    const themeBtn = document.getElementById('themeToggle');
-    if (themeBtn) {
-        themeBtn.addEventListener('click', toggleTheme);
-        console.log("✅ Theme Toggle button connected");
-    }
+    // Utility Buttons with error handling
+    const connectUtilityButton = (selector, clickHandler, buttonName) => {
+        const button = document.querySelector(selector);
+        if (button) {
+            button.addEventListener('click', function() {
+                console.log(`${buttonName} button clicked`);
+                if (typeof clickHandler === 'function') {
+                    clickHandler();
+                } else {
+                    console.error(`${buttonName} function not found!`);
+                    showUtilityMessage(`Error: ${buttonName} function not available`, "error");
+                }
+            });
+            console.log(`✅ ${buttonName} button connected`);
+        }
+    };
     
-    const resetBtn = document.querySelector('.btn-red');
-    if (resetBtn) {
-        resetBtn.addEventListener('click', resetTournament);
-        console.log("✅ Reset Tournament button connected");
-    }
-    
-    const exportBtn = document.querySelector('.btn-gray');
-    if (exportBtn) {
-        exportBtn.addEventListener('click', enhancedExportTournament);
-        console.log("✅ Export Tournament button connected");
-    }
-    
-    const importBtn = document.querySelector('.small-btn');
-    if (importBtn) {
-        importBtn.addEventListener('click', enhancedHandleImport);
-        console.log("✅ Import Save button connected");
-    }
+    connectUtilityButton('#themeToggle', toggleTheme, 'Theme Toggle');
+    connectUtilityButton('.btn-red', resetTournament, 'Reset Tournament');
+    connectUtilityButton('.btn-gray', enhancedExportTournament, 'Export Tournament');
+    connectUtilityButton('.small-btn', enhancedHandleImport, 'Import Save');
     
     // Enhanced Utility Buttons
     const utilityColumn = document.querySelector('.control-column:nth-child(3)');
     if (utilityColumn) {
-        // Backup Restore Button
-        const restoreBackupBtn = document.createElement('button');
-        restoreBackupBtn.className = 'ctrl-btn btn-gray';
-        restoreBackupBtn.id = 'btnRestoreBackup';
-        restoreBackupBtn.innerHTML = `
-            <div class="ctrl-btn-main">
-                <span class="ctrl-btn-title">Restore Backup</span>
-                <span class="ctrl-btn-subtitle">Recover previous tournament data</span>
-            </div>
-            <span class="ctrl-btn-tag">🔄</span>
-        `;
-        restoreBackupBtn.addEventListener('click', restoreFromBackup);
-        utilityColumn.appendChild(restoreBackupBtn);
-        console.log("✅ Restore Backup button added");
+        const createUtilityButton = (id, title, subtitle, icon, clickHandler) => {
+            const button = document.createElement('button');
+            button.className = 'ctrl-btn btn-gray';
+            button.id = id;
+            button.innerHTML = `
+                <div class="ctrl-btn-main">
+                    <span class="ctrl-btn-title">${title}</span>
+                    <span class="ctrl-btn-subtitle">${subtitle}</span>
+                </div>
+                <span class="ctrl-btn-tag">${icon}</span>
+            `;
+            button.addEventListener('click', function() {
+                console.log(`${title} button clicked`);
+                if (typeof clickHandler === 'function') {
+                    clickHandler();
+                } else {
+                    console.error(`${title} function not found!`);
+                    showUtilityMessage(`Error: ${title} function not available`, "error");
+                }
+            });
+            return button;
+        };
         
-        // Settings Button
-        const settingsBtn = document.createElement('button');
-        settingsBtn.className = 'ctrl-btn btn-gray';
-        settingsBtn.id = 'btnSettings';
-        settingsBtn.innerHTML = `
-            <div class="ctrl-btn-main">
-                <span class="ctrl-btn-title">Settings</span>
-                <span class="ctrl-btn-subtitle">Configure simulator options</span>
-            </div>
-            <span class="ctrl-btn-tag">⚙️</span>
-        `;
-        settingsBtn.addEventListener('click', openSettings);
-        utilityColumn.appendChild(settingsBtn);
-        console.log("✅ Settings button added");
+        utilityColumn.appendChild(createUtilityButton(
+            'btnRestoreBackup',
+            'Restore Backup',
+            'Recover previous tournament data',
+            '🔄',
+            restoreFromBackup
+        ));
+        
+        utilityColumn.appendChild(createUtilityButton(
+            'btnSettings',
+            'Settings',
+            'Configure simulator options',
+            '⚙️',
+            openSettings
+        ));
+        
+        console.log("✅ Enhanced utility buttons added");
     }
     
     // Modal-specific buttons
     const customMatchSimBtn = document.querySelector('#customMatchModal .small-btn');
     if (customMatchSimBtn) {
-        customMatchSimBtn.addEventListener('click', simulateCustomMatch);
+        customMatchSimBtn.addEventListener('click', function() {
+            console.log("Custom Match Simulate button clicked");
+            if (typeof simulateCustomMatch === 'function') {
+                simulateCustomMatch();
+            } else {
+                console.error("simulateCustomMatch function not found!");
+            }
+        });
         console.log("✅ Custom Match Simulate button connected");
     }
     
-    // Enhanced RNG System - FIXED: Remove duplicate rngSlider declaration
+    // Enhanced RNG System
     const rngSliderElement = document.getElementById('rngSlider');
     if (rngSliderElement) {
         rngSliderElement.addEventListener('input', function(e) {
@@ -9045,13 +9480,21 @@ document.addEventListener('DOMContentLoaded', function() {
         if (modalElement) {
             const closeBtn = modalElement.querySelector('.modal-close');
             if (closeBtn) {
-                closeBtn.addEventListener('click', modal.func);
+                closeBtn.addEventListener('click', function() {
+                    console.log(`Closing modal: ${modal.id}`);
+                    if (typeof modal.func === 'function') {
+                        modal.func();
+                    }
+                });
             }
             
             // Add backdrop click to close
             modalElement.addEventListener('click', function(e) {
                 if (e.target === this) {
-                    modal.func();
+                    console.log(`Backdrop click - closing modal: ${modal.id}`);
+                    if (typeof modal.func === 'function') {
+                        modal.func();
+                    }
                 }
             });
         }
@@ -9059,123 +9502,86 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log("✅ Modal close buttons connected");
     
     // Initialize custom match dropdowns
-    populateCustomMatchDropdowns();
-    console.log("✅ Custom match dropdowns populated");
+    if (typeof populateCustomMatchDropdowns === 'function') {
+        populateCustomMatchDropdowns();
+        console.log("✅ Custom match dropdowns populated");
+    }
     
     // Initialize enhanced RNG visualization
-    initializeRNG();
-    console.log("✅ RNG system initialized");
+    if (typeof initializeRNG === 'function') {
+        initializeRNG();
+        console.log("✅ RNG system initialized");
+    }
     
     // Initialize button states
-    updateButtonStates();
-    console.log("✅ Button states updated");
+    if (typeof updateButtonStates === 'function') {
+        updateButtonStates();
+        console.log("✅ Button states updated");
+    }
     
     // Check for existing tournament data and update UI accordingly
     setTimeout(() => {
         if (window.GROUP_RESULTS || window.TOURNAMENT) {
-            updateButtonStates();
-            showUtilityMessage("Previous tournament data detected. Buttons updated.", "info");
+            if (typeof updateButtonStates === 'function') {
+                updateButtonStates();
+            }
+            if (typeof showUtilityMessage === 'function') {
+                showUtilityMessage("Previous tournament data detected. Buttons updated.", "info");
+            }
         }
     }, 1000);
     
     console.log("🎉 App initialized successfully!");
-    console.log("📊 Enhanced Features available:");
-    console.log("   • Full tournament automation (one-click)");
-    console.log("   • Advanced modal management with stacking");
-    console.log("   • Enhanced RNG system with visual feedback");
-    console.log("   • Comprehensive export/import with previews");
-    console.log("   • Auto-backup and restore functionality");
-    console.log("   • Team comparison in custom matches");
-    console.log("   • Match detail modals with timelines");
-    console.log("   • Team profile modals with statistics");
-    console.log("   • Enhanced statistics with player comparisons");
-    console.log("   • Custom match history and replays");
-    console.log("   • Settings configuration panel");
-    console.log("   • Theme persistence across sessions");
-    console.log("   • Responsive button states and tooltips");
-    console.log("   • Tournament generation with 64 teams");
-    console.log("   • Group stage simulation (home & away)");
-    console.log("   • Knockout stages with two-leg ties");
-    console.log("   • Player statistics & ratings");
-    console.log("   • Club legacy tracking with all-time records");
+    console.log("📊 All systems ready:");
+    console.log("   • Core tournament functions");
+    console.log("   • Enhanced modal system");
     console.log("   • Custom match simulator");
-    console.log("   • Tournament overview with complete match summaries");
-    console.log("   • Tournament bracket visualization");
-    console.log("   • Group stage results preservation");
     console.log("   • Export/import functionality");
-    console.log("   • Match-by-match results with player of the match");
-    console.log("   • Complete tournament journey navigation");
+    console.log("   • Utility systems (theme, RNG, etc.)");
 });
+// Enhanced global function exports with fallbacks
+const globalExports = {
+    // Tournament control
+    startTournament, runGroupStage, runKnockouts, runFullTournament,
+    // View functions
+    showPlayerStats, showClubLegacy, showGroupStageResults, showTournamentOverview,
+    showTournamentBracket, showMatchResults, showMatchWeeksView, showEnhancedStatistics,
+    showCustomMatchHistory,
+    // Modal functions
+    openCustomMatch, openHistory, openMatchDetail, openTeamDetail, openSettings, openStatistics,
+    closeCustomMatch, closeHistory, closeMatchDetail, closeTeamDetail, closeSettings, closeStatistics,
+    closeAllModals,
+    // Utility functions
+    exportTournament, enhancedExportTournament, resetTournament, performReset,
+    handleImport, enhancedHandleImport, updateRNG, setRNGPreset, toggleTheme,
+    // Custom match functions
+    simulateCustomMatch, simulateRematch, saveCustomMatch, shareMatchResult,
+    populateCustomMatchDropdowns, updateTeamComparison,
+    // Enhanced functions
+    displayMatchWeekResults, displayKnockoutRound, generateMatchSummary,
+    exportTournamentCSV, exportTournamentSummary, backupToLocalStorage,
+    restoreFromBackup, restorePreResetBackup, showPlayerDetails, toggleStatsView,
+    exportPlayerStats, exportBracketData, simulateRematchFromDetail, shareMatchDetails,
+    viewTeamPlayers, replaySavedMatch, deleteSavedMatch, clearCustomMatchHistory,
+    // Utility functions
+    showResetConfirmationModal, initializeTheme, initializeRNG, updateButtonStates,
+    showUtilityMessage,
+    // Modal management
+    ModalManager
+};
 
-// Enhanced global function exports
-window.startTournament = startTournament;
-window.runGroupStage = runGroupStage;
-window.runKnockouts = runKnockouts;
-window.runFullTournament = runFullTournament;
-window.showPlayerStats = showPlayerStats;
-window.showClubLegacy = showClubLegacy;
-window.showGroupStageResults = showGroupStageResults;
-window.showTournamentOverview = showTournamentOverview;
-window.showTournamentBracket = showTournamentBracket;
-window.showMatchResults = showMatchResults;
-window.showMatchWeeksView = showMatchWeeksView;
-window.showEnhancedStatistics = showEnhancedStatistics;
-window.showCustomMatchHistory = showCustomMatchHistory;
-window.openCustomMatch = openCustomMatch;
-window.openHistory = openHistory;
-window.openMatchDetail = openMatchDetail;
-window.openTeamDetail = openTeamDetail;
-window.openSettings = openSettings;
-window.openStatistics = openStatistics;
-window.exportTournament = exportTournament;
-window.enhancedExportTournament = enhancedExportTournament;
-window.resetTournament = resetTournament;
-window.handleImport = handleImport;
-window.enhancedHandleImport = enhancedHandleImport;
-window.updateRNG = updateRNG;
-window.setRNGPreset = setRNGPreset;
-window.toggleTheme = toggleTheme;
-window.closeCustomMatch = closeCustomMatch;
-window.closeHistory = closeHistory;
-window.closeMatchDetail = closeMatchDetail;
-window.closeTeamDetail = closeTeamDetail;
-window.closeSettings = closeSettings;
-window.closeStatistics = closeStatistics;
-window.closeAllModals = closeAllModals;
-window.simulateCustomMatch = simulateCustomMatch;
-window.simulateRematch = simulateRematch;
-window.saveCustomMatch = saveCustomMatch;
-window.shareMatchResult = shareMatchResult;
-window.displayMatchWeekResults = displayMatchWeekResults;
-window.displayKnockoutRound = displayKnockoutRound;
-window.generateMatchSummary = generateMatchSummary;
-window.exportTournamentCSV = exportTournamentCSV;
-window.exportTournamentSummary = exportTournamentSummary;
-window.backupToLocalStorage = backupToLocalStorage;
-window.restoreFromBackup = restoreFromBackup;
-window.restorePreResetBackup = restorePreResetBackup;
-window.showPlayerDetails = showPlayerDetails;
-window.toggleStatsView = toggleStatsView;
-window.exportPlayerStats = exportPlayerStats;
-window.exportBracketData = exportBracketData;
-window.updateTeamComparison = updateTeamComparison;
-window.simulateRematchFromDetail = simulateRematchFromDetail;
-window.shareMatchDetails = shareMatchDetails;
-window.viewTeamPlayers = viewTeamPlayers;
-window.replaySavedMatch = replaySavedMatch;
-window.deleteSavedMatch = deleteSavedMatch;
-window.clearCustomMatchHistory = clearCustomMatchHistory;
-
-// Enhanced utility functions
-window.performReset = performReset;
-window.showResetConfirmationModal = showResetConfirmationModal;
-window.initializeTheme = initializeTheme;
-window.initializeRNG = initializeRNG;
-window.updateButtonStates = updateButtonStates;
-window.showUtilityMessage = showUtilityMessage;
-
-// Modal management
-window.ModalManager = ModalManager;
+// Export all functions to global scope with error handling
+Object.entries(globalExports).forEach(([name, func]) => {
+    if (typeof func === 'function') {
+        window[name] = func;
+    } else {
+        console.warn(`⚠️ Function ${name} is not defined, creating placeholder`);
+        window[name] = function() {
+            console.error(`Function ${name} is not properly defined`);
+            showUtilityMessage(`Error: ${name} function not available`, "error");
+        };
+    }
+});
 
 // Initialize core systems that need to run after DOM load
 function initializeCoreSystems() {
@@ -9187,7 +9593,9 @@ function initializeCoreSystems() {
         console.log("📦 Found existing backup, offering restore...");
         setTimeout(() => {
             if (confirm('A previous tournament backup was found. Would you like to restore it?')) {
-                restoreFromBackup();
+                if (typeof restoreFromBackup === 'function') {
+                    restoreFromBackup();
+                }
             }
         }, 2000);
     }
@@ -9195,7 +9603,9 @@ function initializeCoreSystems() {
     // Set up periodic auto-save
     setInterval(() => {
         if (window.TOURNAMENT || window.GROUP_RESULTS) {
-            backupToLocalStorage();
+            if (typeof backupToLocalStorage === 'function') {
+                backupToLocalStorage();
+            }
         }
     }, 2 * 60 * 1000); // Auto-save every 2 minutes
     
@@ -9208,13 +9618,17 @@ setTimeout(initializeCoreSystems, 500);
 // Enhanced error handling for global functions
 window.addEventListener('error', function(e) {
     console.error('Global error:', e.error);
-    showUtilityMessage('An error occurred. Check console for details.', 'error');
+    if (typeof showUtilityMessage === 'function') {
+        showUtilityMessage('An error occurred. Check console for details.', 'error');
+    }
 });
 
 // Handle unhandled promise rejections
 window.addEventListener('unhandledrejection', function(e) {
     console.error('Unhandled promise rejection:', e.reason);
-    showUtilityMessage('A network error occurred. Please try again.', 'error');
+    if (typeof showUtilityMessage === 'function') {
+        showUtilityMessage('A network error occurred. Please try again.', 'error');
+    }
 });
 
 // Export initialization for testing
@@ -9222,4 +9636,10 @@ window.initializeApp = function() {
     console.log("🔄 Re-initializing app...");
     document.dispatchEvent(new Event('DOMContentLoaded'));
 };
+
+// Fix for favicon error - create a placeholder
+const link = document.createElement('link');
+link.rel = 'icon';
+link.href = 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>';
+document.head.appendChild(link);
 </script>

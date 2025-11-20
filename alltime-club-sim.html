@@ -3287,6 +3287,358 @@ function setRNGPreset(value, element) {
     
     showUtilityMessage(`RNG preset updated to ${value}`, "success");
 }
+function showClubLegacy() {
+    console.log("Showing club legacy...");
+    const out = document.getElementById("output");
+    if (!out) return;
+    
+    let html = `
+        <h2>🏛️ Club Legacy</h2>
+        <div class="group-card">
+            <div class="group-title">🏆 All-Time Champions</div>
+    `;
+    
+    if (CLUB_LEGACY_DB.champions && Object.keys(CLUB_LEGACY_DB.champions).length > 0) {
+        const sortedChampions = Object.entries(CLUB_LEGACY_DB.champions)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 10);
+        
+        html += `<table class="standings-table"><thead><tr><th>Club</th><th>Titles</th></tr></thead><tbody>`;
+        
+        sortedChampions.forEach(([club, titles], index) => {
+            const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : "🏅";
+            html += `<tr><td>${medal} ${club}</td><td>${titles}</td></tr>`;
+        });
+        
+        html += `</tbody></table>`;
+    } else {
+        html += `
+            <div style="padding: 40px; text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 20px;">🏆</div>
+                <p><strong>No championship history yet</strong></p>
+                <p style="color: #9ca3af;">Complete tournaments to build club legacy records.</p>
+            </div>
+        `;
+    }
+    
+    html += `</div>`;
+    out.innerHTML = html;
+}
+
+function showTournamentOverview() {
+    console.log("Showing tournament overview...");
+    const out = document.getElementById("output");
+    if (!out) return;
+    
+    out.innerHTML = `
+        <div class="group-card">
+            <div class="group-title">📅 Tournament Overview</div>
+            <div style="padding: 40px; text-align: center;">
+                <div style="font-size: 64px; margin-bottom: 20px;">📊</div>
+                <p style="font-size: 1.2em; margin-bottom: 10px;"><strong>Tournament Overview</strong></p>
+                <p style="color: #9ca3af; margin-bottom: 20px;">Complete tournament overview with all matches and results.</p>
+                <button onclick="showTournamentBracket()" class="btn-primary">View Tournament Bracket</button>
+            </div>
+        </div>
+    `;
+}
+
+function showMatchResults() {
+    console.log("Showing match results...");
+    showUtilityMessage("Match results view coming soon!", "info");
+}
+
+function showMatchWeeksView() {
+    console.log("Showing match weeks...");
+    showUtilityMessage("Match weeks view coming soon!", "info");
+}
+
+function showTournamentBracket() {
+    console.log("Showing tournament bracket...");
+    if (window.TOURNAMENT) {
+        renderKnockoutResults(window.TOURNAMENT);
+    } else {
+        showUtilityMessage("No tournament completed yet!", "info");
+    }
+}
+
+function showEnhancedStatistics() {
+    console.log("Showing enhanced statistics...");
+    showUtilityMessage("Enhanced statistics coming soon!", "info");
+}
+
+function showCustomMatchHistory() {
+    console.log("Showing custom match history...");
+    showUtilityMessage("Custom match history coming soon!", "info");
+}
+
+function showGroupStageResults() {
+    console.log("Showing group stage results...");
+    if (window.GROUP_RESULTS) {
+        renderGroupResults(window.GROUP_RESULTS);
+    } else {
+        showUtilityMessage("No group stage results available!", "info");
+    }
+}
+
+// Match display functions
+function displayMatchWeekResults() {
+    console.log("Displaying match week results...");
+    showUtilityMessage("Match week results view coming soon!", "info");
+}
+
+function displayKnockoutRound() {
+    console.log("Displaying knockout round...");
+    showUtilityMessage("Knockout round view coming soon!", "info");
+}
+
+// Utility functions
+function exportTournament() {
+    console.log("Exporting tournament...");
+    showUtilityMessage("Export functionality coming soon!", "info");
+}
+
+function resetTournament() {
+    if (confirm("Are you sure you want to reset the tournament? All current progress will be lost.")) {
+        performReset();
+    }
+}
+
+function handleImport() {
+    console.log("Handling import...");
+    showUtilityMessage("Import functionality coming soon!", "info");
+}
+
+function setRNGPreset(value, element) {
+    console.log("Setting RNG preset:", value);
+    const slider = document.getElementById('rngSlider');
+    if (slider) {
+        slider.value = value;
+        updateRNG(value);
+    }
+    
+    // Update active state
+    document.querySelectorAll('.rng-pill').forEach(pill => {
+        pill.classList.remove('active');
+    });
+    if (element) element.classList.add('active');
+    
+    showUtilityMessage(`RNG preset updated to ${value}`, "success");
+}
+
+// Enhanced functions
+function generateMatchSummary(matchData, teamA, teamB) {
+    if (!matchData || !teamA || !teamB) {
+        return "An exciting match between two competitive teams.";
+    }
+
+    const scoreA = matchData.scoreA || 0;
+    const scoreB = matchData.scoreB || 0;
+    const totalGoals = scoreA + scoreB;
+    const goalDiff = Math.abs(scoreA - scoreB);
+
+    if (totalGoals === 0) {
+        return "A tactical battle where both defenses prevailed in a goalless draw.";
+    } else if (goalDiff === 1) {
+        return `A closely contested match decided by a single goal in a ${totalGoals}-goal thriller.`;
+    } else if (goalDiff >= 3) {
+        return `A dominant performance with a convincing ${goalDiff}-goal margin in this ${totalGoals}-goal encounter.`;
+    } else {
+        return `An entertaining ${totalGoals}-goal match that showcased quality football from both sides.`;
+    }
+}
+
+function performReset() {
+    console.log("Performing reset...");
+    // Clear tournament data
+    window.GROUPS = null;
+    window.GROUP_RESULTS = null;
+    window.TOURNAMENT = null;
+    
+    // Clear current tournament player stats
+    Object.keys(PLAYER_DB).forEach(key => {
+        delete PLAYER_DB[key];
+    });
+    
+    // Clear match details
+    Object.keys(MATCH_DETAILS_DB).forEach(key => {
+        delete MATCH_DETAILS_DB[key];
+    });
+    
+    // Reset UI
+    const out = document.getElementById("output");
+    if (out) {
+        out.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">⚽️</div>
+                <h2>Tournament Reset</h2>
+                <p class="output-sub">
+                    Ready to start a new tournament. Click "Generate Groups" to begin.
+                </p>
+            </div>
+        `;
+    }
+    
+    showUtilityMessage("Tournament reset successfully!", "success");
+}
+
+function enhancedExportTournament() {
+    console.log("Enhanced export tournament...");
+    exportTournament();
+}
+
+function enhancedHandleImport() {
+    console.log("Enhanced handle import...");
+    handleImport();
+}
+
+function openCustomMatch() {
+    console.log("Opening custom match...");
+    showUtilityMessage("Custom match interface coming soon!", "info");
+}
+
+function openHistory() {
+    console.log("Opening history...");
+    showUtilityMessage("History view coming soon!", "info");
+}
+
+function openSettings() {
+    console.log("Opening settings...");
+    showUtilityMessage("Settings coming soon!", "info");
+}
+
+function openStatistics() {
+    console.log("Opening statistics...");
+    showUtilityMessage("Statistics coming soon!", "info");
+}
+
+function restoreFromBackup() {
+    console.log("Restoring from backup...");
+    showUtilityMessage("Backup restore coming soon!", "info");
+}
+
+// Modal functions
+function closeCustomMatch() { console.log("Closing custom match modal"); }
+function closeHistory() { console.log("Closing history modal"); }
+function closeMatchDetail() { console.log("Closing match detail modal"); }
+function closeTeamDetail() { console.log("Closing team detail modal"); }
+function closeSettings() { console.log("Closing settings modal"); }
+function closeStatistics() { console.log("Closing statistics modal"); }
+function closeAllModals() { console.log("Closing all modals"); }
+
+// Tournament functions
+function runFullTournament() {
+    console.log("Running full tournament...");
+    if (!window.GROUPS) {
+        startTournament();
+    }
+    setTimeout(() => {
+        if (window.GROUPS && !window.GROUP_RESULTS) {
+            runGroupStage();
+        }
+        setTimeout(() => {
+            if (window.GROUP_RESULTS && !window.TOURNAMENT) {
+                runKnockouts();
+            }
+        }, 500);
+    }, 500);
+}
+
+// Player functions
+function showPlayerDetails(playerId) {
+    console.log("Showing player details for:", playerId);
+    showUtilityMessage("Player details view coming soon!", "info");
+}
+
+function toggleStatsView() {
+    console.log("Toggling stats view...");
+    showUtilityMessage("Stats view toggle coming soon!", "info");
+}
+
+function exportPlayerStats() {
+    console.log("Exporting player stats...");
+    showUtilityMessage("Player stats export coming soon!", "info");
+}
+
+function exportBracketData() {
+    console.log("Exporting bracket data...");
+    showUtilityMessage("Bracket export coming soon!", "info");
+}
+
+// Custom match functions
+function simulateCustomMatch() {
+    console.log("Simulating custom match...");
+    showUtilityMessage("Custom match simulation coming soon!", "info");
+}
+
+function simulateRematch() {
+    console.log("Simulating rematch...");
+    showUtilityMessage("Rematch coming soon!", "info");
+}
+
+function saveCustomMatch() {
+    console.log("Saving custom match...");
+    showUtilityMessage("Custom match save coming soon!", "info");
+}
+
+function shareMatchResult() {
+    console.log("Sharing match result...");
+    showUtilityMessage("Match sharing coming soon!", "info");
+}
+
+function populateCustomMatchDropdowns() {
+    console.log("Populating custom match dropdowns...");
+}
+
+function updateTeamComparison() {
+    console.log("Updating team comparison...");
+}
+
+// Export functions
+function exportTournamentCSV() {
+    console.log("Exporting tournament CSV...");
+    showUtilityMessage("CSV export coming soon!", "info");
+}
+
+function exportTournamentSummary() {
+    console.log("Exporting tournament summary...");
+    showUtilityMessage("Tournament summary export coming soon!", "info");
+}
+
+function backupToLocalStorage() {
+    console.log("Backing up to localStorage...");
+}
+
+function restorePreResetBackup() {
+    console.log("Restoring pre-reset backup...");
+    showUtilityMessage("Pre-reset backup restore coming soon!", "info");
+}
+
+function showResetConfirmationModal() {
+    console.log("Showing reset confirmation modal...");
+    if (confirm("Are you sure you want to reset the tournament?")) {
+        performReset();
+    }
+}
+
+// Initialize functions
+function initializeTheme() {
+    console.log("Initializing theme...");
+}
+
+function initializeRNG() {
+    console.log("Initializing RNG...");
+}
+
+function updateButtonStates() {
+    console.log("Updating button states...");
+}
+
+function showUtilityMessage(message, type = "info") {
+    console.log(`Utility message [${type}]: ${message}`);
+    // Create a simple alert for now
+    alert(`${type.toUpperCase()}: ${message}`);
+}
 /************* GLOBAL VARIABLES *************/
 const MATCH_DETAILS_DB = {};
 const CLUB_LEGACY_DB = {

@@ -902,19 +902,19 @@
       <div class="side-section-title">Save / Reset</div>
       <div class="control-column">
         <button class="ctrl-btn btn-gray" id="exportTournamentBtn">
-          <div class="ctrl-btn-main">
-            <span class="ctrl-btn-title">Export Tournament</span>
-            <span class="ctrl-btn-subtitle">Save results and stats to JSON</span>
-          </div>
-          <span class="ctrl-btn-tag">Save</span>
+            <div class="ctrl-btn-main">
+                <span class="ctrl-btn-title">Export Tournament</span>
+                <span class="ctrl-btn-subtitle">Save results and stats to JSON</span>
+            </div>
+            <span class="ctrl-btn-tag">Save</span>
         </button>
 
         <button class="ctrl-btn btn-red" id="resetTournamentBtn">
-          <div class="ctrl-btn-main">
-            <span class="ctrl-btn-title">Reset</span>
-            <span class="ctrl-btn-subtitle">Clear current draw & simulations</span>
-          </div>
-          <span class="ctrl-btn-tag">New Run</span>
+            <div class="ctrl-btn-main">
+                <span class="ctrl-btn-title">Reset</span>
+                <span class="ctrl-btn-subtitle">Clear current draw & simulations</span>
+            </div>
+            <span class="ctrl-btn-tag">New Run</span>
         </button>
       </div>
 
@@ -931,9 +931,9 @@
           <span id="rngLabel">Balanced</span>
         </div>
         <div class="rng-presets">
-          <button class="rng-pill active" type="button" onclick="setRNGPreset(0.7, this)">Tight</button>
-          <button class="rng-pill" type="button" data-rng-value="1.0">Balanced</button>
-          <button class="rng-pill" type="button" onclick="setRNGPreset(1.3, this)">Chaos</button>
+            <button class="rng-pill active" type="button" data-rng-value="0.7">Tight</button>
+            <button class="rng-pill" type="button" data-rng-value="1.0">Balanced</button>
+            <button class="rng-pill" type="button" data-rng-value="1.3">Chaos</button>
         </div>
       </div>
     </aside>
@@ -5299,14 +5299,9 @@ function renderKnockoutResults(results) {
   
   // Update club legacy
   updateClubLegacy(results);
-  
-  console.log("✅ Knockout results rendered successfully");
-}
-
-function updateClubLegacy(tournamentResults) {
-  if (!tournamentResults || !tournamentResults.champion) {
-    console.warn("⚠️ No tournament results to update club legacy");
-    return;
+  if (!window.lastTournamentChampion || window.lastTournamentChampion !== results.champion.name) {
+      updateClubLegacy(results);
+      window.lastTournamentChampion = results.champion.name;
   }
 
   const champion = tournamentResults.champion.name;
@@ -5710,6 +5705,36 @@ function runKnockouts() {
   }, 100);
 }
 
+// Enhanced global function exports with fallbacks
+const globalExports = {
+    // Tournament control
+    startTournament, runGroupStage, runKnockouts, runFullTournament,
+    // View functions
+    showPlayerStats, showClubLegacy, showGroupStageResults, showTournamentOverview,
+    showTournamentBracket, showMatchResults, showMatchWeeksView, showEnhancedStatistics,
+    showCustomMatchHistory,
+    // Modal functions
+    openCustomMatch, openHistory, openMatchDetail, openTeamDetail, openSettings, openStatistics,
+    closeCustomMatch, closeHistory, closeMatchDetail, closeTeamDetail, closeSettings, closeStatistics,
+    closeAllModals,
+    // Utility functions
+    exportTournament, enhancedExportTournament, resetTournament, performReset,
+    handleImport, enhancedHandleImport, updateRNG, setRNGPreset, toggleTheme,
+    // Custom match functions
+    simulateCustomMatch, simulateRematch, saveCustomMatch, shareMatchResult,
+    populateCustomMatchDropdowns, updateTeamComparison,
+    // Enhanced functions
+    displayMatchWeekResults, displayKnockoutRound, generateMatchSummary,
+    exportTournamentCSV, exportTournamentSummary, backupToLocalStorage,
+    restoreFromBackup, restorePreResetBackup, showPlayerDetails, toggleStatsView,
+    exportPlayerStats, exportBracketData, simulateRematchFromDetail, shareMatchDetails,
+    viewTeamPlayers, replaySavedMatch, deleteSavedMatch, clearCustomMatchHistory,
+    // Utility functions
+    showResetConfirmationModal, initializeTheme, initializeRNG, updateButtonStates,
+    showUtilityMessage,
+    // Modal management
+    ModalManager
+};
 // Helper function to show group stage results
 function showGroupStageResults() {
   if (!window.GROUP_RESULTS) {
@@ -9547,16 +9572,6 @@ function exportTournament() {
     showUtilityMessage("Export functionality coming soon!", "info");
 }
 
-function resetTournament() {
-    if (confirm("Are you sure you want to reset the tournament? All current progress will be lost.")) {
-        performReset();
-    }
-}
-
-function handleImport() {
-    console.log("Handling import...");
-    showUtilityMessage("Import functionality coming soon!", "info");
-}
 
 function setRNGPreset(value, element) {
     console.log("Setting RNG preset:", value);
@@ -9574,38 +9589,6 @@ function setRNGPreset(value, element) {
     
     showUtilityMessage(`RNG preset updated to ${value}`, "success");
 }
-
-// Enhanced global function exports with fallbacks
-const globalExports = {
-    // Tournament control
-    startTournament, runGroupStage, runKnockouts, runFullTournament,
-    // View functions
-    showPlayerStats, showClubLegacy, showGroupStageResults, showTournamentOverview,
-    showTournamentBracket, showMatchResults, showMatchWeeksView, showEnhancedStatistics,
-    showCustomMatchHistory,
-    // Modal functions
-    openCustomMatch, openHistory, openMatchDetail, openTeamDetail, openSettings, openStatistics,
-    closeCustomMatch, closeHistory, closeMatchDetail, closeTeamDetail, closeSettings, closeStatistics,
-    closeAllModals,
-    // Utility functions
-    exportTournament, enhancedExportTournament, resetTournament, performReset,
-    handleImport, enhancedHandleImport, updateRNG, setRNGPreset, toggleTheme,
-    // Custom match functions
-    simulateCustomMatch, simulateRematch, saveCustomMatch, shareMatchResult,
-    populateCustomMatchDropdowns, updateTeamComparison,
-    // Enhanced functions
-    displayMatchWeekResults, displayKnockoutRound, generateMatchSummary,
-    exportTournamentCSV, exportTournamentSummary, backupToLocalStorage,
-    restoreFromBackup, restorePreResetBackup, showPlayerDetails, toggleStatsView,
-    exportPlayerStats, exportBracketData, simulateRematchFromDetail, shareMatchDetails,
-    viewTeamPlayers, replaySavedMatch, deleteSavedMatch, clearCustomMatchHistory,
-    // Utility functions
-    showResetConfirmationModal, initializeTheme, initializeRNG, updateButtonStates,
-    showUtilityMessage,
-    // Modal management
-    ModalManager
-};
-
 // Export all functions to global scope with error handling
 Object.entries(globalExports).forEach(([name, func]) => {
     if (typeof func === 'function') {
@@ -9678,4 +9661,317 @@ const link = document.createElement('link');
 link.rel = 'icon';
 link.href = 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>';
 document.head.appendChild(link);
+// FIXED: Missing function definitions
+function showTournamentOverview() {
+    console.log("Showing tournament overview...");
+    const out = document.getElementById("output");
+    if (!out) return;
+    
+    out.innerHTML = `
+        <div class="group-card">
+            <div class="group-title">📅 Tournament Overview</div>
+            <div style="padding: 40px; text-align: center;">
+                <div style="font-size: 64px; margin-bottom: 20px;">📊</div>
+                <p style="font-size: 1.2em; margin-bottom: 10px;"><strong>Tournament Overview</strong></p>
+                <p style="color: #9ca3af; margin-bottom: 20px;">Complete tournament overview with all matches and results.</p>
+                <button onclick="showTournamentBracket()" class="btn-primary">View Tournament Bracket</button>
+            </div>
+        </div>
+    `;
+}
+// Fix for duplicate legacy updates - call this instead of updateClubLegacy directly
+function updateTournamentLegacy(tournamentResults) {
+    if (!tournamentResults || !tournamentResults.champion) {
+        console.warn("⚠️ No tournament results to update club legacy");
+        return;
+    }
+
+    // Clear any existing legacy data for this tournament to prevent duplicates
+    const champion = tournamentResults.champion.name;
+    
+    // Only update if this is a new champion (prevent duplicates)
+    const currentChampionCount = CLUB_LEGACY_DB.champions[champion] || 0;
+    
+    // Initialize legacy databases if they don't exist
+    if (!CLUB_LEGACY_DB.champions) CLUB_LEGACY_DB.champions = {};
+    if (!CLUB_LEGACY_DB.finals) CLUB_LEGACY_DB.finals = {};
+    if (!CLUB_LEGACY_DB.semiFinals) CLUB_LEGACY_DB.semiFinals = {};
+    if (!CLUB_LEGACY_DB.quarterFinals) CLUB_LEGACY_DB.quarterFinals = {};
+    if (!CLUB_LEGACY_DB.totalWins) CLUB_LEGACY_DB.totalWins = {};
+
+    // Only update if this appears to be a new tournament (not a duplicate)
+    if (currentChampionCount === 0) {
+        // Update champion
+        CLUB_LEGACY_DB.champions[champion] = 1;
+        CLUB_LEGACY_DB.totalWins[champion] = (CLUB_LEGACY_DB.totalWins[champion] || 0) + 1;
+        
+        console.log(`🏆 ${champion} added to champions legacy`);
+
+        // Update runner-up
+        if (tournamentResults.final) {
+            const runnerUp = tournamentResults.final.teamA.name === champion ? 
+                            tournamentResults.final.teamB.name : tournamentResults.final.teamA.name;
+            CLUB_LEGACY_DB.finals[runnerUp] = (CLUB_LEGACY_DB.finals[runnerUp] || 0) + 1;
+            CLUB_LEGACY_DB.totalWins[runnerUp] = (CLUB_LEGACY_DB.totalWins[runnerUp] || 0) + 1;
+            console.log(`🥈 ${runnerUp} added to finals legacy`);
+        }
+
+        // Update semi-finalists
+        if (tournamentResults.semiFinals) {
+            tournamentResults.semiFinals.forEach(match => {
+                if (!match) return;
+                
+                const semiFinalists = [match.teamA.name, match.teamB.name];
+                semiFinalists.forEach(team => {
+                    if (team !== champion && team !== tournamentResults.final?.teamA?.name && team !== tournamentResults.final?.teamB?.name) {
+                        CLUB_LEGACY_DB.semiFinals[team] = (CLUB_LEGACY_DB.semiFinals[team] || 0) + 1;
+                        CLUB_LEGACY_DB.totalWins[team] = (CLUB_LEGACY_DB.totalWins[team] || 0) + 1;
+                    }
+                });
+            });
+            console.log(`🥉 Semi-finalists updated`);
+        }
+
+        console.log("✅ Club legacy database updated (no duplicates)");
+    } else {
+        console.log("ℹ️ Legacy already updated for this tournament, skipping duplicate");
+    }
+}
+
+function showMatchResults() {
+    console.log("Showing match results...");
+    const out = document.getElementById("output");
+    if (!out) return;
+    
+    out.innerHTML = `
+        <div class="group-card">
+            <div class="group-title">📋 Match Results</div>
+            <div style="padding: 40px; text-align: center;">
+                <div style="font-size: 64px; margin-bottom: 20px;">⚽</div>
+                <p style="font-size: 1.2em; margin-bottom: 10px;"><strong>All Match Results</strong></p>
+                <p style="color: #9ca3af; margin-bottom: 20px;">Complete list of all tournament matches with detailed statistics.</p>
+            </div>
+        </div>
+    `;
+}
+
+function showMatchWeeksView() {
+    console.log("Showing match weeks...");
+    const out = document.getElementById("output");
+    if (!out) return;
+    
+    out.innerHTML = `
+        <div class="group-card">
+            <div class="group-title">🗓️ Match Weeks</div>
+            <div style="padding: 40px; text-align: center;">
+                <div style="font-size: 64px; margin-bottom: 20px;">📅</div>
+                <p style="font-size: 1.2em; margin-bottom: 10px;"><strong>Match Weeks Schedule</strong></p>
+                <p style="color: #9ca3af; margin-bottom: 20px;">View all matches organized by match weeks.</p>
+            </div>
+        </div>
+    `;
+}
+
+// Enhanced bracket display with proper match details
+function showTournamentBracket() {
+    const out = document.getElementById("output");
+    if (!out) return;
+    
+    let html = `
+        <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 20px;">
+            <h2>🏆 Tournament Bracket</h2>
+            <button onclick="exportBracketData()" class="btn-secondary" style="padding: 8px 12px;">
+                📥 Export Bracket
+            </button>
+        </div>
+    `;
+    
+    if (!window.TOURNAMENT) {
+        html += `
+            <div class="group-card">
+                <div class="group-title">No Bracket Available</div>
+                <div style="padding: 40px; text-align: center;">
+                    <div style="font-size: 64px; margin-bottom: 20px;">🏆</div>
+                    <p style="font-size: 1.2em; margin-bottom: 10px;"><strong>No tournament bracket available</strong></p>
+                    <p style="color: #9ca3af; margin-bottom: 20px;">Complete a tournament to see the full bracket visualization.</p>
+                    <button onclick="runFullTournament()" class="btn-primary">Run Full Tournament</button>
+                </div>
+            </div>
+        `;
+        out.innerHTML = html;
+        return;
+    }
+    
+    // Enhanced Champion display
+    const champion = window.TOURNAMENT.champion;
+    html += `
+        <div style="background: linear-gradient(135deg, #f59e0b, #d97706, #b45309); padding: 30px; border-radius: 16px; margin-bottom: 30px; text-align: center; color: white; border: 4px solid gold; box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);">
+            <div style="font-size: 3em; margin-bottom: 15px;">🏆</div>
+            <h2 style="margin: 0 0 10px 0; font-size: 2em; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">TOURNAMENT CHAMPION</h2>
+            <h1 style="margin: 10px 0; font-size: 3em; color: gold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">${champion.name}</h1>
+            <div style="display: flex; justify-content: center; gap: 30px; margin-top: 20px; font-size: 1.1em;">
+                <span>${champion.season}</span>
+                <span>•</span>
+                <span>OVR ${champion.strength}</span>
+                <span>•</span>
+                <span>🏅 Champion</span>
+            </div>
+        </div>
+    `;
+    
+    // Enhanced Final match display
+    if (window.TOURNAMENT.final) {
+        const final = window.TOURNAMENT.final;
+        const finalMatch = final.matchDetails || final;
+        const potg = finalMatch.playerOfTheGame;
+        const summary = generateMatchSummary(finalMatch, final.teamA, final.teamB);
+        
+        html += `
+            <div class="group-card" style="border: 2px solid gold;">
+                <div class="group-title" style="color: gold;">🏆 Final</div>
+                <div style="padding: 20px; text-align: center; background: linear-gradient(135deg, #1e3a8a, #3730a3); border-radius: 8px; margin: 10px;">
+                    <div style="font-size: 24px; font-weight: bold; margin-bottom: 10px; color: white;">
+                        ${final.teamA.name} ${finalMatch.scoreA || 0} - ${finalMatch.scoreB || 0} ${final.teamB.name}
+                    </div>
+                    <div style="color: #fbbf24; font-weight: bold; font-size: 18px; margin-bottom: 15px;">
+                        🏆 ${champion.name} wins the tournament! 🏆
+                    </div>
+                    ${potg ? `
+                        <div style="background: rgba(245, 158, 11, 0.3); padding: 10px; border-radius: 6px; margin: 10px 0; border: 1px solid #f59e0b;">
+                            <strong>⭐ Player of the Match:</strong> ${potg.player} (${potg.rating}/10)
+                            ${potg.goals > 0 ? ` • ${potg.goals} goal${potg.goals > 1 ? 's' : ''}` : ''}
+                            ${potg.assists > 0 ? ` • ${potg.assists} assist${potg.assists > 1 ? 's' : ''}` : ''}
+                        </div>
+                    ` : ''}
+                    <div style="color: #cbd5e1; font-style: italic; margin-top: 10px; font-size: 0.9em;">
+                        ${summary}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Enhanced knockout rounds with proper match details
+    const knockoutRounds = [
+        { name: "Semi Finals", data: window.TOURNAMENT.semiFinals, color: "#f59e0b" },
+        { name: "Quarter Finals", data: window.TOURNAMENT.quarterFinals, color: "#8b5cf6" },
+        { name: "Round of 16", data: window.TOURNAMENT.roundOf16, color: "#10b981" },
+        { name: "Round of 32", data: window.TOURNAMENT.roundOf32, color: "#3b82f6" }
+    ];
+    
+    knockoutRounds.forEach(round => {
+        if (round.data && round.data.length > 0) {
+            html += `
+                <div class="group-card">
+                    <div class="group-title" style="background: ${round.color}; color: white;">
+                        ${round.name}
+                    </div>
+                    <div style="display: grid; gap: 15px;">
+            `;
+            
+            round.data.forEach(match => {
+                if (!match) return;
+                
+                const firstLeg = match.firstLeg || {};
+                const secondLeg = match.secondLeg || {};
+                const firstLegDetails = MATCH_DETAILS_DB[firstLeg.matchId] || {};
+                const secondLegDetails = MATCH_DETAILS_DB[secondLeg.matchId] || {};
+                
+                const firstLegPOTG = firstLegDetails.playerOfTheGame;
+                const secondLegPOTG = secondLegDetails.playerOfTheGame;
+                const summary1 = generateMatchSummary(firstLeg, match.teamA, match.teamB);
+                const summary2 = generateMatchSummary(secondLeg, match.teamA, match.teamB);
+                
+                html += `
+                    <div style="background: rgba(15, 23, 42, 0.9); padding: 20px; border-radius: 10px; border-left: 5px solid ${round.color};">
+                        <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: center; margin-bottom: 15px;">
+                            <div style="text-align: right;">
+                                <div style="font-weight: bold; font-size: 1.1em;">${match.teamA.name}</div>
+                                <div style="color: #9ca3af; font-size: 0.85em;">OVR ${match.teamA.strength}</div>
+                            </div>
+                            <div style="text-align: center; background: ${round.color}; padding: 8px 15px; border-radius: 8px; font-weight: bold; font-size: 1.2em; color: white; min-width: 100px;">
+                                ${match.aggScoreA} - ${match.aggScoreB}
+                            </div>
+                            <div style="text-align: left;">
+                                <div style="font-weight: bold; font-size: 1.1em;">${match.teamB.name}</div>
+                                <div style="color: #9ca3af; font-size: 0.85em;">OVR ${match.teamB.strength}</div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div style="background: rgba(30, 41, 59, 0.7); padding: 12px; border-radius: 6px;">
+                                <div style="color: #6b7280; font-size: 0.8em; margin-bottom: 8px;">First Leg</div>
+                                <div style="font-weight: bold; margin-bottom: 8px;">${match.teamB.name} ${firstLeg.scoreA || 0}-${firstLeg.scoreB || 0} ${match.teamA.name}</div>
+                                ${firstLegPOTG ? `
+                                    <div style="color: #f59e0b; font-size: 0.85em;">
+                                        ⭐ ${firstLegPOTG.player} (${firstLegPOTG.rating}/10)
+                                        ${firstLegPOTG.goals > 0 ? ` • ${firstLegPOTG.goals}G` : ''}
+                                        ${firstLegPOTG.assists > 0 ? ` • ${firstLegPOTG.assists}A` : ''}
+                                    </div>
+                                ` : ''}
+                                <div style="font-size: 0.7em; color: #9ca3af; margin-top: 5px;">${summary1}</div>
+                            </div>
+                            
+                            <div style="background: rgba(30, 41, 59, 0.7); padding: 12px; border-radius: 6px;">
+                                <div style="color: #6b7280; font-size: 0.8em; margin-bottom: 8px;">Second Leg</div>
+                                <div style="font-weight: bold; margin-bottom: 8px;">${match.teamA.name} ${secondLeg.scoreA || 0}-${secondLeg.scoreB || 0} ${match.teamB.name}</div>
+                                ${secondLegPOTG ? `
+                                    <div style="color: #f59e0b; font-size: 0.85em;">
+                                        ⭐ ${secondLegPOTG.player} (${secondLegPOTG.rating}/10)
+                                        ${secondLegPOTG.goals > 0 ? ` • ${secondLegPOTG.goals}G` : ''}
+                                        ${secondLegPOTG.assists > 0 ? ` • ${secondLegPOTG.assists}A` : ''}
+                                    </div>
+                                ` : ''}
+                                <div style="font-size: 0.7em; color: #9ca3af; margin-top: 5px;">${summary2}</div>
+                            </div>
+                        </div>
+                        
+                        <div style="text-align: center; color: #10b981; font-weight: bold; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 6px;">
+                            🎯 ${match.winner?.name || 'Unknown'} advances
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `</div></div>`;
+        }
+    });
+    
+    out.innerHTML = html;
+}
+
+// Enhanced player rating system
+function calculateBaseRating(player, teamStrength, performance = {}) {
+    if (!player || !player.quality) {
+        console.warn("⚠️ Invalid player in calculateBaseRating:", player);
+        return 6.0;
+    }
+
+    let rating = ((player.quality || 70) / 10) * 0.5;
+    rating += ((teamStrength || 70) / 100) * 0.3;
+    
+    // Performance bonuses
+    if (performance.goals > 0) rating += performance.goals * 0.8;
+    if (performance.assists > 0) rating += performance.assists * 0.5;
+    if (performance.cleanSheet) rating += 0.6;
+    
+    // Position-based adjustments
+    if (['GK'].includes(player.pos)) {
+        rating += 0.3; // Base bonus for goalkeepers
+        if (performance.cleanSheet) rating += 0.4;
+    } else if (['ST', 'CF', 'FW'].includes(player.pos)) {
+        rating += 0.2; // Base bonus for attackers
+        if (performance.goals > 0) rating += 0.3;
+    } else if (['AM', 'CM', 'LM', 'RM'].includes(player.pos)) {
+        rating += 0.1; // Base bonus for midfielders
+        if (performance.assists > 0) rating += 0.2;
+    }
+    
+    // Add realistic randomness (less variance for better players)
+    const qualityFactor = (player.quality || 70) / 100;
+    const randomness = (Math.random() - 0.5) * (1.5 - qualityFactor * 0.8);
+    rating += randomness;
+    
+    return Math.min(9.8, Math.max(5.0, rating));
+}
 </script>

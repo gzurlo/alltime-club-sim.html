@@ -3962,39 +3962,42 @@ function shuffleArray(arr) {
   }
   return newArr;
 }
-
 function createPots() {
   try {
     // Validate TEAM_POOL
-    if (!TEAM_POOL || TEAM_POOL.length < 64) {
-      console.error("❌ Not enough teams in TEAM_POOL. Found:", TEAM_POOL?.length);
-      // Create backup teams if needed
-      if (TEAM_POOL.length < 64) {
-        console.warn("⚠️ Using available teams (less than 64)");
+    if (!Array.isArray(TEAM_POOL) || TEAM_POOL.length < 64) {
+      console.error("❌ Not enough teams in TEAM_POOL. Found:", TEAM_POOL ? TEAM_POOL.length : 0);
+      if (!Array.isArray(TEAM_POOL) || TEAM_POOL.length === 0) {
+        // Hard fail if no teams at all
+        return [[], [], [], []];
       }
+      console.warn("⚠️ Using available teams (less than 64)");
     }
-    
+
+    // Shuffle all teams (copy so we don't mutate TEAM_POOL)
     const shuffledAllTeams = shuffleArray([...TEAM_POOL]);
     const selectedTeams = shuffledAllTeams.slice(0, 64);
-    
+
     // Filter out any invalid teams
-    const validTeams = selectedTeams.filter(team => 
-      team && team.name && typeof team.strength === 'number'
+    const validTeams = selectedTeams.filter(team =>
+      team && team.name && typeof team.strength === "number"
     );
-    
+
     if (validTeams.length < 64) {
       console.warn(`⚠️ Only ${validTeams.length} valid teams available`);
     }
-    
+
     const sorted = validTeams.sort((a, b) => (b.strength || 0) - (a.strength || 0));
-    
+
     const pot1 = sorted.slice(0, 16);
     const pot2 = sorted.slice(16, 32);
     const pot3 = sorted.slice(32, 48);
     const pot4 = sorted.slice(48, 64);
-    
-    console.log(`🏆 Pots created: Pot1(${pot1.length}), Pot2(${pot2.length}), Pot3(${pot3.length}), Pot4(${pot4.length})`);
-    
+
+    console.log(
+      `🏆 Pots created: Pot1(${pot1.length}), Pot2(${pot2.length}), Pot3(${pot3.length}), Pot4(${pot4.length})`
+    );
+
     return [pot1, pot2, pot3, pot4];
   } catch (error) {
     console.error("❌ Error creating pots:", error);
@@ -4005,18 +4008,23 @@ function createPots() {
 function generateGroups() {
   try {
     const [pot1, pot2, pot3, pot4] = createPots();
-    
+
     // Validate pots have teams
-    if (pot1.length === 0 || pot2.length === 0 || pot3.length === 0 || pot4.length === 0) {
+    if (
+      pot1.length === 0 ||
+      pot2.length === 0 ||
+      pot3.length === 0 ||
+      pot4.length === 0
+    ) {
       throw new Error("One or more pots are empty");
     }
-    
+
     // Shuffle pots to ensure random draw
     const shuffledPot1 = shuffleArray([...pot1]);
     const shuffledPot2 = shuffleArray([...pot2]);
     const shuffledPot3 = shuffleArray([...pot3]);
     const shuffledPot4 = shuffleArray([...pot4]);
-    
+
     const groups = [];
     for (let i = 0; i < 16; i++) {
       // Ensure we don't exceed array bounds
@@ -4024,26 +4032,27 @@ function generateGroups() {
       const team2 = shuffledPot2[i] || { name: `Unknown Team B${i}`, strength: 70 };
       const team3 = shuffledPot3[i] || { name: `Unknown Team C${i}`, strength: 70 };
       const team4 = shuffledPot4[i] || { name: `Unknown Team D${i}`, strength: 70 };
-      
+
       groups.push({
         name: `Group ${String.fromCharCode(65 + i)}`,
         teams: [team1, team2, team3, team4],
-        matches: [] // Initialize matches array for later use
+        matches: []
       });
     }
-    
+
     console.log("✅ Groups generated successfully:", groups.length);
     return groups;
   } catch (error) {
     console.error("❌ Error generating groups:", error);
     // Return empty groups as fallback
-    return Array.from({length: 16}, (_, i) => ({
+    return Array.from({ length: 16 }, (_, i) => ({
       name: `Group ${String.fromCharCode(65 + i)}`,
       teams: [],
       matches: []
     }));
   }
 }
+
 
 function renderGroups(groups) {
   const out = document.getElementById("output");

@@ -8498,9 +8498,7 @@ function showUtilityMessage(message, type = 'info') {
     }
   }, 4000);
 }
-
 /************* MODAL SYSTEM *************/
-
 const ModalManager = {
   activeModal: null,
   modalStack: [],
@@ -8514,6 +8512,7 @@ const ModalManager = {
       return;
     }
 
+    // Close currently active modal if different
     if (this.activeModal && this.activeModal !== modalId) {
       this.close(this.activeModal);
     }
@@ -8530,6 +8529,7 @@ const ModalManager = {
     });
 
     modal.style.display = 'flex';
+
     setTimeout(() => {
       modal.classList.add('active');
       modal.setAttribute('aria-hidden', 'false');
@@ -8542,11 +8542,15 @@ const ModalManager = {
       modal.dispatchEvent(new CustomEvent('modalopen', { detail: data }));
     }, 10);
 
-    modal.addEventListener('click', e => {
+    const clickHandler = (e) => {
       if (e.target === modal) {
         this.close(modalId);
       }
-    });
+    };
+
+    // store handler so it can be removed if needed
+    modal._modalClickHandler = clickHandler;
+    modal.addEventListener('click', clickHandler);
 
     this.addEscapeListener();
     console.log(`Modal opened: ${modalId}`, data);
@@ -8564,6 +8568,12 @@ const ModalManager = {
 
     modal.classList.remove('active');
     modal.setAttribute('aria-hidden', 'true');
+
+    // remove click handler if present
+    if (modal._modalClickHandler) {
+      modal.removeEventListener('click', modal._modalClickHandler);
+      delete modal._modalClickHandler;
+    }
 
     setTimeout(() => {
       modal.style.display = 'none';
@@ -8585,7 +8595,7 @@ const ModalManager = {
 
   addEscapeListener() {
     if (this.escapeHandler) return;
-    this.escapeHandler = e => {
+    this.escapeHandler = (e) => {
       if (e.key === 'Escape') {
         this.close();
       }
@@ -8629,6 +8639,7 @@ function openCustomMatch(teamA = null, teamB = null) {
       }, 100);
     }
   }
+
   if (teamB) {
     const teamBSelect = document.getElementById('customTeamB');
     if (teamBSelect) {
@@ -8964,7 +8975,7 @@ function enhanceCustomMatchModal() {
   const modal = document.getElementById('customMatchModal');
   if (!modal) return;
 
-  const keyHandler = e => {
+  const keyHandler = (e) => {
     if (e.key === 'Enter' && e.ctrlKey) {
       simulateCustomMatch();
     }
@@ -9249,6 +9260,7 @@ function injectModalStyles() {
 
   injectStylesOnce('modal-styles', styles);
 }
+
 /************* MATCH RESULTS VIEWS *************/
 
 function showMatchResults() {
@@ -9336,7 +9348,6 @@ function updateTournamentLegacy(tournamentResults) {
 
   const currentChampionCount = CLUB_LEGACY_DB.champions[champion] || 0;
 
-  // Only count this tournament once for this champion
   if (currentChampionCount === 0) {
     CLUB_LEGACY_DB.champions[champion] = 1;
     CLUB_LEGACY_DB.totalWins[champion] = (CLUB_LEGACY_DB.totalWins[champion] || 0) + 1;
@@ -9393,7 +9404,6 @@ function initializeCoreSystems() {
     }, 2000);
   }
 
-  // Auto-backup every 2 minutes while data exists
   setInterval(() => {
     if (window.TOURNAMENT || window.GROUP_RESULTS) {
       backupToLocalStorage();
@@ -9540,31 +9550,9 @@ function openTeamDetail(teamName) {
   ModalManager.open('teamDetailModal');
 }
 
-// Note: these match helper functions are already defined earlier in your file;
-// this is the single, cleaned version for this chunk.
-
-function simulateRematchFromDetail(teamA, teamB) {
-  closeMatchDetail();
-  setTimeout(() => {
-    openCustomMatch(teamA, teamB);
-  }, 300);
-}
-
-function shareMatchDetails(matchId) {
-  const match = MATCH_DETAILS_DB[matchId];
-  if (!match) return;
-
-  const shareText = `⚽ Match Result: ${match.teamA} ${match.scoreA}-${match.scoreB} ${match.teamB}`;
-  navigator.clipboard.writeText(shareText).then(() => {
-    // Use in-modal feedback to avoid extra toasts if called from a modal
-    showModalMessage('Match details copied to clipboard!', 'success');
-  });
-}
-
 /**
- * Simpler legacy updater (cumulative, no dedupe by tournament).
- * Can be used in addition to updateTournamentLegacy if you want
- * a raw "how many times has this club ever won" counter.
+ * Simpler cumulative legacy updater. Use alongside updateTournamentLegacy
+ * if you want raw counts without per-tournament dedupe.
  */
 function updateClubLegacy(tournamentResults) {
   if (!tournamentResults || !tournamentResults.champion) return;
@@ -9572,9 +9560,6 @@ function updateClubLegacy(tournamentResults) {
   const champion = tournamentResults.champion.name;
 
   if (!CLUB_LEGACY_DB.champions) CLUB_LEGACY_DB.champions = {};
-  if (!CLUB_LEGACY_DB.finals) CLUB_LEGACY_DB.finals = {};
-  if (!CLUB_LEGACY_DB.semiFinals) CLUB_LEGACY_DB.semiFinals = {};
-  if (!CLUB_LEGACY_DB.quarterFinals) CLUB_LEGACY_DB.quarterFinals = {};
   if (!CLUB_LEGACY_DB.totalWins) CLUB_LEGACY_DB.totalWins = {};
 
   CLUB_LEGACY_DB.champions[champion] = (CLUB_LEGACY_DB.champions[champion] || 0) + 1;
@@ -9582,6 +9567,7 @@ function updateClubLegacy(tournamentResults) {
 
   console.log(`🏆 ${champion} added to champions legacy`);
 }
+
 /************* MASTER DOM INITIALIZER *************/
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -9645,7 +9631,7 @@ document.addEventListener('DOMContentLoaded', function () {
   connectViewButton('btnCustomMatch', openCustomMatch, 'Custom Match');
   connectViewButton('btnHistory', openHistory, 'History');
 
-  // Connect utility buttons (guarded)
+  // Connect utility buttons
   const exportBtn = document.getElementById('exportTournamentBtn');
   if (exportBtn && typeof exportTournament === 'function') {
     exportBtn.addEventListener('click', exportTournament);

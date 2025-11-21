@@ -608,33 +608,54 @@
     /* Modals */
 
     .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.7);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 14px;
-      z-index: 999;
-    }
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 999;
+}
 
-    .modal-backdrop.active {
-      display: flex;
-    }
+.modal-backdrop.active {
+  display: flex;
+}
 
-    .modal {
-      max-width: 720px;
-      width: 100%;
-      max-height: 80vh;
-      overflow-y: auto;
-      border-radius: 16px;
-      background: radial-gradient(circle at top left, #0f172a, #020310);
-      border: 1px solid rgba(129, 230, 217, 0.9);
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.8);
-      padding: 12px 14px 14px;
-      font-size: 0.84rem;
-    }
+.modal {
+  width: 100%;
+  max-width: 600px;
+}
 
+.modal-content {
+  background: #1f2937;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
     .modal-head {
       display: flex;
       justify-content: space-between;
@@ -952,59 +973,70 @@
   </div>
 </div>
 
-<!-- Match detail modal -->
 <div id="matchDetailModal" class="modal-backdrop">
-  <div class="modal">
-    <div class="modal-head">
-      <h3 id="matchDetailTitle">Match Detail</h3>
-      <button class="modal-close" onclick="closeMatchDetail()">✕</button>
+    <div class="modal">
+      <div class="modal-content">
+        <div class="modal-head">
+          <h3 id="matchDetailTitle">Match Detail</h3>
+          <button class="modal-close" onclick="closeMatchDetail()">✕</button>
+        </div>
+        <div id="matchDetailBody" class="modal-body"></div>
+      </div>
     </div>
-    <div id="matchDetailBody"></div>
   </div>
-</div>
-
-<!-- Team detail modal -->
-<div id="teamDetailModal" class="modal-backdrop">
-  <div class="modal">
-    <div class="modal-head">
-      <h3 id="teamDetailTitle">Team Detail</h3>
-      <button class="modal-close" onclick="closeTeamDetail()">✕</button>
+  
+  <!-- Team detail modal -->
+  <div id="teamDetailModal" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-content">
+        <div class="modal-head">
+          <h3 id="teamDetailTitle">Team Detail</h3>
+          <button class="modal-close" onclick="closeTeamDetail()">✕</button>
+        </div>
+        <div id="teamDetailBody" class="modal-body"></div>
+      </div>
     </div>
-    <div id="teamDetailBody"></div>
   </div>
-</div>
-
-<!-- Custom match modal -->
-<div id="customMatchModal" class="modal-backdrop">
-  <div class="modal">
-    <div class="modal-head">
-      <h3>Custom Match</h3>
-      <button class="modal-close" onclick="closeCustomMatch()">✕</button>
+  
+  <!-- Custom match modal -->
+  <div id="customMatchModal" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-content">
+        <div class="modal-head">
+          <h3>Custom Match</h3>
+          <button class="modal-close" onclick="closeCustomMatch()">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="section-label">Pick your teams</div>
+          <div class="custom-row">
+            <select id="customTeamA"></select>
+            <select id="customTeamB"></select>
+          </div>
+          <div id="teamComparison" style="display: none;"></div>
+          <div class="radio-row">
+            <label><input type="radio" name="customVenue" value="neutral" checked> Neutral venue</label><br>
+            <label><input type="radio" name="customVenue" value="homeA"> Team A home advantage</label><br>
+            <label><input type="radio" name="customVenue" value="homeB"> Team B home advantage</label>
+          </div>
+          <button class="small-btn" type="button" onclick="simulateCustomMatch()">Play Match</button>
+          <div id="customMatchResult" style="margin-top:8px;"></div>
+        </div>
+      </div>
     </div>
-    <div class="section-label">Pick your teams</div>
-    <div class="custom-row">
-      <select id="customTeamA"></select>
-      <select id="customTeamB"></select>
-    </div>
-    <div class="radio-row">
-      <label><input type="radio" name="customVenue" value="neutral" checked> Neutral venue</label><br>
-      <label><input type="radio" name="customVenue" value="homeAdv"> Team A slight home advantage</label>
-    </div>
-    <button class="small-btn" type="button" onclick="simulateCustomMatch()">Play Match</button>
-    <div id="customMatchResult" style="margin-top:8px;"></div>
   </div>
-</div>
-
-<!-- History modal -->
-<div id="historyModal" class="modal-backdrop">
-  <div class="modal">
-    <div class="modal-head">
-      <h3>Saved Tournament History</h3>
-      <button class="modal-close" onclick="closeHistory()">✕</button>
+  
+  <!-- History modal -->
+  <div id="historyModal" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-content">
+        <div class="modal-head">
+          <h3>Tournament History</h3>
+          <button class="modal-close" onclick="closeHistory()">✕</button>
+        </div>
+        <div id="historyBody" class="modal-body"></div>
+      </div>
     </div>
-    <div id="historyBody"></div>
   </div>
-</div>
 <script>
     const TEAM_POOL = [
       {
@@ -3177,196 +3209,8 @@
 }
 ];
 // === END OF TEAM_POOL DEFINITION =================================
-/************* IMMEDIATE FUNCTION DEFINITIONS *************/
-// Define these functions immediately so they're available globally
-function showClubLegacy() {
-    console.log("Showing club legacy...");
-    const out = document.getElementById("output");
-    if (!out) return;
-    
-    let html = `
-        <h2>🏛️ Club Legacy</h2>
-        <div class="group-card">
-            <div class="group-title">🏆 All-Time Champions</div>
-    `;
-    
-    if (CLUB_LEGACY_DB.champions && Object.keys(CLUB_LEGACY_DB.champions).length > 0) {
-        const sortedChampions = Object.entries(CLUB_LEGACY_DB.champions)
-            .sort(([,a], [,b]) => b - a)
-            .slice(0, 10);
-        
-        html += `<table class="standings-table"><thead><tr><th>Club</th><th>Titles</th></tr></thead><tbody>`;
-        
-        sortedChampions.forEach(([club, titles], index) => {
-            const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : "🏅";
-            html += `<tr><td>${medal} ${club}</td><td>${titles}</td></tr>`;
-        });
-        
-        html += `</tbody></table>`;
-    } else {
-        html += `
-            <div style="padding: 40px; text-align: center;">
-                <div style="font-size: 48px; margin-bottom: 20px;">🏆</div>
-                <p><strong>No championship history yet</strong></p>
-                <p style="color: #9ca3af;">Complete tournaments to build club legacy records.</p>
-            </div>
-        `;
-    }
-    
-    html += `</div>`;
-    out.innerHTML = html;
-}
 
-function showTournamentOverview() {
-    console.log("Showing tournament overview...");
-    const out = document.getElementById("output");
-    if (!out) return;
-    
-    out.innerHTML = `
-        <div class="group-card">
-            <div class="group-title">📅 Tournament Overview</div>
-            <div style="padding: 40px; text-align: center;">
-                <div style="font-size: 64px; margin-bottom: 20px;">📊</div>
-                <p style="font-size: 1.2em; margin-bottom: 10px;"><strong>Tournament Overview</strong></p>
-                <p style="color: #9ca3af; margin-bottom: 20px;">Complete tournament overview with all matches and results.</p>
-                <button onclick="showTournamentBracket()" class="btn-primary">View Tournament Bracket</button>
-            </div>
-        </div>
-    `;
-}
-
-function showMatchResults() {
-    console.log("Showing match results...");
-    showUtilityMessage("Match results view coming soon!", "info");
-}
-
-function showMatchWeeksView() {
-    console.log("Showing match weeks...");
-    showUtilityMessage("Match weeks view coming soon!", "info");
-}
-
-function showTournamentBracket() {
-    console.log("Showing tournament bracket...");
-    if (window.TOURNAMENT) {
-        renderKnockoutResults(window.TOURNAMENT);
-    } else {
-        showUtilityMessage("No tournament completed yet!", "info");
-    }
-}
-
-// Placeholder functions for missing buttons
-function exportTournament() {
-    console.log("Exporting tournament...");
-    showUtilityMessage("Export functionality coming soon!", "info");
-}
-
-function resetTournament() {
-    if (confirm("Are you sure you want to reset the tournament? All current progress will be lost.")) {
-        performReset();
-    }
-}
-
-function handleImport() {
-    console.log("Handling import...");
-    showUtilityMessage("Import functionality coming soon!", "info");
-}
-
-function setRNGPreset(value, element) {
-    console.log("Setting RNG preset:", value);
-    const slider = document.getElementById('rngSlider');
-    if (slider) {
-        slider.value = value;
-        updateRNG(value);
-    }
-    
-    // Update active state
-    document.querySelectorAll('.rng-pill').forEach(pill => {
-        pill.classList.remove('active');
-    });
-    if (element) element.classList.add('active');
-    
-    showUtilityMessage(`RNG preset updated to ${value}`, "success");
-}
-function showClubLegacy() {
-    console.log("Showing club legacy...");
-    const out = document.getElementById("output");
-    if (!out) return;
-    
-    let html = `
-        <h2>🏛️ Club Legacy</h2>
-        <div class="group-card">
-            <div class="group-title">🏆 All-Time Champions</div>
-    `;
-    
-    if (CLUB_LEGACY_DB.champions && Object.keys(CLUB_LEGACY_DB.champions).length > 0) {
-        const sortedChampions = Object.entries(CLUB_LEGACY_DB.champions)
-            .sort(([,a], [,b]) => b - a)
-            .slice(0, 10);
-        
-        html += `<table class="standings-table"><thead><tr><th>Club</th><th>Titles</th></tr></thead><tbody>`;
-        
-        sortedChampions.forEach(([club, titles], index) => {
-            const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : "🏅";
-            html += `<tr><td>${medal} ${club}</td><td>${titles}</td></tr>`;
-        });
-        
-        html += `</tbody></table>`;
-    } else {
-        html += `
-            <div style="padding: 40px; text-align: center;">
-                <div style="font-size: 48px; margin-bottom: 20px;">🏆</div>
-                <p><strong>No championship history yet</strong></p>
-                <p style="color: #9ca3af;">Complete tournaments to build club legacy records.</p>
-            </div>
-        `;
-    }
-    
-    html += `</div>`;
-    out.innerHTML = html;
-}
-
-function showTournamentOverview() {
-    console.log("Showing tournament overview...");
-    const out = document.getElementById("output");
-    if (!out) return;
-    
-    out.innerHTML = `
-        <div class="group-card">
-            <div class="group-title">📅 Tournament Overview</div>
-            <div style="padding: 40px; text-align: center;">
-                <div style="font-size: 64px; margin-bottom: 20px;">📊</div>
-                <p style="font-size: 1.2em; margin-bottom: 10px;"><strong>Tournament Overview</strong></p>
-                <p style="color: #9ca3af; margin-bottom: 20px;">Complete tournament overview with all matches and results.</p>
-                <button onclick="showTournamentBracket()" class="btn-primary">View Tournament Bracket</button>
-            </div>
-        </div>
-    `;
-}
-
-function showMatchResults() {
-    console.log("Showing match results...");
-    showUtilityMessage("Match results view coming soon!", "info");
-}
-
-function showMatchWeeksView() {
-    console.log("Showing match weeks...");
-    showUtilityMessage("Match weeks view coming soon!", "info");
-}
-
-function showTournamentBracket() {
-    console.log("Showing tournament bracket...");
-    if (window.TOURNAMENT) {
-        renderKnockoutResults(window.TOURNAMENT);
-    } else {
-        showUtilityMessage("No tournament completed yet!", "info");
-    }
-}
-
-function showEnhancedStatistics() {
-    console.log("Showing enhanced statistics...");
-    showUtilityMessage("Enhanced statistics coming soon!", "info");
-}
-
+// Tournament stage functions
 function showCustomMatchHistory() {
     console.log("Showing custom match history...");
     showUtilityMessage("Custom match history coming soon!", "info");
@@ -3526,24 +3370,6 @@ function closeSettings() { console.log("Closing settings modal"); }
 function closeStatistics() { console.log("Closing statistics modal"); }
 function closeAllModals() { console.log("Closing all modals"); }
 
-// Tournament functions
-function runFullTournament() {
-    console.log("Running full tournament...");
-    if (!window.GROUPS) {
-        startTournament();
-    }
-    setTimeout(() => {
-        if (window.GROUPS && !window.GROUP_RESULTS) {
-            runGroupStage();
-        }
-        setTimeout(() => {
-            if (window.GROUP_RESULTS && !window.TOURNAMENT) {
-                runKnockouts();
-            }
-        }, 500);
-    }, 500);
-}
-
 // Player functions
 function showPlayerDetails(playerId) {
     console.log("Showing player details for:", playerId);
@@ -3626,9 +3452,7 @@ function initializeTheme() {
     console.log("Initializing theme...");
 }
 
-function initializeRNG() {
-    console.log("Initializing RNG...");
-}
+
 
 function updateButtonStates() {
     console.log("Updating button states...");
@@ -3639,6 +3463,12 @@ function showUtilityMessage(message, type = "info") {
     // Create a simple alert for now
     alert(`${type.toUpperCase()}: ${message}`);
 }
+window.PLAYER_DB = window.PLAYER_DB || {};
+window.MATCH_DETAILS_DB = window.MATCH_DETAILS_DB || {};
+window.CLUB_LEGACY_DB = window.CLUB_LEGACY_DB || {};
+window.TEAM_POOL = window.TEAM_POOL || [];
+window.TEAM_MAP = window.TEAM_MAP || new Map();
+window.RNG_SETTINGS = window.RNG_SETTINGS || {};
 /************* GLOBAL VARIABLES *************/
 const MATCH_DETAILS_DB = {};
 const CLUB_LEGACY_DB = {
@@ -3939,7 +3769,7 @@ function viewTeamPlayers(teamName) {
     const teamPlayers = Object.values(PLAYER_DB).filter(p => p.team === teamName && p.apps > 0);
     
     let html = `
-        <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between;align-items: center; margin-bottom: 20px;">
             <h2>👥 ${teamName} Squad</h2>
             <button onclick="openTeamDetail('${teamName}')" class="btn-secondary">← Back to Team</button>
         </div>
@@ -5275,6 +5105,52 @@ function enableStatsButton() {
     console.log("✅ Stats button enabled");
   }
 }
+function exportTournament() {
+    const tournamentData = {
+        metadata: {
+            dataType: "football-tournament",
+            tournamentName: getTournamentName(),
+            exportDate: new Date().toISOString(),
+            totalMatches: Object.keys(MATCH_DETAILS_DB).length,
+            totalPlayers: Object.values(PLAYER_DB).filter(p => p.apps > 0).length,
+            exportSize: 0
+        },
+        groups: window.GROUPS,
+        groupResults: window.GROUP_RESULTS,
+        knockoutResults: window.TOURNAMENT,
+        matchDetails: MATCH_DETAILS_DB,
+        playerStats: PLAYER_DB,
+        clubLegacy: CLUB_LEGACY_DB,
+        allTimeStats: ALL_TIME_PLAYER_DB
+    };
+    
+    const exportStr = JSON.stringify(tournamentData, null, 2);
+    tournamentData.metadata.exportSize = new Blob([exportStr]).size;
+    
+    showExportPreviewModal(tournamentData, exportStr);
+}
+
+function handleImport() {
+    const fileInput = document.getElementById('importSave');
+    if (!fileInput.files.length) {
+        showUtilityMessage("Please select a file to import", "error");
+        return;
+    }
+    
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            validateAndImportData(data, file.name);
+        } catch (error) {
+            showUtilityMessage("Error reading file: " + error.message, "error");
+        }
+    };
+    
+    reader.readAsText(file);
+}
 
 /************* ENHANCED KNOCKOUT STAGE FUNCTIONS *************/
 function getQualifiedTeams(groupResults) {
@@ -5758,14 +5634,6 @@ function renderKnockoutResults(results) {
   `;
 
   out.innerHTML = html;
-  
-  // Update club legacy
-  updateClubLegacy(results);
-  if (!window.lastTournamentChampion || window.lastTournamentChampion !== results.champion.name) {
-      updateClubLegacy(results);
-      window.lastTournamentChampion = results.champion.name;
-  }
-
   const champion = tournamentResults.champion.name;
   
   // Initialize legacy databases if they don't exist
@@ -6217,22 +6085,6 @@ function showGroupStageResults() {
   
   renderGroupResults(window.GROUP_RESULTS);
 }
-
-// Enhanced enableStatsButton function
-function enableStatsButton() {
-  const btnStats = document.getElementById("btnStats");
-  if (btnStats) {
-    btnStats.disabled = false;
-    btnStats.innerHTML = `
-      <div class="ctrl-btn-main">
-        <span class="ctrl-btn-title">Player & Match Stats</span>
-        <span class="ctrl-btn-subtitle">Top scorers & quick tournament log</span>
-      </div>
-      <span class="ctrl-btn-tag">View</span>
-    `;
-    console.log("✅ Stats button enabled");
-  }
-}
 /************* ENHANCED VIEW FUNCTIONS *************/
 
 function showPlayerStats() {
@@ -6241,7 +6093,7 @@ function showPlayerStats() {
   if (!out) return;
 
   let html = `
-    <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
       <h2>📊 Player Statistics</h2>
       <div style="display: flex; gap: 10px;">
         <button onclick="exportPlayerStats()" class="btn-secondary" style="padding: 8px 12px;">
@@ -6297,7 +6149,7 @@ function showPlayerStats() {
     // Top Scorers with enhanced features
     html += `
       <div class="group-card">
-        <div class="group-title" style="display: flex; justify-content: between; align-items: center;">
+        <div class="group-title" style="display: flex;justify-content: space-between;align-items: center;">
           <span>🥇 Top Scorers</span>
           <span style="font-size: 0.9em; color: #9ca3af;">Showing ${topScorers.length} players</span>
         </div>
@@ -6484,7 +6336,25 @@ function getRatingColor(rating) {
   if (numRating >= 6.5) return "#f59e0b"; // Yellow
   return "#ef4444"; // Red
 }
+function calculateTeamOverallStrength(team) {
+    if (!team || !team.startingXI) return 70;
+    
+    const startingStrength = team.startingXI.reduce((sum, player) => 
+        sum + (player.quality || 70), 0) / team.startingXI.length;
+    
+    const benchStrength = team.bench ? 
+        team.bench.reduce((sum, player) => sum + (player.quality || 70), 0) / team.bench.length : 70;
+    
+    return Math.round((startingStrength * 0.8) + (benchStrength * 0.2));
+}
 
+function getTeamPlayingStyle(team) {
+    const strength = calculateTeamOverallStrength(team);
+    if (strength >= 85) return '🌟 Elite';
+    if (strength >= 75) return '🔥 Strong';
+    if (strength >= 65) return '💪 Competitive';
+    return '🆙 Developing';
+}
 function calculateTeamStats(players) {
   const teams = {};
   
@@ -6695,15 +6565,6 @@ const enhancedStyles = `
 const styleSheet = document.createElement("style");
 styleSheet.textContent = enhancedStyles;
 document.head.appendChild(styleSheet);
-
-function enableStatsButton() {
-  const btnStats = document.getElementById("btnStats");
-  if (btnStats) {
-    btnStats.disabled = false;
-    btnStats.style.opacity = "1";
-    btnStats.style.cursor = "pointer";
-  }
-}
 /************* ENHANCED CUSTOM MATCH FUNCTIONS *************/
 
 function populateCustomMatchDropdowns() {
@@ -6825,6 +6686,36 @@ function updateTeamComparison() {
   `;
   comparisonDiv.style.display = 'block';
 }
+/************* SMALL SHARED HELPERS *************/
+function injectStylesOnce(id, css) {
+  if (!css) return;
+  if (id && document.getElementById(id)) return;
+  const el = document.createElement('style');
+  if (id) el.id = id;
+  el.textContent = css;
+  document.head.appendChild(el);
+}
+
+// Ensure global DB objects exist (safety)
+window.MATCH_DETAILS_DB = window.MATCH_DETAILS_DB || {};
+window.PLAYER_DB = window.PLAYER_DB || {};
+window.CLUB_LEGACY_DB = window.CLUB_LEGACY_DB || {
+  champions: {},
+  finals: {},
+  semiFinals: {},
+  quarterFinals: {},
+  totalWins: {}
+};
+window.ALL_TIME_PLAYER_DB = window.ALL_TIME_PLAYER_DB || {};
+window.RNG_SETTINGS = window.RNG_SETTINGS || {
+  groupChaos: 1.0,
+  knockoutChaos: 1.2,
+  finalChaos: 0.8
+};
+window.TEAM_MAP = window.TEAM_MAP || new Map();
+window.TEAM_POOL = window.TEAM_POOL || [];
+
+/************* CUSTOM MATCH SIMULATOR *************/
 
 function simulateCustomMatch() {
   const teamASelect = document.getElementById('customTeamA');
@@ -6876,14 +6767,14 @@ function simulateCustomMatch() {
   }
   
   // Get match importance
-  const importance = matchImportance ? parseFloat(matchImportance.value) : 1.0;
+  const importance = matchImportance ? parseFloat(matchImportance.value) || 1.0 : 1.0;
   
   // Get weather condition
   const weather = weatherSelect ? weatherSelect.value : 'normal';
   
   // Simulate the match with enhanced parameters
   const match = simulateMatch(teamA, teamB, isHome, importance, weather);
-  const matchDetails = MATCH_DETAILS_DB[match.matchId];
+  const matchDetails = MATCH_DETAILS_DB[match.matchId] || {};
   const potg = matchDetails.playerOfTheGame;
   
   // Generate enhanced match analysis
@@ -6897,6 +6788,7 @@ function simulateCustomMatch() {
 
 function displayCustomMatchResult(match, teamA, teamB, potg, analysis, venueType, importance, weather) {
   const resultDiv = document.getElementById('customMatchResult');
+  if (!resultDiv) return;
   
   const venueText = getVenueText(venueType, teamA.name, teamB.name);
   const importanceText = getImportanceText(importance);
@@ -6958,7 +6850,7 @@ function displayCustomMatchResult(match, teamA, teamB, potg, analysis, venueType
         ` : ''}
         
         <!-- Match Analysis -->
-        <div class="analysis-card" style="background: rgba(30, 41, 59, 0.8); padding: 20px; border-radius: 10px; margin: 20px 0;">
+        <div class="analysis-card" style="background: rgba(30, 41, 59, 0.8); padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #8b5cf6;">
           <div style="font-weight: bold; color: #e5e7eb; margin-bottom: 15px; font-size: 1.1em;">📊 Match Analysis</div>
           <div style="color: #d1d5db; line-height: 1.6;">
             ${analysis}
@@ -7076,12 +6968,10 @@ function saveCustomMatch() {
   
   if (!teamAName || !teamBName) return;
   
-  // Get the latest match from details DB (assuming it's the custom match)
   const matches = Object.values(MATCH_DETAILS_DB);
   const latestMatch = matches[matches.length - 1];
   
   if (latestMatch) {
-    // Save to localStorage or custom matches array
     const savedMatches = JSON.parse(localStorage.getItem('savedCustomMatches') || '[]');
     savedMatches.push({
       ...latestMatch,
@@ -7091,7 +6981,6 @@ function saveCustomMatch() {
     
     localStorage.setItem('savedCustomMatches', JSON.stringify(savedMatches));
     
-    // Show success message
     showCustomMatchMessage('Match saved successfully!', 'success');
   }
 }
@@ -7105,17 +6994,19 @@ function shareMatchResult() {
   const teamAName = teamASelect.value;
   const teamBName = teamBSelect.value;
   
-  // Get match result from the displayed content
   const resultDiv = document.getElementById('customMatchResult');
+  if (!resultDiv) return;
+  
   const scoreElement = resultDiv.querySelector('.match-header + div [style*="font-size: 2.5em"]');
   
   if (scoreElement) {
     const scoreText = scoreElement.textContent.trim();
     const shareText = `⚽ Custom Match Result: ${teamAName} ${scoreText} ${teamBName}`;
     
-    // Copy to clipboard
     navigator.clipboard.writeText(shareText).then(() => {
       showCustomMatchMessage('Match result copied to clipboard!', 'success');
+    }).catch(() => {
+      showCustomMatchMessage('Failed to copy result to clipboard.', 'error');
     });
   }
 }
@@ -7127,7 +7018,7 @@ function showCustomMatchHistory() {
   if (!out) return;
   
   let html = `
-    <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
       <h2>📋 Saved Custom Matches</h2>
       ${savedMatches.length > 0 ? `
         <button onclick="clearCustomMatchHistory()" class="btn-secondary" style="padding: 8px 12px;">
@@ -7152,12 +7043,12 @@ function showCustomMatchHistory() {
   } else {
     html += `<div class="group-card"><div class="group-title">Match History (${savedMatches.length} matches)</div>`;
     
-    savedMatches.reverse().forEach((match, index) => {
+    savedMatches.slice().reverse().forEach((match) => {
       const date = new Date(match.savedAt).toLocaleDateString();
       
       html += `
         <div style="background: rgba(15, 23, 42, 0.8); padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #3b82f6;">
-          <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
             <div style="font-weight: bold; font-size: 1.1em;">
               ${match.teamA} ${match.scoreA} - ${match.scoreB} ${match.teamB}
             </div>
@@ -7230,6 +7121,7 @@ function getTeamPlayingStyle(team) {
 
 function showCustomMatchError(message) {
   const resultDiv = document.getElementById('customMatchResult');
+  if (!resultDiv) return;
   resultDiv.innerHTML = `
     <div style="color: #ef4444; padding: 15px; background: #fef2f2; border-radius: 8px; border-left: 4px solid #ef4444;">
       <div style="display: flex; align-items: center; gap: 10px;">
@@ -7248,6 +7140,8 @@ function showCustomMatchMessage(message, type = 'info') {
   };
   
   const resultDiv = document.getElementById('customMatchResult');
+  if (!resultDiv) return;
+  
   const messageDiv = document.createElement('div');
   messageDiv.innerHTML = `
     <div style="color: ${colors[type]}; padding: 12px; background: ${colors[type]}20; border-radius: 6px; border-left: 4px solid ${colors[type]}; margin-top: 10px;">
@@ -7257,7 +7151,6 @@ function showCustomMatchMessage(message, type = 'info') {
   
   resultDiv.appendChild(messageDiv);
   
-  // Remove message after 3 seconds
   setTimeout(() => {
     if (messageDiv.parentNode) {
       messageDiv.parentNode.removeChild(messageDiv);
@@ -7266,15 +7159,15 @@ function showCustomMatchMessage(message, type = 'info') {
 }
 
 function updateCustomMatchHistory(match, teamA, teamB) {
-  // This would update a history display if implemented
   console.log(`Custom match recorded: ${teamA.name} ${match.scoreA}-${match.scoreB} ${teamB.name}`);
 }
 
 // Initialize custom match interface
 function initializeCustomMatchInterface() {
-  populateCustomMatchDropdowns();
-  
-  // Add enhanced CSS for custom match interface
+  if (typeof populateCustomMatchDropdowns === 'function') {
+    populateCustomMatchDropdowns();
+  }
+
   const customMatchStyles = `
     .custom-match-result {
       border-radius: 12px;
@@ -7316,16 +7209,9 @@ function initializeCustomMatchInterface() {
     }
   `;
   
-  styleSheet.textContent = customMatchStyles;
-  document.head.appendChild(styleSheet);
+  injectStylesOnce('custom-match-styles', customMatchStyles);
 }
 
-// Call initialization when the page loads
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeCustomMatchInterface);
-} else {
-  initializeCustomMatchInterface();
-}
 /************* ENHANCED EXPORT/IMPORT FUNCTIONS *************/
 
 function showExportPreviewModal(tournamentData, exportStr) {
@@ -7345,9 +7231,9 @@ function showExportPreviewModal(tournamentData, exportStr) {
   
   modal.innerHTML = `
     <div style="background: #1f2937; border-radius: 12px; padding: 25px; max-width: 90vw; max-height: 90vh; width: 600px; overflow-y: auto;">
-      <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h3 style="margin: 0; color: #e5e7eb;">📤 Export Tournament Data</h3>
-        <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()" 
+        <button onclick="this.closest('div[style*=\\\'position: fixed\\\']').remove()" 
                 style="background: none; border: none; color: #9ca3af; font-size: 1.5em; cursor: pointer;">×</button>
       </div>
       
@@ -7501,7 +7387,6 @@ function generateTournamentSummary() {
     summary += `Season: ${window.TOURNAMENT.champion.season} | OVR: ${window.TOURNAMENT.champion.strength}\n\n`;
   }
   
-  // Top scorers
   const playersWithData = Object.values(PLAYER_DB).filter(p => p.apps > 0);
   if (playersWithData.length > 0) {
     const topScorers = [...playersWithData].sort((a, b) => b.goals - a.goals).slice(0, 5);
@@ -7512,13 +7397,13 @@ function generateTournamentSummary() {
     summary += `\n`;
   }
   
-  // Match statistics
   const matches = Object.values(MATCH_DETAILS_DB);
   if (matches.length > 0) {
     summary += `MATCH STATISTICS:\n`;
+    const totalGoals = matches.reduce((sum, m) => sum + m.scoreA + m.scoreB, 0);
     summary += `Total Matches: ${matches.length}\n`;
-    summary += `Total Goals: ${matches.reduce((sum, m) => sum + m.scoreA + m.scoreB, 0)}\n`;
-    summary += `Average Goals per Match: ${(matches.reduce((sum, m) => sum + m.scoreA + m.scoreB, 0) / matches.length).toFixed(2)}\n`;
+    summary += `Total Goals: ${totalGoals}\n`;
+    summary += `Average Goals per Match: ${(totalGoals / matches.length).toFixed(2)}\n`;
   }
   
   return summary;
@@ -7533,6 +7418,7 @@ function backupToLocalStorage() {
       matchDetails: MATCH_DETAILS_DB,
       playerStats: PLAYER_DB,
       clubLegacy: CLUB_LEGACY_DB,
+      allTimeStats: ALL_TIME_PLAYER_DB,
       backupDate: new Date().toISOString()
     };
     
@@ -7550,7 +7436,6 @@ function restoreFromBackup() {
       showExportMessage("No backup found in local storage", "error");
       return;
     }
-    
     showImportConfirmationModal(backupData);
   } catch (error) {
     showExportMessage("Error restoring backup: " + error.message, "error");
@@ -7577,9 +7462,9 @@ function showImportConfirmationModal(backupData) {
   
   modal.innerHTML = `
     <div style="background: #1f2937; border-radius: 12px; padding: 25px; max-width: 500px; width: 90vw;">
-      <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h3 style="margin: 0; color: #e5e7eb;">🔄 Restore Backup</h3>
-        <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()" 
+        <button onclick="this.closest('div[style*=\\\'position: fixed\\\']').remove()" 
                 style="background: none; border: none; color: #9ca3af; font-size: 1.5em; cursor: pointer;">×</button>
       </div>
       
@@ -7593,7 +7478,7 @@ function showImportConfirmationModal(backupData) {
       </div>
       
       <div style="display: flex; gap: 10px; justify-content: flex-end;">
-        <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()" 
+        <button onclick="this.closest('div[style*=\\\'position: fixed\\\']').remove()" 
                 class="btn-secondary" style="padding: 10px 20px;">
           Cancel
         </button>
@@ -7619,13 +7504,10 @@ function confirmRestoreBackup(encodedData) {
 }
 
 function validateAndImportData(data, fileName) {
-  // Basic validation
   if (!data.metadata || data.metadata.dataType !== "football-tournament") {
     showExportMessage("Invalid tournament file format.", "error");
     return;
   }
-  
-  // Show import confirmation with file details
   showImportDetailsModal(data, fileName);
 }
 
@@ -7648,9 +7530,9 @@ function showImportDetailsModal(data, fileName) {
   
   modal.innerHTML = `
     <div style="background: #1f2937; border-radius: 12px; padding: 25px; max-width: 500px; width: 90vw;">
-      <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h3 style="margin: 0; color: #e5e7eb;">📥 Import Tournament</h3>
-        <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()" 
+        <button onclick="this.closest('div[style*=\\\'position: fixed\\\']').remove()" 
                 style="background: none; border: none; color: #9ca3af; font-size: 1.5em; cursor: pointer;">×</button>
       </div>
       
@@ -7682,7 +7564,7 @@ function showImportDetailsModal(data, fileName) {
       </div>
       
       <div style="display: flex; gap: 10px; justify-content: flex-end;">
-        <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()" 
+        <button onclick="this.closest('div[style*=\\\'position: fixed\\\']').remove()" 
                 class="btn-secondary" style="padding: 10px 20px;">
           Cancel
         </button>
@@ -7709,10 +7591,8 @@ function confirmImport(encodedData) {
 
 function importTournamentData(data, source) {
   try {
-    // Clear existing data
     clearExistingData();
     
-    // Import new data
     if (data.groups) window.GROUPS = data.groups;
     if (data.groupResults) window.GROUP_RESULTS = data.groupResults;
     if (data.knockoutResults) window.TOURNAMENT = data.knockoutResults;
@@ -7721,25 +7601,22 @@ function importTournamentData(data, source) {
     if (data.clubLegacy) Object.assign(CLUB_LEGACY_DB, data.clubLegacy);
     if (data.allTimeStats) Object.assign(ALL_TIME_PLAYER_DB, data.allTimeStats);
     
-    // Update UI based on available data
-    if (window.TOURNAMENT) {
+    if (window.TOURNAMENT && typeof renderKnockoutResults === 'function') {
       renderKnockoutResults(window.TOURNAMENT);
-      showTournamentBracket();
-    } else if (window.GROUP_RESULTS) {
+      if (typeof showTournamentBracket === 'function') showTournamentBracket();
+    } else if (window.GROUP_RESULTS && typeof renderGroupResults === 'function') {
       renderGroupResults(window.GROUP_RESULTS);
-      showGroupStageResults();
-    } else if (window.GROUPS) {
+      if (typeof showGroupStageResults === 'function') showGroupStageResults();
+    } else if (window.GROUPS && typeof renderGroups === 'function') {
       renderGroups(window.GROUPS);
-    } else {
+    } else if (typeof showTournamentOverview === 'function') {
       showTournamentOverview();
     }
     
-    // Create auto backup after import
     backupToLocalStorage();
     
     showExportMessage(`✅ Tournament data imported successfully from ${source}!`, "success");
     
-    // Log import statistics
     console.log(`Import successful: ${Object.keys(MATCH_DETAILS_DB).length} matches, ${Object.keys(PLAYER_DB).length} players`);
     
   } catch (error) {
@@ -7754,11 +7631,10 @@ function clearExistingData() {
   window.TOURNAMENT = null;
   MATCH_DETAILS_DB = {};
   PLAYER_DB = {};
-  CLUB_LEGACY_DB = { champions: {}, finals: {}, semiFinals: {} };
+  CLUB_LEGACY_DB = { champions: {}, finals: {}, semiFinals: {}, quarterFinals: {}, totalWins: {} };
   ALL_TIME_PLAYER_DB = {};
 }
 
-// Helper functions
 function getTournamentName() {
   if (window.TOURNAMENT?.champion) {
     return `${window.TOURNAMENT.champion.season} Tournament`;
@@ -7767,7 +7643,7 @@ function getTournamentName() {
 }
 
 function formatFileSize(bytes) {
-  if (bytes === 0) return '0 Bytes';
+  if (!bytes) return '0 Bytes';
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -7783,7 +7659,6 @@ function getCustomMatchesHistory() {
 }
 
 function showExportMessage(message, type = "info") {
-  // Remove any existing messages
   const existingMessages = document.querySelectorAll('.export-message');
   existingMessages.forEach(msg => msg.remove());
   
@@ -7820,7 +7695,6 @@ function showExportMessage(message, type = "info") {
   
   document.body.appendChild(messageDiv);
   
-  // Auto remove after 5 seconds
   setTimeout(() => {
     if (messageDiv.parentNode) {
       messageDiv.style.animation = 'slideOut 0.3s ease-in';
@@ -7829,7 +7703,6 @@ function showExportMessage(message, type = "info") {
   }, 5000);
 }
 
-// Add CSS animations
 const exportStyles = `
   @keyframes slideIn {
     from {
@@ -7858,17 +7731,9 @@ const exportStyles = `
   }
 `;
 
-// Inject styles
-styleSheet.textContent = exportStyles;
-document.head.appendChild(styleSheet);
+injectStylesOnce('export-message-styles', exportStyles);
 
-// Initialize auto-backup on page load
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeExportFeatures);
-} else {
-  initializeExportFeatures();
-}
-
+// Initialize auto-backup on page load for export/import features
 function initializeExportFeatures() {
   // Check for existing backup and offer to restore
   const hasBackup = localStorage.getItem('tournamentBackup');
@@ -7880,7 +7745,7 @@ function initializeExportFeatures() {
     }, 1000);
   }
   
-  // Set up periodic auto-backup (every 5 minutes)
+  // Periodic auto-backup (every 5 minutes)
   setInterval(() => {
     if (window.TOURNAMENT || window.GROUP_RESULTS) {
       backupToLocalStorage();
@@ -7888,16 +7753,24 @@ function initializeExportFeatures() {
   }, 5 * 60 * 1000);
 }
 
-// Enhanced export function for the main export button
+// Enhanced export / import main handlers (wrappers)
 function enhancedExportTournament() {
-  exportTournament();
+  if (typeof exportTournament === 'function') {
+    exportTournament();
+  } else {
+    showExportMessage("exportTournament() is not implemented", "error");
+  }
 }
 
-// Enhanced import function for the main import button
 function enhancedHandleImport() {
-  handleImport();
+  if (typeof handleImport === 'function') {
+    handleImport();
+  } else {
+    showExportMessage("handleImport() is not implemented", "error");
+  }
 }
-/************* ENHANCED UTILITY FUNCTIONS *************/
+
+/************* RESET / UTILITIES / THEME / RNG *************/
 
 function showResetConfirmationModal() {
   const hasData = window.GROUPS || window.GROUP_RESULTS || window.TOURNAMENT || Object.keys(PLAYER_DB).length > 0;
@@ -7926,9 +7799,9 @@ function showResetConfirmationModal() {
   
   modal.innerHTML = `
     <div style="background: #1f2937; border-radius: 12px; padding: 25px; max-width: 500px; width: 90vw;">
-      <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h3 style="margin: 0; color: #e5e7eb;">🔄 Reset Tournament</h3>
-        <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()" 
+        <button onclick="this.closest('div[style*=\\\'position: fixed\\\']').remove()" 
                 style="background: none; border: none; color: #9ca3af; font-size: 1.5em; cursor: pointer;">×</button>
       </div>
       
@@ -7956,16 +7829,16 @@ function showResetConfirmationModal() {
       </div>
       
       <div style="display: flex; gap: 10px; justify-content: space-between;">
-        <button onclick="exportTournament(); this.closest('div[style*=\"position: fixed\"]').remove()" 
+        <button onclick="exportTournament && exportTournament(); this.closest('div[style*=\\\'position: fixed\\\']').remove()" 
                 class="btn-secondary" style="padding: 10px 15px; flex: 1;">
           💾 Export First
         </button>
         <div style="display: flex; gap: 10px;">
-          <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()" 
+          <button onclick="this.closest('div[style*=\\\'position: fixed\\\']').remove()" 
                   class="btn-secondary" style="padding: 10px 20px;">
             Cancel
           </button>
-          <button onclick="performReset(); this.closest('div[style*=\"position: fixed\"]').remove()" 
+          <button onclick="performReset(); this.closest('div[style*=\\\'position: fixed\\\']').remove()" 
                   class="btn-primary" style="padding: 10px 20px; background: #ef4444;">
             🗑️ Reset Anyway
           </button>
@@ -7978,31 +7851,18 @@ function showResetConfirmationModal() {
 }
 
 function performReset() {
-  // Create backup before reset
   createPreResetBackup();
   
-  // Clear tournament data
   window.GROUPS = null;
   window.GROUP_RESULTS = null;
   window.TOURNAMENT = null;
   
-  // Clear current tournament player stats but keep all-time stats
-  const currentPlayerIds = Object.keys(PLAYER_DB);
-  currentPlayerIds.forEach(key => {
-    delete PLAYER_DB[key];
-  });
+  Object.keys(PLAYER_DB).forEach(key => delete PLAYER_DB[key]);
+  Object.keys(MATCH_DETAILS_DB).forEach(key => delete MATCH_DETAILS_DB[key]);
   
-  // Clear match details
-  const matchIds = Object.keys(MATCH_DETAILS_DB);
-  matchIds.forEach(key => {
-    delete MATCH_DETAILS_DB[key];
-  });
-  
-  // Reset simulation settings
   window.LAST_SIMULATION_DATE = null;
   window.TOURNAMENT_FORMAT = null;
   
-  // Update UI
   const out = document.getElementById("output");
   if (out) {
     out.innerHTML = `
@@ -8012,20 +7872,15 @@ function performReset() {
         <p style="color: #9ca3af; font-size: 1.1em; margin-bottom: 30px; max-width: 400px; margin-left: auto; margin-right: auto;">
           Ready to start a new all-eras tournament adventure. Your all-time records are preserved.
         </p>
-        <button onclick="generateGroups()" class="btn-primary" style="padding: 12px 30px; font-size: 1.1em;">
+        <button onclick="generateGroups && generateGroups()" class="btn-primary" style="padding: 12px 30px; font-size: 1.1em;">
           🎯 Generate New Groups
         </button>
       </div>
     `;
   }
   
-  // Update button states
   updateButtonStates();
-  
-  // Show success message
   showUtilityMessage("Tournament reset successfully. All-time records preserved.", "success");
-  
-  // Log reset action
   console.log("Tournament reset performed. Current season data cleared.");
 }
 
@@ -8043,12 +7898,6 @@ function createPreResetBackup() {
     };
     
     localStorage.setItem('preResetBackup', JSON.stringify(backupData));
-    
-    // Set expiration (24 hours)
-    setTimeout(() => {
-      localStorage.removeItem('preResetBackup');
-    }, 24 * 60 * 60 * 1000);
-    
   } catch (error) {
     console.warn("Could not create pre-reset backup:", error);
   }
@@ -8072,25 +7921,16 @@ function toggleTheme() {
   const body = document.body;
   const isLight = body.classList.toggle('light');
   
-  // Save theme preference
-  localStorage.setItem('theme', isLight ? 'light' : 'dark');
-  
-  // Update theme toggle button
   const themeBtn = document.getElementById('themeToggle');
   if (themeBtn) {
-    themeBtn.innerHTML = isLight ? '🌙 Dark' : '☀️ Light';
-    themeBtn.title = isLight ? 'Switch to dark mode' : 'Switch to light mode';
+    themeBtn.textContent = isLight ? '🌙 Dark' : '☀️ Light';
   }
   
-  // Show theme change message
-  showUtilityMessage(`Switched to ${isLight ? 'light' : 'dark'} mode`, "success");
-  
-  // Apply theme to custom elements
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
   applyThemeToCustomElements(isLight);
 }
 
 function applyThemeToCustomElements(isLight) {
-  // Update CSS variables for custom components
   const root = document.documentElement;
   if (isLight) {
     root.style.setProperty('--bg-primary', '#ffffff');
@@ -8115,7 +7955,6 @@ function initializeTheme() {
     body.classList.add('light');
   }
   
-  // Initialize theme toggle button
   const themeBtn = document.getElementById('themeToggle');
   if (themeBtn) {
     themeBtn.innerHTML = savedTheme === 'light' ? '🌙 Dark' : '☀️ Light';
@@ -8124,21 +7963,18 @@ function initializeTheme() {
   applyThemeToCustomElements(savedTheme === 'light');
 }
 
+/************* RNG SYSTEM (CLEANED / MERGED) *************/
+
 function applyRNGLevel(rawValue) {
   const v = Math.max(0.3, Math.min(2.0, parseFloat(rawValue) || 1.0));
   
-  // Apply different chaos levels to different stages
   RNG_SETTINGS.groupChaos = v;
-  RNG_SETTINGS.knockoutChaos = v * 1.2; // Knockouts are more unpredictable
-  RNG_SETTINGS.finalChaos = v * 0.8;    // Finals are slightly more predictable
+  RNG_SETTINGS.knockoutChaos = v * 1.2;
+  RNG_SETTINGS.finalChaos = v * 0.8;
   
-  // Update RNG visualization
   updateRNGVisualization(v);
-  
-  // Save RNG preference
   localStorage.setItem('rngLevel', v.toString());
   
-  // Show RNG change message for significant changes
   const previousLevel = window.lastRNGLevel || 1.0;
   if (Math.abs(v - previousLevel) > 0.2) {
     showRNGChangeMessage(v);
@@ -8201,7 +8037,6 @@ function updateRNGVisualization(value) {
     indicator.style.background = color;
   }
   
-  // Update RNG effect descriptions
   updateRNGEffectDescriptions(value);
 }
 
@@ -8231,13 +8066,16 @@ function updateRNGEffectDescriptions(value) {
   `;
 }
 
+function getRNGLevelText(value) {
+  if (value <= 0.7) return "Predictable";
+  if (value <= 1.0) return "Balanced";
+  if (value <= 1.3) return "Chaotic";
+  return "Wild";
+}
+
 function updateRNG(value) {
-  applyRNGLevel(value);
-  
-  // Add haptic feedback if available
-  if (navigator.vibrate) {
-    navigator.vibrate(50);
-  }
+  const numericValue = parseFloat(value);
+  applyRNGLevel(numericValue);
 }
 
 function showRNGChangeMessage(level) {
@@ -8256,139 +8094,44 @@ function showRNGChangeMessage(level) {
   
   showUtilityMessage(`🎲 RNG Level Updated: ${message}`, "success");
 }
-
 function initializeRNG() {
-  const savedLevel = localStorage.getItem('rngLevel') || '1.0';
-  const slider = document.getElementById("rngSlider");
-  
-  if (slider) {
-    slider.value = savedLevel;
-    applyRNGLevel(savedLevel);
-  }
-  
-  // Initialize preset buttons
-  const presetButtons = {
-    '0.5': document.querySelector('[onclick*="0.5"]'),
-    '1.0': document.querySelector('[onclick*="1.0"]'),
-    '1.5': document.querySelector('[onclick*="1.5"]'),
-    '2.0': document.querySelector('[onclick*="2.0"]')
-  };
-  
-  if (presetButtons[savedLevel]) {
-    presetButtons[savedLevel].classList.add('active');
-  }
-}
-
-function updateButtonStates() {
-  const buttons = {
-    group: document.getElementById("btnGroupStage"),
-    ko: document.getElementById("btnKnockouts"),
-    stats: document.getElementById("btnStats"),
-    bracket: document.getElementById("btnBracket"),
-    overview: document.getElementById("btnOverview")
-  };
-  
-  const hasGroups = window.GROUPS;
-  const hasGroupResults = window.GROUP_RESULTS;
-  const hasTournament = window.TOURNAMENT;
-  
-  if (buttons.group) {
-    buttons.group.disabled = !hasGroups;
-    buttons.group.title = hasGroups ? "Simulate group stage matches" : "Generate groups first";
-  }
-  
-  if (buttons.ko) {
-    buttons.ko.disabled = !hasGroupResults;
-    buttons.ko.title = hasGroupResults ? "Simulate knockout stage" : "Complete group stage first";
-  }
-  
-  if (buttons.stats) {
-    buttons.stats.disabled = !hasGroupResults && !hasTournament;
-    buttons.stats.title = (hasGroupResults || hasTournament) ? "View player statistics" : "Simulate matches first";
-  }
-  
-  if (buttons.bracket) {
-    buttons.bracket.disabled = !hasTournament;
-    buttons.bracket.title = hasTournament ? "View tournament bracket" : "Complete tournament first";
-  }
-  
-  if (buttons.overview) {
-    buttons.overview.disabled = !hasGroups && !hasTournament;
-    buttons.overview.title = (hasGroups || hasTournament) ? "View tournament overview" : "Generate tournament first";
-  }
-  
-  // Update button styles based on state
-  Object.values(buttons).forEach(btn => {
-    if (btn) {
-      if (btn.disabled) {
-        btn.style.opacity = "0.5";
-        btn.style.cursor = "not-allowed";
-      } else {
-        btn.style.opacity = "1";
-        btn.style.cursor = "pointer";
-      }
+    const savedLevel = localStorage.getItem('rngLevel') || '1.0';
+    const slider = document.getElementById("rngSlider");
+    
+    if (slider) {
+        slider.value = savedLevel;
+        applyRNGLevel(savedLevel);
+        
+        slider.addEventListener('input', (e) => {
+            updateRNG(e.target.value);
+        });
+        slider.addEventListener('change', (e) => {
+            updateRNG(e.target.value);
+        });
     }
-  });
+    
+    // Fix RNG preset buttons
+    document.querySelectorAll('.rng-pill').forEach(btn => {
+        // Remove existing listeners
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        
+        newBtn.addEventListener('click', function() {
+            const value = parseFloat(this.getAttribute('data-rng-value') || '1.0');
+            document.querySelectorAll('.rng-pill').forEach(p => p.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Update slider
+            const slider = document.getElementById("rngSlider");
+            if (slider) {
+                slider.value = value;
+                updateRNG(value);
+            }
+        });
+    });
 }
 
-function showUtilityMessage(message, type = "info") {
-  // Remove any existing messages
-  const existingMessages = document.querySelectorAll('.utility-message');
-  existingMessages.forEach(msg => msg.remove());
-  
-  const colors = {
-    success: '#10b981',
-    error: '#ef4444',
-    info: '#3b82f6',
-    warning: '#f59e0b'
-  };
-  
-  const icons = {
-    success: '✅',
-    error: '❌',
-    info: 'ℹ️',
-    warning: '⚠️'
-  };
-  
-  const messageDiv = document.createElement('div');
-  messageDiv.className = 'utility-message';
-  messageDiv.style.cssText = `
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: ${colors[type]}20;
-    color: ${colors[type]};
-    padding: 12px 20px;
-    border-radius: 8px;
-    border: 1px solid ${colors[type]}40;
-    z-index: 1001;
-    max-width: 400px;
-    text-align: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(10px);
-    animation: slideUp 0.3s ease-out;
-  `;
-  
-  messageDiv.innerHTML = `
-    <div style="display: flex; align-items: center; gap: 10px; justify-content: center;">
-      <span style="font-size: 1.2em;">${icons[type]}</span>
-      <strong>${message}</strong>
-    </div>
-  `;
-  
-  document.body.appendChild(messageDiv);
-  
-  // Auto remove after 4 seconds
-  setTimeout(() => {
-    if (messageDiv.parentNode) {
-      messageDiv.style.animation = 'slideDown 0.3s ease-in';
-      setTimeout(() => messageDiv.remove(), 300);
-    }
-  }, 4000);
-}
 
-// Enhanced CSS for utility functions
 const utilityStyles = `
   @keyframes slideUp {
     from {
@@ -8454,82 +8197,121 @@ const utilityStyles = `
   }
 `;
 
-// Inject styles
-const utilityStyleSheet = document.createElement('style');
-utilityStyleSheet.textContent = utilityStyles;
-document.head.appendChild(utilityStyleSheet);
+injectStylesOnce('utility-styles', utilityStyles);
 
-// Initialize utilities when page loads
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeUtilities);
-} else {
-  initializeUtilities();
-}
-
-function initializeUtilities() {
-  initializeTheme();
-  initializeRNG();
-  updateButtonStates();
+function updateButtonStates() {
+  const buttons = {
+    group: document.getElementById("btnGroupStage"),
+    ko: document.getElementById("btnKnockouts"),
+    stats: document.getElementById("btnStats"),
+    bracket: document.getElementById("btnBracket"),
+    overview: document.getElementById("btnOverview")
+  };
   
-  // Check for pre-reset backup on startup
-  setTimeout(() => {
-    const preResetBackup = localStorage.getItem('preResetBackup');
-    if (preResetBackup && !window.TOURNAMENT && !window.GROUP_RESULTS) {
-      showRestoreBackupOffer();
+  const hasGroups = window.GROUPS;
+  const hasGroupResults = window.GROUP_RESULTS;
+  const hasTournament = window.TOURNAMENT;
+  
+  if (buttons.group) {
+    buttons.group.disabled = !hasGroups;
+    buttons.group.title = hasGroups ? "Simulate group stage matches" : "Generate groups first";
+  }
+  
+  if (buttons.ko) {
+    buttons.ko.disabled = !hasGroupResults;
+    buttons.ko.title = hasGroupResults ? "Simulate knockout stage" : "Complete group stage first";
+  }
+  
+  if (buttons.stats) {
+    buttons.stats.disabled = !hasGroupResults && !hasTournament;
+    buttons.stats.title = (hasGroupResults || hasTournament) ? "View player statistics" : "Simulate matches first";
+  }
+  
+  if (buttons.bracket) {
+    buttons.bracket.disabled = !hasTournament;
+    buttons.bracket.title = hasTournament ? "View tournament bracket" : "Complete tournament first";
+  }
+  
+  if (buttons.overview) {
+    buttons.overview.disabled = !hasGroups && !hasTournament;
+    buttons.overview.title = (hasGroups || hasTournament) ? "View tournament overview" : "Generate tournament first";
+  }
+  
+  Object.values(buttons).forEach(btn => {
+    if (btn) {
+      if (btn.disabled) {
+        btn.style.opacity = "0.5";
+        btn.style.cursor = "not-allowed";
+      } else {
+        btn.style.opacity = "1";
+        btn.style.cursor = "pointer";
+      }
     }
-  }, 2000);
+  });
 }
 
-function showRestoreBackupOffer() {
-  const offerDiv = document.createElement('div');
-  offerDiv.style.cssText = `
+function showUtilityMessage(message, type = "info") {
+  const existingMessages = document.querySelectorAll('.utility-message');
+  existingMessages.forEach(msg => msg.remove());
+  
+  const colors = {
+    success: '#10b981',
+    error: '#ef4444',
+    info: '#3b82f6',
+    warning: '#f59e0b'
+  };
+  
+  const icons = {
+    success: '✅',
+    error: '❌',
+    info: 'ℹ️',
+    warning: '⚠️'
+  };
+  
+  const messageDiv = document.createElement('div');
+  messageDiv.className = 'utility-message';
+  messageDiv.style.cssText = `
     position: fixed;
     bottom: 20px;
-    right: 20px;
-    background: #1f2937;
-    border: 1px solid #374151;
+    left: 50%;
+    transform: translateX(-50%);
+    background: ${colors[type]}20;
+    color: ${colors[type]};
+    padding: 12px 20px;
     border-radius: 8px;
-    padding: 15px;
-    max-width: 300px;
-    z-index: 999;
+    border: 1px solid ${colors[type]}40;
+    z-index: 1001;
+    max-width: 400px;
+    text-align: center;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    animation: slideUp 0.3s ease-out;
   `;
   
-  offerDiv.innerHTML = `
-    <div style="color: #e5e7eb; margin-bottom: 10px; font-weight: bold;">
-      🔄 Restore Previous Tournament?
-    </div>
-    <div style="color: #9ca3af; font-size: 0.9em; margin-bottom: 15px;">
-      We found a tournament from your last session. Would you like to restore it?
-    </div>
-    <div style="display: flex; gap: 10px;">
-      <button onclick="this.parentElement.parentElement.remove()" 
-              style="padding: 8px 12px; background: #374151; border: none; border-radius: 4px; color: #d1d5db; cursor: pointer; flex: 1;">
-        No Thanks
-      </button>
-      <button onclick="restorePreResetBackup(); this.parentElement.parentElement.remove()" 
-              style="padding: 8px 12px; background: #10b981; border: none; border-radius: 4px; color: white; cursor: pointer; flex: 1;">
-        Restore
-      </button>
+  messageDiv.innerHTML = `
+    <div style="display: flex; align-items: center; gap: 10px; justify-content: center;">
+      <span style="font-size: 1.2em;">${icons[type]}</span>
+      <strong>${message}</strong>
     </div>
   `;
   
-  document.body.appendChild(offerDiv);
+  document.body.appendChild(messageDiv);
   
-  // Auto remove after 10 seconds
   setTimeout(() => {
-    if (offerDiv.parentNode) {
-      offerDiv.remove();
+    if (messageDiv.parentNode) {
+      messageDiv.style.animation = 'slideDown 0.3s ease-in';
+      setTimeout(() => messageDiv.remove(), 300);
     }
-  }, 10000);
+  }, 4000);
 }
-/************* ENHANCED MODAL FUNCTIONS *************/
 
-// Modal state management
+/************* MODAL SYSTEM *************/
+
 const ModalManager = {
   activeModal: null,
   modalStack: [],
   history: [],
+  escapeHandler: null,
   
   open(modalId, data = null) {
     const modal = document.getElementById(modalId);
@@ -8538,39 +8320,39 @@ const ModalManager = {
       return;
     }
     
-    // Close current modal if any
     if (this.activeModal && this.activeModal !== modalId) {
       this.close(this.activeModal);
     }
     
-    // Add to stack
-    this.modalStack.push(modalId);
+    if (!this.modalStack.includes(modalId)) {
+      this.modalStack.push(modalId);
+    }
     this.activeModal = modalId;
     
-    // Store open data in history
     this.history.push({
       modalId,
       timestamp: new Date().toISOString(),
       data
     });
     
-    // Show modal with animation
     modal.style.display = 'flex';
     setTimeout(() => {
       modal.classList.add('active');
       modal.setAttribute('aria-hidden', 'false');
       
-      // Focus management
       const focusable = modal.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
       if (focusable) focusable.focus();
       
-      // Dispatch custom event
       modal.dispatchEvent(new CustomEvent('modalopen', { detail: data }));
     }, 10);
     
-    // Add escape key listener
-    this.addEscapeListener();
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        this.close(modalId);
+      }
+    });
     
+    this.addEscapeListener();
     console.log(`Modal opened: ${modalId}`, data);
   },
   
@@ -8581,22 +8363,17 @@ const ModalManager = {
     const modal = document.getElementById(targetModalId);
     if (!modal) return;
     
-    // Remove from stack
     this.modalStack = this.modalStack.filter(id => id !== targetModalId);
     this.activeModal = this.modalStack[this.modalStack.length - 1] || null;
     
-    // Hide modal with animation
     modal.classList.remove('active');
     modal.setAttribute('aria-hidden', 'true');
     
     setTimeout(() => {
       modal.style.display = 'none';
-      
-      // Dispatch custom event
       modal.dispatchEvent(new CustomEvent('modalclose'));
     }, 300);
     
-    // Remove escape listener if no modals left
     if (this.modalStack.length === 0) {
       this.removeEscapeListener();
     }
@@ -8611,6 +8388,7 @@ const ModalManager = {
   },
   
   addEscapeListener() {
+    if (this.escapeHandler) return;
     this.escapeHandler = (e) => {
       if (e.key === 'Escape') {
         this.close();
@@ -8636,7 +8414,9 @@ const ModalManager = {
 };
 
 function openCustomMatch(teamA = null, teamB = null) {
-  populateCustomMatchDropdowns();
+  if (typeof populateCustomMatchDropdowns === 'function') {
+    populateCustomMatchDropdowns();
+  }
   
   const modalData = {};
   if (teamA) modalData.preselectedTeamA = teamA;
@@ -8644,23 +8424,25 @@ function openCustomMatch(teamA = null, teamB = null) {
   
   ModalManager.open('customMatchModal', modalData);
   
-  // Apply preselections if provided
   if (teamA) {
     const teamASelect = document.getElementById('customTeamA');
     if (teamASelect) {
       teamASelect.value = teamA;
-      setTimeout(() => updateTeamComparison(), 100);
+      setTimeout(() => {
+        if (typeof updateTeamComparison === 'function') updateTeamComparison();
+      }, 100);
     }
   }
   if (teamB) {
     const teamBSelect = document.getElementById('customTeamB');
     if (teamBSelect) {
       teamBSelect.value = teamB;
-      setTimeout(() => updateTeamComparison(), 100);
+      setTimeout(() => {
+        if (typeof updateTeamComparison === 'function') updateTeamComparison();
+      }, 100);
     }
   }
   
-  // Add modal-specific enhancements
   enhanceCustomMatchModal();
 }
 
@@ -8668,55 +8450,40 @@ function openHistory(filter = null) {
   const modalData = { filter };
   ModalManager.open('historyModal', modalData);
   
-  // Load and display history based on filter
-  loadHistoryContent(filter);
+  if (typeof loadHistoryContent === 'function') {
+    loadHistoryContent(filter);
+  }
   
-  // Add modal-specific enhancements
   enhanceHistoryModal();
 }
 
-function openMatchDetail(matchId, matchData = null) {
-  const match = matchData || MATCH_DETAILS_DB[matchId];
+function openMatchDetail(matchId) {
+  const match = MATCH_DETAILS_DB[matchId];
   if (!match) {
-    console.warn(`Match ${matchId} not found`);
+    showUtilityMessage("Match details not found", "error");
     return;
   }
   
-  ModalManager.open('matchDetailModal', { matchId, match });
+  const modal = document.getElementById('matchDetailModal');
+  if (!modal) return;
   
-  // Populate match details
-  populateMatchDetailModal(match);
-  
-  // Add modal-specific enhancements
-  enhanceMatchDetailModal();
-}
-
-function openTeamDetail(teamName, teamData = null) {
-  const team = teamData || TEAM_MAP.get(teamName);
-  if (!team) {
-    console.warn(`Team ${teamName} not found`);
-    return;
+  if (typeof populateMatchDetailModal === 'function') {
+    populateMatchDetailModal(match);
   }
   
-  ModalManager.open('teamDetailModal', { teamName, team });
-  
-  // Populate team details
-  populateTeamDetailModal(team);
-  
-  // Add modal-specific enhancements
-  enhanceTeamDetailModal();
+  ModalManager.open('matchDetailModal', { matchId });
 }
 
 function openSettings() {
   ModalManager.open('settingsModal');
-  populateSettingsModal();
-  enhanceSettingsModal();
+  if (typeof populateSettingsModal === 'function') populateSettingsModal();
+  if (typeof enhanceSettingsModal === 'function') enhanceSettingsModal();
 }
 
 function openStatistics() {
   ModalManager.open('statisticsModal');
-  populateStatisticsModal();
-  enhanceStatisticsModal();
+  if (typeof populateStatisticsModal === 'function') populateStatisticsModal();
+  if (typeof enhanceStatisticsModal === 'function') enhanceStatisticsModal();
 }
 
 function closeCustomMatch() {
@@ -8747,13 +8514,12 @@ function closeAllModals() {
   ModalManager.closeAll();
 }
 
-// Enhanced modal content population functions
 function populateMatchDetailModal(match) {
   const modal = document.getElementById('matchDetailModal');
   if (!modal) return;
   
   const potg = match.playerOfTheGame;
-  const events = match.events || {};
+  const events = match.events || { goals: [] };
   
   let html = `
     <div class="modal-header">
@@ -8797,7 +8563,6 @@ function populateMatchDetailModal(match) {
       </div>
   `;
   
-  // Player of the Game section
   if (potg) {
     html += `
       <div class="potg-section">
@@ -8815,7 +8580,6 @@ function populateMatchDetailModal(match) {
     `;
   }
   
-  // Match Events timeline
   if (events.goals && events.goals.length > 0) {
     html += `
       <div class="events-section">
@@ -8840,7 +8604,6 @@ function populateMatchDetailModal(match) {
     html += `</div></div>`;
   }
   
-  // Match Statistics
   html += `
     <div class="stats-section">
       <h3>📈 Match Statistics</h3>
@@ -8864,6 +8627,9 @@ function populateMatchDetailModal(match) {
       <button class="btn-secondary" onclick="simulateRematchFromDetail('${match.teamA}', '${match.teamB}')">
         🔄 Simulate Rematch
       </button>
+      <button class="btn-secondary copy-match-id" data-match-id="${match.matchId}">
+        📋 Copy ID
+      </button>
       <button class="btn-secondary" onclick="shareMatchDetails('${match.matchId}')">
         📤 Share Match
       </button>
@@ -8871,6 +8637,7 @@ function populateMatchDetailModal(match) {
   `;
   
   modal.querySelector('.modal-content').innerHTML = html;
+  enhanceMatchDetailModal();
 }
 
 function populateTeamDetailModal(team) {
@@ -8921,7 +8688,6 @@ function populateTeamDetailModal(team) {
       </div>
   `;
   
-  // Top performers
   if (topScorer || topAssist) {
     html += `
       <div class="top-performers">
@@ -8952,7 +8718,6 @@ function populateTeamDetailModal(team) {
     html += `</div></div>`;
   }
   
-  // Recent matches (last 5)
   const teamMatches = Object.values(MATCH_DETAILS_DB)
     .filter(m => m.teamA === team.name || m.teamB === team.name)
     .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
@@ -8999,12 +8764,10 @@ function populateTeamDetailModal(team) {
   modal.querySelector('.modal-content').innerHTML = html;
 }
 
-// Modal enhancement functions
 function enhanceCustomMatchModal() {
   const modal = document.getElementById('customMatchModal');
   if (!modal) return;
   
-  // Add keyboard shortcuts
   const keyHandler = (e) => {
     if (e.key === 'Enter' && e.ctrlKey) {
       simulateCustomMatch();
@@ -9013,7 +8776,6 @@ function enhanceCustomMatchModal() {
   
   modal.addEventListener('keydown', keyHandler);
   
-  // Add animation to team selection
   const teamSelects = modal.querySelectorAll('select');
   teamSelects.forEach(select => {
     select.addEventListener('change', function() {
@@ -9029,17 +8791,15 @@ function enhanceHistoryModal() {
   const modal = document.getElementById('historyModal');
   if (!modal) return;
   
-  // Add search functionality
   const searchInput = modal.querySelector('.history-search');
-  if (searchInput) {
-    searchInput.addEventListener('input', function(e) {
+  if (searchInput && typeof filterHistoryContent === 'function') {
+    searchInput.addEventListener('input', function() {
       filterHistoryContent(this.value);
     });
   }
   
-  // Add refresh button functionality
   const refreshBtn = modal.querySelector('.refresh-history');
-  if (refreshBtn) {
+  if (refreshBtn && typeof loadHistoryContent === 'function') {
     refreshBtn.addEventListener('click', function() {
       this.classList.add('refreshing');
       setTimeout(() => {
@@ -9054,7 +8814,6 @@ function enhanceMatchDetailModal() {
   const modal = document.getElementById('matchDetailModal');
   if (!modal) return;
   
-  // Add copy match ID functionality
   const copyBtn = modal.querySelector('.copy-match-id');
   if (copyBtn) {
     copyBtn.addEventListener('click', function() {
@@ -9069,7 +8828,6 @@ function enhanceMatchDetailModal() {
   }
 }
 
-// Utility functions for modals
 function getTeamSeason(teamName) {
   const team = TEAM_MAP.get(teamName);
   return team ? team.season : 'Unknown Season';
@@ -9088,8 +8846,7 @@ function getImportanceBadge(importance) {
     2: { text: 'High', color: '#ef4444' }
   };
   
-  const level = importance >= 2 ? levels[2] : 
-                importance >= 1.5 ? levels[1.5] : levels[1];
+  const level = importance >= 2 ? levels[2] : importance >= 1.5 ? levels[1.5] : levels[1];
   
   return `<span style="background: ${level.color}20; color: ${level.color}; padding: 2px 8px; border-radius: 12px; font-size: 0.8em;">${level.text}</span>`;
 }
@@ -9126,18 +8883,8 @@ function showModalMessage(message, type = 'info') {
   }, 3000);
 }
 
-// Initialize modal system
 function initializeModalSystem() {
-  // Add click outside to close functionality
-  document.addEventListener('click', (e) => {
-    if (e.target.classList.contains('modal')) {
-      ModalManager.close(e.target.id);
-    }
-  });
-  
-  // Add modal styles
   injectModalStyles();
-  
   console.log('Modal system initialized');
 }
 
@@ -9248,7 +8995,6 @@ function injectModalStyles() {
       border: 1px solid #ef444440;
     }
     
-    /* Match detail specific styles */
     .match-score-card {
       display: grid;
       grid-template-columns: 1fr auto 1fr;
@@ -9288,7 +9034,6 @@ function injectModalStyles() {
       margin-top: 5px;
     }
     
-    /* Responsive design */
     @media (max-width: 768px) {
       .modal-content {
         width: 95vw;
@@ -9306,611 +9051,389 @@ function injectModalStyles() {
     }
   `;
   
+  injectStylesOnce('modal-styles', styles);
+}
+
+/************* MATCH RESULTS VIEWS *************/
+
+function showMatchResults() {
+  console.log("Showing match results...");
+  const out = document.getElementById("output");
+  if (!out) return;
   
-  styleSheet.textContent = styles;
-  document.head.appendChild(styleSheet);
+  out.innerHTML = `
+    <div class="group-card">
+      <div class="group-title">📋 Match Results</div>
+      <div style="padding: 40px; text-align: center;">
+        <div style="font-size: 64px; margin-bottom: 20px;">⚽</div>
+        <p style="font-size: 1.2em; margin-bottom: 10px;"><strong>All Match Results</strong></p>
+        <p style="color: #9ca3af; margin-bottom: 20px;">Complete list of all tournament matches with detailed statistics.</p>
+      </div>
+    </div>
+  `;
 }
 
-// Initialize when page loads
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeModalSystem);
-} else {
-  initializeModalSystem();
-document.getElementById('exportTournamentBtn')?.addEventListener('click', exportTournament);
-document.getElementById('resetTournamentBtn')?.addEventListener('click', resetTournament);
-document.getElementById('importSaveBtn')?.addEventListener('click', handleImport);
-}
-/************* FIXED INITIALIZATION *************/
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("🏁 Initializing All-Time Football Simulator...");
-    
-    // Inject all styles first to avoid duplicate declarations
-    injectAllStyles();
-    
-    // Initialize core systems
-    if (typeof initTeamsAndPlayers === 'function') {
-        initTeamsAndPlayers();
-    } else {
-        console.error("❌ initTeamsAndPlayers function not found!");
-    }
-    
-    // Update UI elements
-    const teamCountEl = document.getElementById('teamCount');
-    if (teamCountEl) teamCountEl.textContent = TEAM_POOL ? TEAM_POOL.length.toString() : "0";
-    
-    const rngSlider = document.getElementById('rngSlider');
-    if (rngSlider) {
-        updateRNG(rngSlider.value);
-    }
-    
-    console.log("🔗 Connecting buttons and event handlers...");
-    
-    // Tournament Control Buttons
-    const generateBtn = document.getElementById('btnDraw');
-    if (generateBtn) {
-        generateBtn.addEventListener('click', function() {
-            console.log("Generate button clicked");
-            if (typeof startTournament === 'function') {
-                startTournament();
-            } else {
-                console.error("startTournament function not found!");
-            }
-        });
-        console.log("✅ Generate Groups button connected");
-    }
-    
-    const groupStageBtn = document.getElementById('btnGroupStage');
-    if (groupStageBtn) {
-        groupStageBtn.addEventListener('click', function() {
-            console.log("Group Stage button clicked");
-            if (typeof runGroupStage === 'function') {
-                runGroupStage();
-            } else {
-                console.error("runGroupStage function not found!");
-            }
-        });
-        console.log("✅ Group Stage button connected");
-    }
-    
-    const knockoutsBtn = document.getElementById('btnKnockouts');
-    if (knockoutsBtn) {
-        knockoutsBtn.addEventListener('click', function() {
-            console.log("Knockouts button clicked");
-            if (typeof runKnockouts === 'function') {
-                runKnockouts();
-            } else {
-                console.error("runKnockouts function not found!");
-            }
-        });
-        console.log("✅ Knockouts button connected");
-    }
-    
-    // Enhanced Tournament Control - Full Tournament Run
-    const fullTournamentBtn = document.getElementById('btnFullTournament');
-    if (!fullTournamentBtn) {
-        const controlsColumn = document.querySelector('.control-column:nth-child(1)');
-        if (controlsColumn) {
-            const newFullTournamentBtn = document.createElement('button');
-            newFullTournamentBtn.className = 'ctrl-btn btn-blue';
-            newFullTournamentBtn.id = 'btnFullTournament';
-            newFullTournamentBtn.innerHTML = `
-                <div class="ctrl-btn-main">
-                    <span class="ctrl-btn-title">Run Full Tournament</span>
-                    <span class="ctrl-btn-subtitle">Generate groups & simulate complete tournament</span>
-                </div>
-                <span class="ctrl-btn-tag">🚀</span>
-            `;
-            newFullTournamentBtn.addEventListener('click', function() {
-                console.log("Full Tournament button clicked");
-                runFullTournament();
-            });
-            controlsColumn.insertBefore(newFullTournamentBtn, controlsColumn.firstChild);
-            console.log("✅ Full Tournament button added");
-        }
-    }
-    
-    // View Buttons - Add proper error handling
-    const connectViewButton = (buttonId, clickHandler, buttonName) => {
-        const button = document.getElementById(buttonId);
-        if (button) {
-            button.addEventListener('click', function() {
-                console.log(`${buttonName} button clicked`);
-                if (typeof clickHandler === 'function') {
-                    clickHandler();
-                } else {
-                    console.error(`${buttonName} function not found!`);
-                    showUtilityMessage(`Error: ${buttonName} function not available`, "error");
-                }
-            });
-            console.log(`✅ ${buttonName} button connected`);
-            return true;
-        }
-        return false;
-    };
-    
-    // Connect all view buttons with error handling
-    connectViewButton('btnStats', showPlayerStats, 'Player Stats');
-    connectViewButton('btnClubLegacy', showClubLegacy, 'Club Legacy');
-    connectViewButton('btnCustomMatch', openCustomMatch, 'Custom Match');
-    connectViewButton('btnHistory', openHistory, 'History');
-    
-    // Dynamically created view buttons
-    const viewsColumn = document.querySelector('.control-column:nth-child(2)');
-    if (viewsColumn) {
-        // Clear any existing dynamically added buttons to avoid duplicates
-        const existingDynamicButtons = viewsColumn.querySelectorAll('[id^="btn"]');
-        existingDynamicButtons.forEach(btn => {
-            if (!btn.id.includes('btnStats') && !btn.id.includes('btnClubLegacy') && 
-                !btn.id.includes('btnCustomMatch') && !btn.id.includes('btnHistory')) {
-                btn.remove();
-            }
-        });
-        
-        // Create dynamic buttons with proper error handling
-        const createDynamicButton = (id, title, subtitle, icon, clickHandler) => {
-            const button = document.createElement('button');
-            button.className = 'ctrl-btn btn-purple';
-            button.id = id;
-            button.innerHTML = `
-                <div class="ctrl-btn-main">
-                    <span class="ctrl-btn-title">${title}</span>
-                    <span class="ctrl-btn-subtitle">${subtitle}</span>
-                </div>
-                <span class="ctrl-btn-tag">${icon}</span>
-            `;
-            button.addEventListener('click', function() {
-                console.log(`${title} button clicked`);
-                if (typeof clickHandler === 'function') {
-                    clickHandler();
-                } else {
-                    console.error(`${title} function not found!`);
-                    showUtilityMessage(`Error: ${title} function not available`, "error");
-                }
-            });
-            return button;
-        };
-        
-        // Add all dynamic buttons
-        viewsColumn.appendChild(createDynamicButton(
-            'btnGroupStageResults', 
-            'Group Stage Results', 
-            'Final standings & qualified teams', 
-            '📈', 
-            showGroupStageResults
-        ));
-        
-        viewsColumn.appendChild(createDynamicButton(
-            'btnOverview', 
-            'Tournament Overview', 
-            'Match-by-match results & summaries', 
-            '📅', 
-            showTournamentOverview
-        ));
-        
-        viewsColumn.appendChild(createDynamicButton(
-            'btnBracket', 
-            'Tournament Bracket', 
-            'Full knockout bracket visualization', 
-            '🏆', 
-            showTournamentBracket
-        ));
-        
-        viewsColumn.appendChild(createDynamicButton(
-            'btnMatchResults', 
-            'Match Results', 
-            'All games with player ratings & events', 
-            '📋', 
-            showMatchResults
-        ));
-        
-        viewsColumn.appendChild(createDynamicButton(
-            'btnMatchWeeks', 
-            'Match Weeks', 
-            'View all games with POTM & summaries', 
-            '📅', 
-            showMatchWeeksView
-        ));
-        
-        viewsColumn.appendChild(createDynamicButton(
-            'btnEnhancedStats', 
-            'Enhanced Statistics', 
-            'Advanced analytics & player comparisons', 
-            '📊', 
-            showEnhancedStatistics
-        ));
-        
-        viewsColumn.appendChild(createDynamicButton(
-            'btnCustomHistory', 
-            'Custom Matches', 
-            'Saved custom matches & replays', 
-            '💾', 
-            showCustomMatchHistory
-        ));
-        
-        console.log("✅ All dynamic view buttons added");
-    }
-    
-    // FIXED: Missing function buttons with proper event listeners
-    document.getElementById('exportTournamentBtn')?.addEventListener('click', exportTournament);
-    document.getElementById('resetTournamentBtn')?.addEventListener('click', resetTournament);
-    document.getElementById('importSaveBtn')?.addEventListener('click', handleImport);
-
-    // FIXED: RNG pills with proper event listeners
-    document.querySelectorAll('.rng-pill').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const value = parseFloat(this.getAttribute('data-rng-value') || '1.0');
-            setRNGPreset(value, this);
-        });
-    });
-    
-    // Utility Buttons with error handling
-    const connectUtilityButton = (selector, clickHandler, buttonName) => {
-        const button = document.querySelector(selector);
-        if (button) {
-            button.addEventListener('click', function() {
-                console.log(`${buttonName} button clicked`);
-                if (typeof clickHandler === 'function') {
-                    clickHandler();
-                } else {
-                    console.error(`${buttonName} function not found!`);
-                    showUtilityMessage(`Error: ${buttonName} function not available`, "error");
-                }
-            });
-            console.log(`✅ ${buttonName} button connected`);
-        }
-    };
-    
-    connectUtilityButton('#themeToggle', toggleTheme, 'Theme Toggle');
-    
-    // Enhanced Utility Buttons
-    const utilityColumn = document.querySelector('.control-column:nth-child(3)');
-    if (utilityColumn) {
-        const createUtilityButton = (id, title, subtitle, icon, clickHandler) => {
-            const button = document.createElement('button');
-            button.className = 'ctrl-btn btn-gray';
-            button.id = id;
-            button.innerHTML = `
-                <div class="ctrl-btn-main">
-                    <span class="ctrl-btn-title">${title}</span>
-                    <span class="ctrl-btn-subtitle">${subtitle}</span>
-                </div>
-                <span class="ctrl-btn-tag">${icon}</span>
-            `;
-            button.addEventListener('click', function() {
-                console.log(`${title} button clicked`);
-                if (typeof clickHandler === 'function') {
-                    clickHandler();
-                } else {
-                    console.error(`${title} function not found!`);
-                    showUtilityMessage(`Error: ${title} function not available`, "error");
-                }
-            });
-            return button;
-        };
-        
-        utilityColumn.appendChild(createUtilityButton(
-            'btnRestoreBackup',
-            'Restore Backup',
-            'Recover previous tournament data',
-            '🔄',
-            restoreFromBackup
-        ));
-        
-        utilityColumn.appendChild(createUtilityButton(
-            'btnSettings',
-            'Settings',
-            'Configure simulator options',
-            '⚙️',
-            openSettings
-        ));
-        
-        console.log("✅ Enhanced utility buttons added");
-    }
-    
-    // Modal-specific buttons
-    const customMatchSimBtn = document.querySelector('#customMatchModal .small-btn');
-    if (customMatchSimBtn) {
-        customMatchSimBtn.addEventListener('click', function() {
-            console.log("Custom Match Simulate button clicked");
-            if (typeof simulateCustomMatch === 'function') {
-                simulateCustomMatch();
-            } else {
-                console.error("simulateCustomMatch function not found!");
-            }
-        });
-        console.log("✅ Custom Match Simulate button connected");
-    }
-    
-    // Enhanced RNG System
-    const rngSliderElement = document.getElementById('rngSlider');
-    if (rngSliderElement) {
-        rngSliderElement.addEventListener('input', function(e) {
-            updateRNG(e.target.value);
-        });
-        rngSliderElement.addEventListener('change', function(e) {
-            updateRNG(e.target.value);
-        });
-        console.log("✅ RNG Slider connected");
-    }
-    
-    // Enhanced Modal Close Buttons
-    const modalCloseButtons = [
-        { id: 'customMatchModal', func: closeCustomMatch },
-        { id: 'historyModal', func: closeHistory },
-        { id: 'matchDetailModal', func: closeMatchDetail },
-        { id: 'teamDetailModal', func: closeTeamDetail },
-        { id: 'settingsModal', func: closeSettings },
-        { id: 'statisticsModal', func: closeStatistics }
-    ];
-    
-    modalCloseButtons.forEach(modal => {
-        const modalElement = document.getElementById(modal.id);
-        if (modalElement) {
-            const closeBtn = modalElement.querySelector('.modal-close');
-            if (closeBtn) {
-                closeBtn.addEventListener('click', function() {
-                    console.log(`Closing modal: ${modal.id}`);
-                    if (typeof modal.func === 'function') {
-                        modal.func();
-                    }
-                });
-            }
-            
-            // Add backdrop click to close
-            modalElement.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    console.log(`Backdrop click - closing modal: ${modal.id}`);
-                    if (typeof modal.func === 'function') {
-                        modal.func();
-                    }
-                }
-            });
-        }
-    });
-    console.log("✅ Modal close buttons connected");
-    
-    // Initialize custom match dropdowns
-    if (typeof populateCustomMatchDropdowns === 'function') {
-        populateCustomMatchDropdowns();
-        console.log("✅ Custom match dropdowns populated");
-    }
-    
-    // Initialize enhanced RNG visualization
-    if (typeof initializeRNG === 'function') {
-        initializeRNG();
-        console.log("✅ RNG system initialized");
-    }
-    
-    // Initialize button states
-    if (typeof updateButtonStates === 'function') {
-        updateButtonStates();
-        console.log("✅ Button states updated");
-    }
-    
-    // Check for existing tournament data and update UI accordingly
-    setTimeout(() => {
-        if (window.GROUP_RESULTS || window.TOURNAMENT) {
-            if (typeof updateButtonStates === 'function') {
-                updateButtonStates();
-            }
-            if (typeof showUtilityMessage === 'function') {
-                showUtilityMessage("Previous tournament data detected. Buttons updated.", "info");
-            }
-        }
-    }, 1000);
-    
-    console.log("🎉 App initialized successfully!");
-    console.log("📊 All systems ready:");
-    console.log("   • Core tournament functions");
-    console.log("   • Enhanced modal system");
-    console.log("   • Custom match simulator");
-    console.log("   • Export/import functionality");
-    console.log("   • Utility systems (theme, RNG, etc.)");
-});
-
-
-
-
-// Initialize core systems that need to run after DOM load
-function initializeCoreSystems() {
-    // Check for existing data and restore if available
-    const hasBackup = localStorage.getItem('tournamentBackup');
-    const hasData = window.GROUP_RESULTS || window.TOURNAMENT;
-    
-    if (!hasData && hasBackup) {
-        console.log("📦 Found existing backup, offering restore...");
-        setTimeout(() => {
-            if (confirm('A previous tournament backup was found. Would you like to restore it?')) {
-                if (typeof restoreFromBackup === 'function') {
-                    restoreFromBackup();
-                }
-            }
-        }, 2000);
-    }
-    
-    // Set up periodic auto-save
-    setInterval(() => {
-        if (window.TOURNAMENT || window.GROUP_RESULTS) {
-            if (typeof backupToLocalStorage === 'function') {
-                backupToLocalStorage();
-            }
-        }
-    }, 2 * 60 * 1000); // Auto-save every 2 minutes
-    
-    console.log("🔧 Core systems initialized");
+function showMatchWeeksView() {
+  console.log("Showing match weeks...");
+  const out = document.getElementById("output");
+  if (!out) return;
+  
+  out.innerHTML = `
+    <div class="group-card">
+      <div class="group-title">🗓️ Match Weeks</div>
+      <div style="padding: 40px; text-align: center;">
+        <div style="font-size: 64px; margin-bottom: 20px;">📅</div>
+        <p style="font-size: 1.2em; margin-bottom: 10px;"><strong>Match Weeks Schedule</strong></p>
+        <p style="color: #9ca3af; margin-bottom: 20px;">View all matches organized by match weeks.</p>
+      </div>
+    </div>
+  `;
 }
 
-// Call core systems initialization after a brief delay
-setTimeout(initializeCoreSystems, 500);
+/************* PLAYER RATING SYSTEM *************/
 
-// Enhanced error handling for global functions
-window.addEventListener('error', function(e) {
-    console.error('Global error:', e.error);
-    if (typeof showUtilityMessage === 'function') {
-        showUtilityMessage('An error occurred. Check console for details.', 'error');
-    }
-});
+function calculateBaseRating(player, teamStrength, performance = {}) {
+  if (!player || !player.quality) {
+    console.warn("⚠️ Invalid player in calculateBaseRating:", player);
+    return 6.0;
+  }
 
-// Handle unhandled promise rejections
-window.addEventListener('unhandledrejection', function(e) {
-    console.error('Unhandled promise rejection:', e.reason);
-    if (typeof showUtilityMessage === 'function') {
-        showUtilityMessage('A network error occurred. Please try again.', 'error');
-    }
-});
+  let rating = ((player.quality || 70) / 10) * 0.5;
+  rating += ((teamStrength || 70) / 100) * 0.3;
+  
+  if (performance.goals > 0) rating += performance.goals * 0.8;
+  if (performance.assists > 0) rating += performance.assists * 0.5;
+  if (performance.cleanSheet) rating += 0.6;
+  
+  if (['GK'].includes(player.pos)) {
+    rating += 0.3;
+    if (performance.cleanSheet) rating += 0.4;
+  } else if (['ST', 'CF', 'FW'].includes(player.pos)) {
+    rating += 0.2;
+    if (performance.goals > 0) rating += 0.3;
+  } else if (['AM', 'CM', 'LM', 'RM'].includes(player.pos)) {
+    rating += 0.1;
+    if (performance.assists > 0) rating += 0.2;
+  }
+  
+  const qualityFactor = (player.quality || 70) / 100;
+  const randomness = (Math.random() - 0.5) * (1.5 - qualityFactor * 0.8);
+  rating += randomness;
+  
+  return Math.min(9.8, Math.max(5.0, rating));
+}
 
-// Export initialization for testing
-window.initializeApp = function() {
-    console.log("🔄 Re-initializing app...");
-    document.dispatchEvent(new Event('DOMContentLoaded'));
-};
+/************* CLUB LEGACY (DEDUPED) *************/
 
-// Fix for favicon error - create a placeholder
-const link = document.createElement('link');
-link.rel = 'icon';
-link.href = 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>';
-document.head.appendChild(link);
-// FIXED: Missing function definitions
-// Fix for duplicate legacy updates - call this instead of updateClubLegacy directly
 function updateTournamentLegacy(tournamentResults) {
-    if (!tournamentResults || !tournamentResults.champion) {
-        console.warn("⚠️ No tournament results to update club legacy");
-        return;
+  if (!tournamentResults || !tournamentResults.champion) {
+    console.warn("⚠️ No tournament results to update club legacy");
+    return;
+  }
+
+  const champion = tournamentResults.champion.name;
+  
+  if (!CLUB_LEGACY_DB.champions) CLUB_LEGACY_DB.champions = {};
+  if (!CLUB_LEGACY_DB.finals) CLUB_LEGACY_DB.finals = {};
+  if (!CLUB_LEGACY_DB.semiFinals) CLUB_LEGACY_DB.semiFinals = {};
+  if (!CLUB_LEGACY_DB.quarterFinals) CLUB_LEGACY_DB.quarterFinals = {};
+  if (!CLUB_LEGACY_DB.totalWins) CLUB_LEGACY_DB.totalWins = {};
+  
+  const currentChampionCount = CLUB_LEGACY_DB.champions[champion] || 0;
+  
+  if (currentChampionCount === 0) {
+    CLUB_LEGACY_DB.champions[champion] = 1;
+    CLUB_LEGACY_DB.totalWins[champion] = (CLUB_LEGACY_DB.totalWins[champion] || 0) + 1;
+    
+    console.log(`🏆 ${champion} added to champions legacy`);
+
+    if (tournamentResults.final) {
+      const runnerUp = tournamentResults.final.teamA.name === champion ? 
+                      tournamentResults.final.teamB.name : tournamentResults.final.teamA.name;
+      CLUB_LEGACY_DB.finals[runnerUp] = (CLUB_LEGACY_DB.finals[runnerUp] || 0) + 1;
+      CLUB_LEGACY_DB.totalWins[runnerUp] = (CLUB_LEGACY_DB.totalWins[runnerUp] || 0) + 1;
+      console.log(`🥈 ${runnerUp} added to finals legacy`);
     }
 
-    // Clear any existing legacy data for this tournament to prevent duplicates
+    if (tournamentResults.semiFinals) {
+      tournamentResults.semiFinals.forEach(match => {
+        if (!match) return;
+        const semiFinalists = [match.teamA.name, match.teamB.name];
+        semiFinalists.forEach(team => {
+          if (team !== champion && team !== tournamentResults.final?.teamA?.name && team !== tournamentResults.final?.teamB?.name) {
+            CLUB_LEGACY_DB.semiFinals[team] = (CLUB_LEGACY_DB.semiFinals[team] || 0) + 1;
+            CLUB_LEGACY_DB.totalWins[team] = (CLUB_LEGACY_DB.totalWins[team] || 0) + 1;
+          }
+        });
+      });
+      console.log(`🥉 Semi-finalists updated`);
+    }
+
+    console.log("✅ Club legacy database updated (no duplicates)");
+  } else {
+    console.log("ℹ️ Legacy already updated for this tournament, skipping duplicate");
+  }
+}
+
+/************* CORE INITIALIZATION *************/
+
+function initializeCoreSystems() {
+  const hasBackup = localStorage.getItem('tournamentBackup');
+  const hasData = window.GROUP_RESULTS || window.TOURNAMENT;
+  
+  if (!hasData && hasBackup) {
+    console.log("📦 Found existing backup, offering restore...");
+    setTimeout(() => {
+      if (confirm('A previous tournament backup was found. Would you like to restore it?')) {
+        restoreFromBackup();
+      }
+    }, 2000);
+  }
+  
+  setInterval(() => {
+    if (window.TOURNAMENT || window.GROUP_RESULTS) {
+      backupToLocalStorage();
+    }
+  }, 2 * 60 * 1000);
+  
+  console.log("🔧 Core systems initialized");
+}
+
+/************* GLOBAL ERROR HANDLERS *************/
+
+window.addEventListener('error', function(e) {
+  console.error('Global error:', e.error);
+  showUtilityMessage('An error occurred. Check console for details.', 'error');
+});
+
+window.addEventListener('unhandledrejection', function(e) {
+  console.error('Unhandled promise rejection:', e.reason);
+  showUtilityMessage('A network error occurred. Please try again.', 'error');
+});
+
+/************* OPTIONAL STUBS FOR MISSING FUNCTIONS *************/
+
+(function ensureStubs() {
+  const stub = (name) => {
+    if (typeof window[name] !== 'function') {
+      window[name] = function() {
+        console.warn(name + '() not implemented');
+      };
+    }
+  };
+  
+  stub('showClubLegacy');
+  stub('showTournamentOverview');
+  stub('showTournamentBracket');
+  stub('showGroupStageResults');
+  stub('showEnhancedStatistics');
+  stub('viewTeamPlayers');
+  stub('loadHistoryContent');
+  stub('filterHistoryContent');
+  stub('populateSettingsModal');
+  stub('enhanceSettingsModal');
+  stub('populateStatisticsModal');
+  stub('enhanceStatisticsModal');
+  stub('generateGroups');
+  stub('runFullTournament');
+  stub('injectAllStyles');
+  stub('renderKnockoutResults');
+  stub('renderGroupResults');
+  stub('showPlayerStats');
+  stub('saveCustomMatch');
+  stub('shareMatchResult');
+  stub('generateMatchSummary');
+  stub('startTournament');
+  stub('runGroupStage');
+  stub('runKnockouts');
+  stub('exportTournament');
+  stub('resetTournament');
+  stub('handleImport');
+})();
+// Add these missing function definitions
+function showClubLegacy() {
+    const out = document.getElementById("output");
+    if (!out) return;
+    
+    out.innerHTML = `
+        <div class="group-card">
+            <div class="group-title">🏛️ Club Legacy</div>
+            <div style="padding: 40px; text-align: center;">
+                <div style="font-size: 64px; margin-bottom: 20px;">🏆</div>
+                <p style="font-size: 1.2em; margin-bottom: 10px;"><strong>Club Legacy Records</strong></p>
+                <p style="color: #9ca3af; margin-bottom: 20px;">All-time club achievements across all tournaments.</p>
+                <button onclick="showTournamentOverview()" class="btn-primary">View Current Tournament</button>
+            </div>
+        </div>
+    `;
+}
+
+function showTournamentOverview() {
+    const out = document.getElementById("output");
+    if (!out) return;
+    
+    let html = `<h2>📅 Tournament Overview</h2>`;
+    
+    if (window.GROUPS) {
+        html += `<p>Groups have been generated. ${window.GROUPS.length} groups ready.</p>`;
+    }
+    if (window.GROUP_RESULTS) {
+        html += `<p>Group stage completed. Ready for knockouts.</p>`;
+    }
+    if (window.TOURNAMENT) {
+        html += `<p>Tournament complete! Champion: ${window.TOURNAMENT.champion?.name || 'Unknown'}</p>`;
+    }
+    
+    if (!window.GROUPS && !window.GROUP_RESULTS && !window.TOURNAMENT) {
+        html += `
+            <div class="empty-state">
+                <div class="empty-icon">⚽️</div>
+                <h2>No Tournament Data</h2>
+                <p class="output-sub">Start by generating groups to begin a tournament.</p>
+            </div>
+        `;
+    }
+    
+    out.innerHTML = html;
+}
+
+function showTournamentBracket() {
+    const out = document.getElementById("output");
+    if (!out) return;
+    
+    out.innerHTML = `
+        <div class="group-card">
+            <div class="group-title">🏆 Tournament Bracket</div>
+            <div style="padding: 40px; text-align: center;">
+                <div style="font-size: 64px; margin-bottom: 20px;">📊</div>
+                <p style="font-size: 1.2em; margin-bottom: 10px;"><strong>Tournament Bracket View</strong></p>
+                <p style="color: #9ca3af; margin-bottom: 20px;">Visual bracket representation coming soon!</p>
+            </div>
+        </div>
+    `;
+}
+
+function showCustomMatchInterface() {
+    openCustomMatch();
+}
+
+function filterHistoryContent(filter) {
+    console.log("Filtering history with:", filter);
+}
+
+function openTeamDetail(teamName) {
+    const team = TEAM_MAP.get(teamName);
+    if (!team) return;
+    
+    const modal = document.getElementById('teamDetailModal');
+    if (!modal) return;
+    
+    populateTeamDetailModal(team);
+    ModalManager.open('teamDetailModal');
+}
+
+function simulateRematchFromDetail(teamA, teamB) {
+    closeMatchDetail();
+    setTimeout(() => {
+        openCustomMatch(teamA, teamB);
+    }, 300);
+}
+
+function shareMatchDetails(matchId) {
+    const match = MATCH_DETAILS_DB[matchId];
+    if (!match) return;
+    
+    const shareText = `⚽ Match Result: ${match.teamA} ${match.scoreA}-${match.scoreB} ${match.teamB}`;
+    navigator.clipboard.writeText(shareText).then(() => {
+        showUtilityMessage('Match details copied to clipboard!', 'success');
+    });
+}
+
+function updateClubLegacy(tournamentResults) {
+    if (!tournamentResults || !tournamentResults.champion) return;
+    
     const champion = tournamentResults.champion.name;
     
-    // Only update if this is a new champion (prevent duplicates)
-    const currentChampionCount = CLUB_LEGACY_DB.champions[champion] || 0;
-    
-    // Initialize legacy databases if they don't exist
+    // Initialize if needed
     if (!CLUB_LEGACY_DB.champions) CLUB_LEGACY_DB.champions = {};
     if (!CLUB_LEGACY_DB.finals) CLUB_LEGACY_DB.finals = {};
     if (!CLUB_LEGACY_DB.semiFinals) CLUB_LEGACY_DB.semiFinals = {};
     if (!CLUB_LEGACY_DB.quarterFinals) CLUB_LEGACY_DB.quarterFinals = {};
     if (!CLUB_LEGACY_DB.totalWins) CLUB_LEGACY_DB.totalWins = {};
+    
+    // Update champion
+    CLUB_LEGACY_DB.champions[champion] = (CLUB_LEGACY_DB.champions[champion] || 0) + 1;
+    CLUB_LEGACY_DB.totalWins[champion] = (CLUB_LEGACY_DB.totalWins[champion] || 0) + 1;
+    
+    console.log(`🏆 ${champion} added to champions legacy`);
+}
+/************* MASTER DOM INITIALIZER *************/
 
-    // Only update if this appears to be a new tournament (not a duplicate)
-    if (currentChampionCount === 0) {
-        // Update champion
-        CLUB_LEGACY_DB.champions[champion] = 1;
-        CLUB_LEGACY_DB.totalWins[champion] = (CLUB_LEGACY_DB.totalWins[champion] || 0) + 1;
-        
-        console.log(`🏆 ${champion} added to champions legacy`);
-
-        // Update runner-up
-        if (tournamentResults.final) {
-            const runnerUp = tournamentResults.final.teamA.name === champion ? 
-                            tournamentResults.final.teamB.name : tournamentResults.final.teamA.name;
-            CLUB_LEGACY_DB.finals[runnerUp] = (CLUB_LEGACY_DB.finals[runnerUp] || 0) + 1;
-            CLUB_LEGACY_DB.totalWins[runnerUp] = (CLUB_LEGACY_DB.totalWins[runnerUp] || 0) + 1;
-            console.log(`🥈 ${runnerUp} added to finals legacy`);
+document.addEventListener('DOMContentLoaded', function() {
+  console.log("🏁 Initializing All-Time Football Simulator (final chunk)...");
+  
+  if (typeof injectAllStyles === 'function') injectAllStyles();
+  initializeTheme();
+  initializeRNG();
+  initializeExportFeatures();
+  initializeModalSystem();
+  initializeCustomMatchInterface();
+  initializeCoreSystems();
+  updateButtonStates();
+  
+  const teamCountEl = document.getElementById('teamCount');
+if (teamCountEl && Array.isArray(TEAM_POOL)) {
+    teamCountEl.textContent = Math.min(TEAM_POOL.length, 64).toString();
+}  
+  const connectViewButton = (buttonId, fn, name) => {
+    const button = document.getElementById(buttonId);
+    if (!button) {
+        console.warn(`Button ${buttonId} not found`);
+        return;
+    }
+    
+    // Remove any existing listeners
+    const newButton = button.cloneNode(true);
+    button.parentNode.replaceChild(newButton, button);
+    
+    newButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log(`${name} button clicked`);
+        if (typeof fn === 'function') {
+            try {
+                fn();
+            } catch (error) {
+                console.error(`Error in ${name}:`, error);
+                showUtilityMessage(`Error in ${name}: ${error.message}`, "error");
+            }
+        } else {
+            console.error(`${name} function not available`);
+            showUtilityMessage(`Error: ${name} function not available`, "error");
         }
-
-        // Update semi-finalists
-        if (tournamentResults.semiFinals) {
-            tournamentResults.semiFinals.forEach(match => {
-                if (!match) return;
-                
-                const semiFinalists = [match.teamA.name, match.teamB.name];
-                semiFinalists.forEach(team => {
-                    if (team !== champion && team !== tournamentResults.final?.teamA?.name && team !== tournamentResults.final?.teamB?.name) {
-                        CLUB_LEGACY_DB.semiFinals[team] = (CLUB_LEGACY_DB.semiFinals[team] || 0) + 1;
-                        CLUB_LEGACY_DB.totalWins[team] = (CLUB_LEGACY_DB.totalWins[team] || 0) + 1;
-                    }
-                });
-            });
-            console.log(`🥉 Semi-finalists updated`);
-        }
-
-        console.log("✅ Club legacy database updated (no duplicates)");
-    } else {
-        console.log("ℹ️ Legacy already updated for this tournament, skipping duplicate");
-    }
-}
-
-function showMatchResults() {
-    console.log("Showing match results...");
-    const out = document.getElementById("output");
-    if (!out) return;
+    });
     
-    out.innerHTML = `
-        <div class="group-card">
-            <div class="group-title">📋 Match Results</div>
-            <div style="padding: 40px; text-align: center;">
-                <div style="font-size: 64px; margin-bottom: 20px;">⚽</div>
-                <p style="font-size: 1.2em; margin-bottom: 10px;"><strong>All Match Results</strong></p>
-                <p style="color: #9ca3af; margin-bottom: 20px;">Complete list of all tournament matches with detailed statistics.</p>
-            </div>
-        </div>
-    `;
-}
+    return newButton;
+};
 
-function showMatchWeeksView() {
-    console.log("Showing match weeks...");
-    const out = document.getElementById("output");
-    if (!out) return;
-    
-    out.innerHTML = `
-        <div class="group-card">
-            <div class="group-title">🗓️ Match Weeks</div>
-            <div style="padding: 40px; text-align: center;">
-                <div style="font-size: 64px; margin-bottom: 20px;">📅</div>
-                <p style="font-size: 1.2em; margin-bottom: 10px;"><strong>Match Weeks Schedule</strong></p>
-                <p style="color: #9ca3af; margin-bottom: 20px;">View all matches organized by match weeks.</p>
-            </div>
-        </div>
-    `;
-}
+// Connect all main buttons
+connectViewButton('btnDraw', startTournament, 'Generate Groups');
+connectViewButton('btnGroupStage', runGroupStage, 'Group Stage');
+connectViewButton('btnKnockouts', runKnockouts, 'Knockouts');
+connectViewButton('btnStats', showPlayerStats, 'Player Stats');
+connectViewButton('btnClubLegacy', showClubLegacy, 'Club Legacy');
+connectViewButton('btnCustomMatch', openCustomMatch, 'Custom Match');
+connectViewButton('btnHistory', openHistory, 'History');
 
-// Enhanced bracket display with proper match details
-// Enhanced player rating system
-function calculateBaseRating(player, teamStrength, performance = {}) {
-    if (!player || !player.quality) {
-        console.warn("⚠️ Invalid player in calculateBaseRating:", player);
-        return 6.0;
-    }
+// Connect utility buttons
+document.getElementById('exportTournamentBtn')?.addEventListener('click', exportTournament);
+document.getElementById('resetTournamentBtn')?.addEventListener('click', resetTournament);
+document.getElementById('importSaveBtn')?.addEventListener('click', handleImport);
 
-    let rating = ((player.quality || 70) / 10) * 0.5;
-    rating += ((teamStrength || 70) / 100) * 0.3;
-    
-    // Performance bonuses
-    if (performance.goals > 0) rating += performance.goals * 0.8;
-    if (performance.assists > 0) rating += performance.assists * 0.5;
-    if (performance.cleanSheet) rating += 0.6;
-    
-    // Position-based adjustments
-    if (['GK'].includes(player.pos)) {
-        rating += 0.3; // Base bonus for goalkeepers
-        if (performance.cleanSheet) rating += 0.4;
-    } else if (['ST', 'CF', 'FW'].includes(player.pos)) {
-        rating += 0.2; // Base bonus for attackers
-        if (performance.goals > 0) rating += 0.3;
-    } else if (['AM', 'CM', 'LM', 'RM'].includes(player.pos)) {
-        rating += 0.1; // Base bonus for midfielders
-        if (performance.assists > 0) rating += 0.2;
-    }
-    
-    // Add realistic randomness (less variance for better players)
-    const qualityFactor = (player.quality || 70) / 100;
-    const randomness = (Math.random() - 0.5) * (1.5 - qualityFactor * 0.8);
-    rating += randomness;
-    
-    return Math.min(9.8, Math.max(5.0, rating));
-}
-// Temporary debug - add this to your DOMContentLoaded function
-console.log("Available functions check:");
-console.log("showClubLegacy:", typeof showClubLegacy);
-console.log("showTournamentOverview:", typeof showTournamentOverview);
-console.log("exportTournament:", typeof exportTournament);
-console.log("resetTournament:", typeof resetTournament);
-console.log("handleImport:", typeof handleImport);
-console.log("setRNGPreset:", typeof setRNGPreset);
-
-// Check if buttons exist
-console.log("Export button:", document.getElementById('exportTournamentBtn'));
-console.log("Reset button:", document.getElementById('resetTournamentBtn'));
-console.log("Import button:", document.getElementById('importSaveBtn'));
-console.log("RNG pills:", document.querySelectorAll('.rng-pill').length);
+  const themeToggle = document.getElementById('themeToggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', toggleTheme);
+  }
+  
+  console.log("🎉 Final chunk initialized successfully!");
+});
 </script>

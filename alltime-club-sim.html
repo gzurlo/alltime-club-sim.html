@@ -820,6 +820,34 @@
         grid-template-columns: 1fr;
       }
     }
+    .match-card {
+      transition: all 0.3s ease;
+    }
+
+    .match-card:hover {
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    .matches-container {
+      max-width: 100%;
+      margin: 0 auto;
+    }
+
+    .match-week-card {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .match-card > div:first-child {
+        flex-direction: column;
+        align-items: flex-start !important;
+      }
+
+      .match-card [style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -888,6 +916,21 @@
       <div class="side-section-title">Views</div>
       <div class="control-column">
         <button class="ctrl-btn btn-purple" id="btnStats" disabled>
+            <button class="ctrl-btn btn-purple" id="btnAllMatches" disabled onclick="showTournamentOverview()">
+                <div class="ctrl-btn-main">
+                  <span class="ctrl-btn-title">All Matches</span>
+                  <span class="ctrl-btn-subtitle">Complete match results with summaries</span>
+                </div>
+                <span class="ctrl-btn-tag">View</span>
+              </button>
+              <button class="ctrl-btn btn-purple" id="btnMatchWeeks" disabled onclick="showMatchWeeksView()">
+                <div class="ctrl-btn-main">
+                  <span class="ctrl-btn-title">Match Weeks</span>
+                  <span class="ctrl-btn-subtitle">View by weekly schedule</span>
+                </div>
+                <span class="ctrl-btn-tag">View</span>
+              </button>
+              ````
           <div class="ctrl-btn-main">
             <span class="ctrl-btn-title">Player & Match Stats</span>
             <span class="ctrl-btn-subtitle">Top scorers & quick tournament log</span>
@@ -8566,6 +8609,8 @@ function updateButtonStates() {
     group: document.getElementById('btnGroupStage'),
     ko: document.getElementById('btnKnockouts'),
     stats: document.getElementById('btnStats'),
+    allMatches: document.getElementById('btnAllMatches'),
+    matchWeeks: document.getElementById('btnMatchWeeks'),
     bracket: document.getElementById('btnBracket'),
     overview: document.getElementById('btnOverview')
   };
@@ -8589,7 +8634,18 @@ function updateButtonStates() {
     buttons.stats.title =
       hasGroupResults || hasTournament ? 'View player statistics' : 'Simulate matches first';
   }
+  if (buttons.allMatches) {
+    const hasMatches = Object.keys(MATCH_DETAILS_DB).length > 0;
+    buttons.allMatches.disabled = !hasMatches;
+    buttons.allMatches.title = hasMatches ? 'View all match results' : 'Simulate matches first';
+  }
 
+  if (buttons.matchWeeks) {
+    const hasSchedule = (MATCH_SCHEDULE.groupStage && MATCH_SCHEDULE.groupStage.length > 0) ||
+                        (MATCH_SCHEDULE.knockoutStage && MATCH_SCHEDULE.knockoutStage.length > 0);
+    buttons.matchWeeks.disabled = !hasSchedule;
+    buttons.matchWeeks.title = hasSchedule ? 'View matches by week' : 'Simulate matches first';
+  }
   if (buttons.bracket) {
     buttons.bracket.disabled = !hasTournament;
     buttons.bracket.title = hasTournament ? 'View tournament bracket' : 'Complete tournament first';
@@ -9329,22 +9385,174 @@ function showMatchResults() {
     </div>
   `;
 }
-
 function showMatchWeeksView() {
-  console.log('Showing match weeks...');
   const out = document.getElementById('output');
   if (!out) return;
 
-  out.innerHTML = `
-    <div class="group-card">
-      <div class="group-title">🗓️ Match Weeks</div>
-      <div style="padding: 40px; text-align: center;">
-        <div style="font-size: 64px; margin-bottom: 20px;">📅</div>
-        <p style="font-size: 1.2em; margin-bottom: 10px;"><strong>Match Weeks Schedule</strong></p>
-        <p style="color: #9ca3af; margin-bottom: 20px;">View all matches organized by match weeks.</p>
+  const groupStageWeeks = MATCH_SCHEDULE.groupStage || [];
+  const knockoutWeeks = MATCH_SCHEDULE.knockoutStage || [];
+  
+  if (groupStageWeeks.length === 0 && knockoutWeeks.length === 0) {
+    out.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🗓️</div>
+        <h2>No Match Schedule Yet</h2>
+        <p class="output-sub">Simulate matches to see them organized by match week.</p>
+        <button onclick="runGroupStage()" class="btn-primary" style="margin-top: 20px;">
+          Simulate Group Stage
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  let html = `
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2>🗓️ Match Weeks Schedule</h2>
+      <button onclick="showTournamentOverview()" class="btn-secondary" style="padding: 8px 16px;">
+        📅 View All Matches
+      </button>
+    </div>
+
+    <div style="background: #2d3748; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #8b5cf6;">
+      📊 <strong>Schedule Overview:</strong> 
+      ${groupStageWeeks.length} group stage weeks | 
+      ${knockoutWeeks.length} knockout weeks
+    </div>
+  `;
+
+  // Group Stage Weeks
+  if (groupStageWeeks.length > 0) {
+    html += `<h3 style="margin: 25px 0 15px 0; color: #e5e7eb;">📊 Group Stage</h3>`;
+    
+    groupStageWeeks.forEach((week, weekIndex) => {
+      html += generateMatchWeekCard(week, weekIndex, 'group');
+    });
+  }
+
+  // Knockout Weeks
+  if (knockoutWeeks.length > 0) {
+    html += `<h3 style="margin: 25px 0 15px 0; color: #e5e7eb;">🏆 Knockout Stage</h3>`;
+    
+    knockoutWeeks.forEach((week, weekIndex) => {
+      html += generateMatchWeekCard(week, weekIndex + groupStageWeeks.length, 'knockout');
+    });
+  }
+
+  out.innerHTML = html;
+}
+
+function generateMatchWeekCard(week, weekIndex, stage) {
+  const weekMatches = week.matches || [];
+  const weekNumber = week.week || weekIndex + 1;
+  const weekName = week.name || `Week ${weekNumber}`;
+  
+  let html = `
+    <div class="match-week-card" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(17, 24, 39, 0.95)); 
+         border-radius: 12px; padding: 20px; margin-bottom: 15px; border: 1px solid #374151;">
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 2px solid #374151;">
+        <div>
+          <h3 style="margin: 0; color: #e5e7eb; font-size: 1.3em;">
+            ${stage === 'group' ? '📊' : '🏆'} ${weekName}
+          </h3>
+          <div style="color: #9ca3af; font-size: 0.9em; margin-top: 4px;">
+            ${weekMatches.length} matches
+          </div>
+        </div>
+        <button onclick="toggleWeekMatches('week-${weekIndex}')" 
+                class="btn-secondary" style="padding: 6px 12px; font-size: 0.85em;">
+          <span id="week-${weekIndex}-toggle">▼ Expand</span>
+        </button>
+      </div>
+
+      <div id="week-${weekIndex}" style="display: none;">
+  `;
+
+  weekMatches.forEach((matchData, matchIndex) => {
+    const match = matchData.match ? MATCH_DETAILS_DB[matchData.match.matchId] : null;
+    if (!match) return;
+
+    html += `
+      <div style="background: rgba(30, 41, 59, 0.5); border-radius: 8px; padding: 15px; margin-bottom: 10px; border: 1px solid #4b5563;">
+        <div style="display: grid; grid-template-columns: 2fr auto 2fr; gap: 15px; align-items: center;">
+          
+          <div style="text-align: right;">
+            <div style="font-size: 1.1em; font-weight: bold; color: #e5e7eb;">
+              ${match.teamA}
+            </div>
+            <div style="font-size: 0.8em; color: #9ca3af;">
+              ${getTeamRecordAtMatch(match.teamA, match.timestamp)}
+            </div>
+          </div>
+
+          <div style="text-align: center; background: #1f2937; padding: 10px 20px; border-radius: 6px;">
+            <div style="font-size: 1.8em; font-weight: bold; color: white;">
+              ${match.scoreA} - ${match.scoreB}
+            </div>
+          </div>
+
+          <div style="text-align: left;">
+            <div style="font-size: 1.1em; font-weight: bold; color: #e5e7eb;">
+              ${match.teamB}
+            </div>
+            <div style="font-size: 0.8em; color: #9ca3af;">
+              ${getTeamRecordAtMatch(match.teamB, match.timestamp)}
+            </div>
+          </div>
+        </div>
+
+        ${match.playerOfTheGame ? `
+          <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #4b5563;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="font-size: 0.85em;">
+                <span style="color: #f59e0b;">⭐</span>
+                <span style="color: #9ca3af;">POTG:</span>
+                <span style="color: #e5e7eb; font-weight: bold;"> ${match.playerOfTheGame.player}</span>
+              </div>
+              <div style="font-size: 0.85em; color: #fbbf24;">
+                ${match.playerOfTheGame.rating}/10 • ${match.playerOfTheGame.goals}G ${match.playerOfTheGame.assists}A
+              </div>
+            </div>
+          </div>
+        ` : ''}
+
+        <div style="margin-top: 10px; padding: 10px; background: rgba(139, 92, 246, 0.1); border-radius: 6px; border-left: 3px solid #8b5cf6;">
+          <div style="color: #d1d5db; font-size: 0.9em; line-height: 1.5;">
+            ${generateDetailedMatchSummary(match)}
+          </div>
+        </div>
+
+        <div style="margin-top: 10px; text-align: center;">
+          <button onclick="openMatchDetail('${match.id}')" class="btn-secondary" style="padding: 6px 16px; font-size: 0.85em;">
+            View Full Details
+          </button>
+        </div>
+      </div>
+    `;
+  });
+
+  html += `
       </div>
     </div>
   `;
+
+  return html;
+}
+
+function toggleWeekMatches(weekId) {
+  const weekDiv = document.getElementById(weekId);
+  const toggleSpan = document.getElementById(weekId + '-toggle');
+  
+  if (!weekDiv || !toggleSpan) return;
+  
+  if (weekDiv.style.display === 'none') {
+    weekDiv.style.display = 'block';
+    toggleSpan.textContent = '▲ Collapse';
+  } else {
+    weekDiv.style.display = 'none';
+    toggleSpan.textContent = '▼ Expand';
+  }
 }
 
 /************* PLAYER RATING SYSTEM *************/
@@ -9533,35 +9741,342 @@ function showClubLegacy() {
     </div>
   `;
 }
-
 function showTournamentOverview() {
   const out = document.getElementById('output');
   if (!out) return;
 
-  let html = `<h2>📅 Tournament Overview</h2>`;
+  const allMatches = Object.values(MATCH_DETAILS_DB).sort((a, b) => 
+    new Date(a.timestamp) - new Date(b.timestamp)
+  );
 
-  if (window.GROUPS) {
-    html += `<p>Groups have been generated. ${window.GROUPS.length} groups ready.</p>`;
-  }
-  if (window.GROUP_RESULTS) {
-    html += `<p>Group stage completed. Ready for knockouts.</p>`;
-  }
-  if (window.TOURNAMENT) {
-    html += `<p>Tournament complete! Champion: ${
-      window.TOURNAMENT.champion?.name || 'Unknown'
-    }</p>`;
-  }
-
-  if (!window.GROUPS && !window.GROUP_RESULTS && !window.TOURNAMENT) {
-    html += `
+  if (allMatches.length === 0) {
+    out.innerHTML = `
       <div class="empty-state">
         <div class="empty-icon">⚽️</div>
-        <h2>No Tournament Data</h2>
-        <p class="output-sub">Start by generating groups to begin a tournament.</p>
+        <h2>No Matches Yet</h2>
+        <p class="output-sub">Simulate the group stage or knockouts to see match results here.</p>
+        <button onclick="runGroupStage()" class="btn-primary" style="margin-top: 20px;">
+          Simulate Group Stage
+        </button>
       </div>
     `;
+    return;
   }
 
+  let html = `
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2>📅 All Tournament Matches</h2>
+      <div style="display: flex; gap: 10px;">
+        <button onclick="showMatchWeeksView()" class="btn-secondary" style="padding: 8px 16px;">
+          🗓️ View by Week
+        </button>
+        <button onclick="filterMatchesByStage('group')" class="btn-secondary" style="padding: 8px 16px;">
+          📊 Group Stage Only
+        </button>
+        <button onclick="filterMatchesByStage('knockout')" class="btn-secondary" style="padding: 8px 16px;">
+          🏆 Knockouts Only
+        </button>
+      </div>
+    </div>
+
+    <div style="background: #2d3748; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #3b82f6;">
+      📊 <strong>Tournament Statistics:</strong> ${allMatches.length} matches played | 
+      ${allMatches.reduce((sum, m) => sum + m.scoreA + m.scoreB, 0)} total goals | 
+      ${(allMatches.reduce((sum, m) => sum + m.scoreA + m.scoreB, 0) / allMatches.length).toFixed(2)} goals/match
+    </div>
+
+    <div class="matches-container" id="allMatchesContainer">
+  `;
+
+  allMatches.forEach((match, index) => {
+    html += generateMatchCard(match, index + 1);
+  });
+
+  html += `</div>`;
+  out.innerHTML = html;
+}
+
+function generateMatchCard(match, matchNumber) {
+  const potg = match.playerOfTheGame;
+  const summary = generateDetailedMatchSummary(match);
+  const winner = match.scoreA > match.scoreB ? match.teamA : 
+                 match.scoreB > match.scoreA ? match.teamB : null;
+  
+  const teamARecord = getTeamRecordAtMatch(match.teamA, match.timestamp);
+  const teamBRecord = getTeamRecordAtMatch(match.teamB, match.timestamp);
+
+  return `
+    <div class="match-card" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(17, 24, 39, 0.95)); 
+         border-radius: 12px; padding: 20px; margin-bottom: 15px; border: 1px solid #374151;
+         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); cursor: pointer; transition: all 0.3s ease;"
+         onmouseover="this.style.borderColor='#3b82f6'; this.style.transform='translateY(-2px)'"
+         onmouseout="this.style.borderColor='#374151'; this.style.transform='translateY(0)'"
+         onclick="openMatchDetail('${match.id}')">
+      
+      <!-- Match Header -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #374151;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="background: #3b82f6; color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.85em;">
+            Match #${matchNumber}
+          </span>
+          <span style="color: #9ca3af; font-size: 0.9em;">
+            ${new Date(match.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          </span>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <span style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 3px 10px; border-radius: 12px; font-size: 0.8em;">
+            ${match.venue || 'Neutral'}
+          </span>
+          ${match.importance > 1 ? `
+            <span style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; padding: 3px 10px; border-radius: 12px; font-size: 0.8em;">
+              🔥 ${match.importance}x
+            </span>
+          ` : ''}
+        </div>
+      </div>
+
+      <!-- Score Display -->
+      <div style="display: grid; grid-template-columns: 2fr auto 2fr; gap: 20px; align-items: center; margin-bottom: 15px;">
+        
+        <!-- Team A -->
+        <div style="text-align: right;">
+          <div style="font-size: 1.3em; font-weight: bold; color: #e5e7eb; margin-bottom: 4px;">
+            ${match.teamA}
+            ${winner === match.teamA ? '<span style="color: #10b981; margin-left: 8px;">✓</span>' : ''}
+          </div>
+          <div style="font-size: 0.85em; color: #9ca3af;">
+            ${teamARecord}
+          </div>
+        </div>
+
+        <!-- Score -->
+        <div style="text-align: center; background: #1f2937; padding: 15px 25px; border-radius: 10px; border: 2px solid ${winner === match.teamA ? '#10b981' : winner === match.teamB ? '#ef4444' : '#6b7280'};">
+          <div style="font-size: 2.5em; font-weight: bold; color: white; line-height: 1;">
+            ${match.scoreA} - ${match.scoreB}
+          </div>
+          ${!winner ? '<div style="color: #9ca3af; font-size: 0.8em; margin-top: 4px;">Draw</div>' : ''}
+        </div>
+
+        <!-- Team B -->
+        <div style="text-align: left;">
+          <div style="font-size: 1.3em; font-weight: bold; color: #e5e7eb; margin-bottom: 4px;">
+            ${winner === match.teamB ? '<span style="color: #10b981; margin-right: 8px;">✓</span>' : ''}
+            ${match.teamB}
+          </div>
+          <div style="font-size: 0.85em; color: #9ca3af;">
+            ${teamBRecord}
+          </div>
+        </div>
+      </div>
+
+      ${potg ? `
+        <!-- Player of the Game -->
+        <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.15)); 
+             padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid rgba(245, 158, 11, 0.3);">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 1.5em;">⭐</span>
+              <div>
+                <div style="font-size: 0.75em; color: #f59e0b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                  Player of the Game
+                </div>
+                <div style="font-size: 1.1em; font-weight: bold; color: #fbbf24; margin-top: 2px;">
+                  ${potg.player}
+                </div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 15px; align-items: center;">
+              <div style="text-align: center;">
+                <div style="font-size: 1.4em; font-weight: bold; color: #fbbf24;">
+                  ${potg.rating}<span style="font-size: 0.7em; color: #d97706;">/10</span>
+                </div>
+                <div style="font-size: 0.75em; color: #9ca3af;">Rating</div>
+              </div>
+              ${potg.goals > 0 || potg.assists > 0 ? `
+                <div style="text-align: center; border-left: 1px solid rgba(245, 158, 11, 0.3); padding-left: 15px;">
+                  <div style="font-size: 1.2em; font-weight: bold; color: #e5e7eb;">
+                    ${potg.goals}G ${potg.assists}A
+                  </div>
+                  <div style="font-size: 0.75em; color: #9ca3af;">Contributions</div>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- Match Summary -->
+      <div style="background: rgba(30, 41, 59, 0.5); padding: 12px 15px; border-radius: 8px; border-left: 3px solid #8b5cf6;">
+        <div style="font-size: 0.75em; color: #8b5cf6; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
+          📝 Match Summary
+        </div>
+        <div style="color: #d1d5db; line-height: 1.6; font-size: 0.95em;">
+          ${summary}
+        </div>
+      </div>
+
+      <!-- Goals Timeline -->
+      ${match.events && match.events.goals && match.events.goals.length > 0 ? `
+        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #374151;">
+          <div style="font-size: 0.75em; color: #9ca3af; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
+            ⚽ Goals
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            ${match.events.goals.map(goal => `
+              <div style="background: rgba(59, 130, 246, 0.1); padding: 6px 12px; border-radius: 6px; font-size: 0.85em; border: 1px solid rgba(59, 130, 246, 0.3);">
+                <span style="color: #60a5fa; font-weight: bold;">${goal.minute}'</span>
+                <span style="color: #e5e7eb; margin: 0 6px;">•</span>
+                <span style="color: #e5e7eb;">${goal.player}</span>
+                ${goal.assisted ? `<span style="color: #9ca3af; font-size: 0.9em;"> (${goal.assisted})</span>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+
+    </div>
+  `;
+}
+
+function generateDetailedMatchSummary(match) {
+  const scoreA = match.scoreA || 0;
+  const scoreB = match.scoreB || 0;
+  const totalGoals = scoreA + scoreB;
+  const goalDiff = Math.abs(scoreA - scoreB);
+  
+  const teamA = match.teamAObj || { name: match.teamA, strength: 75 };
+  const teamB = match.teamBObj || { name: match.teamB, strength: 75 };
+  const strengthDiff = Math.abs((teamA.strength || 75) - (teamB.strength || 75));
+  
+  const potg = match.playerOfTheGame;
+  const isHome = match.isHome;
+  const venue = isHome ? teamA.name : 'neutral venue';
+  
+  let summary = '';
+  
+  // Opening statement based on result type
+  if (totalGoals === 0) {
+    summary = `A tactical chess match at ${venue} saw both defenses stand firm throughout. `;
+    summary += strengthDiff > 10 
+      ? `Despite ${teamA.strength > teamB.strength ? teamA.name : teamB.name}'s superior quality, neither side could find the breakthrough. `
+      : `The evenly-matched sides cancelled each other out in a cagey encounter. `;
+  } else if (goalDiff === 0) {
+    summary = `An entertaining ${totalGoals}-goal thriller at ${venue} ended level after both sides traded blows. `;
+    summary += totalGoals >= 4 
+      ? `The high-scoring affair saw end-to-end action with momentum swinging throughout the contest. `
+      : `Neither team could quite find the decisive moment in this competitive stalemate. `;
+  } else if (goalDiff === 1) {
+    const winner = scoreA > scoreB ? teamA.name : teamB.name;
+    summary = `A tightly-contested encounter at ${venue} saw ${winner} edge past their opponents ${scoreA}-${scoreB}. `;
+    summary += totalGoals >= 4
+      ? `The high-tempo match featured constant attacking play from both sides before the narrow margin was settled. `
+      : `Small margins proved decisive in what was otherwise an evenly-balanced contest. `;
+  } else if (goalDiff === 2) {
+    const winner = scoreA > scoreB ? teamA.name : teamB.name;
+    const loser = scoreA > scoreB ? teamB.name : teamA.name;
+    summary = `${winner} earned a convincing ${scoreA > scoreB ? scoreA + '-' + scoreB : scoreB + '-' + scoreA} victory at ${venue}. `;
+    summary += strengthDiff > 10 && ((teamA.strength > teamB.strength && scoreA > scoreB) || (teamB.strength > teamA.strength && scoreB > scoreA))
+      ? `The favorites demonstrated their class with a professional performance that ${loser} struggled to contain. `
+      : `${loser} showed moments of quality but ultimately couldn't match their opponent's clinical finishing. `;
+  } else {
+    const winner = scoreA > scoreB ? teamA.name : teamB.name;
+    const loser = scoreA > scoreB ? teamB.name : teamA.name;
+    summary = `${winner} ran riot in a dominant ${scoreA > scoreB ? scoreA + '-' + scoreB : scoreB + '-' + scoreA} display at ${venue}. `;
+    summary += `${loser} had no answer to the relentless attacking onslaught in what became a one-sided affair. `;
+  }
+  
+  // Add player of the game context
+  if (potg) {
+    if (potg.goals >= 2) {
+      summary += `${potg.player}'s ${potg.goals}-goal haul proved decisive, earning them a ${potg.rating}/10 match rating.`;
+    } else if (potg.goals === 1 && potg.assists >= 1) {
+      summary += `${potg.player} was instrumental with a goal and assist, capping an outstanding ${potg.rating}/10 performance.`;
+    } else if (potg.rating >= 8.5) {
+      summary += `${potg.player} dominated proceedings with a masterful ${potg.rating}/10 display.`;
+    } else if (potg.cleanSheet) {
+      summary += `${potg.player} marshalled the defense superbly, keeping a clean sheet in a ${potg.rating}/10 performance.`;
+    } else {
+      summary += `${potg.player}'s ${potg.rating}/10 rating reflected their key contribution to the result.`;
+    }
+  } else if (totalGoals === 0) {
+    summary += `Both goalkeepers can be credited with maintaining clean sheets in difficult circumstances.`;
+  }
+  
+  return summary;
+}
+
+function getTeamRecordAtMatch(teamName, timestamp) {
+  const teamMatches = Object.values(MATCH_DETAILS_DB)
+    .filter(m => (m.teamA === teamName || m.teamB === teamName) && new Date(m.timestamp) <= new Date(timestamp))
+    .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  
+  let wins = 0, draws = 0, losses = 0;
+  
+  teamMatches.forEach(m => {
+    const isTeamA = m.teamA === teamName;
+    const teamScore = isTeamA ? m.scoreA : m.scoreB;
+    const oppScore = isTeamA ? m.scoreB : m.scoreA;
+    
+    if (teamScore > oppScore) wins++;
+    else if (teamScore === oppScore) draws++;
+    else losses++;
+  });
+  
+  return `${wins}W ${draws}D ${losses}L`;
+}
+function getCustomMatchesHistory() {
+  try {
+    return JSON.parse(localStorage.getItem('savedCustomMatches') || '[]');
+  } catch {
+    return [];
+  }
+}
+function filterMatchesByStage(stage) {
+  const out = document.getElementById('output');
+  if (!out) return;
+  
+  let filteredMatches = [];
+  
+  if (stage === 'group') {
+    filteredMatches = Object.values(MATCH_DETAILS_DB)
+      .filter(m => !m.round || m.round === 'Group Stage')
+      .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  } else if (stage === 'knockout') {
+    filteredMatches = Object.values(MATCH_DETAILS_DB)
+      .filter(m => m.round && m.round !== 'Group Stage')
+      .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  }
+  
+  if (filteredMatches.length === 0) {
+    out.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚽</div>
+        <h2>No ${stage === 'group' ? 'Group Stage' : 'Knockout'} Matches</h2>
+        <p class="output-sub">These matches haven't been simulated yet.</p>
+        <button onclick="showTournamentOverview()" class="btn-primary" style="margin-top: 20px;">
+          View All Matches
+        </button>
+      </div>
+    `;
+    return;
+  }
+  
+  let html = `
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2>📅 ${stage === 'group' ? 'Group Stage' : 'Knockout'} Matches</h2>
+      <button onclick="showTournamentOverview()" class="btn-secondary" style="padding: 8px 16px;">
+        ← Back to All Matches
+      </button>
+    </div>
+    
+    <div class="matches-container">
+  `;
+  
+  filteredMatches.forEach((match, index) => {
+    html += generateMatchCard(match, index + 1);
+  });
+  
+  html += `</div>`;
   out.innerHTML = html;
 }
 
@@ -9682,6 +10197,8 @@ document.addEventListener('DOMContentLoaded', function () {
   connectViewButton('btnGroupStage', runGroupStage, 'Group Stage');
   connectViewButton('btnKnockouts', runKnockouts, 'Knockouts');
   connectViewButton('btnStats', showPlayerStats, 'Player Stats');
+  connectViewButton('btnAllMatches', showTournamentOverview, 'All Matches');
+  connectViewButton('btnMatchWeeks', showMatchWeeksView, 'Match Weeks');
   connectViewButton('btnClubLegacy', showClubLegacy, 'Club Legacy');
   connectViewButton('btnCustomMatch', openCustomMatch, 'Custom Match');
   connectViewButton('btnHistory', openHistory, 'History');

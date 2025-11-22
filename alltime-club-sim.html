@@ -953,6 +953,193 @@
         grid-template-columns: 1fr;
       }
     }
+    /* Smooth transitions for all buttons */
+    .ctrl-btn,
+    .btn-primary,
+    .btn-secondary,
+    .small-btn {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .ctrl-btn:not(:disabled):hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.7) !important;
+    }
+
+    .ctrl-btn:not(:disabled):active {
+      transform: translateY(0);
+      box-shadow: 0 5px 14px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    /* Glow effect for enabled buttons */
+    .ctrl-btn:not(:disabled) {
+      box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+      animation: pulse-glow 2s infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% {
+        box-shadow: 0 5px 14px rgba(0, 0, 0, 0.4);
+      }
+      50% {
+        box-shadow: 0 5px 14px rgba(0, 0, 0, 0.4), 0 0 20px rgba(59, 130, 246, 0.3);
+      }
+    }
+
+    /* Disabled button styling */
+    .ctrl-btn:disabled {
+      filter: grayscale(0.7);
+      cursor: not-allowed !important;
+    }
+
+    /* Enhanced match card hover */
+    .match-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .match-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .match-card:hover::before {
+      left: 100%;
+    }
+
+    /* Enhanced group card styling */
+    .group-card {
+      transition: all 0.3s ease;
+    }
+
+    .group-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.8) !important;
+    }
+
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Better focus states for accessibility */
+    button:focus-visible,
+    select:focus-visible,
+    input:focus-visible {
+      outline: 2px solid #3b82f6;
+      outline-offset: 2px;
+    }
+
+    /* Loading animation for button states */
+    @keyframes shimmer {
+      0% {
+        background-position: -1000px 0;
+      }
+      100% {
+        background-position: 1000px 0;
+      }
+    }
+
+    .ctrl-btn.loading {
+      background: linear-gradient(90deg, #4a5568 0%, #6b7280 50%, #4a5568 100%);
+      background-size: 1000px 100%;
+      animation: shimmer 2s infinite;
+    }
+
+    /* Enhanced modal animations */
+    .modal-backdrop {
+      backdrop-filter: blur(8px);
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    .modal-content {
+      animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* Better scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #1f2937;
+      border-radius: 5px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #4b5563, #374151);
+      border-radius: 5px;
+      border: 2px solid #1f2937;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, #6b7280, #4b5563);
+    }
+
+    /* Enhanced empty state */
+    .empty-state {
+      animation: fadeInUp 0.6s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Stat cards with hover effects */
+    .stat-card {
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    /* Enhanced team row hover */
+    .team-row {
+      transition: all 0.2s ease;
+    }
+
+    .team-row:hover {
+      transform: translateX(3px);
+      border-color: #3b82f6 !important;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
   </style>
 </head>
 <body>
@@ -5088,33 +5275,32 @@ function simulateGroupStage(groups) {
   console.log("🎉 Group stage simulation completed!");
   return results;
 }
-
 function organizeGroupMatchesIntoWeeks(matches, groupName) {
   if (!matches || !Array.isArray(matches)) {
-    console.warn("⚠️ Invalid matches for organizeGroupMatchesIntoWeeks");
+    console.warn('⚠️ Invalid matches for organizeGroupMatchesIntoWeeks');
     return [];
   }
 
+  // Sort matches by whether they're home or away legs
+  const homeMatches = matches.filter(m => m.type === 'home');
+  const awayMatches = matches.filter(m => m.type === 'away');
+
   const weeks = [];
-  const usedMatches = new Set();
-
-  for (let week = 1; week <= 6; week++) {
+  
+  // Weeks 1-3: First legs (away for team A, home for team B)
+  for (let week = 1; week <= 3; week++) {
     const weekMatches = [];
-
-    matches.forEach((matchData) => {
-      if (!matchData || usedMatches.has(matchData.match?.matchId)) return;
-
-      const matchWeek = calculateMatchWeek(matchData, week);
-      if (matchWeek === week) {
-        weekMatches.push({
-          ...matchData,
-          week,
-          group: groupName,
-          matchweek: `Group Stage - Matchweek ${week}`,
-          timestamp: new Date().toISOString()
-        });
-        usedMatches.add(matchData.match?.matchId);
-      }
+    const startIdx = (week - 1) * Math.ceil(homeMatches.length / 3);
+    const endIdx = week * Math.ceil(homeMatches.length / 3);
+    
+    homeMatches.slice(startIdx, endIdx).forEach(matchData => {
+      weekMatches.push({
+        ...matchData,
+        week,
+        group: groupName,
+        matchweek: `Group Stage - Matchweek ${week}`,
+        timestamp: new Date().toISOString()
+      });
     });
 
     if (weekMatches.length > 0) {
@@ -5127,48 +5313,35 @@ function organizeGroupMatchesIntoWeeks(matches, groupName) {
     }
   }
 
-  const remainingMatches = matches.filter(
-    (matchData) => matchData && !usedMatches.has(matchData.match?.matchId)
-  );
-
-  if (remainingMatches.length > 0) {
-    console.warn(
-      `⚠️ ${remainingMatches.length} matches not assigned to weeks for ${groupName}`
-    );
-
-    remainingMatches.forEach((matchData) => {
-      const matchWeek = calculateMatchWeek(matchData, 1);
-      let targetWeek = weeks.find((w) => w.week === matchWeek);
-
-      if (!targetWeek) {
-        targetWeek = {
-          week: matchWeek,
-          name: `Group ${groupName} - Matchweek ${matchWeek}`,
-          matches: [],
-          group: groupName
-        };
-        weeks.push(targetWeek);
-      }
-
-      targetWeek.matches.push({
+  // Weeks 4-6: Second legs (home for team A, away for team B)
+  for (let week = 4; week <= 6; week++) {
+    const weekMatches = [];
+    const startIdx = (week - 4) * Math.ceil(awayMatches.length / 3);
+    const endIdx = (week - 3) * Math.ceil(awayMatches.length / 3);
+    
+    awayMatches.slice(startIdx, endIdx).forEach(matchData => {
+      weekMatches.push({
         ...matchData,
-        week: matchWeek,
+        week,
         group: groupName,
-        matchweek: `Group Stage - Matchweek ${matchWeek}`,
+        matchweek: `Group Stage - Matchweek ${week}`,
         timestamp: new Date().toISOString()
       });
-      usedMatches.add(matchData.match?.matchId);
     });
+
+    if (weekMatches.length > 0) {
+      weeks.push({
+        week,
+        name: `Group ${groupName} - Matchweek ${week}`,
+        matches: weekMatches,
+        group: groupName
+      });
+    }
   }
 
-  weeks.sort((a, b) => a.week - b.week);
-
-  console.log(
-    `📅 Organized ${usedMatches.size} matches into ${weeks.length} weeks for ${groupName}`
-  );
+  console.log(`📅 Organized ${matches.length} matches into ${weeks.length} weeks for ${groupName}`);
   return weeks;
 }
-
 function calculateMatchWeek(matchData) {
   if (!matchData || !matchData.teamA || !matchData.teamB) return 1;
 
@@ -5441,6 +5614,10 @@ function simulateKnockoutRound(teams, roundName, matchImportance = 1.5) {
           matchDetails: finalMatchLight,
           isFinal: true
         };
+        // Update the match detail with round info
+        if (MATCH_DETAILS_DB[finalMatchLight.matchId]) {
+          MATCH_DETAILS_DB[finalMatchLight.matchId].round = roundName;
+        }
         matches.push(match);
         console.log(
           `🏆 Final: ${teamA.name} ${finalMatchLight.scoreA}-${finalMatchLight.scoreB} ${teamB.name}, Winner: ${match.winner.name}`
@@ -5490,6 +5667,13 @@ function simulateKnockoutRound(teams, roundName, matchImportance = 1.5) {
           awayGoalsA: firstLeg.scoreA || 0,
           awayGoalsB: secondLeg.scoreB || 0
         };
+        // Update both leg match details with round info
+        if (MATCH_DETAILS_DB[firstLeg.matchId]) {
+          MATCH_DETAILS_DB[firstLeg.matchId].round = roundName;
+        }
+        if (MATCH_DETAILS_DB[secondLeg.matchId]) {
+          MATCH_DETAILS_DB[secondLeg.matchId].round = roundName;
+        }
         matches.push(match);
 
         console.log(
@@ -8742,60 +8926,75 @@ const utilityStyles = `
 `;
 
 injectStylesOnce('utility-styles', utilityStyles);
-
 function updateButtonStates() {
   const buttons = {
+    draw: document.getElementById('btnDraw'),
     group: document.getElementById('btnGroupStage'),
     ko: document.getElementById('btnKnockouts'),
     stats: document.getElementById('btnStats'),
     allMatches: document.getElementById('btnAllMatches'),
     matchWeeks: document.getElementById('btnMatchWeeks'),
     bracket: document.getElementById('btnBracket'),
-    overview: document.getElementById('btnOverview')
+    overview: document.getElementById('btnOverview'),
+    clubLegacy: document.getElementById('btnClubLegacy'),
+    customMatch: document.getElementById('btnCustomMatch'),
+    history: document.getElementById('btnHistory')
   };
 
   const hasGroups = window.GROUPS;
   const hasGroupResults = window.GROUP_RESULTS;
   const hasTournament = window.TOURNAMENT;
+  const hasMatches = Object.keys(MATCH_DETAILS_DB).length > 0;
 
+  // Draw button - always enabled
+  if (buttons.draw) {
+    buttons.draw.disabled = false;
+  }
+
+  // Group stage button - enabled after draw
   if (buttons.group) {
     buttons.group.disabled = !hasGroups;
     buttons.group.title = hasGroups ? 'Simulate group stage matches' : 'Generate groups first';
   }
 
+  // Knockout button - enabled after group stage
   if (buttons.ko) {
     buttons.ko.disabled = !hasGroupResults;
     buttons.ko.title = hasGroupResults ? 'Simulate knockout stage' : 'Complete group stage first';
   }
 
+  // Stats button - enabled after any matches
   if (buttons.stats) {
-    buttons.stats.disabled = !hasGroupResults && !hasTournament;
-    buttons.stats.title =
-      hasGroupResults || hasTournament ? 'View player statistics' : 'Simulate matches first';
+    buttons.stats.disabled = !hasMatches;
+    buttons.stats.title = hasMatches ? 'View player statistics' : 'Simulate matches first';
   }
+
+  // All matches button - enabled after any matches
   if (buttons.allMatches) {
-    const hasMatches = Object.keys(MATCH_DETAILS_DB).length > 0;
     buttons.allMatches.disabled = !hasMatches;
     buttons.allMatches.title = hasMatches ? 'View all match results' : 'Simulate matches first';
   }
 
+  // Match weeks button - enabled after group stage
   if (buttons.matchWeeks) {
     const hasSchedule = (MATCH_SCHEDULE.groupStage && MATCH_SCHEDULE.groupStage.length > 0) ||
                         (MATCH_SCHEDULE.knockoutStage && MATCH_SCHEDULE.knockoutStage.length > 0);
     buttons.matchWeeks.disabled = !hasSchedule;
     buttons.matchWeeks.title = hasSchedule ? 'View matches by week' : 'Simulate matches first';
   }
+
+  // Bracket button - enabled after tournament complete
   if (buttons.bracket) {
     buttons.bracket.disabled = !hasTournament;
     buttons.bracket.title = hasTournament ? 'View tournament bracket' : 'Complete tournament first';
   }
 
-  if (buttons.overview) {
-    buttons.overview.disabled = !hasGroups && !hasTournament;
-    buttons.overview.title =
-      hasGroups || hasTournament ? 'View tournament overview' : 'Generate tournament first';
-  }
+  // Club legacy, custom match, history - always enabled
+  if (buttons.clubLegacy) buttons.clubLegacy.disabled = false;
+  if (buttons.customMatch) buttons.customMatch.disabled = false;
+  if (buttons.history) buttons.history.disabled = false;
 
+  // Apply visual styling
   Object.values(buttons).forEach(btn => {
     if (btn) {
       if (btn.disabled) {
@@ -8865,6 +9064,14 @@ function showUtilityMessage(message, type = 'info') {
 }
 
 function openCustomMatch(teamA = null, teamB = null) {
+  const modal = document.getElementById('customMatchModal');
+  if (!modal) {
+    console.error('Custom match modal not found');
+    showUtilityMessage('Custom match feature not available', 'error');
+    return;
+  }
+
+  // Populate dropdowns first
   if (typeof populateCustomMatchDropdowns === 'function') {
     populateCustomMatchDropdowns();
   }
@@ -8874,7 +9081,6 @@ function openCustomMatch(teamA = null, teamB = null) {
   if (teamB) modalData.preselectedTeamB = teamB;
 
   ModalManager.open('customMatchModal', modalData);
-
   if (teamA) {
     const teamASelect = document.getElementById('customTeamA');
     if (teamASelect) {
@@ -8899,14 +9105,68 @@ function openCustomMatch(teamA = null, teamB = null) {
 }
 
 function openHistory(filter = null) {
+  const modal = document.getElementById('historyModal');
+  if (!modal) {
+    console.error('History modal not found');
+    showUtilityMessage('History feature not available', 'error');
+    return;
+  }
+
   const modalData = { filter };
   ModalManager.open('historyModal', modalData);
 
   if (typeof loadHistoryContent === 'function') {
     loadHistoryContent(filter);
+  } else {
+    // Load default history
+    const body = document.getElementById('historyBody');
+    if (body) {
+      body.innerHTML = generateHistoryContent();
+    }
   }
 
-  enhanceHistoryModal();
+  if (typeof enhanceHistoryModal === 'function') {
+    enhanceHistoryModal();
+  }
+}
+
+function generateHistoryContent() {
+  const history = TOURNAMENT_HISTORY || [];
+  
+  if (history.length === 0) {
+    return `
+      <div style="text-align: center; padding: 40px 20px;">
+        <div style="font-size: 64px; margin-bottom: 20px;">📚</div>
+        <p style="font-size: 1.2em; margin-bottom: 10px;"><strong>No Tournament History</strong></p>
+        <p style="color: #9ca3af;">Complete tournaments to build your championship history.</p>
+      </div>
+    `;
+  }
+
+  let html = `
+    <div style="padding: 20px;">
+      <h3 style="margin: 0 0 15px 0; color: #e5e7eb;">Tournament Champions</h3>
+  `;
+
+  history.forEach((tournament, index) => {
+    html += `
+      <div class="history-card" style="margin-bottom: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-weight: bold; color: #fbbf24; font-size: 1.1em;">
+              🏆 ${tournament.champion || 'Unknown'}
+            </div>
+            <div style="font-size: 0.85em; color: #9ca3af; margin-top: 2px;">
+              Tournament #${index + 1} • ${new Date(tournament.date).toLocaleDateString()}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+  return html;
 }
 
 function openMatchDetail(matchId) {
@@ -9537,7 +9797,7 @@ function showMatchWeeksView() {
         <div class="empty-icon">🗓️</div>
         <h2>No Match Schedule Yet</h2>
         <p class="output-sub">Simulate matches to see them organized by match week.</p>
-        <button onclick="runGroupStage()" class="btn-primary" style="margin-top: 20px;">
+        <button onclick="runGroupStage()" class="btn-primary" style="margin-top: 15px;">
           Simulate Group Stage
         </button>
       </div>
@@ -9545,130 +9805,144 @@ function showMatchWeeksView() {
     return;
   }
 
+  // Reorganize group stage by GLOBAL weeks (all groups together)
+  const globalGroupWeeks = {};
+  groupStageWeeks.forEach(weekData => {
+    const week = weekData.week;
+    if (!globalGroupWeeks[week]) {
+      globalGroupWeeks[week] = {
+        week,
+        name: `Matchweek ${week}`,
+        matches: []
+      };
+    }
+    globalGroupWeeks[week].matches.push(...(weekData.matches || []));
+  });
+
+  const sortedGlobalWeeks = Object.values(globalGroupWeeks).sort((a, b) => a.week - b.week);
+
   let html = `
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
       <h2>🗓️ Match Weeks Schedule</h2>
-      <button onclick="showTournamentOverview()" class="btn-secondary" style="padding: 8px 16px;">
+      <button onclick="showTournamentOverview()" class="btn-secondary" style="padding: 6px 12px;">
         📅 View All Matches
       </button>
     </div>
 
-    <div style="background: #2d3748; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #8b5cf6;">
+    <div style="background: #2d3748; padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #8b5cf6;">
       📊 <strong>Schedule Overview:</strong> 
-      ${groupStageWeeks.length} group stage weeks | 
+      ${sortedGlobalWeeks.length} group stage weeks | 
       ${knockoutWeeks.length} knockout weeks
     </div>
   `;
 
-  // Group Stage Weeks
-  if (groupStageWeeks.length > 0) {
-    html += `<h3 style="margin: 25px 0 15px 0; color: #e5e7eb;">📊 Group Stage</h3>`;
+  // Group Stage Weeks (1-6, all groups combined)
+  if (sortedGlobalWeeks.length > 0) {
+    html += `<h3 style="margin: 20px 0 12px 0; color: #e5e7eb; font-size: 1.15rem;">📊 Group Stage</h3>`;
     
-    groupStageWeeks.forEach((week, weekIndex) => {
-      html += generateMatchWeekCard(week, weekIndex, 'group');
+    sortedGlobalWeeks.forEach((week, weekIndex) => {
+      html += generateGlobalMatchWeekCard(week, weekIndex);
     });
   }
 
-  // Knockout Weeks
+  // Knockout Weeks (7+)
   if (knockoutWeeks.length > 0) {
-    html += `<h3 style="margin: 25px 0 15px 0; color: #e5e7eb;">🏆 Knockout Stage</h3>`;
+    html += `<h3 style="margin: 20px 0 12px 0; color: #e5e7eb; font-size: 1.15rem;">🏆 Knockout Stage</h3>`;
     
     knockoutWeeks.forEach((week, weekIndex) => {
-      html += generateMatchWeekCard(week, weekIndex + groupStageWeeks.length, 'knockout');
+      html += generateMatchWeekCard(week, weekIndex + 6, 'knockout');
     });
   }
 
   out.innerHTML = html;
 }
 
-function generateMatchWeekCard(week, weekIndex, stage) {
+function generateGlobalMatchWeekCard(week, weekIndex) {
   const weekMatches = week.matches || [];
   const weekNumber = week.week || weekIndex + 1;
-  const weekName = week.name || `Week ${weekNumber}`;
   
+  // Group matches by group for better organization
+  const matchesByGroup = {};
+  weekMatches.forEach(matchData => {
+    const groupName = matchData.group || 'Unknown Group';
+    if (!matchesByGroup[groupName]) {
+      matchesByGroup[groupName] = [];
+    }
+    matchesByGroup[groupName].push(matchData);
+  });
+
   let html = `
     <div class="match-week-card" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(17, 24, 39, 0.95)); 
-         border-radius: 12px; padding: 20px; margin-bottom: 15px; border: 1px solid #374151;">
+         border-radius: 10px; padding: 12px; margin-bottom: 12px; border: 1px solid #374151;">
       
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 2px solid #374151;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 2px solid #374151;">
         <div>
-          <h3 style="margin: 0; color: #e5e7eb; font-size: 1.3em;">
-            ${stage === 'group' ? '📊' : '🏆'} ${weekName}
+          <h3 style="margin: 0; color: #e5e7eb; font-size: 1.2em;">
+            📅 Matchweek ${weekNumber}
           </h3>
-          <div style="color: #9ca3af; font-size: 0.9em; margin-top: 4px;">
-            ${weekMatches.length} matches
+          <div style="color: #9ca3af; font-size: 0.85em; margin-top: 3px;">
+            ${weekMatches.length} matches across all groups
           </div>
         </div>
-        <button onclick="toggleWeekMatches('week-${weekIndex}')" 
-                class="btn-secondary" style="padding: 6px 12px; font-size: 0.85em;">
-          <span id="week-${weekIndex}-toggle">▼ Expand</span>
+        <button onclick="toggleWeekMatches('global-week-${weekIndex}')" 
+                class="btn-secondary" style="padding: 5px 10px; font-size: 0.8em;">
+          <span id="global-week-${weekIndex}-toggle">▼ Expand</span>
         </button>
       </div>
 
-      <div id="week-${weekIndex}" style="display: none;">
+      <div id="global-week-${weekIndex}" style="display: none;">
   `;
 
-  weekMatches.forEach((matchData, matchIndex) => {
-    const match = matchData.match ? MATCH_DETAILS_DB[matchData.match.matchId] : null;
-    if (!match) return;
-
+  // Display matches grouped by group
+  Object.keys(matchesByGroup).sort().forEach(groupName => {
+    const groupMatches = matchesByGroup[groupName];
+    
     html += `
-      <div style="background: rgba(30, 41, 59, 0.5); border-radius: 8px; padding: 15px; margin-bottom: 10px; border: 1px solid #4b5563;">
-        <div style="display: grid; grid-template-columns: 2fr auto 2fr; gap: 15px; align-items: center;">
-          
-          <div style="text-align: right;">
-            <div style="font-size: 1.1em; font-weight: bold; color: #e5e7eb;">
-              ${match.teamA}
-            </div>
-            <div style="font-size: 0.8em; color: #9ca3af;">
-              ${getTeamRecordAtMatch(match.teamA, match.timestamp)}
-            </div>
-          </div>
-
-          <div style="text-align: center; background: #1f2937; padding: 10px 20px; border-radius: 6px;">
-            <div style="font-size: 1.8em; font-weight: bold; color: white;">
-              ${match.scoreA} - ${match.scoreB}
-            </div>
-          </div>
-
-          <div style="text-align: left;">
-            <div style="font-size: 1.1em; font-weight: bold; color: #e5e7eb;">
-              ${match.teamB}
-            </div>
-            <div style="font-size: 0.8em; color: #9ca3af;">
-              ${getTeamRecordAtMatch(match.teamB, match.timestamp)}
-            </div>
-          </div>
-        </div>
-
-        ${match.playerOfTheGame ? `
-          <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #4b5563;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <div style="font-size: 0.85em;">
-                <span style="color: #f59e0b;">⭐</span>
-                <span style="color: #9ca3af;">POTG:</span>
-                <span style="color: #e5e7eb; font-weight: bold;"> ${match.playerOfTheGame.player}</span>
-              </div>
-              <div style="font-size: 0.85em; color: #fbbf24;">
-                ${match.playerOfTheGame.rating}/10 • ${match.playerOfTheGame.goals}G ${match.playerOfTheGame.assists}A
-              </div>
-            </div>
-          </div>
-        ` : ''}
-
-        <div style="margin-top: 10px; padding: 10px; background: rgba(139, 92, 246, 0.1); border-radius: 6px; border-left: 3px solid #8b5cf6;">
-          <div style="color: #d1d5db; font-size: 0.9em; line-height: 1.5;">
-            ${generateDetailedMatchSummary(match)}
-          </div>
-        </div>
-
-        <div style="margin-top: 10px; text-align: center;">
-          <button onclick="openMatchDetail('${match.id}')" class="btn-secondary" style="padding: 6px 16px; font-size: 0.85em;">
-            View Full Details
-          </button>
-        </div>
-      </div>
+      <div style="margin-bottom: 15px;">
+        <h4 style="margin: 0 0 8px 0; color: #a7f3d0; font-size: 0.95em; padding: 6px 10px; background: rgba(72, 187, 120, 0.15); border-radius: 6px; border-left: 3px solid #48bb78;">
+          ${groupName}
+        </h4>
     `;
+
+    groupMatches.forEach((matchData) => {
+      const match = matchData.match ? MATCH_DETAILS_DB[matchData.match.matchId] : null;
+      if (!match) return;
+
+      html += `
+        <div style="background: rgba(30, 41, 59, 0.5); border-radius: 6px; padding: 10px; margin-bottom: 6px; border: 1px solid #4b5563;">
+          <div style="display: grid; grid-template-columns: 2fr auto 2fr; gap: 10px; align-items: center;">
+            
+            <div style="text-align: right;">
+              <div style="font-size: 0.95em; font-weight: bold; color: #e5e7eb;">
+                ${match.teamA}
+              </div>
+            </div>
+
+            <div style="text-align: center; background: #1f2937; padding: 6px 14px; border-radius: 5px;">
+              <div style="font-size: 1.4em; font-weight: bold; color: white;">
+                ${match.scoreA} - ${match.scoreB}
+              </div>
+            </div>
+
+            <div style="text-align: left;">
+              <div style="font-size: 0.95em; font-weight: bold; color: #e5e7eb;">
+                ${match.teamB}
+              </div>
+            </div>
+          </div>
+
+          ${match.playerOfTheGame ? `
+            <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid #4b5563; text-align: center;">
+              <span style="color: #f59e0b; font-size: 0.8em;">
+                ⭐ ${match.playerOfTheGame.player} (${match.playerOfTheGame.rating}/10)
+              </span>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    });
+
+    html += `</div>`;
   });
 
   html += `
@@ -10175,12 +10449,18 @@ function filterMatchesByStage(stage) {
   let filteredMatches = [];
   
   if (stage === 'group') {
+    // Group stage matches don't have a round property OR have importance <= 1.2
     filteredMatches = Object.values(MATCH_DETAILS_DB)
-      .filter(m => !m.round || m.round === 'Group Stage')
+      .filter(m => {
+        const hasKnockoutRound = m.round && ['Round of 32', 'Round of 16', 'Quarter Finals', 'Semi Finals', 'Final'].includes(m.round);
+        return !hasKnockoutRound;
+      })
       .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
   } else if (stage === 'knockout') {
+    // Knockout matches have specific round names
+    const knockoutRounds = ['Round of 32', 'Round of 16', 'Quarter Finals', 'Semi Finals', 'Final'];
     filteredMatches = Object.values(MATCH_DETAILS_DB)
-      .filter(m => m.round && m.round !== 'Group Stage')
+      .filter(m => m.round && knockoutRounds.includes(m.round))
       .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
   }
   

@@ -846,6 +846,113 @@
         gap: 10px !important;
       }
     }
+    .bracket-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-top: 15px;
+    }
+
+    .bracket-round {
+      background: rgba(30, 41, 59, 0.5);
+      border-radius: 10px;
+      padding: 12px;
+      border: 1px solid #374151;
+    }
+
+    .bracket-matches {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .bracket-match {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(17, 24, 39, 0.95));
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #4b5563;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .bracket-match:hover {
+      border-color: #3b82f6;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .bracket-match.final-match {
+      border: 2px solid #f59e0b;
+    }
+
+    .bracket-match-header {
+      background: rgba(59, 130, 246, 0.2);
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: #60a5fa;
+      text-align: center;
+      border-bottom: 1px solid #374151;
+    }
+
+    .bracket-team {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      border-bottom: 1px solid #374151;
+      transition: background 0.2s ease;
+    }
+
+    .bracket-team:last-of-type {
+      border-bottom: none;
+    }
+
+    .bracket-team.winner {
+      background: rgba(16, 185, 129, 0.15);
+      border-left: 3px solid #10b981;
+    }
+
+    .bracket-team .team-name {
+      font-weight: 600;
+      color: #e5e7eb;
+      font-size: 0.9rem;
+    }
+
+    .bracket-team .team-score {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #fbbf24;
+      min-width: 30px;
+      text-align: right;
+    }
+
+    .bracket-team.winner .team-score {
+      color: #10b981;
+    }
+
+    .bracket-legs {
+      background: rgba(15, 23, 42, 0.5);
+      text-align: center;
+      padding: 0;
+    }
+
+    .bracket-winner {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      padding: 6px 10px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 0.85rem;
+      border-top: 1px solid #374151;
+    }
+
+    @media (max-width: 768px) {
+      .bracket-matches {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
@@ -913,70 +1020,60 @@
 
       <div class="side-section-title">Views</div>
       <div class="control-column">
-        <button class="ctrl-btn btn-purple" id="btnStats" disabled>
-            <button class="ctrl-btn btn-purple" id="btnAllMatches" disabled onclick="showTournamentOverview()">
-                <div class="ctrl-btn-main">
-                  <span class="ctrl-btn-title">All Matches</span>
-                  <span class="ctrl-btn-subtitle">Complete match results with summaries</span>
-                </div>
-                <span class="ctrl-btn-tag">View</span>
-              </button>
-              <button class="ctrl-btn btn-purple" id="btnMatchWeeks" disabled onclick="showMatchWeeksView()">
-                <div class="ctrl-btn-main">
-                  <span class="ctrl-btn-title">Match Weeks</span>
-                  <span class="ctrl-btn-subtitle">View by weekly schedule</span>
-                </div>
-                <span class="ctrl-btn-tag">View</span>
-              </button>
-              ````
+        <button class="ctrl-btn btn-purple" id="btnStats" disabled onclick="showPlayerStats()">
           <div class="ctrl-btn-main">
             <span class="ctrl-btn-title">Player & Match Stats</span>
-            <span class="ctrl-btn-subtitle">Top scorers & quick tournament log</span>
+            <span class="ctrl-btn-subtitle">Top scorers & tournament log</span>
           </div>
           <span class="ctrl-btn-tag">View</span>
         </button>
 
-        <button class="ctrl-btn btn-purple" id="btnClubLegacy">
+        <button class="ctrl-btn btn-purple" id="btnAllMatches" disabled onclick="showTournamentOverview()">
+          <div class="ctrl-btn-main">
+            <span class="ctrl-btn-title">All Matches</span>
+            <span class="ctrl-btn-subtitle">Complete match results</span>
+          </div>
+          <span class="ctrl-btn-tag">View</span>
+        </button>
+
+        <button class="ctrl-btn btn-purple" id="btnMatchWeeks" disabled onclick="showMatchWeeksView()">
+          <div class="ctrl-btn-main">
+            <span class="ctrl-btn-title">Match Weeks</span>
+            <span class="ctrl-btn-subtitle">Weekly schedule</span>
+          </div>
+          <span class="ctrl-btn-tag">View</span>
+        </button>
+
+        <button class="ctrl-btn btn-purple" id="btnBracket" disabled onclick="showTournamentBracket()">
+          <div class="ctrl-btn-main">
+            <span class="ctrl-btn-title">Tournament Bracket</span>
+            <span class="ctrl-btn-subtitle">Knockout tree view</span>
+          </div>
+          <span class="ctrl-btn-tag">View</span>
+        </button>
+
+        <button class="ctrl-btn btn-purple" id="btnClubLegacy" onclick="showClubLegacy()">
           <div class="ctrl-btn-main">
             <span class="ctrl-btn-title">Club Legacy</span>
-            <span class="ctrl-btn-subtitle">Most successful clubs over all saves</span>
+            <span class="ctrl-btn-subtitle">All-time achievements</span>
           </div>
           <span class="ctrl-btn-tag">Legacy</span>
         </button>
 
-        <button class="ctrl-btn btn-purple" id="btnCustomMatch">
+        <button class="ctrl-btn btn-purple" id="btnCustomMatch" onclick="openCustomMatch()">
           <div class="ctrl-btn-main">
             <span class="ctrl-btn-title">Custom Match</span>
-            <span class="ctrl-btn-subtitle">One-off clash between any two sides</span>
+            <span class="ctrl-btn-subtitle">One-off clash</span>
           </div>
           <span class="ctrl-btn-tag">Friendly</span>
         </button>
 
-        <button class="ctrl-btn btn-purple" id="btnHistory">
+        <button class="ctrl-btn btn-purple" id="btnHistory" onclick="openHistory()">
           <div class="ctrl-btn-main">
             <span class="ctrl-btn-title">Tournament History</span>
-            <span class="ctrl-btn-subtitle">List of all past champions</span>
+            <span class="ctrl-btn-subtitle">Past champions</span>
           </div>
           <span class="ctrl-btn-tag">Log</span>
-        </button>
-      </div>
-
-      <div class="side-section-title">Save / Reset</div>
-      <div class="control-column">
-        <button class="ctrl-btn btn-gray" id="exportTournamentBtn">
-            <div class="ctrl-btn-main">
-                <span class="ctrl-btn-title">Export Tournament</span>
-                <span class="ctrl-btn-subtitle">Save results and stats to JSON</span>
-            </div>
-            <span class="ctrl-btn-tag">Save</span>
-        </button>
-
-        <button class="ctrl-btn btn-red" id="resetTournamentBtn">
-            <div class="ctrl-btn-main">
-                <span class="ctrl-btn-title">Reset</span>
-                <span class="ctrl-btn-subtitle">Clear current draw & simulations</span>
-            </div>
-            <span class="ctrl-btn-tag">New Run</span>
         </button>
       </div>
 
@@ -3716,6 +3813,10 @@ function updateButtonStates() {
 
   // Stats only after there is a tournament object
   if (btnStats) btnStats.disabled = !window.TOURNAMENT;
+  if (buttons.bracket) {
+    buttons.bracket.disabled = !hasTournament;
+    buttons.bracket.title = hasTournament ? 'View tournament bracket' : 'Complete tournament first';
+  }
 }
 
 /************* GENERIC UTILITY MESSAGE *************/
@@ -5818,61 +5919,101 @@ function renderKnockoutResults(results) {
   }
 
   // Semi Finals (2 legs each)
-  if (results.semiFinals && results.semiFinals.length > 0) {
-    html += `<div class="group-card"><div class="group-title">Semi Finals</div>`;
-    results.semiFinals.forEach((match) => {
+ // All Knockout Rounds
+ const knockoutRounds = [
+    { name: 'Round of 32', data: results.roundOf32 },
+    { name: 'Round of 16', data: results.roundOf16 },
+    { name: 'Quarter Finals', data: results.quarterFinals },
+    { name: 'Semi Finals', data: results.semiFinals }
+  ];
+
+  knockoutRounds.forEach(round => {
+    if (!round.data || round.data.length === 0) return;
+
+    html += `
+      <div class="group-card" style="margin-top: 15px;">
+        <div class="group-title">${round.name}</div>
+        <div style="padding: 10px;">
+    `;
+
+    round.data.forEach((match, idx) => {
       if (!match) return;
 
       const firstLeg = getDetailedMatch(match.firstLeg);
       const secondLeg = getDetailedMatch(match.secondLeg);
 
-      const firstLegPOTG = firstLeg?.playerOfTheGame;
-      const secondLegPOTG = secondLeg?.playerOfTheGame;
-
-      const summary1 = generateMatchSummary(firstLeg, match.teamA, match.teamB);
-      const summary2 = generateMatchSummary(secondLeg, match.teamA, match.teamB);
-
       html += `
-        <div style="padding: 15px; border-bottom: 1px solid #374151; background: rgba(30, 41, 59, 0.5); margin: 5px; border-radius: 6px;">
-          <div style="font-weight: bold; font-size: 1.1em; margin-bottom: 10px; text-align: center;">
-            ${match.teamA.name} ${match.aggScoreA || 0} - ${
-        match.aggScoreB || 0
-      } ${match.teamB.name} (Agg.)
-          </div>
+        <div style="background: rgba(30, 41, 59, 0.5); border-radius: 8px; padding: 10px; margin-bottom: 8px; border: 1px solid #374151;">
           
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 10px;">
-            <div style="background: rgba(15, 23, 42, 0.8); padding: 10px; border-radius: 6px;">
-              <div style="font-size: 0.9em; color: #6b7280; margin-bottom: 5px;">First Leg</div>
-              <div style="font-weight: bold;">${match.teamB.name} ${firstLeg?.scoreA || 0} - ${firstLeg?.scoreB || 0} ${match.teamA.name}</div>
-              ${
-                firstLegPOTG
-                  ? `<div style="font-size: 0.8em; color: #f59e0b;">⭐ ${firstLegPOTG.player}</div>`
-                  : ""
-              }
-              <div style="font-size: 0.7em; color: #9ca3af; margin-top: 5px;">${summary1}</div>
+          <div style="display: grid; grid-template-columns: 2fr auto 2fr; gap: 12px; align-items: center; margin-bottom: 8px;">
+            <div style="text-align: right;">
+              <div style="font-weight: bold; color: ${match.winner?.name === match.teamA?.name ? '#10b981' : '#e5e7eb'}; font-size: 0.95rem;">
+                ${match.teamA?.name || 'Unknown'}
+                ${match.winner?.name === match.teamA?.name ? ' ✓' : ''}
+              </div>
+            </div>
+
+            <div style="text-align: center; background: #1f2937; padding: 8px 15px; border-radius: 6px; border: 2px solid ${match.winner?.name === match.teamA?.name ? '#10b981' : match.winner?.name === match.teamB?.name ? '#ef4444' : '#6b7280'};">
+              <div style="font-size: 1.5rem; font-weight: bold; color: white;">
+                ${match.aggScoreA || 0} - ${match.aggScoreB || 0}
+              </div>
+              <div style="font-size: 0.7rem; color: #9ca3af; margin-top: 2px;">Aggregate</div>
+            </div>
+
+            <div style="text-align: left;">
+              <div style="font-weight: bold; color: ${match.winner?.name === match.teamB?.name ? '#10b981' : '#e5e7eb'}; font-size: 0.95rem;">
+                ${match.winner?.name === match.teamB?.name ? '✓ ' : ''}
+                ${match.teamB?.name || 'Unknown'}
+              </div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.8rem;">
+            <div style="background: rgba(15, 23, 42, 0.8); padding: 6px; border-radius: 4px; text-align: center;">
+              <div style="color: #9ca3af; font-size: 0.75rem; margin-bottom: 2px;">First Leg (Away)</div>
+              <div style="font-weight: bold; color: #e5e7eb;">
+                ${match.teamB?.name}: ${firstLeg?.scoreA || 0}-${firstLeg?.scoreB || 0}
+              </div>
+              ${firstLeg?.playerOfTheGame ? `
+                <div style="color: #f59e0b; font-size: 0.75rem; margin-top: 3px;">
+                  ⭐ ${firstLeg.playerOfTheGame.player}
+                </div>
+              ` : ''}
             </div>
             
-            <div style="background: rgba(15, 23, 42, 0.8); padding: 10px; border-radius: 6px;">
-              <div style="font-size: 0.9em; color: #6b7280; margin-bottom: 5px;">Second Leg</div>
-              <div style="font-weight: bold;">${match.teamA.name} ${secondLeg?.scoreA || 0} - ${secondLeg?.scoreB || 0} ${match.teamB.name}</div>
-              ${
-                secondLegPOTG
-                  ? `<div style="font-size: 0.8em; color: #f59e0b;">⭐ ${secondLegPOTG.player}</div>`
-                  : ""
-              }
-              <div style="font-size: 0.7em; color: #9ca3af; margin-top: 5px;">${summary2}</div>
+            <div style="background: rgba(15, 23, 42, 0.8); padding: 6px; border-radius: 4px; text-align: center;">
+              <div style="color: #9ca3af; font-size: 0.75rem; margin-bottom: 2px;">Second Leg (Home)</div>
+              <div style="font-weight: bold; color: #e5e7eb;">
+                ${match.teamA?.name}: ${secondLeg?.scoreA || 0}-${secondLeg?.scoreB || 0}
+              </div>
+              ${secondLeg?.playerOfTheGame ? `
+                <div style="color: #f59e0b; font-size: 0.75rem; margin-top: 3px;">
+                  ⭐ ${secondLeg.playerOfTheGame.player}
+                </div>
+              ` : ''}
             </div>
           </div>
-          
-          <div style="color: #10b981; font-weight: bold; text-align: center; padding: 8px; background: rgba(16, 185, 129, 0.1); border-radius: 4px;">
-            → ${match.winner?.name || "Unknown"} advances to the Final
+
+          ${match.awayGoalsA !== match.awayGoalsB && match.aggScoreA === match.aggScoreB ? `
+            <div style="margin-top: 6px; padding: 4px 8px; background: rgba(245, 158, 11, 0.2); border-radius: 4px; text-align: center; font-size: 0.75rem; color: #fbbf24;">
+              ⚡ Decided on away goals
+            </div>
+          ` : ''}
+
+          <div style="margin-top: 8px; text-align: center;">
+            <span style="color: #10b981; font-weight: bold; font-size: 0.85rem;">
+              → ${match.winner?.name || 'Unknown'} advances
+            </span>
           </div>
         </div>
       `;
     });
-    html += `</div>`;
-  }
 
+    html += `
+        </div>
+      </div>
+    `;
+  });
   // Nav buttons
   html += `
     <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
@@ -10080,16 +10221,121 @@ function showTournamentBracket() {
   const out = document.getElementById('output');
   if (!out) return;
 
-  out.innerHTML = `
-    <div class="group-card">
-      <div class="group-title">🏆 Tournament Bracket</div>
-      <div style="padding: 40px; text-align: center;">
-        <div style="font-size: 64px; margin-bottom: 20px;">📊</div>
-        <p style="font-size: 1.2em; margin-bottom: 10px;"><strong>Tournament Bracket View</strong></p>
-        <p style="color: #9ca3af; margin-bottom: 20px;">Visual bracket representation coming soon!</p>
+  if (!window.TOURNAMENT || !window.TOURNAMENT.bracket) {
+    out.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🏆</div>
+        <h2>No Bracket Available</h2>
+        <p class="output-sub">Complete the knockout stage to view the tournament bracket.</p>
+        <button onclick="runKnockouts()" class="btn-primary" style="margin-top: 15px;">
+          Simulate Knockouts
+        </button>
       </div>
+    `;
+    return;
+  }
+
+  const bracket = window.TOURNAMENT.bracket;
+  
+  let html = `
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+      <h2>🏆 Tournament Bracket</h2>
+      <button onclick="showTournamentOverview()" class="btn-secondary" style="padding: 6px 12px;">
+        📅 View All Matches
+      </button>
     </div>
+
+    <div style="background: #2d3748; padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #f59e0b;">
+      🏆 <strong>Champion:</strong> ${window.TOURNAMENT.champion?.name || 'TBD'}
+    </div>
+
+    <div class="bracket-container">
   `;
+
+  bracket.forEach(roundData => {
+    const roundName = roundData.round;
+    const matches = roundData.matches || [];
+
+    if (matches.length === 0) return;
+
+    html += `
+      <div class="bracket-round">
+        <h3 style="margin: 0 0 10px 0; color: #e5e7eb; font-size: 1.1rem; text-align: center; padding: 8px; background: rgba(59, 130, 246, 0.2); border-radius: 8px;">
+          ${roundName}
+        </h3>
+        <div class="bracket-matches">
+    `;
+
+    matches.forEach(match => {
+      if (!match) return;
+
+      const isFinal = roundName === 'Final';
+      const winner = match.winner?.name || 'TBD';
+
+      if (isFinal) {
+        const finalMatch = match.matchDetails || match;
+        html += `
+          <div class="bracket-match final-match" onclick="openMatchDetail('${finalMatch.matchId || finalMatch.id}')">
+            <div class="bracket-match-header" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white;">
+              🏆 THE FINAL
+            </div>
+            <div class="bracket-team ${finalMatch.scoreA > finalMatch.scoreB ? 'winner' : ''}">
+              <span class="team-name">${match.teamA?.name || 'Unknown'}</span>
+              <span class="team-score">${finalMatch.scoreA}</span>
+            </div>
+            <div class="bracket-team ${finalMatch.scoreB > finalMatch.scoreA ? 'winner' : ''}">
+              <span class="team-name">${match.teamB?.name || 'Unknown'}</span>
+              <span class="team-score">${finalMatch.scoreB}</span>
+            </div>
+            <div class="bracket-winner" style="background: #10b981; color: white; padding: 6px; text-align: center; font-weight: bold; border-radius: 0 0 8px 8px;">
+              🏆 ${winner}
+            </div>
+          </div>
+        `;
+      } else {
+        // Two-leg tie
+        const firstLeg = match.firstLeg;
+        const secondLeg = match.secondLeg;
+
+        html += `
+          <div class="bracket-match">
+            <div class="bracket-match-header">
+              ${roundName}
+            </div>
+            
+            <div class="bracket-team ${match.winner?.name === match.teamA?.name ? 'winner' : ''}">
+              <span class="team-name">${match.teamA?.name || 'Unknown'}</span>
+              <span class="team-score">${match.aggScoreA || 0}</span>
+            </div>
+            
+            <div class="bracket-team ${match.winner?.name === match.teamB?.name ? 'winner' : ''}">
+              <span class="team-name">${match.teamB?.name || 'Unknown'}</span>
+              <span class="team-score">${match.aggScoreB || 0}</span>
+            </div>
+
+            <div class="bracket-legs">
+              <div style="font-size: 0.75rem; color: #9ca3af; padding: 4px 8px;">
+                1st: ${firstLeg?.scoreA || 0}-${firstLeg?.scoreB || 0} • 
+                2nd: ${secondLeg?.scoreA || 0}-${secondLeg?.scoreB || 0}
+              </div>
+            </div>
+
+            <div class="bracket-winner">
+              → ${winner}
+            </div>
+          </div>
+        `;
+      }
+    });
+
+    html += `
+        </div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+  out.innerHTML = html;
 }
 
 function showCustomMatchInterface() {

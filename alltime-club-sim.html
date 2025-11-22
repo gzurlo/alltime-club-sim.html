@@ -1238,7 +1238,13 @@
           </div>
           <span class="ctrl-btn-tag">View</span>
         </button>
-
+        <button class="ctrl-btn btn-purple" id="btnSimpleBracket" disabled onclick="showSimpleBracket()">
+            <div class="ctrl-btn-main">
+              <span class="ctrl-btn-title">Simple Bracket</span>
+              <span class="ctrl-btn-subtitle">NCAA-style tree view</span>
+            </div>
+            <span class="ctrl-btn-tag">🏀</span>
+          </button>
         <button class="ctrl-btn btn-purple" id="btnClubLegacy" onclick="showClubLegacy()">
           <div class="ctrl-btn-main">
             <span class="ctrl-btn-title">Club Legacy</span>
@@ -1254,7 +1260,13 @@
           </div>
           <span class="ctrl-btn-tag">Friendly</span>
         </button>
-
+        <button class="ctrl-btn btn-red" id="resetTournamentBtn" onclick="showResetConfirmationModal()">
+            <div class="ctrl-btn-main">
+                <span class="ctrl-btn-title">Reset Tournament</span>
+                <span class="ctrl-btn-subtitle">Clear and start fresh</span>
+            </div>
+            <span class="ctrl-btn-tag">🗑️</span>
+        </button>
         <button class="ctrl-btn btn-purple" id="btnHistory" onclick="openHistory()">
           <div class="ctrl-btn-main">
             <span class="ctrl-btn-title">Tournament History</span>
@@ -4401,10 +4413,6 @@ function showPlayerDetails(playerId) {
   // Placeholder – will render into a modal or side panel later
 }
 
-function toggleStatsView() {
-  console.log("Toggling stats view...");
-  // Placeholder – maybe switch between players / matches / clubs
-}
 
 function exportBracketData() {
   console.log("Exporting bracket data...");
@@ -4506,6 +4514,12 @@ function updateButtonStates() {
     buttons.bracket.disabled = !hasTournament;
     buttons.bracket.title = hasTournament ? 'View tournament bracket' : 'Complete tournament first';
   }
+  const simpleBracketBtn = document.getElementById('btnSimpleBracket');
+if (simpleBracketBtn) {
+  simpleBracketBtn.disabled = !hasTournament;
+  simpleBracketBtn.style.opacity = hasTournament ? '1' : '0.5';
+  simpleBracketBtn.style.cursor = hasTournament ? 'pointer' : 'not-allowed';
+}
 }
 
 /************* GENERIC UTILITY MESSAGE *************/
@@ -5022,9 +5036,13 @@ function generateGroups() {
     updateButtonStates();
     return;
   }
-
   out.innerHTML = `
-    <h2>🏆 Tournament Draw</h2>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h2>🏆 Tournament Draw</h2>
+      <button onclick="shuffleGroups()" class="btn-secondary" style="padding: 6px 14px;">
+        🔀 Shuffle Groups
+      </button>
+    </div>
     <p style="margin-bottom:10px;" class="output-sub">
       64 legendary club sides split into 16 groups of four. Top two in each group advance to the Round of 32.
     </p>
@@ -5034,7 +5052,26 @@ function generateGroups() {
     </div>
     <div class="group-grid" id="groupGrid"></div>
   `;
+  function shuffleGroups() {
+  if (!window.GROUPS || window.GROUPS.length === 0) {
+    showUtilityMessage('No groups to shuffle', 'error');
+    return;
+  }
 
+  if (window.GROUP_RESULTS) {
+    if (!confirm('Shuffling will reset your group stage results. Continue?')) {
+      return;
+    }
+    window.GROUP_RESULTS = null;
+  }
+
+  // Re-generate groups
+  const newGroups = generateGroups();
+  window.GROUPS = newGroups;
+  renderGroups(newGroups);
+  updateButtonStates();
+  showUtilityMessage('Groups shuffled! 🔀', 'success');
+}
   const container = out.querySelector("#groupGrid");
   if (!container) {
     console.error("❌ Group grid container not found");
@@ -5893,10 +5930,22 @@ function renderGroupResults(results) {
     `;
     return;
   }
-
   let html = `
-    <h2>🏆 Group Stage Results</h2>
-    <div style="background: #2d3748; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #10b981;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h2>🏆 Group Stage Results</h2>
+      <div style="display: flex; gap: 8px;">
+        <button onclick="showTournamentOverview()" class="btn-secondary" style="padding: 6px 12px; font-size: 0.85em;">
+          📅 View All Matches
+        </button>
+        <button onclick="showMatchWeeksView()" class="btn-secondary" style="padding: 6px 12px; font-size: 0.85em;">
+          🗓️ Match Weeks
+        </button>
+        <button onclick="runKnockouts()" class="btn-primary" style="padding: 6px 12px; font-size: 0.85em;">
+          🎯 Start Knockouts
+        </button>
+      </div>
+    </div>
+    <div style="background: #2d3748; padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #10b981;">
       ✅ <strong>Group Stage Completed!</strong> Top two teams from each group advance to the knockout stage.
     </div>
   `;
@@ -6103,19 +6152,40 @@ function simulateKnockoutRound(teams, roundName, matchImportance = 1.5) {
     console.log(`🎯 ${roundName} Match: ${teamA.name} vs ${teamB.name}`);
 
     if (roundName === "Final") {
-      try {
-        const finalMatchLight = simulateMatch(teamA, teamB, false, 2.0);
-        const match = {
-          teamA,
-          teamB,
-          scoreA: finalMatchLight.scoreA,
-          scoreB: finalMatchLight.scoreB,
-          winner:
-            finalMatchLight.scoreA > finalMatchLight.scoreB ? teamA : teamB,
-          round: roundName,
-          matchDetails: finalMatchLight,
-          isFinal: true
-        };
+        try {
+          const finalMatchLight = simulateMatch(teamA, teamB, false, 2.0);
+          let winner;
+          let penaltiesUsed = false;
+          let penaltyScoreA = 0;
+          let penaltyScoreB = 0;
+
+          if (finalMatchLight.scoreA > finalMatchLight.scoreB) {
+            winner = teamA;
+          } else if (finalMatchLight.scoreB > finalMatchLight.scoreA) {
+            winner = teamB;
+          } else {
+            // Final goes to penalties if tied
+            penaltiesUsed = true;
+            const penaltyResult = simulatePenalties(teamA, teamB);
+            winner = penaltyResult.winner;
+            penaltyScoreA = penaltyResult.scoreA;
+            penaltyScoreB = penaltyResult.scoreB;
+            console.log(`🎯 Final went to penalties: ${winner.name} wins ${penaltyScoreA}-${penaltyScoreB}`);
+          }
+
+          const match = {
+            teamA,
+            teamB,
+            scoreA: finalMatchLight.scoreA,
+            scoreB: finalMatchLight.scoreB,
+            winner,
+            round: roundName,
+            matchDetails: finalMatchLight,
+            isFinal: true,
+            penaltiesUsed,
+            penaltyScoreA,
+            penaltyScoreB
+          };
         // Update the match detail with round info
         if (MATCH_DETAILS_DB[finalMatchLight.matchId]) {
           MATCH_DETAILS_DB[finalMatchLight.matchId].round = roundName;
@@ -6137,23 +6207,31 @@ function simulateKnockoutRound(teams, roundName, matchImportance = 1.5) {
         const aggScoreB = (firstLeg.scoreB || 0) + (secondLeg.scoreB || 0);
 
         let winner;
+        let penaltiesUsed = false;
+        let penaltyScoreA = 0;
+        let penaltyScoreB = 0;
+
         if (aggScoreA > aggScoreB) {
           winner = teamA;
         } else if (aggScoreA < aggScoreB) {
           winner = teamB;
         } else {
           // Away goals rule
-          const teamAAwayGoals = firstLeg.scoreA || 0; // A away in leg 1
-          const teamBAwayGoals = secondLeg.scoreB || 0; // B away in leg 2
+          const teamAAwayGoals = firstLeg.scoreA || 0;
+          const teamBAwayGoals = secondLeg.scoreB || 0;
 
           if (teamAAwayGoals > teamBAwayGoals) {
             winner = teamA;
           } else if (teamBAwayGoals > teamAAwayGoals) {
             winner = teamB;
           } else {
-            // Pens
-            winner = Math.random() > 0.5 ? teamA : teamB;
-            console.log(`⚽ ${roundName} went to penalties: ${winner.name} wins`);
+            // Penalties
+            penaltiesUsed = true;
+            const penaltyResult = simulatePenalties(teamA, teamB);
+            winner = penaltyResult.winner;
+            penaltyScoreA = penaltyResult.scoreA;
+            penaltyScoreB = penaltyResult.scoreB;
+            console.log(`🎯 ${roundName} went to penalties: ${winner.name} wins ${penaltyScoreA}-${penaltyScoreB}`);
           }
         }
 
@@ -6167,7 +6245,10 @@ function simulateKnockoutRound(teams, roundName, matchImportance = 1.5) {
           winner,
           round: roundName,
           awayGoalsA: firstLeg.scoreA || 0,
-          awayGoalsB: secondLeg.scoreB || 0
+          awayGoalsB: secondLeg.scoreB || 0,
+          penaltiesUsed,
+          penaltyScoreA,
+          penaltyScoreB
         };
         // Update both leg match details with round info
         if (MATCH_DETAILS_DB[firstLeg.matchId]) {
@@ -6194,6 +6275,40 @@ function simulateKnockoutRound(teams, roundName, matchImportance = 1.5) {
 /**
  * Full knockout pipeline from R32 → R16 → QF → SF → Final.
  */
+ function simulatePenalties(teamA, teamB) {
+  const shooters = 5; // Standard 5 penalty shooters
+  let scoreA = 0;
+  let scoreB = 0;
+
+  // Simulate 5 penalties each
+  for (let i = 0; i < shooters; i++) {
+    // Team A penalty (85% base success rate, modified by team strength)
+    const successRateA = 0.70 + ((teamA.strength || 75) / 100) * 0.15;
+    if (Math.random() < successRateA) scoreA++;
+
+    // Team B penalty
+    const successRateB = 0.70 + ((teamB.strength || 75) / 100) * 0.15;
+    if (Math.random() < successRateB) scoreB++;
+  }
+
+  // Sudden death if tied after 5
+  while (scoreA === scoreB) {
+    const successRateA = 0.70 + ((teamA.strength || 75) / 100) * 0.15;
+    const successRateB = 0.70 + ((teamB.strength || 75) / 100) * 0.15;
+    
+    const penA = Math.random() < successRateA ? 1 : 0;
+    const penB = Math.random() < successRateB ? 1 : 0;
+    
+    scoreA += penA;
+    scoreB += penB;
+  }
+
+  return {
+    winner: scoreA > scoreB ? teamA : teamB,
+    scoreA,
+    scoreB
+  };
+}
 function simulateKnockoutRounds(teams) {
   if (!teams || !Array.isArray(teams) || teams.length === 0) {
     console.error("❌ No qualified teams for knockout stage");
@@ -6702,14 +6817,14 @@ function renderKnockoutResults(results) {
   });
   // Nav buttons
   html += `
-    <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
-      <button class="small-btn" onclick="showTournamentBracket()" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+    <div style="margin-top: 15px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">
+      <button onclick="showTournamentBracket()" class="btn-secondary" style="padding: 8px 16px;">
         🏆 View Full Bracket
       </button>
-      <button class="small-btn" onclick="showTournamentOverview()" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+      <button onclick="showTournamentOverview()" class="btn-secondary" style="padding: 8px 16px;">
         📅 All Match Results
       </button>
-      <button class="small-btn" onclick="showClubLegacy()" style="background: linear-gradient(135deg, #10b981, #059669);">
+      <button onclick="showClubLegacy()" class="btn-secondary" style="padding: 8px 16px;">
         🏛️ Club Legacy
       </button>
     </div>
@@ -6904,6 +7019,9 @@ function runGroupStage() {
       renderGroupResults(groupResults);
 
       console.log("✅ Group stage completed successfully");
+      setTimeout(() => {
+  updateButtonStates();
+}, 100);
     } catch (error) {
       console.error("❌ Error in group stage simulation:", error);
 
@@ -7020,6 +7138,20 @@ function runKnockouts() {
       renderKnockoutResults(knockoutResults);
 
       // Update UI state
+      setTimeout(() => {
+  updateButtonStates();
+  
+  // Force enable all view buttons after knockout completion
+  const viewButtons = ['btnStats', 'btnAllMatches', 'btnMatchWeeks', 'btnBracket'];
+  viewButtons.forEach(btnId => {
+    const btn = document.getElementById(btnId);
+    if (btn) {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.cursor = 'pointer';
+    }
+  });
+}, 100);
       if (btnGroup) {
         btnGroup.disabled = false;
         btnGroup.style.background = "";
@@ -7327,34 +7459,33 @@ function showPlayerStats() {
   );
   const out = document.getElementById("output");
   if (!out) return;
+  const viewMode = window.STATS_VIEW_MODE || 'detailed';
 
-  let html = `
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <h2>📊 Player Statistics</h2>
-      <div style="display: flex; gap: 10px;">
-        <button onclick="exportPlayerStats()" class="btn-secondary" style="padding: 8px 12px;">
-          📥 Export Data
-        </button>
-        <button onclick="toggleStatsView()" class="btn-secondary" id="statsViewToggle" style="padding: 8px 12px;">
-          📈 Detailed View
-        </button>
-      </div>
+let html = `
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2>📊 Player Statistics</h2>
+    <div style="display: flex; gap: 10px;">
+      <button onclick="exportPlayerStats()" class="btn-secondary" style="padding: 8px 12px;">
+        📥 Export Data
+      </button>
+      <button onclick="toggleStatsView()" class="btn-secondary" id="statsViewToggle" style="padding: 8px 12px;">
+        ${viewMode === 'detailed' ? '📊 Compact View' : '📈 Detailed View'}
+      </button>
     </div>
-  `;
+  </div>
+`;
   
   if (playersWithData.length > 0) {
     const topScorers = [...playersWithData]
       .sort((a, b) => b.goals - a.goals)
       .slice(0, 15);
-
-    const topAssists = [...playersWithData]
-      .sort((a, b) => b.assists - a.assists)
-      .slice(0, 15);
-
-    const topRatings = [...playersWithData]
-      .filter(p => p.apps >= 3)
-      .sort((a, b) => (b.avgRating || 6.5) - (a.avgRating || 6.5))
-      .slice(0, 10);
+      const topAssists = [...playersWithData]
+  .sort((a, b) => b.assists - a.assists)
+  .slice(0, viewMode === 'compact' ? 10 : 15);
+  const topRatings = [...playersWithData]
+  .filter(p => p.apps >= 3)
+  .sort((a, b) => (b.avgRating || 6.5) - (a.avgRating || 6.5))
+  .slice(0, viewMode === 'compact' ? 5 : 10);
     
     // Enhanced Tournament Summary
     const totalGoals = playersWithData.reduce((sum, p) => sum + (p.goals || 0), 0);
@@ -7789,23 +7920,11 @@ function exportBracketData() {
   link.click();
   document.body.removeChild(link);
 }
-
 function toggleStatsView() {
-  const toggleBtn = document.getElementById("statsViewToggle");
-  if (!toggleBtn) return;
-
-  const isDetailed = toggleBtn.textContent.includes("Detailed");
-  if (isDetailed) {
-    toggleBtn.textContent = "📊 Compact View";
-    showUtilityMessage("Compact stats view coming soon!", "info");
-    // TODO: implement compact view (e.g., only top scorers table)
-  } else {
-    toggleBtn.textContent = "📈 Detailed View";
-    showUtilityMessage("Detailed stats view coming soon!", "info");
-    // TODO: revert to full view if you change DOM structure
-  }
+  const currentMode = window.STATS_VIEW_MODE || 'detailed';
+  window.STATS_VIEW_MODE = currentMode === 'detailed' ? 'compact' : 'detailed';
+  showPlayerStats();
 }
-
 /**
  * NOTE:
  * We already inject table styles via `injectAllStyles()` in another chunk.
@@ -8607,7 +8726,9 @@ function generateTournamentSummary() {
   
   const playersWithData = Object.values(PLAYER_DB).filter(p => p.apps > 0);
   if (playersWithData.length > 0) {
-    const topScorers = [...playersWithData].sort((a, b) => b.goals - a.goals).slice(0, 5);
+   const topScorers = [...playersWithData]
+  .sort((a, b) => b.goals - a.goals)
+  .slice(0, viewMode === 'compact' ? 10 : 15);
     summary += `TOP SCORERS:\n`;
     topScorers.forEach((player, index) => {
       summary += `${index + 1}. ${player.name} (${player.team}) - ${player.goals} goals\n`;
@@ -8998,7 +9119,6 @@ function enhancedHandleImport() {
   }
 }
 /************* RESET / UTILITIES / THEME / RNG *************/
-
 function showResetConfirmationModal() {
   const hasData =
     window.GROUPS ||
@@ -9007,74 +9127,64 @@ function showResetConfirmationModal() {
     Object.keys(PLAYER_DB).length > 0;
 
   if (!hasData) {
-    performReset();
+    showUtilityMessage('No tournament data to reset', 'info');
     return;
   }
 
   const modal = document.createElement('div');
-  modal.className = 'modal-overlay';
+  modal.className = 'modal-backdrop';
   modal.style.cssText = `
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.85);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    backdrop-filter: blur(5px);
   `;
 
   const matchCount = Object.keys(MATCH_DETAILS_DB).length;
   const playerCount = Object.values(PLAYER_DB).filter(p => p.apps > 0).length;
 
   modal.innerHTML = `
-    <div style="background: #1f2937; border-radius: 12px; padding: 25px; max-width: 500px; width: 90vw;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h3 style="margin: 0; color: #e5e7eb;">🔄 Reset Tournament</h3>
-        <button onclick="this.closest('.modal-overlay').remove()" 
-                style="background: none; border: none; color: #9ca3af; font-size: 1.5em; cursor: pointer;">×</button>
+    <div style="background: linear-gradient(135deg, #1f2937, #111827); border-radius: 12px; padding: 25px; max-width: 500px; width: 90vw; border: 2px solid #ef4444; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <div style="font-size: 4em; margin-bottom: 10px;">⚠️</div>
+        <h3 style="margin: 0; color: #ef4444; font-size: 1.6em;">Reset Tournament?</h3>
       </div>
       
-      <div style="background: #ef4444; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-        <div style="color: white; font-weight: bold; display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-          ⚠️ Destructive Action
-        </div>
-        <div style="color: #fecaca; font-size: 0.9em;">
-          This will permanently delete your current tournament progress and statistics.
-        </div>
-      </div>
-      
-      <div style="background: #374151; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-        <div style="color: #e5e7eb; margin-bottom: 10px; font-weight: bold;">Data to be deleted:</div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; color: #d1d5db;">
-          <div>🏆 Tournament Bracket</div>
-          <div>${window.TOURNAMENT ? '✅ Present' : '❌ None'}</div>
-          <div>⚽ Group Stage</div>
-          <div>${window.GROUP_RESULTS ? '✅ Present' : '❌ None'}</div>
-          <div>📊 Match Results</div>
-          <div>${matchCount > 0 ? `✅ ${matchCount} matches` : '❌ None'}</div>
-          <div>👤 Player Stats</div>
-          <div>${playerCount > 0 ? `✅ ${playerCount} players` : '❌ None'}</div>
+      <div style="background: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ef4444;">
+        <div style="color: #fecaca; font-size: 0.95em; line-height: 1.6;">
+          <strong style="color: #ef4444;">⚠️ Warning:</strong> This will permanently delete all tournament progress including:
+          <ul style="margin: 10px 0; padding-left: 20px;">
+            <li>${matchCount} match results</li>
+            <li>${playerCount} player statistics</li>
+            <li>Group stage and knockout brackets</li>
+            <li>All current tournament data</li>
+          </ul>
+          <div style="margin-top: 10px; padding: 10px; background: rgba(239, 68, 68, 0.2); border-radius: 4px;">
+            <strong>Note:</strong> Your all-time club legacy and historical records will be preserved.
+          </div>
         </div>
       </div>
       
       <div style="display: flex; gap: 10px; justify-content: space-between;">
-        <button onclick="exportTournament && exportTournament(); this.closest('.modal-overlay').remove()" 
-                class="btn-secondary" style="padding: 10px 15px; flex: 1;">
+        <button onclick="exportTournament(); this.closest('.modal-backdrop').remove()" 
+                class="btn-secondary" style="padding: 12px 20px; flex: 1; background: linear-gradient(135deg, #3b82f6, #2563eb);">
           💾 Export First
         </button>
-        <div style="display: flex; gap: 10px;">
-          <button onclick="this.closest('.modal-overlay').remove()" 
-                  class="btn-secondary" style="padding: 10px 20px;">
-            Cancel
-          </button>
-          <button onclick="performReset(); this.closest('.modal-overlay').remove()" 
-                  class="btn-primary" style="padding: 10px 20px; background: #ef4444;">
-            🗑️ Reset Anyway
-          </button>
-        </div>
+        <button onclick="this.closest('.modal-backdrop').remove()" 
+                class="btn-secondary" style="padding: 12px 20px; flex: 1;">
+          ❌ Cancel
+        </button>
+        <button onclick="performReset(); this.closest('.modal-backdrop').remove()" 
+                class="btn-primary" style="padding: 12px 20px; flex: 1; background: linear-gradient(135deg, #ef4444, #dc2626);">
+          🗑️ Reset Now
+        </button>
       </div>
     </div>
   `;
@@ -9853,7 +9963,6 @@ function populateMatchDetailModal(match) {
   modal.querySelector('.modal-content').innerHTML = html;
   enhanceMatchDetailModal();
 }
-
 function populateTeamDetailModal(team) {
   const modal = document.getElementById('teamDetailModal');
   if (!modal) return;
@@ -9861,6 +9970,14 @@ function populateTeamDetailModal(team) {
   const teamPlayers = Object.values(PLAYER_DB).filter(p => p.team === team.name);
   const topScorer = [...teamPlayers].sort((a, b) => b.goals - a.goals)[0];
   const topAssist = [...teamPlayers].sort((a, b) => b.assists - a.assists)[0];
+
+  // Get key players from starting XI
+  const keyPlayers = (team.startingXI || [])
+    .sort((a, b) => (b.quality || 0) - (a.quality || 0))
+    .slice(0, 2);
+
+  // Determine country/league from team name
+  const teamInfo = getTeamCountryInfo(team);
 
   let html = `
     <div class="modal-header">
@@ -9870,114 +9987,163 @@ function populateTeamDetailModal(team) {
       </button>
     </div>
     
-    <div class="modal-body">
-      <div class="team-header">
-        <div class="team-badge">${team.name.charAt(0)}</div>
-        <div class="team-info">
-          <h3 class="team-name">${team.name}</h3>
-          <div class="team-meta">
-            <span class="season">${team.season}</span>
-            <span class="strength">⭐ OVR ${calculateTeamOverallStrength(team)}</span>
-          </div>
+    <div class="modal-body" style="padding: 20px;">
+      <div class="team-header" style="text-align: center; margin-bottom: 20px;">
+        <div style="font-size: 4em; margin-bottom: 10px;">${teamInfo.flag}</div>
+        <h3 style="margin: 0; color: #e5e7eb; font-size: 1.8em;">${team.name}</h3>
+        <div style="color: #9ca3af; font-size: 1em; margin-top: 5px;">
+          ${teamInfo.country} • ${team.season}
+        </div>
+        <div style="margin-top: 8px;">
+          <span style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.9em;">
+            ⭐ Overall: ${calculateTeamOverallStrength(team)}
+          </span>
         </div>
       </div>
-      
-      <div class="team-stats-grid">
-        <div class="stat-card">
-          <div class="stat-value">${teamPlayers.length}</div>
-          <div class="stat-label">Players</div>
+
+      <div style="background: rgba(30, 41, 59, 0.5); border-radius: 10px; padding: 15px; margin-bottom: 15px; border: 1px solid #374151;">
+        <h4 style="margin: 0 0 12px 0; color: #a7f3d0; font-size: 1.1em;">🌟 Key Players</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+  `;
+
+  keyPlayers.forEach(player => {
+    if (!player) return;
+    html += `
+      <div style="background: rgba(15, 23, 42, 0.8); padding: 10px; border-radius: 8px; border-left: 3px solid #3b82f6;">
+        <div style="font-weight: bold; color: #e5e7eb; font-size: 0.95em;">${player.name}</div>
+        <div style="font-size: 0.8em; color: #9ca3af; margin-top: 2px;">${player.pos}</div>
+        <div style="margin-top: 4px;">
+          <span style="background: #3b82f6; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75em; font-weight: bold;">
+            OVR ${player.quality}
+          </span>
         </div>
-        <div class="stat-card">
-          <div class="stat-value">${teamPlayers.reduce((sum, p) => sum + p.goals, 0)}</div>
-          <div class="stat-label">Total Goals</div>
+      </div>
+    `;
+  });
+
+  html += `
         </div>
-        <div class="stat-card">
-          <div class="stat-value">${teamPlayers.reduce((sum, p) => sum + p.assists, 0)}</div>
-          <div class="stat-label">Total Assists</div>
+      </div>
+
+      <div class="team-stats-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px;">
+        <div style="text-align: center; background: rgba(59, 130, 246, 0.1); padding: 12px; border-radius: 8px;">
+          <div style="font-size: 1.5em; font-weight: bold; color: #3b82f6;">${teamPlayers.length}</div>
+          <div style="font-size: 0.75em; color: #9ca3af;">Players</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-value">${teamPlayers.reduce((sum, p) => sum + p.apps, 0)}</div>
-          <div class="stat-label">Total Apps</div>
+        <div style="text-align: center; background: rgba(239, 68, 68, 0.1); padding: 12px; border-radius: 8px;">
+          <div style="font-size: 1.5em; font-weight: bold; color: #ef4444;">${teamPlayers.reduce((sum, p) => sum + p.goals, 0)}</div>
+          <div style="font-size: 0.75em; color: #9ca3af;">Goals</div>
+        </div>
+        <div style="text-align: center; background: rgba(16, 185, 129, 0.1); padding: 12px; border-radius: 8px;">
+          <div style="font-size: 1.5em; font-weight: bold; color: #10b981;">${teamPlayers.reduce((sum, p) => sum + p.assists, 0)}</div>
+          <div style="font-size: 0.75em; color: #9ca3af;">Assists</div>
+        </div>
+        <div style="text-align: center; background: rgba(245, 158, 11, 0.1); padding: 12px; border-radius: 8px;">
+          <div style="font-size: 1.5em; font-weight: bold; color: #f59e0b;">${teamPlayers.reduce((sum, p) => sum + p.apps, 0)}</div>
+          <div style="font-size: 0.75em; color: #9ca3af;">Apps</div>
         </div>
       </div>
   `;
 
   if (topScorer || topAssist) {
     html += `
-      <div class="top-performers">
-        <h4>🏅 Top Performers</h4>
-        <div class="performers-grid">
+      <div style="background: rgba(30, 41, 59, 0.5); border-radius: 10px; padding: 15px; border: 1px solid #374151;">
+        <h4 style="margin: 0 0 10px 0; color: #a7f3d0; font-size: 1.1em;">🏅 Top Performers</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
     `;
 
-    if (topScorer) {
+    if (topScorer && topScorer.goals > 0) {
       html += `
-        <div class="performer-card">
-          <div class="performer-role">🥇 Top Scorer</div>
-          <div class="performer-name">${topScorer.name}</div>
-          <div class="performer-stats">${topScorer.goals} goals</div>
+        <div style="background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 8px; border-left: 3px solid #ef4444;">
+          <div style="font-size: 0.75em; color: #ef4444; font-weight: bold; margin-bottom: 4px;">🥇 TOP SCORER</div>
+          <div style="font-weight: bold; color: #e5e7eb;">${topScorer.name}</div>
+          <div style="font-size: 1.3em; font-weight: bold; color: #ef4444; margin-top: 4px;">${topScorer.goals} goals</div>
         </div>
       `;
     }
 
-    if (topAssist) {
+    if (topAssist && topAssist.assists > 0) {
       html += `
-        <div class="performer-card">
-          <div class="performer-role">🎯 Top Assister</div>
-          <div class="performer-name">${topAssist.name}</div>
-          <div class="performer-stats">${topAssist.assists} assists</div>
+        <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 8px; border-left: 3px solid #10b981;">
+          <div style="font-size: 0.75em; color: #10b981; font-weight: bold; margin-bottom: 4px;">🎯 TOP ASSISTER</div>
+          <div style="font-weight: bold; color: #e5e7eb;">${topAssist.name}</div>
+          <div style="font-size: 1.3em; font-weight: bold; color: #10b981; margin-top: 4px;">${topAssist.assists} assists</div>
         </div>
       `;
     }
-
-    html += `</div></div>`;
-  }
-
-  const teamMatches = Object.values(MATCH_DETAILS_DB)
-    .filter(m => m.teamA === team.name || m.teamB === team.name)
-    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-    .slice(0, 5);
-
-  if (teamMatches.length > 0) {
-    html += `
-      <div class="recent-matches">
-        <h4>📅 Recent Matches</h4>
-        <div class="matches-list">
-    `;
-
-    teamMatches.forEach(match => {
-      const isTeamA = match.teamA === team.name;
-      const opponent = isTeamA ? match.teamB : match.teamA;
-      const teamScore = isTeamA ? match.scoreA : match.scoreB;
-      const opponentScore = isTeamA ? match.scoreB : match.scoreA;
-      const result = teamScore > opponentScore ? 'W' : teamScore < opponentScore ? 'L' : 'D';
-
-      html += `
-        <div class="match-item ${result.toLowerCase()}">
-          <div class="match-result">${result}</div>
-          <div class="match-opponent">${opponent}</div>
-          <div class="match-score">${teamScore}-${opponentScore}</div>
-          <div class="match-date">${new Date(match.timestamp).toLocaleDateString()}</div>
-        </div>
-      `;
-    });
 
     html += `</div></div>`;
   }
 
   html += `
-    <div class="modal-actions">
-      <button class="btn-secondary" onclick="openCustomMatch('${team.name}', '')">
-        ⚽ Simulate Match
-      </button>
-      <button class="btn-secondary" onclick="viewTeamPlayers('${team.name}')">
-        👥 View Squad
-      </button>
+      <div style="margin-top: 15px; display: flex; gap: 8px; justify-content: center;">
+        <button onclick="openCustomMatch('${team.name}', '')" class="btn-secondary" style="padding: 8px 16px;">
+          ⚽ Simulate Match
+        </button>
+        <button onclick="viewTeamPlayers('${team.name}')" class="btn-secondary" style="padding: 8px 16px;">
+          👥 View Full Squad
+        </button>
+      </div>
     </div>
   `;
 
-  modal.querySelector('.modal-content').innerHTML = html;
+  const content = modal.querySelector('.modal-content');
+  if (content) {
+    content.innerHTML = html;
+  }
 }
 
+function getTeamCountryInfo(team) {
+  const teamName = team.name || '';
+  const countryMap = {
+    'Barcelona': { country: 'Spain', flag: '🇪🇸' },
+    'Real Madrid': { country: 'Spain', flag: '🇪🇸' },
+    'Atlético Madrid': { country: 'Spain', flag: '🇪🇸' },
+    'Valencia': { country: 'Spain', flag: '🇪🇸' },
+    'AC Milan': { country: 'Italy', flag: '🇮🇹' },
+    'Inter Milan': { country: 'Italy', flag: '🇮🇹' },
+    'Juventus': { country: 'Italy', flag: '🇮🇹' },
+    'Roma': { country: 'Italy', flag: '🇮🇹' },
+    'Napoli': { country: 'Italy', flag: '🇮🇹' },
+    'Sampdoria': { country: 'Italy', flag: '🇮🇹' },
+    'Bayern Munich': { country: 'Germany', flag: '🇩🇪' },
+    'Borussia Dortmund': { country: 'Germany', flag: '🇩🇪' },
+    'Bayer Leverkusen': { country: 'Germany', flag: '🇩🇪' },
+    'Hamburg': { country: 'Germany', flag: '🇩🇪' },
+    'Manchester United': { country: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+    'Manchester City': { country: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+    'Liverpool': { country: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+    'Chelsea': { country: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+    'Arsenal': { country: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+    'Nottingham Forest': { country: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+    'Aston Villa': { country: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+    'Ajax': { country: 'Netherlands', flag: '🇳🇱' },
+    'PSV Eindhoven': { country: 'Netherlands', flag: '🇳🇱' },
+    'Feyenoord': { country: 'Netherlands', flag: '🇳🇱' },
+    'Porto': { country: 'Portugal', flag: '🇵🇹' },
+    'Benfica': { country: 'Portugal', flag: '🇵🇹' },
+    'Marseille': { country: 'France', flag: '🇫🇷' },
+    'Celtic': { country: 'Scotland', flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿' },
+    'Red Star Belgrade': { country: 'Serbia', flag: '🇷🇸' },
+    'Steaua București': { country: 'Romania', flag: '🇷🇴' },
+    'Galatasaray': { country: 'Turkey', flag: '🇹🇷' },
+    'Santos': { country: 'Brazil', flag: '🇧🇷' },
+    'São Paulo': { country : 'Brazil', flag: '🇧🇷' },
+'Flamengo': { country: 'Brazil', flag: '🇧🇷' },
+'Corinthians': { country: 'Brazil', flag: '🇧🇷' },
+'Boca Juniors': { country: 'Argentina', flag: '🇦🇷' },
+'River Plate': { country: 'Argentina', flag: '🇦🇷' },
+'Estudiantes': { country: 'Argentina', flag: '🇦🇷' }
+};
+// Try to find exact match
+for (const [key, value] of Object.entries(countryMap)) {
+if (teamName.includes(key)) {
+return value;
+}
+}
+// Default
+return { country: 'Europe', flag: '🌍' };
+}
 function enhanceCustomMatchModal() {
   const modal = document.getElementById('customMatchModal');
   if (!modal) return;
@@ -10478,29 +10644,52 @@ function calculateBaseRating(player, teamStrength, performance = {}) {
     return 6.0;
   }
 
-  let rating = ((player.quality || 70) / 10) * 0.5;
-  rating += ((teamStrength || 70) / 100) * 0.3;
+  // Base rating starts from player quality (scaled to 5-8 range)
+  let rating = 5.0 + ((player.quality || 70) / 100) * 3.0;
+  
+  // Team performance influence (slight boost/penalty)
+  const teamFactor = ((teamStrength || 70) - 70) / 100;
+  rating += teamFactor * 0.5;
 
-  if (performance.goals > 0) rating += performance.goals * 0.8;
-  if (performance.assists > 0) rating += performance.assists * 0.5;
-  if (performance.cleanSheet) rating += 0.6;
-
-  if (['GK'].includes(player.pos)) {
-    rating += 0.3;
-    if (performance.cleanSheet) rating += 0.4;
-  } else if (['ST', 'CF', 'FW'].includes(player.pos)) {
-    rating += 0.2;
-    if (performance.goals > 0) rating += 0.3;
-  } else if (['AM', 'CM', 'LM', 'RM'].includes(player.pos)) {
-    rating += 0.1;
-    if (performance.assists > 0) rating += 0.2;
+  // Performance bonuses
+  if (performance.goals > 0) {
+    rating += performance.goals * 1.2; // Goals are very valuable
+  }
+  if (performance.assists > 0) {
+    rating += performance.assists * 0.7; // Assists are valuable
+  }
+  if (performance.cleanSheet && ['GK', 'CB', 'RB', 'LB'].includes(player.pos)) {
+    rating += 0.8; // Clean sheet bonus for defenders
   }
 
+  // Position-specific adjustments
+  if (['GK'].includes(player.pos)) {
+    // Goalkeepers: high floor, moderate ceiling
+    rating = Math.max(rating, 6.0);
+    if (performance.cleanSheet) rating += 0.5;
+  } else if (['ST', 'CF', 'FW'].includes(player.pos)) {
+    // Strikers: rating depends heavily on goals
+    if (performance.goals === 0 && Math.random() < 0.3) {
+      rating -= 0.5; // Penalty for not scoring
+    }
+  } else if (['CB', 'RB', 'LB'].includes(player.pos)) {
+    // Defenders: high floor if clean sheet
+    if (performance.cleanSheet) {
+      rating = Math.max(rating, 7.0);
+    }
+  }
+
+  // Add controlled randomness (better players have less variance)
   const qualityFactor = (player.quality || 70) / 100;
-  const randomness = (Math.random() - 0.5) * (1.5 - qualityFactor * 0.8);
+  const variance = 0.8 * (1 - qualityFactor * 0.5); // High quality = less variance
+  const randomness = (Math.random() - 0.5) * variance;
   rating += randomness;
 
-  return Math.min(9.8, Math.max(5.0, rating));
+  // Realistic bounds: very rare to see below 5.5 or above 9.5
+  rating = Math.max(5.5, Math.min(9.5, rating));
+
+  // Round to 1 decimal
+  return Math.round(rating * 10) / 10;
 }
 
 /************* CLUB LEGACY (DEDUPED) *************/
@@ -10722,10 +10911,9 @@ function generateMatchCard(match, matchNumber) {
   return `
     <div class="match-card" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(17, 24, 39, 0.95)); 
          border-radius: 10px; padding: 12px; margin-bottom: 10px; border: 1px solid #374151;
-         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); cursor: pointer; transition: all 0.3s ease;"
+         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); transition: all 0.3s ease;"
          onmouseover="this.style.borderColor='#3b82f6'; this.style.transform='translateY(-2px)'"
-         onmouseout="this.style.borderColor='#374151'; this.style.transform='translateY(0)'"
-         onclick="openMatchDetail('${match.id}')">
+         onmouseout="this.style.borderColor='#374151'; this.style.transform='translateY(0)'">
       <!-- Match Header -->
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #374151;">
         <div style="display: flex; align-items: center; gap: 10px;">
@@ -10745,6 +10933,11 @@ function generateMatchCard(match, matchNumber) {
               🔥 ${match.importance}x
             </span>
           ` : ''}
+            <!-- View Details Button -->
+      <div style="margin-top: 10px; text-align: center; padding-top: 10px; border-top: 1px solid #374151;">
+        <button onclick="openMatchDetail('${match.id}')" class="btn-secondary" style="padding: 6px 20px; font-size: 0.85em;">
+          📊 View Full Details
+        </button>
         </div>
       </div>
 
@@ -11119,7 +11312,146 @@ function showTournamentBracket() {
   html += `</div>`;
   out.innerHTML = html;
 }
+function showSimpleBracket() {
+  const out = document.getElementById('output');
+  if (!out) return;
 
+  if (!window.TOURNAMENT || !window.TOURNAMENT.bracket) {
+    out.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🏆</div>
+        <h2>No Bracket Available</h2>
+        <p class="output-sub">Complete the knockout stage to view the bracket.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const rounds = window.TOURNAMENT.bracket;
+  
+  let html = `
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+      <h2>🏀 NCAA-Style Bracket</h2>
+      <div style="display: flex; gap: 8px;">
+        <button onclick="showTournamentBracket()" class="btn-secondary" style="padding: 6px 12px;">
+          📋 Detailed View
+        </button>
+        <button onclick="showTournamentOverview()" class="btn-secondary" style="padding: 6px 12px;">
+          📅 All Matches
+        </button>
+      </div>
+    </div>
+
+    <div style="background: #2d3748; padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #f59e0b; text-align: center;">
+      🏆 <strong>CHAMPION: ${window.TOURNAMENT.champion?.name || 'TBD'}</strong>
+    </div>
+
+    <div class="ncaa-bracket">
+  `;
+
+  // Create columns for each round
+  const roundColumns = [];
+  
+  rounds.forEach(roundData => {
+    if (!roundData || !roundData.matches || roundData.matches.length === 0) return;
+    
+    roundColumns.push({
+      name: roundData.round,
+      matches: roundData.matches
+    });
+  });
+
+  html += `<div style="display: flex; justify-content: space-around; align-items: center; gap: 15px; overflow-x: auto; padding: 20px 10px;">`;
+
+  roundColumns.forEach((round, roundIndex) => {
+    const isLeft = roundIndex < roundColumns.length / 2;
+    
+    html += `
+      <div class="bracket-column" style="display: flex; flex-direction: column; gap: ${20 * Math.pow(2, roundIndex)}px; min-width: 180px;">
+        <h4 style="text-align: center; color: #60a5fa; font-size: 0.9em; margin-bottom: 10px; position: sticky; top: 0; background: rgba(15, 23, 42, 0.95); padding: 8px; border-radius: 6px; z-index: 1;">
+          ${round.name}
+        </h4>
+    `;
+
+    round.matches.forEach(match => {
+      if (!match) return;
+
+      const isFinal = round.name === 'Final';
+      const finalMatch = isFinal ? (match.matchDetails || match) : null;
+
+      html += `
+        <div class="bracket-matchup" style="background: rgba(30, 41, 59, 0.8); border-radius: 6px; padding: 6px; border: 1px solid #4b5563; min-width: 160px;">
+      `;
+
+      if (isFinal) {
+        html += `
+          <div style="background: ${finalMatch.scoreA > finalMatch.scoreB ? 'rgba(16, 185, 129, 0.2)' : 'rgba(75, 85, 99, 0.2)'}; padding: 6px 8px; border-radius: 4px; margin-bottom: 2px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid ${finalMatch.scoreA > finalMatch.scoreB ? '#10b981' : 'transparent'};">
+            <span style="font-size: 0.85em; color: ${finalMatch.scoreA > finalMatch.scoreB ? '#10b981' : '#e5e7eb'}; font-weight: ${finalMatch.scoreA > finalMatch.scoreB ? 'bold' : 'normal'};">
+              ${match.teamA?.name || 'TBD'}
+            </span>
+            <span style="font-size: 0.9em; font-weight: bold; color: ${finalMatch.scoreA > finalMatch.scoreB ? '#10b981' : '#9ca3af'};">
+              ${finalMatch.scoreA}
+            </span>
+          </div>
+          <div style="background: ${finalMatch.scoreB > finalMatch.scoreA ? 'rgba(16, 185, 129, 0.2)' : 'rgba(75, 85, 99, 0.2)'}; padding: 6px 8px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid ${finalMatch.scoreB > finalMatch.scoreA ? '#10b981' : 'transparent'};">
+            <span style="font-size: 0.85em; color: ${finalMatch.scoreB > finalMatch.scoreA ? '#10b981' : '#e5e7eb'}; font-weight: ${finalMatch.scoreB > finalMatch.scoreA ? 'bold' : 'normal'};">
+              ${match.teamB?.name || 'TBD'}
+            </span>
+            <span style="font-size: 0.9em; font-weight: bold; color: ${finalMatch.scoreB > finalMatch.scoreA ? '#10b981' : '#9ca3af'};">
+              ${finalMatch.scoreB}
+            </span>
+          </div>
+        `;
+
+        if (match.penaltiesUsed) {
+          html += `
+            <div style="text-align: center; font-size: 0.7em; color: #f59e0b; margin-top: 4px; padding: 2px;">
+              🎯 Pens: ${match.penaltyScoreA}-${match.penaltyScoreB}
+            </div>
+          `;
+        }
+      } else {
+        // Two-leg tie
+        const winnerA = match.winner?.name === match.teamA?.name;
+        const winnerB = match.winner?.name === match.teamB?.name;
+
+        html += `
+          <div style="background: ${winnerA ? 'rgba(16, 185, 129, 0.2)' : 'rgba(75, 85, 99, 0.2)'}; padding: 6px 8px; border-radius: 4px; margin-bottom: 2px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid ${winnerA ? '#10b981' : 'transparent'};">
+            <span style="font-size: 0.85em; color: ${winnerA ? '#10b981' : '#e5e7eb'}; font-weight: ${winnerA ? 'bold' : 'normal'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              ${match.teamA?.name || 'TBD'}
+            </span>
+            <span style="font-size: 0.9em; font-weight: bold; color: ${winnerA ? '#10b981' : '#9ca3af'}; margin-left: 8px;">
+              ${match.aggScoreA || 0}
+            </span>
+          </div>
+          <div style="background: ${winnerB ? 'rgba(16, 185, 129, 0.2)' : 'rgba(75, 85, 99, 0.2)'}; padding: 6px 8px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid ${winnerB ? '#10b981' : 'transparent'};">
+            <span style="font-size: 0.85em; color: ${winnerB ? '#10b981' : '#e5e7eb'}; font-weight: ${winnerB ? 'bold' : 'normal'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              ${match.teamB?.name || 'TBD'}
+            </span>
+            <span style="font-size: 0.9em; font-weight: bold; color: ${winnerB ? '#10b981' : '#9ca3af'}; margin-left: 8px;">
+              ${match.aggScoreB || 0}
+            </span>
+          </div>
+        `;
+
+        if (match.penaltiesUsed) {
+          html += `
+            <div style="text-align: center; font-size: 0.7em; color: #f59e0b; margin-top: 4px; padding: 2px;">
+              🎯 Pens: ${match.penaltyScoreA}-${match.penaltyScoreB}
+            </div>
+          `;
+        }
+      }
+
+      html += `</div>`;
+    });
+
+    html += `</div>`;
+  });
+
+  html += `</div></div>`;
+  out.innerHTML = html;
+}
 function showCustomMatchInterface() {
   openCustomMatch();
 }

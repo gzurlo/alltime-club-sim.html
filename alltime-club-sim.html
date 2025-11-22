@@ -7495,45 +7495,48 @@ function showPlayerStats() {
       </div>
     `;
     
-    // Top Scorers
-    html += `
-      <div class="group-card">
-        <div class="group-title" style="display: flex;justify-content: space-between;align-items: center;">
-          <span>🥇 Top Scorers</span>
-          <span style="font-size: 0.9em; color: #9ca3af;">Showing ${topScorers.length} players</span>
-        </div>
-        <div class="table-container">
-          <table class="standings-table">
-            <thead>
-              <tr>
-                <th>Rank</th>
-                <th>Player</th>
-                <th>Team</th>
-                <th>Goals</th>
-                <th>Assists</th>
-                <th>Apps</th>
-                <th>Ratio</th>
-                <th>Rating</th>
-              </tr>
-            </thead>
-            <tbody>
-    `;
-    
-// In the top scorers table
-topScorers.forEach((player, index) => {
+   // Top Scorers Section
+if (topScorers.length > 0) {
   html += `
-    <tr>
-      <td style="text-align: center;">${index + 1}</td>
-      <td><strong>${player.name}</strong></td>
-      <td style="text-align: center;">${player.goals}</td>
-      ${viewMode === 'detailed' ? `<td style="text-align: center;">${player.assists || 0}</td>` : ''}
-      ${viewMode === 'detailed' ? `<td style="text-align: center;">${player.apps}</td>` : ''}
-      <td style="text-align: center;"><span style="color: ${getRatingColor(player.avgRating)}">${player.avgRating}</span></td>
-      <td>${player.team}</td>
-    </tr>
+    <div style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #475569;">
+      <h3 style="margin: 0 0 15px 0; color: #3b82f6; display: flex; align-items: center; gap: 8px;">
+        <span>⚽</span> Top Scorers
+      </h3>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background: rgba(59, 130, 246, 0.1); border-bottom: 2px solid #3b82f6;">
+            <th style="padding: 12px; text-align: center; width: 50px;">#</th>
+            <th style="padding: 12px; text-align: left;">Player</th>
+            <th style="padding: 12px; text-align: center;">⚽ Goals</th>
+            ${viewMode === 'detailed' ? '<th style="padding: 12px; text-align: center;">🎯 Assists</th>' : ''}
+            ${viewMode === 'detailed' ? '<th style="padding: 12px; text-align: center;">📊 Apps</th>' : ''}
+            <th style="padding: 12px; text-align: center;">⭐ Rating</th>
+            <th style="padding: 12px; text-align: left;">Team</th>
+          </tr>
+        </thead>
+        <tbody>
   `;
-});
 
+  topScorers.forEach((player, index) => {
+    html += `
+      <tr style="border-bottom: 1px solid rgba(71, 85, 105, 0.3);">
+        <td style="padding: 12px; text-align: center; color: #94a3b8; font-weight: 600;">${index + 1}</td>
+        <td style="padding: 12px;"><strong style="color: #e2e8f0;">${player.name}</strong></td>
+        <td style="padding: 12px; text-align: center; color: #3b82f6; font-weight: bold;">${player.goals}</td>
+        ${viewMode === 'detailed' ? `<td style="padding: 12px; text-align: center; color: #94a3b8;">${player.assists || 0}</td>` : ''}
+        ${viewMode === 'detailed' ? `<td style="padding: 12px; text-align: center; color: #94a3b8;">${player.apps}</td>` : ''}
+        <td style="padding: 12px; text-align: center;"><span style="color: ${getRatingColor(player.avgRating)}; font-weight: 600;">${player.avgRating}</span></td>
+        <td style="padding: 12px; color: #94a3b8;">${player.team}</td>
+      </tr>
+    `;
+  });
+
+  html += `
+        </tbody>
+      </table>
+    </div>
+  `;
+}
 // Update the table header too
 html += `
   <table style="width: 100%; border-collapse: collapse;">
@@ -7573,68 +7576,90 @@ html += `
             </thead>
             <tbody>
     `;
-    
-    topAssists.forEach((player, index) => {
-      const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : (index + 1);
-      const contributions = (player.goals || 0) + (player.assists || 0);
-      const rating = player.avgRating ? player.avgRating.toFixed(1) : "N/A";
-      
-      html += `
-        <tr onclick="showPlayerDetails('${player.id}')" style="cursor: pointer;">
-          <td><strong>${medal}</strong></td>
-          <td><strong>${player.name}</strong></td>
-          <td>${player.team}</td>
-          <td><strong style="color: #10b981; font-size: 1.1em;">${player.assists}</strong></td>
-          <td>${player.goals}</td>
-          <td>${player.apps}</td>
-          <td>${contributions}</td>
-          <td><span style="color: ${getRatingColor(rating)}">${rating}</span></td>
-        </tr>
-      `;
-    });
-    
-    html += `</tbody></table></div></div>`;
-    
-    // Top Rated Players
-    if (topRatings.length > 0) {
-      html += `
-        <div class="group-card">
-          <div class="group-title">⭐ Top Rated Players (min. 3 apps)</div>
-          <div class="table-container">
-            <table class="standings-table">
-              <thead>
-                <tr>
-                  <th>Rank</th>
-                  <th>Player</th>
-                  <th>Team</th>
-                  <th>Rating</th>
-                  <th>Goals</th>
-                  <th>Assists</th>
-                  <th>Apps</th>
-                </tr>
-              </thead>
-              <tbody>
-      `;
-      
-      topRatings.forEach((player, index) => {
-        const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : (index + 1);
-        const rating = player.avgRating.toFixed(1);
-        
-        html += `
-          <tr onclick="showPlayerDetails('${player.id}')" style="cursor: pointer;">
-            <td><strong>${medal}</strong></td>
-            <td><strong>${player.name}</strong></td>
-            <td>${player.team}</td>
-            <td><strong style="color: ${getRatingColor(rating)}; font-size: 1.1em;">${rating}</strong></td>
-            <td>${player.goals}</td>
-            <td>${player.assists}</td>
-            <td>${player.apps}</td>
+    // Top Assists Section
+if (topAssists.length > 0) {
+  html += `
+    <div style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #475569;">
+      <h3 style="margin: 0 0 15px 0; color: #10b981; display: flex; align-items: center; gap: 8px;">
+        <span>🎯</span> Top Assists
+      </h3>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background: rgba(16, 185, 129, 0.1); border-bottom: 2px solid #10b981;">
+            <th style="padding: 12px; text-align: center; width: 50px;">#</th>
+            <th style="padding: 12px; text-align: left;">Player</th>
+            <th style="padding: 12px; text-align: center;">🎯 Assists</th>
+            ${viewMode === 'detailed' ? '<th style="padding: 12px; text-align: center;">⚽ Goals</th>' : ''}
+            ${viewMode === 'detailed' ? '<th style="padding: 12px; text-align: center;">📊 Apps</th>' : ''}
+            <th style="padding: 12px; text-align: center;">⭐ Rating</th>
+            <th style="padding: 12px; text-align: left;">Team</th>
           </tr>
-        `;
-      });
-      
-      html += `</tbody></table></div></div>`;
-    }
+        </thead>
+        <tbody>
+  `;
+
+  topAssists.forEach((player, index) => {
+    html += `
+      <tr style="border-bottom: 1px solid rgba(71, 85, 105, 0.3);">
+        <td style="padding: 12px; text-align: center; color: #94a3b8; font-weight: 600;">${index + 1}</td>
+        <td style="padding: 12px;"><strong style="color: #e2e8f0;">${player.name}</strong></td>
+        <td style="padding: 12px; text-align: center; color: #10b981; font-weight: bold;">${player.assists}</td>
+        ${viewMode === 'detailed' ? `<td style="padding: 12px; text-align: center; color: #94a3b8;">${player.goals || 0}</td>` : ''}
+        ${viewMode === 'detailed' ? `<td style="padding: 12px; text-align: center; color: #94a3b8;">${player.apps}</td>` : ''}
+        <td style="padding: 12px; text-align: center;"><span style="color: ${getRatingColor(player.avgRating)}; font-weight: 600;">${player.avgRating}</span></td>
+        <td style="padding: 12px; color: #94a3b8;">${player.team}</td>
+      </tr>
+    `;
+  });
+
+  html += `
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+// Top Ratings Section
+if (topRatings.length > 0) {
+  html += `
+    <div style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #475569;">
+      <h3 style="margin: 0 0 15px 0; color: #f59e0b; display: flex; align-items: center; gap: 8px;">
+        <span>⭐</span> Top Rated Players <span style="font-size: 0.8em; color: #94a3b8;">(min. 3 apps)</span>
+      </h3>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background: rgba(245, 158, 11, 0.1); border-bottom: 2px solid #f59e0b;">
+            <th style="padding: 12px; text-align: center; width: 50px;">#</th>
+            <th style="padding: 12px; text-align: left;">Player</th>
+            <th style="padding: 12px; text-align: center;">⭐ Rating</th>
+            ${viewMode === 'detailed' ? '<th style="padding: 12px; text-align: center;">⚽ Goals</th>' : ''}
+            ${viewMode === 'detailed' ? '<th style="padding: 12px; text-align: center;">🎯 Assists</th>' : ''}
+            ${viewMode === 'detailed' ? '<th style="padding: 12px; text-align: center;">📊 Apps</th>' : ''}
+            <th style="padding: 12px; text-align: left;">Team</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  topRatings.forEach((player, index) => {
+    html += `
+      <tr style="border-bottom: 1px solid rgba(71, 85, 105, 0.3);">
+        <td style="padding: 12px; text-align: center; color: #94a3b8; font-weight: 600;">${index + 1}</td>
+        <td style="padding: 12px;"><strong style="color: #e2e8f0;">${player.name}</strong></td>
+        <td style="padding: 12px; text-align: center;"><span style="color: ${getRatingColor(player.avgRating)}; font-weight: bold; font-size: 1.1em;">${player.avgRating}</span></td>
+        ${viewMode === 'detailed' ? `<td style="padding: 12px; text-align: center; color: #94a3b8;">${player.goals || 0}</td>` : ''}
+        ${viewMode === 'detailed' ? `<td style="padding: 12px; text-align: center; color: #94a3b8;">${player.assists || 0}</td>` : ''}
+        ${viewMode === 'detailed' ? `<td style="padding: 12px; text-align: center; color: #94a3b8;">${player.apps}</td>` : ''}
+        <td style="padding: 12px; color: #94a3b8;">${player.team}</td>
+      </tr>
+    `;
+  });
+
+  html += `
+        </tbody>
+      </table>
+    </div>
+  `;
+}
     
     // Team Statistics
     const teamStats = calculateTeamStats(playersWithData);

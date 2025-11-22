@@ -6305,13 +6305,132 @@ const globalExports = {
   updateButtonStates,
   showUtilityMessage,
 
-  // Modal management
-  ModalManager
 };
-
+// Expose to window for console / external bindings
 // Expose to window for console / external bindings
 window.GlobalSim = Object.assign(window.GlobalSim || {}, globalExports);
 
+/************* MODAL SYSTEM *************/
+const ModalManager = {
+  activeModal: null,
+  modalStack: [],
+  history: [],
+  escapeHandler: null,
+
+  open(modalId, data = null) {
+    const modal = document.getElementById(modalId);
+    if (!modal) {
+      console.warn(`Modal ${modalId} not found`);
+      return;
+    }
+
+    // Close currently active modal if different
+    if (this.activeModal && this.activeModal !== modalId) {
+      this.close(this.activeModal);
+    }
+
+    if (!this.modalStack.includes(modalId)) {
+      this.modalStack.push(modalId);
+    }
+    this.activeModal = modalId;
+
+    this.history.push({
+      modalId,
+      timestamp: new Date().toISOString(),
+      data
+    });
+
+    modal.style.display = 'flex';
+
+    setTimeout(() => {
+      modal.classList.add('active');
+      modal.setAttribute('aria-hidden', 'false');
+
+      const focusable = modal.querySelector(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable) focusable.focus();
+
+      modal.dispatchEvent(new CustomEvent('modalopen', { detail: data }));
+    }, 10);
+
+    const clickHandler = (e) => {
+      if (e.target === modal) {
+        this.close(modalId);
+      }
+    };
+
+    modal._modalClickHandler = clickHandler;
+    modal.addEventListener('click', clickHandler);
+
+    this.addEscapeListener();
+    console.log(`Modal opened: ${modalId}`, data);
+  },
+
+  close(modalId = null) {
+    const targetModalId = modalId || this.activeModal;
+    if (!targetModalId) return;
+
+    const modal = document.getElementById(targetModalId);
+    if (!modal) return;
+
+    this.modalStack = this.modalStack.filter(id => id !== targetModalId);
+    this.activeModal = this.modalStack[this.modalStack.length - 1] || null;
+
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+
+    if (modal._modalClickHandler) {
+      modal.removeEventListener('click', modal._modalClickHandler);
+      delete modal._modalClickHandler;
+    }
+
+    setTimeout(() => {
+      modal.style.display = 'none';
+      modal.dispatchEvent(new CustomEvent('modalclose'));
+    }, 300);
+
+    if (this.modalStack.length === 0) {
+      this.removeEscapeListener();
+    }
+
+    console.log(`Modal closed: ${targetModalId}`);
+  },
+
+  closeAll() {
+    while (this.modalStack.length > 0) {
+      this.close(this.modalStack[this.modalStack.length - 1]);
+    }
+  },
+
+  addEscapeListener() {
+    if (this.escapeHandler) return;
+    this.escapeHandler = (e) => {
+      if (e.key === 'Escape') {
+        this.close();
+      }
+    };
+    document.addEventListener('keydown', this.escapeHandler);
+  },
+
+  removeEscapeListener() {
+    if (this.escapeHandler) {
+      document.removeEventListener('keydown', this.escapeHandler);
+      this.escapeHandler = null;
+    }
+  },
+
+  getHistory() {
+    return [...this.history];
+  },
+
+  clearHistory() {
+    this.history = [];
+  }
+};
+
+// Now add ModalManager to window after it's defined
+window.ModalManager = ModalManager;
 // Helper function to show group stage results (enhanced)
 function showGroupStageResults() {
   if (!window.GROUP_RESULTS) {
@@ -8549,126 +8668,6 @@ function showUtilityMessage(message, type = 'info') {
     }
   }, 4000);
 }
-/************* MODAL SYSTEM *************/
-const ModalManager = {
-  activeModal: null,
-  modalStack: [],
-  history: [],
-  escapeHandler: null,
-
-  open(modalId, data = null) {
-    const modal = document.getElementById(modalId);
-    if (!modal) {
-      console.warn(`Modal ${modalId} not found`);
-      return;
-    }
-
-    // Close currently active modal if different
-    if (this.activeModal && this.activeModal !== modalId) {
-      this.close(this.activeModal);
-    }
-
-    if (!this.modalStack.includes(modalId)) {
-      this.modalStack.push(modalId);
-    }
-    this.activeModal = modalId;
-
-    this.history.push({
-      modalId,
-      timestamp: new Date().toISOString(),
-      data
-    });
-
-    modal.style.display = 'flex';
-
-    setTimeout(() => {
-      modal.classList.add('active');
-      modal.setAttribute('aria-hidden', 'false');
-
-      const focusable = modal.querySelector(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      );
-      if (focusable) focusable.focus();
-
-      modal.dispatchEvent(new CustomEvent('modalopen', { detail: data }));
-    }, 10);
-
-    const clickHandler = (e) => {
-      if (e.target === modal) {
-        this.close(modalId);
-      }
-    };
-
-    // store handler so it can be removed if needed
-    modal._modalClickHandler = clickHandler;
-    modal.addEventListener('click', clickHandler);
-
-    this.addEscapeListener();
-    console.log(`Modal opened: ${modalId}`, data);
-  },
-
-  close(modalId = null) {
-    const targetModalId = modalId || this.activeModal;
-    if (!targetModalId) return;
-
-    const modal = document.getElementById(targetModalId);
-    if (!modal) return;
-
-    this.modalStack = this.modalStack.filter(id => id !== targetModalId);
-    this.activeModal = this.modalStack[this.modalStack.length - 1] || null;
-
-    modal.classList.remove('active');
-    modal.setAttribute('aria-hidden', 'true');
-
-    // remove click handler if present
-    if (modal._modalClickHandler) {
-      modal.removeEventListener('click', modal._modalClickHandler);
-      delete modal._modalClickHandler;
-    }
-
-    setTimeout(() => {
-      modal.style.display = 'none';
-      modal.dispatchEvent(new CustomEvent('modalclose'));
-    }, 300);
-
-    if (this.modalStack.length === 0) {
-      this.removeEscapeListener();
-    }
-
-    console.log(`Modal closed: ${targetModalId}`);
-  },
-
-  closeAll() {
-    while (this.modalStack.length > 0) {
-      this.close(this.modalStack[this.modalStack.length - 1]);
-    }
-  },
-
-  addEscapeListener() {
-    if (this.escapeHandler) return;
-    this.escapeHandler = (e) => {
-      if (e.key === 'Escape') {
-        this.close();
-      }
-    };
-    document.addEventListener('keydown', this.escapeHandler);
-  },
-
-  removeEscapeListener() {
-    if (this.escapeHandler) {
-      document.removeEventListener('keydown', this.escapeHandler);
-      this.escapeHandler = null;
-    }
-  },
-
-  getHistory() {
-    return [...this.history];
-  },
-
-  clearHistory() {
-    this.history = [];
-  }
-};
 
 function openCustomMatch(teamA = null, teamB = null) {
   if (typeof populateCustomMatchDropdowns === 'function') {

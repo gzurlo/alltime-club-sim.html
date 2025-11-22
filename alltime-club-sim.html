@@ -11364,8 +11364,6 @@ function showSimpleBracket() {
   html += `<div style="display: flex; justify-content: space-around; align-items: center; gap: 15px; overflow-x: auto; padding: 20px 10px;">`;
 
   roundColumns.forEach((round, roundIndex) => {
-    const isLeft = roundIndex < roundColumns.length / 2;
-    
     html += `
       <div class="bracket-column" style="display: flex; flex-direction: column; gap: ${20 * Math.pow(2, roundIndex)}px; min-width: 180px;">
         <h4 style="text-align: center; color: #60a5fa; font-size: 0.9em; margin-bottom: 10px; position: sticky; top: 0; background: rgba(15, 23, 42, 0.95); padding: 8px; border-radius: 6px; z-index: 1;">

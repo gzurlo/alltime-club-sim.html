@@ -3273,43 +3273,50 @@ function exportTournament() {
   console.log("Exporting tournament...");
 
   const exportPayload = {
-    meta: {
+    metadata: {
       version: 1,
-      exportedAt: new Date().toISOString(),
-      tournamentId: window.CURRENT_TOURNAMENT_ID || null
+      dataType: "football-tournament",
+      exportDate: new Date().toISOString(),
+      tournamentId: window.CURRENT_TOURNAMENT_ID || null,
+      tournamentName: getTournamentName(),
+      totalMatches: Object.keys(MATCH_DETAILS_DB).length,
+      totalPlayers: Object.keys(PLAYER_DB).length,
+      exportSize: 0
     },
-    state: {
-      groups: window.GROUPS,
-      groupResults: window.GROUP_RESULTS,
-      tournament: window.TOURNAMENT
-    },
-    data: {
-      playerDb: PLAYER_DB,
-      allTimePlayerDb: ALL_TIME_PLAYER_DB,
-      matchDetails: MATCH_DETAILS_DB,
-      clubLegacy: CLUB_LEGACY_DB,
-      matchSchedule: MATCH_SCHEDULE,
-      timeline: TOURNAMENT_TIMELINE,
-      rngSettings: RNG_SETTINGS,
-      history: TOURNAMENT_HISTORY
-    }
+    groups: window.GROUPS,
+    groupResults: window.GROUP_RESULTS,
+    knockoutResults: window.TOURNAMENT,
+    matchDetails: MATCH_DETAILS_DB,
+    playerStats: PLAYER_DB,
+    clubLegacy: CLUB_LEGACY_DB,
+    allTimeStats: ALL_TIME_PLAYER_DB,
+    matchSchedule: MATCH_SCHEDULE,
+    timeline: TOURNAMENT_TIMELINE,
+    rngSettings: RNG_SETTINGS,
+    history: TOURNAMENT_HISTORY,
+    customMatches: getCustomMatchesHistory()
   };
 
   try {
     const json = JSON.stringify(exportPayload, null, 2);
-    const blob = new Blob([json], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    const ts = new Date().toISOString().replace(/[:.]/g, "-");
-    a.href = url;
-    a.download = `all-time-football-save-${ts}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    showUtilityMessage("Tournament exported to JSON file.", "success");
+    exportPayload.metadata.exportSize = new Blob([json]).size;
+    const finalJson = JSON.stringify(exportPayload, null, 2);
+    
+    if (typeof showExportPreviewModal === 'function') {
+      showExportPreviewModal(exportPayload, finalJson);
+    } else {
+      const blob = new Blob([finalJson], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const ts = new Date().toISOString().replace(/[:.]/g, "-");
+      a.href = url;
+      a.download = `all-time-football-save-${ts}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showUtilityMessage("Tournament exported to JSON file.", "success");
+    }
   } catch (err) {
     console.error("Export error:", err);
     showUtilityMessage("Failed to export tournament.", "error");
@@ -3321,7 +3328,6 @@ function resetTournament() {
     performReset();
   }
 }
-
 function handleImport() {
   console.log("Handling import...");
 
@@ -3339,53 +3345,16 @@ function handleImport() {
       const text = e.target.result;
       const parsed = JSON.parse(text);
 
-      // Basic shape check
-      if (!parsed || typeof parsed !== "object" || !parsed.state) {
+      if (!parsed || typeof parsed !== "object") {
         showUtilityMessage("Invalid save file format.", "error");
         return;
       }
 
-      const { state, data, meta } = parsed;
-
-      window.GROUPS = state.groups || null;
-      window.GROUP_RESULTS = state.groupResults || null;
-      window.TOURNAMENT = state.tournament || null;
-      window.CURRENT_TOURNAMENT_ID = (meta && meta.tournamentId) || null;
-
-      // Merge data if present
-      if (data) {
-        Object.assign(PLAYER_DB, data.playerDb || {});
-        Object.assign(ALL_TIME_PLAYER_DB, data.allTimePlayerDb || {});
-        Object.assign(MATCH_DETAILS_DB, data.matchDetails || {});
-        Object.assign(CLUB_LEGACY_DB.champions, (data.clubLegacy && data.clubLegacy.champions) || {});
-        Object.assign(CLUB_LEGACY_DB.finals, (data.clubLegacy && data.clubLegacy.finals) || {});
-        Object.assign(CLUB_LEGACY_DB.semiFinals, (data.clubLegacy && data.clubLegacy.semiFinals) || {});
-        Object.assign(CLUB_LEGACY_DB.quarterFinals, (data.clubLegacy && data.clubLegacy.quarterFinals) || {});
-        Object.assign(CLUB_LEGACY_DB.totalWins, (data.clubLegacy && data.clubLegacy.totalWins) || {});
-
-        if (data.matchSchedule) {
-          MATCH_SCHEDULE.groupStage = data.matchSchedule.groupStage || [];
-          MATCH_SCHEDULE.knockoutStage = data.matchSchedule.knockoutStage || [];
-        }
-
-        if (Array.isArray(data.timeline)) {
-          TOURNAMENT_TIMELINE.length = 0;
-          TOURNAMENT_TIMELINE.push(...data.timeline);
-        }
-
-        if (data.rngSettings) {
-          RNG_SETTINGS.groupChaos = data.rngSettings.groupChaos ?? RNG_SETTINGS.groupChaos;
-          RNG_SETTINGS.knockoutChaos = data.rngSettings.knockoutChaos ?? RNG_SETTINGS.knockoutChaos;
-        }
-
-        if (Array.isArray(data.history)) {
-          TOURNAMENT_HISTORY.length = 0;
-          TOURNAMENT_HISTORY.push(...data.history);
-        }
+      if (typeof validateAndImportData === 'function') {
+        validateAndImportData(parsed, file.name);
+      } else {
+        legacyImportData(parsed);
       }
-
-      updateButtonStates();
-      showUtilityMessage("Save file loaded successfully.", "success");
     } catch (err) {
       console.error("Import error:", err);
       showUtilityMessage("Failed to load save file.", "error");
@@ -3398,6 +3367,56 @@ function handleImport() {
   };
 
   reader.readAsText(file);
+}
+
+function legacyImportData(parsed) {
+  const state = parsed.state || parsed;
+  const data = parsed.data || parsed;
+
+  window.GROUPS = state.groups || parsed.groups || null;
+  window.GROUP_RESULTS = state.groupResults || parsed.groupResults || null;
+  window.TOURNAMENT = state.tournament || state.knockoutResults || parsed.knockoutResults || null;
+  window.CURRENT_TOURNAMENT_ID = (parsed.meta && parsed.meta.tournamentId) || (parsed.metadata && parsed.metadata.tournamentId) || null;
+
+  if (data.playerDb || data.playerStats) {
+    Object.assign(PLAYER_DB, data.playerDb || data.playerStats || {});
+  }
+  if (data.allTimePlayerDb || data.allTimeStats) {
+    Object.assign(ALL_TIME_PLAYER_DB, data.allTimePlayerDb || data.allTimeStats || {});
+  }
+  if (data.matchDetails) {
+    Object.assign(MATCH_DETAILS_DB, data.matchDetails || {});
+  }
+  if (data.clubLegacy) {
+    Object.assign(CLUB_LEGACY_DB.champions, (data.clubLegacy && data.clubLegacy.champions) || {});
+    Object.assign(CLUB_LEGACY_DB.finals, (data.clubLegacy && data.clubLegacy.finals) || {});
+    Object.assign(CLUB_LEGACY_DB.semiFinals, (data.clubLegacy && data.clubLegacy.semiFinals) || {});
+    Object.assign(CLUB_LEGACY_DB.quarterFinals, (data.clubLegacy && data.clubLegacy.quarterFinals) || {});
+    Object.assign(CLUB_LEGACY_DB.totalWins, (data.clubLegacy && data.clubLegacy.totalWins) || {});
+  }
+
+  if (data.matchSchedule) {
+    MATCH_SCHEDULE.groupStage = data.matchSchedule.groupStage || [];
+    MATCH_SCHEDULE.knockoutStage = data.matchSchedule.knockoutStage || [];
+  }
+
+  if (Array.isArray(data.timeline)) {
+    TOURNAMENT_TIMELINE.length = 0;
+    TOURNAMENT_TIMELINE.push(...data.timeline);
+  }
+
+  if (data.rngSettings) {
+    RNG_SETTINGS.groupChaos = data.rngSettings.groupChaos ?? RNG_SETTINGS.groupChaos;
+    RNG_SETTINGS.knockoutChaos = data.rngSettings.knockoutChaos ?? RNG_SETTINGS.knockoutChaos;
+  }
+
+  if (Array.isArray(data.history)) {
+    TOURNAMENT_HISTORY.length = 0;
+    TOURNAMENT_HISTORY.push(...data.history);
+  }
+
+  updateButtonStates();
+  showUtilityMessage("Save file loaded successfully.", "success");
 }
 
 function setRNGPreset(value, element) {
@@ -4471,6 +4490,38 @@ function simulateTeamGoals(team, numGoals, matchEvents) {
   }
 }
 
+function trackEnhancedPlayerStats(teamA, teamB, goalsA, goalsB) {
+  const matchEvents = {
+    goals: [],
+    assists: [],
+    playerPerformances: {}
+  };
+
+  const initPerformance = (team) => {
+    [...(team.startingXI || []), ...(team.bench || [])].forEach(player => {
+      if (!player || !player.name) return;
+      const key = `${team.name}::${player.name}`;
+      matchEvents.playerPerformances[key] = {
+        player: player.name,
+        team: team.name,
+        position: player.pos,
+        goals: 0,
+        assists: 0,
+        baseRating: calculateBaseRating(player, team.strength || 70)
+      };
+    });
+  };
+
+  initPerformance(teamA);
+  initPerformance(teamB);
+
+  if (typeof simulateTeamGoals === 'function') {
+    simulateTeamGoals(teamA, goalsA, matchEvents);
+    simulateTeamGoals(teamB, goalsB, matchEvents);
+  }
+
+  return matchEvents;
+}
 /**
  * Pick Player of the Game based on individual performance + clean sheet + winner bonus.
  */
@@ -4627,7 +4678,7 @@ function generateMatchSummary(matchData, teamA, teamB) {
 /**
  * Core match simulation used for group stage (and can be reused for knockouts).
  */
-function simulateMatch(teamA, teamB, isHome, matchImportance = 1.0) {
+ function simulateMatch(teamA, teamB, isHome, matchImportance = 1.0, weather = 'normal') {
   if (!teamA || !teamB) {
     console.error("❌ Invalid teams provided to simulateMatch");
     return {
@@ -4668,8 +4719,7 @@ function simulateMatch(teamA, teamB, isHome, matchImportance = 1.0) {
   const matchId = `${teamA.name}_vs_${teamB.name}_${Date.now()}_${Math.random()
     .toString(36)
     .substr(2, 9)}`;
-
-  MATCH_DETAILS_DB[matchId] = {
+    MATCH_DETAILS_DB[matchId] = {
     id: matchId,
     teamA: teamA.name,
     teamB: teamB.name,
@@ -4682,7 +4732,8 @@ function simulateMatch(teamA, teamB, isHome, matchImportance = 1.0) {
     playerOfTheGame: determinePlayerOfTheGame(matchEvents, teamA, teamB),
     timestamp: new Date().toISOString(),
     venue: isHome ? `${teamA.name} Home` : "Neutral",
-    importance: matchImportance
+    importance: matchImportance,
+    weather: weather
   };
 
   console.log(
@@ -9571,7 +9622,12 @@ function updateClubLegacy(tournamentResults) {
 /************* MASTER DOM INITIALIZER *************/
 
 document.addEventListener('DOMContentLoaded', function () {
-  console.log("🏁 Initializing All-Time Football Simulator (final chunk)...");
+  console.log("🏁 Initializing All-Time Football Simulator...");
+
+  // Initialize TEAM_POOL first
+  if (typeof TEAM_POOL !== 'undefined' && TEAM_POOL.length > 0) {
+    initTeamsAndPlayers();
+  }
 
   if (typeof injectAllStyles === 'function') injectAllStyles();
   if (typeof initializeTheme === 'function') initializeTheme();
@@ -9652,6 +9708,6 @@ document.addEventListener('DOMContentLoaded', function () {
     themeToggle.addEventListener('click', toggleTheme);
   }
 
-  console.log("🎉 Final chunk initialized!");
+  console.log("🎉 Simulator initialized successfully!");
 });
 </script>

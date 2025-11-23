@@ -10874,6 +10874,8 @@ function showMatchWeeks() {
   const out = document.getElementById('output');
   if (!out) return;
 
+  console.log("📅 Loading match weeks...");
+
   const groupMatches = [];
   const knockoutMatches = [];
 
@@ -10896,9 +10898,7 @@ function showMatchWeeks() {
   // Collect knockout matches
   if (window.TOURNAMENT && window.TOURNAMENT.allKnockoutMatches) {
     window.TOURNAMENT.allKnockoutMatches.forEach(match => {
-      if (match) {
-        knockoutMatches.push(match);
-      }
+      if (match) knockoutMatches.push(match);
     });
   }
 
@@ -10927,20 +10927,16 @@ function showMatchWeeks() {
     </div>
   `;
 
-  // GROUP STAGE - Organize by matchday
+  // GROUP STAGE by matchday
   if (groupMatches.length > 0) {
-    // Get unique matchdays
     const matchdays = [...new Set(groupMatches.map(m => m.matchday))].sort((a, b) => a - b);
 
     matchdays.forEach(matchday => {
       html += `
         <div style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid #3b82f6;">
-          <h3 style="margin: 0 0 15px 0; color: #60a5fa; font-size: 1.3em;">
-            🗓️ Matchday ${matchday}
-          </h3>
+          <h3 style="margin: 0 0 15px 0; color: #60a5fa; font-size: 1.3em;">🗓️ Matchday ${matchday}</h3>
       `;
 
-      // Get all groups
       const groups = [...new Set(groupMatches.filter(m => m.matchday === matchday).map(m => m.groupName))].sort();
 
       groups.forEach(groupName => {
@@ -10949,21 +10945,19 @@ function showMatchWeeks() {
         if (matches.length > 0) {
           html += `
             <div style="background: rgba(30, 41, 59, 0.5); padding: 15px; border-radius: 8px; margin-bottom: 12px;">
-              <h4 style="color: #94a3b8; font-size: 1em; margin: 0 0 12px 0; font-weight: 600;">
-                ${groupName}
-              </h4>
+              <h4 style="color: #94a3b8; font-size: 1em; margin: 0 0 12px 0;">${groupName}</h4>
               <div style="display: grid; gap: 10px;">
           `;
 
           matches.forEach(match => {
             const matchDetails = MATCH_DETAILS_DB[match.matchId];
             html += `
-              <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.6); padding: 12px 15px; border-radius: 6px; border: 1px solid rgba(71, 85, 105, 0.3);">
+              <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.6); padding: 12px 15px; border-radius: 6px;">
                 <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
                   <span style="color: #e2e8f0; font-weight: 500; width: 150px;">${match.teamA}</span>
-                  <div style="display: flex; align-items: center; gap: 10px; min-width: 70px; justify-content: center;">
+                  <div style="display: flex; align-items: center; gap: 10px;">
                     <span style="color: #fff; font-weight: bold; font-size: 1.2em;">${match.scoreA}</span>
-                    <span style="color: #64748b; font-weight: bold;">-</span>
+                    <span style="color: #64748b;">-</span>
                     <span style="color: #fff; font-weight: bold; font-size: 1.2em;">${match.scoreB}</span>
                   </div>
                   <span style="color: #e2e8f0; font-weight: 500; width: 150px; text-align: right;">${match.teamB}</span>
@@ -10977,10 +10971,7 @@ function showMatchWeeks() {
             `;
           });
 
-          html += `
-              </div>
-            </div>
-          `;
+          html += `</div></div>`;
         }
       });
 
@@ -10988,138 +10979,8 @@ function showMatchWeeks() {
     });
   }
 
-  // KNOCKOUT STAGE - Organize by round and leg
-  if (knockoutMatches.length > 0) {
-    const roundOrder = ['Round of 16', 'Quarter-finals', 'Semi-finals', 'Final'];
-    
-    roundOrder.forEach(roundName => {
-      const roundMatches = knockoutMatches.filter(m => m.round === roundName);
-      
-      if (roundMatches.length > 0) {
-        html += `
-          <div style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid #f59e0b;">
-            <h3 style="margin: 0 0 15px 0; color: #fbbf24; font-size: 1.3em;">
-              🏆 ${roundName}
-            </h3>
-        `;
-
-        if (roundName === 'Final') {
-          // Final is single match
-          const match = roundMatches[0];
-          const matchDetails = match.matchDetails || match;
-          const detailsDB = MATCH_DETAILS_DB[match.matchId];
-
-          html += `
-            <div style="background: rgba(30, 41, 59, 0.5); padding: 15px; border-radius: 8px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.6); padding: 15px; border-radius: 6px; border: 1px solid rgba(251, 191, 36, 0.3);">
-                <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
-                  <span style="color: ${matchDetails.scoreA > matchDetails.scoreB ? '#10b981' : '#e2e8f0'}; font-weight: ${matchDetails.scoreA > matchDetails.scoreB ? 'bold' : '500'}; width: 150px; font-size: 1.1em;">
-                    ${match.teamA?.name || 'TBD'}
-                  </span>
-                  <div style="display: flex; align-items: center; gap: 10px; min-width: 70px; justify-content: center;">
-                    <span style="color: #fff; font-weight: bold; font-size: 1.3em;">${matchDetails.scoreA}</span>
-                    <span style="color: #64748b; font-weight: bold;">-</span>
-                    <span style="color: #fff; font-weight: bold; font-size: 1.3em;">${matchDetails.scoreB}</span>
-                  </div>
-                  <span style="color: ${matchDetails.scoreB > matchDetails.scoreA ? '#10b981' : '#e2e8f0'}; font-weight: ${matchDetails.scoreB > matchDetails.scoreA ? 'bold' : '500'}; width: 150px; text-align: right; font-size: 1.1em;">
-                    ${match.teamB?.name || 'TBD'}
-                  </span>
-                </div>
-                ${match.penaltiesUsed ? `<span style="color: #f59e0b; font-size: 0.9em; margin-left: 10px;">🎯 ${match.penaltyScoreA}-${match.penaltyScoreB} Pens</span>` : ''}
-                ${detailsDB ? `
-                  <button onclick="viewMatchDetails('${match.matchId}')" class="btn-secondary" style="padding: 6px 12px; margin-left: 15px;">
-                    📋 Details
-                  </button>
-                ` : ''}
-              </div>
-            </div>
-          `;
-        } else {
-          // Two-leg ties - organize by leg
-          html += `
-            <div style="background: rgba(30, 41, 59, 0.5); padding: 15px; border-radius: 8px; margin-bottom: 12px;">
-              <h4 style="color: #94a3b8; font-size: 1em; margin: 0 0 12px 0; font-weight: 600;">
-                First Leg
-              </h4>
-              <div style="display: grid; gap: 10px;">
-          `;
-
-          roundMatches.forEach(match => {
-            if (match.firstLeg) {
-              const detailsDB = MATCH_DETAILS_DB[match.firstLegId];
-              html += `
-                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.6); padding: 12px 15px; border-radius: 6px; border: 1px solid rgba(71, 85, 105, 0.3);">
-                  <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
-                    <span style="color: #e2e8f0; font-weight: 500; width: 150px;">${match.teamA?.name || 'TBD'}</span>
-                    <div style="display: flex; align-items: center; gap: 10px; min-width: 70px; justify-content: center;">
-                      <span style="color: #fff; font-weight: bold; font-size: 1.2em;">${match.firstLeg.scoreA}</span>
-                      <span style="color: #64748b; font-weight: bold;">-</span>
-                      <span style="color: #fff; font-weight: bold; font-size: 1.2em;">${match.firstLeg.scoreB}</span>
-                    </div>
-                    <span style="color: #e2e8f0; font-weight: 500; width: 150px; text-align: right;">${match.teamB?.name || 'TBD'}</span>
-                  </div>
-                  ${detailsDB ? `
-                    <button onclick="viewMatchDetails('${match.firstLegId}')" class="btn-secondary" style="padding: 6px 12px; margin-left: 15px;">
-                      📋 Details
-                    </button>
-                  ` : ''}
-                </div>
-              `;
-            }
-          });
-
-          html += `
-              </div>
-            </div>
-
-            <div style="background: rgba(30, 41, 59, 0.5); padding: 15px; border-radius: 8px;">
-              <h4 style="color: #94a3b8; font-size: 1em; margin: 0 0 12px 0; font-weight: 600;">
-                Second Leg
-              </h4>
-              <div style="display: grid; gap: 10px;">
-          `;
-
-          roundMatches.forEach(match => {
-            if (match.secondLeg) {
-              const detailsDB = MATCH_DETAILS_DB[match.secondLegId];
-              const winnerA = match.winner?.name === match.teamA?.name;
-              const winnerB = match.winner?.name === match.teamB?.name;
-
-              html += `
-                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.6); padding: 12px 15px; border-radius: 6px; border: 1px solid rgba(71, 85, 105, 0.3);">
-                  <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
-                    <span style="color: ${winnerB ? '#10b981' : '#e2e8f0'}; font-weight: ${winnerB ? 'bold' : '500'}; width: 150px;">${match.teamB?.name || 'TBD'}</span>
-                    <div style="display: flex; align-items: center; gap: 10px; min-width: 70px; justify-content: center;">
-                      <span style="color: #fff; font-weight: bold; font-size: 1.2em;">${match.secondLeg.scoreB}</span>
-                      <span style="color: #64748b; font-weight: bold;">-</span>
-                      <span style="color: #fff; font-weight: bold; font-size: 1.2em;">${match.secondLeg.scoreA}</span>
-                    </div>
-                    <span style="color: ${winnerA ? '#10b981' : '#e2e8f0'}; font-weight: ${winnerA ? 'bold' : '500'}; width: 150px; text-align: right;">${match.teamA?.name || 'TBD'}</span>
-                  </div>
-                  <span style="color: #f59e0b; font-size: 0.85em; margin-left: 10px;">Agg: ${match.aggScoreA}-${match.aggScoreB}</span>
-                  ${match.penaltiesUsed ? `<span style="color: #f59e0b; font-size: 0.85em; margin-left: 8px;">🎯 Pens</span>` : ''}
-                  ${detailsDB ? `
-                    <button onclick="viewMatchDetails('${match.secondLegId}')" class="btn-secondary" style="padding: 6px 12px; margin-left: 15px;">
-                      📋 Details
-                    </button>
-                  ` : ''}
-                </div>
-              `;
-            }
-          });
-
-          html += `
-              </div>
-            </div>
-          `;
-        }
-
-        html += `</div>`;
-      }
-    });
-  }
-
   out.innerHTML = html;
+  console.log("✅ Match weeks loaded");
 }
 function generateGlobalMatchWeekCard(week, weekIndex) {
   const weekMatches = week.matches || [];
@@ -11574,15 +11435,21 @@ function viewMatchDetails(matchId) {
   
   if (!match) {
     showUtilityMessage('Match details not found', 'error');
-    console.error('Match not found in database:', matchId);
+    console.error('Match not found:', matchId);
     return;
   }
 
   const out = document.getElementById('output');
   if (!out) return;
 
+  // FIX: Safely get scores
+  const scoreA = match.scoreA !== undefined ? match.scoreA : 0;
+  const scoreB = match.scoreB !== undefined ? match.scoreB : 0;
+  const teamA = match.teamA || 'Team A';
+  const teamB = match.teamB || 'Team B';
+
   const potg = match.playerOfTheGame;
-  const summary = generateMatchSummary(match, match.teamA, match.teamB);
+  const summary = match.summary || generateMatchSummary(match, teamA, teamB);
 
   let html = `
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -11597,15 +11464,15 @@ function viewMatchDetails(matchId) {
         <div style="color: #94a3b8; font-size: 0.9em; margin-bottom: 10px;">${match.stage || 'Match'}</div>
         <div style="display: flex; justify-content: center; align-items: center; gap: 20px;">
           <div style="text-align: right; flex: 1;">
-            <div style="font-size: 1.8em; font-weight: bold; color: #e2e8f0;">${match.teamA}</div>
+            <div style="font-size: 1.8em; font-weight: bold; color: #e2e8f0;">${teamA}</div>
           </div>
           <div style="background: rgba(59, 130, 246, 0.2); padding: 15px 25px; border-radius: 8px; border: 2px solid #3b82f6;">
             <div style="font-size: 2.5em; font-weight: bold; color: white;">
-              ${match.scoreA} - ${match.scoreB}
+              ${scoreA} - ${scoreB}
             </div>
           </div>
           <div style="text-align: left; flex: 1;">
-            <div style="font-size: 1.8em; font-weight: bold; color: #e2e8f0;">${match.teamB}</div>
+            <div style="font-size: 1.8em; font-weight: bold; color: #e2e8f0;">${teamB}</div>
           </div>
         </div>
       </div>
@@ -11628,7 +11495,7 @@ function viewMatchDetails(matchId) {
     </div>
   `;
 
-  // Goals
+  // Goals section
   if (match.events && match.events.goals && match.events.goals.length > 0) {
     html += `
       <div style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #475569;">
@@ -11645,48 +11512,6 @@ function viewMatchDetails(matchId) {
             <span style="color: #94a3b8; margin-left: 10px;">(${goal.team})</span>
           </div>
           ${goal.assist ? `<span style="color: #60a5fa; font-size: 0.9em;">Assist: ${goal.assist}</span>` : ''}
-        </div>
-      `;
-    });
-
-    html += `</div></div>`;
-  }
-
-  // Yellow Cards
-  if (match.events && match.events.yellowCards && match.events.yellowCards.length > 0) {
-    html += `
-      <div style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #475569;">
-        <h3 style="margin: 0 0 15px 0; color: #fbbf24;">🟨 Yellow Cards</h3>
-        <div style="display: grid; gap: 8px;">
-    `;
-
-    match.events.yellowCards.forEach(card => {
-      html += `
-        <div style="background: rgba(251, 191, 36, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #fbbf24;">
-          <span style="color: #fbbf24; font-weight: bold;">${card.minute}'</span>
-          <span style="color: #e2e8f0; margin-left: 10px;">${card.player}</span>
-          <span style="color: #94a3b8; margin-left: 10px;">(${card.team})</span>
-        </div>
-      `;
-    });
-
-    html += `</div></div>`;
-  }
-
-  // Red Cards
-  if (match.events && match.events.redCards && match.events.redCards.length > 0) {
-    html += `
-      <div style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #475569;">
-        <h3 style="margin: 0 0 15px 0; color: #ef4444;">🟥 Red Cards</h3>
-        <div style="display: grid; gap: 8px;">
-    `;
-
-    match.events.redCards.forEach(card => {
-      html += `
-        <div style="background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #ef4444;">
-          <span style="color: #ef4444; font-weight: bold;">${card.minute}'</span>
-          <span style="color: #e2e8f0; margin-left: 10px;">${card.player}</span>
-          <span style="color: #94a3b8; margin-left: 10px;">(${card.team})</span>
         </div>
       `;
     });
@@ -12166,123 +11991,20 @@ function showSimpleBracket() {
     return;
   }
 
-  const rounds = window.TOURNAMENT.bracket;
-  
-  let html = `
+  out.innerHTML = `
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-      <h2>🏀 NCAA-Style Bracket</h2>
-      <div style="display: flex; gap: 8px;">
-        <button onclick="showTournamentBracket()" class="btn-secondary" style="padding: 6px 12px;">
-          📋 Detailed View
-        </button>
-        <button onclick="showTournamentOverview()" class="btn-secondary" style="padding: 6px 12px;">
-          📅 All Matches
-        </button>
-      </div>
+      <h2>🏀 Simple Bracket</h2>
+      <button onclick="showTournamentBracket()" class="btn-secondary" style="padding: 8px 12px;">
+        📋 Detailed View
+      </button>
     </div>
 
-    <div style="background: #2d3748; padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #f59e0b; text-align: center;">
+    <div style="background: #2d3748; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
       🏆 <strong>CHAMPION: ${window.TOURNAMENT.champion?.name || 'TBD'}</strong>
     </div>
 
-    <div class="ncaa-bracket" style="overflow-x: auto;">
-      <div style="display: flex; justify-content: space-around; align-items: center; gap: 20px; padding: 20px 10px; min-width: 1200px;">
+    <p style="color: #94a3b8; text-align: center;">Bracket view coming soon...</p>
   `;
-
-  // Process each round
-  rounds.forEach((roundData, roundIndex) => {
-    if (!roundData || !roundData.matches || roundData.matches.length === 0) return;
-    
-    const spacing = 30 * Math.pow(1.8, roundIndex);
-    
-    html += `
-      <div class="bracket-column" style="display: flex; flex-direction: column; gap: ${spacing}px; min-width: 200px;">
-        <h4 style="text-align: center; color: #60a5fa; font-size: 0.95em; margin-bottom: 15px; padding: 8px; background: rgba(15, 23, 42, 0.95); border-radius: 6px; position: sticky; top: 0; z-index: 1;">
-          ${roundData.round}
-        </h4>
-    `;
-
-    roundData.matches.forEach(match => {
-      if (!match) return;
-
-      const isFinal = roundData.round === 'Final';
-      
-      html += `
-        <div class="bracket-matchup" style="background: rgba(30, 41, 59, 0.9); border-radius: 8px; padding: 8px; border: 1px solid #4b5563; min-width: 180px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
-      `;
-
-      if (isFinal) {
-        const finalMatch = match.matchDetails || match;
-        const winnerA = finalMatch.scoreA > finalMatch.scoreB;
-        const winnerB = finalMatch.scoreB > finalMatch.scoreA;
-
-        html += `
-          <div style="background: ${winnerA ? 'rgba(16, 185, 129, 0.2)' : 'rgba(75, 85, 99, 0.2)'}; padding: 8px 10px; border-radius: 6px; margin-bottom: 3px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid ${winnerA ? '#10b981' : 'transparent'};">
-            <span style="font-size: 0.9em; color: ${winnerA ? '#10b981' : '#e5e7eb'}; font-weight: ${winnerA ? 'bold' : 'normal'};">
-              ${match.teamA?.name || 'TBD'}
-            </span>
-            <span style="font-size: 1em; font-weight: bold; color: ${winnerA ? '#10b981' : '#9ca3af'};">
-              ${finalMatch.scoreA || 0}
-            </span>
-          </div>
-          <div style="background: ${winnerB ? 'rgba(16, 185, 129, 0.2)' : 'rgba(75, 85, 99, 0.2)'}; padding: 8px 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid ${winnerB ? '#10b981' : 'transparent'};">
-            <span style="font-size: 0.9em; color: ${winnerB ? '#10b981' : '#e5e7eb'}; font-weight: ${winnerB ? 'bold' : 'normal'};">
-              ${match.teamB?.name || 'TBD'}
-            </span>
-            <span style="font-size: 1em; font-weight: bold; color: ${winnerB ? '#10b981' : '#9ca3af'};">
-              ${finalMatch.scoreB || 0}
-            </span>
-          </div>
-        `;
-
-        if (match.penaltiesUsed) {
-          html += `
-            <div style="text-align: center; font-size: 0.75em; color: #f59e0b; margin-top: 5px; padding: 3px;">
-              🎯 Pens: ${match.penaltyScoreA}-${match.penaltyScoreB}
-            </div>
-          `;
-        }
-      } else {
-        // Two-leg aggregate
-        const winnerA = match.winner?.name === match.teamA?.name;
-        const winnerB = match.winner?.name === match.teamB?.name;
-
-        html += `
-          <div style="background: ${winnerA ? 'rgba(16, 185, 129, 0.2)' : 'rgba(75, 85, 99, 0.2)'}; padding: 8px 10px; border-radius: 6px; margin-bottom: 3px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid ${winnerA ? '#10b981' : 'transparent'};">
-            <span style="font-size: 0.9em; color: ${winnerA ? '#10b981' : '#e5e7eb'}; font-weight: ${winnerA ? 'bold' : 'normal'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px;">
-              ${match.teamA?.name || 'TBD'}
-            </span>
-            <span style="font-size: 1em; font-weight: bold; color: ${winnerA ? '#10b981' : '#9ca3af'}; margin-left: 8px;">
-              ${match.aggScoreA || 0}
-            </span>
-          </div>
-          <div style="background: ${winnerB ? 'rgba(16, 185, 129, 0.2)' : 'rgba(75, 85, 99, 0.2)'}; padding: 8px 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid ${winnerB ? '#10b981' : 'transparent'};">
-            <span style="font-size: 0.9em; color: ${winnerB ? '#10b981' : '#e5e7eb'}; font-weight: ${winnerB ? 'bold' : 'normal'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px;">
-              ${match.teamB?.name || 'TBD'}
-            </span>
-            <span style="font-size: 1em; font-weight: bold; color: ${winnerB ? '#10b981' : '#9ca3af'}; margin-left: 8px;">
-              ${match.aggScoreB || 0}
-            </span>
-          </div>
-        `;
-
-        if (match.penaltiesUsed) {
-          html += `
-            <div style="text-align: center; font-size: 0.75em; color: #f59e0b; margin-top: 5px; padding: 3px;">
-              🎯 Pens: ${match.penaltyScoreA}-${match.penaltyScoreB}
-            </div>
-          `;
-        }
-      }
-
-      html += `</div>`;
-    });
-
-    html += `</div>`;
-  });
-
-  html += `</div></div>`;
-  out.innerHTML = html;
 }
 function showCustomMatchInterface() {
   openCustomMatch();

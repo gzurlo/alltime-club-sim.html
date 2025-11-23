@@ -4420,74 +4420,8 @@ function exportBracketData() {
 }
 
 /************* CUSTOM MATCH FUNCTIONS *************/
-function simulateCustomMatch() {}
-  const teamAName = document.getElementById('customTeamA')?.value;
-  const teamBName = document.getElementById('customTeamB')?.value;
-  const matchType = document.getElementById('customMatchType')?.value;
 
-  if (!teamAName || !teamBName) {
-    showUtilityMessage('Please select both teams', 'warning');
-    return;
-  }
-
-  if (teamAName === teamBName) {
-    showUtilityMessage('Please select different teams', 'warning');
-    return;
-  }
-
-  const teamA = window.DRAWN_TEAMS.find(t => t.name === teamAName);
-  const teamB = window.DRAWN_TEAMS.find(t => t.name === teamBName);
-
-  if (!teamA || !teamB) {
-    showUtilityMessage('Teams not found', 'error');
-    return;
-  }
-
-  console.log(`🎮 Simulating custom match: ${teamA.name} vs ${teamB.name}`);
-
-  try {
-  // Close the modal first
-  const modal = document.getElementById('customMatchModal');
-  if (modal) {
-    modal.remove();
-  }
-
-  // Show loading message
-  showUtilityMessage('⚽ Simulating custom match...', 'info');
-
-  // Store for rematch feature
-  window.LAST_CUSTOM_MATCH = {
-    teamA: teamA,
-    teamB: teamB,
-    matchType: matchType
-  };
-
-  // Simulate the match
-  const result = simulateMatch(teamA, teamB, 1, `Custom Match (${matchType})`, 1);
-  
-  if (!result || !result.matchId) {
-    showUtilityMessage('❌ Failed to simulate match', 'error');
-    return;
-  }
-
-  console.log('✅ Custom match simulated:', result);
-
-  // Show success message
-  setTimeout(() => {
-    showUtilityMessage(
-      `✅ Match complete: ${teamA.name} ${result.scoreA}-${result.scoreB} ${teamB.name}`,
-      'success'
-    );
-
-    // Display the match details
-    viewMatchDetails(result.matchId);
-  }, 500);
-
-} catch (error) {
-  console.error('Error simulating custom match:', error);
-  showUtilityMessage('❌ Error simulating match: ' + error.message, 'error');
-}
-    function simulateCustomMatch() {
+function simulateCustomMatch() {
   const teamAName = document.getElementById('customTeamA')?.value;
   const teamBName = document.getElementById('customTeamB')?.value;
   const matchType = document.getElementById('customMatchType')?.value;
@@ -4521,6 +4455,13 @@ function simulateCustomMatch() {}
 
     // Show loading message
     showUtilityMessage('⚽ Simulating custom match...', 'info');
+
+    // Store for rematch feature
+    window.LAST_CUSTOM_MATCH = {
+      teamA: teamA,
+      teamB: teamB,
+      matchType: matchType
+    };
 
     // Simulate the match
     const result = simulateMatch(teamA, teamB, 1, `Custom Match (${matchType})`, 1);

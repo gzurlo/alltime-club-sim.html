@@ -5284,6 +5284,36 @@ function createPots() {
     }));
   }
 }
+function handleGenerateGroups() {
+  console.log("🎲 Generating groups...");
+  
+  const groups = generateGroups();
+  
+  if (groups && groups.length > 0) {
+    // Store globally
+    window.GROUPS = groups;
+    
+    // Store all teams
+    window.DRAWN_TEAMS = [];
+    groups.forEach(group => {
+      group.teams.forEach(team => {
+        if (team && team.name && !window.DRAWN_TEAMS.find(t => t.name === team.name)) {
+          window.DRAWN_TEAMS.push(team);
+        }
+      });
+    });
+    
+    // RENDER IMMEDIATELY
+    renderGroupDrawResults(groups);
+    
+    // Update buttons
+    updateButtonStates();
+    
+    showUtilityMessage('✅ Groups generated successfully!', 'success');
+  } else {
+    showUtilityMessage('❌ Failed to generate groups', 'error');
+  }
+}
 function renderGroupDrawResults(groups) {
   const out = document.getElementById('output');
   if (!out) return;
@@ -5363,9 +5393,99 @@ function renderGroupDrawResults(groups) {
   html += `</div>`;
   out.innerHTML = html;
 }
-/**
- * Render groups to the main output panel.
- */
+function renderGroupResults(groupResults) {
+  const out = document.getElementById('output');
+  if (!out) return;
+
+  if (!groupResults || Object.keys(groupResults).length === 0) {
+    out.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📊</div>
+        <h2>No Group Results</h2>
+        <p class="output-sub">Simulate the group stage to see results.</p>
+      </div>
+    `;
+    return;
+  }
+
+  let html = `
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2>📊 Group Stage Results</h2>
+      <div style="display: flex; gap: 8px;">
+        <button onclick="showMatchWeeks()" class="btn-secondary" style="padding: 8px 12px;">
+          📅 Match Weeks
+        </button>
+        <button onclick="showPlayerStats()" class="btn-secondary" style="padding: 8px 12px;">
+          📈 Statistics
+        </button>
+      </div>
+    </div>
+
+    <div style="background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #10b981;">
+      <strong style="color: #10b981;">✅ Group stage completed!</strong>
+      <span style="color: #e2e8f0; margin-left: 10px;">All groups have finished their matches. Proceed to knockouts.</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px;">
+  `;
+
+  Object.entries(groupResults).forEach(([groupName, data]) => {
+    if (!data || !data.standings) return;
+
+    html += `
+      <div style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 15px; border-radius: 12px; border: 1px solid #475569;">
+        <h3 style="margin: 0 0 15px 0; color: #60a5fa; font-size: 1.1em; text-align: center; padding-bottom: 10px; border-bottom: 2px solid #3b82f6;">
+          ${groupName}
+        </h3>
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="background: rgba(59, 130, 246, 0.1); font-size: 0.85em; color: #94a3b8;">
+              <th style="padding: 8px; text-align: left;">#</th>
+              <th style="padding: 8px; text-align: left;">Team</th>
+              <th style="padding: 8px; text-align: center;">P</th>
+              <th style="padding: 8px; text-align: center;">W</th>
+              <th style="padding: 8px; text-align: center;">D</th>
+              <th style="padding: 8px; text-align: center;">L</th>
+              <th style="padding: 8px; text-align: center;">GD</th>
+              <th style="padding: 8px; text-align: center; font-weight: bold;">Pts</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+
+    data.standings.forEach((team, index) => {
+      const isQualified = index < 2;
+      const rowColor = isQualified ? 'rgba(16, 185, 129, 0.1)' : 'transparent';
+      const borderColor = index === 0 ? '#10b981' : index === 1 ? '#3b82f6' : 'transparent';
+
+      html += `
+        <tr style="background: ${rowColor}; border-left: 3px solid ${borderColor};">
+          <td style="padding: 10px; color: #94a3b8; font-weight: 600;">${index + 1}</td>
+          <td style="padding: 10px; color: #e2e8f0; font-weight: 500;">${team.team}</td>
+          <td style="padding: 10px; text-align: center; color: #94a3b8;">${team.played}</td>
+          <td style="padding: 10px; text-align: center; color: #10b981;">${team.wins}</td>
+          <td style="padding: 10px; text-align: center; color: #f59e0b;">${team.draws}</td>
+          <td style="padding: 10px; text-align: center; color: #ef4444;">${team.losses}</td>
+          <td style="padding: 10px; text-align: center; color: ${team.goalDifference >= 0 ? '#10b981' : '#ef4444'};">
+            ${team.goalDifference >= 0 ? '+' : ''}${team.goalDifference}
+          </td>
+          <td style="padding: 10px; text-align: center; color: #60a5fa; font-weight: bold; font-size: 1.1em;">
+            ${team.points}
+          </td>
+        </tr>
+      `;
+    });
+
+    html += `
+          </tbody>
+        </table>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+  out.innerHTML = html;
+}
  function renderGroups(groups) {
   const out = document.getElementById("output");
   if (!out) {
@@ -9384,7 +9504,7 @@ function performReset() {
         <p style="color: #9ca3af; font-size: 1.1em; margin-bottom: 30px; max-width: 400px; margin-left: auto; margin-right: auto;">
           Ready to start a new all-eras tournament adventure. Your all-time records are preserved.
         </p>
-        <button onclick="generateGroups && generateGroups()" class="btn-primary" style="padding: 12px 30px; font-size: 1.1em;">
+      <button onclick="handleGenerateGroups()" class="ctrl-btn" id="generateGroupsBtn">
           🎯 Generate New Groups
         </button>
       </div>
@@ -9846,8 +9966,14 @@ function showUtilityMessage(message, type = 'info') {
 }
 function openCustomMatchModal() {
   if (!window.DRAWN_TEAMS || window.DRAWN_TEAMS.length < 2) {
-    showUtilityMessage('Draw groups first before creating custom matches', 'warning');
+    showUtilityMessage('⚠️ Draw groups first before creating custom matches', 'warning');
     return;
+  }
+
+  // Remove any existing modal first
+  const existingModal = document.getElementById('customMatchModal');
+  if (existingModal) {
+    existingModal.remove();
   }
 
   const modal = document.createElement('div');
@@ -9873,35 +9999,33 @@ function openCustomMatchModal() {
       <div style="display: grid; gap: 15px; margin-bottom: 20px;">
         <div>
           <label style="display: block; color: #94a3b8; margin-bottom: 8px; font-weight: 500;">Home Team</label>
-          <select id="customTeamA" onchange="updateComparisonPreview()" style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #475569; border-radius: 6px; color: white;">
+          <select id="customTeamA" style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #475569; border-radius: 6px; color: white; font-size: 0.95em;">
             ${window.DRAWN_TEAMS.map(team => `<option value="${team.name}">${team.name} (${team.overall})</option>`).join('')}
           </select>
         </div>
         
         <div>
           <label style="display: block; color: #94a3b8; margin-bottom: 8px; font-weight: 500;">Away Team</label>
-          <select id="customTeamB" onchange="updateComparisonPreview()" style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #475569; border-radius: 6px; color: white;">
+          <select id="customTeamB" style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #475569; border-radius: 6px; color: white; font-size: 0.95em;">
             ${window.DRAWN_TEAMS.map((team, idx) => `<option value="${team.name}" ${idx === 1 ? 'selected' : ''}>${team.name} (${team.overall})</option>`).join('')}
           </select>
         </div>
 
         <div>
           <label style="display: block; color: #94a3b8; margin-bottom: 8px; font-weight: 500;">Match Type</label>
-          <select id="customMatchType" style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #475569; border-radius: 6px; color: white;">
-            <option value="friendly">Friendly</option>
+          <select id="customMatchType" style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #475569; border-radius: 6px; color: white; font-size: 0.95em;">
+            <option value="friendly">Friendly Match</option>
             <option value="group">Group Stage</option>
-            <option value="knockout">Knockout</option>
+            <option value="knockout">Knockout Round</option>
           </select>
         </div>
-
-        <div id="comparisonPreview"></div>
       </div>
 
       <div style="display: flex; gap: 10px; justify-content: flex-end;">
-        <button onclick="document.getElementById('customMatchModal').remove()" class="btn-secondary" style="padding: 10px 20px;">
+        <button onclick="closeCustomMatchModal()" class="btn-secondary" style="padding: 10px 20px;">
           Cancel
         </button>
-        <button onclick="simulateCustomMatch()" class="btn-primary" style="padding: 10px 20px;">
+        <button onclick="simulateCustomMatchNow()" class="btn-primary" style="padding: 10px 20px;">
           ⚽ Simulate Match
         </button>
       </div>
@@ -9909,9 +10033,85 @@ function openCustomMatchModal() {
   `;
 
   document.body.appendChild(modal);
-  
-  // Initialize comparison
-  updateComparisonPreview();
+  console.log("✅ Custom match modal opened");
+}
+
+function closeCustomMatchModal() {
+  const modal = document.getElementById('customMatchModal');
+  if (modal) {
+    modal.remove();
+    console.log("✅ Custom match modal closed");
+  }
+}
+
+function simulateCustomMatchNow() {
+  const teamAName = document.getElementById('customTeamA')?.value;
+  const teamBName = document.getElementById('customTeamB')?.value;
+  const matchType = document.getElementById('customMatchType')?.value;
+
+  console.log("🎮 Starting custom match:", teamAName, "vs", teamBName);
+
+  if (!teamAName || !teamBName) {
+    showUtilityMessage('⚠️ Please select both teams', 'warning');
+    return;
+  }
+
+  if (teamAName === teamBName) {
+    showUtilityMessage('⚠️ Please select different teams', 'warning');
+    return;
+  }
+
+  const teamA = window.DRAWN_TEAMS.find(t => t.name === teamAName);
+  const teamB = window.DRAWN_TEAMS.find(t => t.name === teamBName);
+
+  if (!teamA || !teamB) {
+    showUtilityMessage('❌ Teams not found', 'error');
+    return;
+  }
+
+  // Close modal FIRST
+  closeCustomMatchModal();
+
+  // Show loading message
+  showUtilityMessage('⚽ Simulating custom match...', 'info');
+
+  try {
+    // Store for rematch feature
+    window.LAST_CUSTOM_MATCH = { teamA, teamB, matchType };
+
+    // Simulate after a short delay to prevent blocking
+    setTimeout(() => {
+      try {
+        const result = simulateMatch(teamA, teamB, 1, `Custom Match (${matchType})`, 1);
+        
+        if (!result || !result.matchId) {
+          showUtilityMessage('❌ Failed to simulate match', 'error');
+          return;
+        }
+
+        console.log('✅ Custom match completed:', result);
+
+        // Show success message
+        showUtilityMessage(
+          `✅ ${teamA.name} ${result.scoreA}-${result.scoreB} ${teamB.name}`,
+          'success'
+        );
+
+        // Display match details
+        setTimeout(() => {
+          viewMatchDetails(result.matchId);
+        }, 500);
+
+      } catch (innerError) {
+        console.error('❌ Match simulation error:', innerError);
+        showUtilityMessage('❌ Error: ' + innerError.message, 'error');
+      }
+    }, 100);
+
+  } catch (error) {
+    console.error('❌ Custom match error:', error);
+    showUtilityMessage('❌ Error: ' + error.message, 'error');
+  }
 }
 
 function updateComparisonPreview() {

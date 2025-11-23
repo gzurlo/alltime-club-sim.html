@@ -1223,7 +1223,7 @@
           <span class="ctrl-btn-tag">View</span>
         </button>
 
-        <button class="ctrl-btn btn-purple" id="btnMatchWeeks" disabled onclick="showMatchWeeksView()">
+        <button class="ctrl-btn btn-purple" id="btnMatchWeeks" disabled onclick="showMatchWeeks()">
           <div class="ctrl-btn-main">
             <span class="ctrl-btn-title">Match Weeks</span>
             <span class="ctrl-btn-subtitle">Weekly schedule</span>
@@ -5903,7 +5903,7 @@ function renderGroupResults(results) {
         <button onclick="showTournamentOverview()" class="btn-secondary" style="padding: 6px 12px; font-size: 0.85em;">
           📅 View All Matches
         </button>
-        <button onclick="showMatchWeeksView()" class="btn-secondary" style="padding: 6px 12px; font-size: 0.85em;">
+        <button onclick="showMatchWeeks()" class="btn-secondary" style="padding: 6px 12px; font-size: 0.85em;">
           🗓️ Match Weeks
         </button>
         <button onclick="runKnockouts()" class="btn-primary" style="padding: 6px 12px; font-size: 0.85em;">
@@ -5998,7 +5998,7 @@ function renderGroupResults(results) {
       <button class="small-btn" onclick="showTournamentOverview()" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
         📅 View All Matches
       </button>
-      <button class="small-btn" onclick="showMatchWeeksView()" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+      <button class="small-btn" onclick="showMatchWeeks()" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
         🗓️ Match Weeks
       </button>
       <button class="small-btn" onclick="runKnockouts()" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
@@ -7203,7 +7203,7 @@ const globalExports = {
   showTournamentOverview,
   showTournamentBracket,
   showMatchResults,
-  showMatchWeeksView,
+  showMatchWeeks,
   showEnhancedStatistics,
   showCustomMatchHistory,
 
@@ -11819,7 +11819,7 @@ document.addEventListener('DOMContentLoaded', function () {
   connectViewButton('btnKnockouts', runKnockouts, 'Knockouts');
   connectViewButton('btnStats', showPlayerStats, 'Player Stats');
   connectViewButton('btnAllMatches', showTournamentOverview, 'All Matches');
-  connectViewButton('btnMatchWeeks', showMatchWeeksView, 'Match Weeks');
+  connectViewButton('btnMatchWeeks', showMatchWeeks, 'Match Weeks');
   connectViewButton('btnClubLegacy', showClubLegacy, 'Club Legacy');
   connectViewButton('btnCustomMatch', openCustomMatch, 'Custom Match');
   connectViewButton('btnHistory', openHistory, 'History');

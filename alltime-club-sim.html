@@ -2351,8 +2351,8 @@
 
           <button class="ctrl-btn btn-purple" id="btnMatchWeeks" disabled onclick="showMatchWeeks()">
             <div class="ctrl-btn-main">
-              <span class="ctrl-btn-title">Match Weeks</span>
-              <span class="ctrl-btn-subtitle">Weekly schedule</span>
+              <span class="ctrl-btn-title">Matchdays</span>
+              <span class="ctrl-btn-subtitle">View by matchday</span>
             </div>
             <span class="ctrl-btn-tag">View</span>
           </button>
@@ -2394,7 +2394,7 @@
       <!-- Tools Tab -->
       <div class="tab-content" id="tab-tools">
         <div class="control-column">
-          <button class="ctrl-btn btn-purple" id="customMatchBtn" onclick="openCustomMatchModal()">
+          <button class="ctrl-btn btn-purple" id="customMatchBtn">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Custom Match</span>
               <span class="ctrl-btn-subtitle">Simulate any matchup</span>
@@ -6320,29 +6320,42 @@ function getTopScorer() {
 
 // Historical "What If" Matchups
 function showClassicMatchups() {
-  const content = `
-    <div style="padding: 20px;">
-      <h2 style="margin-bottom: 20px; color: #10b981;">Historical "What If" Matchups</h2>
-      <div style="display: grid; gap: 15px;">
+  const out = document.getElementById('output');
+  if (!out) return;
+
+  const html = `
+    <div style="max-width: 1200px; margin: 0 auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+        <h2 style="margin: 0; color: #10b981;">🎭 Historical "What If" Matchups</h2>
+        <p style="color: #94a3b8; margin: 0; font-size: 0.9em;">Click any matchup to simulate</p>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
         ${CLASSIC_MATCHUPS.map(matchup => `
-          <div class="matchup-card" style="padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; transition: all 0.3s;"
-               onclick="simulateClassicMatchup('${matchup.teamA}', '${matchup.teamB}', '${matchup.name}')">
-            <h3 style="color: #10b981; margin-bottom: 8px;">${matchup.name}</h3>
-            <div style="font-size: 1.1em; margin: 10px 0;">${matchup.teamA} vs ${matchup.teamB}</div>
-            <div style="color: #94a3b8; font-size: 0.9em;">${matchup.description}</div>
+          <div class="matchup-card"
+               style="padding: 20px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+                      border-radius: 12px; cursor: pointer; transition: all 0.3s; border: 2px solid rgba(16, 185, 129, 0.3);
+                      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);"
+               onclick="simulateClassicMatchup('${matchup.teamA}', '${matchup.teamB}', '${matchup.name}')"
+               onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#10b981'; this.style.boxShadow='0 8px 12px rgba(16, 185, 129, 0.3)'"
+               onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(16, 185, 129, 0.3)'; this.style.boxShadow='0 4px 6px rgba(0, 0, 0, 0.2)'">
+            <h3 style="color: #10b981; margin: 0 0 12px 0; font-size: 1.2em; font-weight: 600;">${matchup.name}</h3>
+            <div style="font-size: 1em; margin: 12px 0; color: #e5e7eb; font-weight: 500; line-height: 1.6;">
+              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                <span style="flex: 1; text-align: right; color: #60a5fa;">${matchup.teamA}</span>
+                <span style="color: #94a3b8; font-weight: bold;">vs</span>
+                <span style="flex: 1; text-align: left; color: #f59e0b;">${matchup.teamB}</span>
+              </div>
+            </div>
+            <div style="color: #94a3b8; font-size: 0.85em; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(16, 185, 129, 0.2);">
+              ${matchup.description}
+            </div>
           </div>
         `).join('')}
       </div>
     </div>
   `;
 
-  const modal = document.createElement('div');
-  modal.className = 'modal-backdrop active';
-  modal.innerHTML = content;
-  modal.onclick = (e) => {
-    if (e.target === modal) modal.remove();
-  };
-  document.body.appendChild(modal);
+  out.innerHTML = html;
 }
 
 function simulateClassicMatchup(teamAName, teamBName, matchupName) {
@@ -6632,25 +6645,41 @@ function showTournamentHighlights() {
     return;
   }
 
-  const champion = window.TOURNAMENT.champion;
+  const championData = window.TOURNAMENT.champion;
+  const championName = championData?.name || championData || 'Unknown';
   const topScorer = getTopScorer();
   const stats = calculateTournamentStats();
 
   const content = `
-    <div style="padding: 30px; text-align: center;">
+    <div style="padding: 30px; text-align: center; background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 12px;">
       <h1 style="color: #10b981; font-size: 2.5em; margin-bottom: 30px;">🏆 Tournament Complete!</h1>
-      <div style="font-size: 1.5em; margin: 20px 0;">
-        Champion: <span style="color: #fbbf24; font-weight: bold;">${champion}</span>
+      <div style="font-size: 1.5em; margin: 20px 0; padding: 15px; background: rgba(251, 191, 36, 0.1); border-radius: 8px; border: 2px solid #fbbf24;">
+        <div style="color: #94a3b8; font-size: 0.6em; margin-bottom: 8px;">Champion</div>
+        <div style="color: #fbbf24; font-weight: bold;">${championName}</div>
       </div>
-      <div style="font-size: 1.2em; margin: 15px 0;">
-        ⚽ Top Scorer: ${topScorer ? topScorer.name + ' (' + topScorer.goals + ' goals)' : 'Unknown'}
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 25px;">
+        <div style="padding: 15px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);">
+          <div style="color: #94a3b8; font-size: 0.9em; margin-bottom: 5px;">⚽ Top Scorer</div>
+          <div style="color: #e5e7eb; font-weight: 600;">${topScorer ? topScorer.name : 'Unknown'}</div>
+          <div style="color: #60a5fa; font-size: 0.9em;">${topScorer ? topScorer.goals + ' goals' : ''}</div>
+        </div>
+        <div style="padding: 15px; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3);">
+          <div style="color: #94a3b8; font-size: 0.9em; margin-bottom: 5px;">📊 Goals Per Game</div>
+          <div style="color: #10b981; font-weight: 600; font-size: 1.2em;">${stats ? stats.goalsPerGame : 'N/A'}</div>
+        </div>
+        <div style="padding: 15px; background: rgba(245, 158, 11, 0.1); border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.3);">
+          <div style="color: #94a3b8; font-size: 0.9em; margin-bottom: 5px;">🎯 Total Matches</div>
+          <div style="color: #f59e0b; font-weight: 600; font-size: 1.2em;">${stats ? stats.totalMatches : 'N/A'}</div>
+        </div>
       </div>
-      <div style="font-size: 1.2em; margin: 15px 0;">
-        📊 Goals Per Game: ${stats ? stats.goalsPerGame : 'N/A'}
-      </div>
-      <div style="font-size: 1.2em; margin: 15px 0;">
-        🎯 Total Matches: ${stats ? stats.totalMatches : 'N/A'}
-      </div>
+      <button onclick="this.closest('.modal-backdrop').remove()"
+              style="margin-top: 25px; padding: 12px 24px; background: linear-gradient(135deg, #3b82f6, #2563eb);
+                     border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer;
+                     transition: all 0.3s;"
+              onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(59, 130, 246, 0.4)'"
+              onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+        Close
+      </button>
     </div>
   `;
 
@@ -7109,13 +7138,27 @@ function hideModal(id) {
 }
 
 function openCustomMatch() {
-  console.log("Opening custom match modal");
-  openCustomMatchModal();
+  console.log("🎮 Opening custom match modal");
+  try {
+    if (typeof openCustomMatchModal === 'function') {
+      openCustomMatchModal();
+    } else {
+      console.error('❌ openCustomMatchModal function not found');
+      showUtilityMessage('Error opening custom match', 'error');
+    }
+  } catch (error) {
+    console.error('❌ Error opening custom match:', error);
+    showUtilityMessage('Error opening custom match: ' + error.message, 'error');
+  }
 }
 
 function closeCustomMatch() {
   console.log("Closing custom match modal");
-  hideModal("customMatchModal");
+  const modal = document.getElementById("customMatchModal");
+  if (modal) {
+    modal.classList.remove("active");
+    modal.style.display = "none";
+  }
 }
 
 function closeAllModals() {
@@ -8169,7 +8212,7 @@ function renderGroupResults(groupResults) {
       <h2>📊 Group Stage Results</h2>
       <div style="display: flex; gap: 8px;">
         <button onclick="showMatchWeeks()" class="btn-secondary" style="padding: 8px 12px;">
-          📅 Match Weeks
+          📅 Matchdays
         </button>
         <button onclick="showPlayerStats()" class="btn-secondary" style="padding: 8px 12px;">
           📈 Statistics
@@ -9090,10 +9133,28 @@ function simulateGroupStage(groups) {
       }
     }
 
-    // Organize into matchweeks
+    // Organize into matchweeks and add matchday to all matches
     try {
       const matchweeks = organizeGroupMatchesIntoWeeks(groupMatches, groupName);
       MATCH_SCHEDULE.groupStage.push(...matchweeks);
+
+      // Add matchday property to each match in results
+      matchweeks.forEach(weekData => {
+        const weekNumber = weekData.week;
+        weekData.matches.forEach(weekMatch => {
+          // weekMatch has the wrapper structure, get the actual match
+          const actualMatch = weekMatch.match || weekMatch;
+          const matchId = actualMatch.matchId;
+
+          // Find and update the original match in results
+          const originalMatch = results[groupName].matches.find(m =>
+            m.matchId === matchId
+          );
+          if (originalMatch) {
+            originalMatch.matchday = weekNumber;
+          }
+        });
+      });
     } catch (error) {
       console.error(`❌ Error organizing matchweeks for ${groupName}:`, error);
     }
@@ -9122,66 +9183,70 @@ function organizeGroupMatchesIntoWeeks(matches, groupName) {
     return [];
   }
 
-  // Sort matches by whether they're home or away legs
-  const homeMatches = matches.filter(m => m.type === 'home');
-  const awayMatches = matches.filter(m => m.type === 'away');
+  // In a 4-team group round-robin: 6 matchdays, 2 matches per matchday
+  // Matchday 1-3: First round, Matchday 4-6: Return fixtures
+  const homeMatches = matches.filter(m => m.type === 'home').map(m => m.match || m);
+  const awayMatches = matches.filter(m => m.type === 'away').map(m => m.match || m);
 
-  const weeks = [];
-  
-  // Weeks 1-3: First legs (away for team A, home for team B)
-  for (let week = 1; week <= 3; week++) {
-    const weekMatches = [];
-    const startIdx = (week - 1) * Math.ceil(homeMatches.length / 3);
-    const endIdx = week * Math.ceil(homeMatches.length / 3);
-    
-    homeMatches.slice(startIdx, endIdx).forEach(matchData => {
-      weekMatches.push({
-        ...matchData,
-        week,
+  const matchdays = [];
+
+  // Matchdays 1-3: First round (2 matches per matchday, each team plays once)
+  for (let day = 1; day <= 3; day++) {
+    const dayMatches = [];
+
+    // Take 2 matches from home matches for this matchday
+    const startIdx = (day - 1) * 2;
+    const endIdx = day * 2;
+
+    homeMatches.slice(startIdx, endIdx).forEach(match => {
+      dayMatches.push({
+        ...match,
+        matchday: day,
         group: groupName,
-        matchweek: `Group Stage - Matchweek ${week}`,
+        matchweek: `Matchday ${day}`,
         timestamp: new Date().toISOString()
       });
     });
 
-    if (weekMatches.length > 0) {
-      weeks.push({
-        week,
-        name: `Group ${groupName} - Matchweek ${week}`,
-        matches: weekMatches,
+    if (dayMatches.length > 0) {
+      matchdays.push({
+        week: day,
+        name: `${groupName} - Matchday ${day}`,
+        matches: dayMatches,
         group: groupName
       });
     }
   }
 
-  // Weeks 4-6: Second legs (home for team A, away for team B)
-  for (let week = 4; week <= 6; week++) {
-    const weekMatches = [];
-    const startIdx = (week - 4) * Math.ceil(awayMatches.length / 3);
-    const endIdx = (week - 3) * Math.ceil(awayMatches.length / 3);
-    
-    awayMatches.slice(startIdx, endIdx).forEach(matchData => {
-      weekMatches.push({
-        ...matchData,
-        week,
+  // Matchdays 4-6: Return fixtures (2 matches per matchday)
+  for (let day = 4; day <= 6; day++) {
+    const dayMatches = [];
+
+    const startIdx = (day - 4) * 2;
+    const endIdx = (day - 3) * 2;
+
+    awayMatches.slice(startIdx, endIdx).forEach(match => {
+      dayMatches.push({
+        ...match,
+        matchday: day,
         group: groupName,
-        matchweek: `Group Stage - Matchweek ${week}`,
+        matchweek: `Matchday ${day}`,
         timestamp: new Date().toISOString()
       });
     });
 
-    if (weekMatches.length > 0) {
-      weeks.push({
-        week,
-        name: `Group ${groupName} - Matchweek ${week}`,
-        matches: weekMatches,
+    if (dayMatches.length > 0) {
+      matchdays.push({
+        week: day,
+        name: `${groupName} - Matchday ${day}`,
+        matches: dayMatches,
         group: groupName
       });
     }
   }
 
-  console.log(`📅 Organized ${matches.length} matches into ${weeks.length} weeks for ${groupName}`);
-  return weeks;
+  console.log(`📅 Organized ${matches.length} matches into ${matchdays.length} matchdays for ${groupName}`);
+  return matchdays;
 }
 function calculateMatchWeek(matchData) {
   if (!matchData || !matchData.teamA || !matchData.teamB) return 1;
@@ -9877,9 +9942,10 @@ function updateClubLegacyFromResults(results) {
         <div style="padding: 20px; text-align: center; background: linear-gradient(135deg, #1e3a8a, #3730a3); border-radius: 8px; margin: 10px;">
           <div style="font-size: 24px; font-weight: bold; margin-bottom: 10px; color: white;">
             ${data.final.teamA.name} ${finalMatch.scoreA || 0} - ${finalMatch.scoreB || 0} ${data.final.teamB.name}
+            ${data.final.penaltiesUsed ? `<div style="font-size: 16px; color: #fbbf24; margin-top: 8px;">(${data.final.penaltyScoreA}-${data.final.penaltyScoreB} on penalties)</div>` : ''}
           </div>
           <div style="color: #fbbf24; font-weight: bold; font-size: 18px; margin-bottom: 15px;">
-            🏆 ${champ.name} wins the tournament! 🏆
+            🏆 ${champ.name} wins the tournament${data.final.penaltiesUsed ? ' on penalties' : ''}! 🏆
           </div>
           ${potg ? `
             <div style="background: rgba(245, 158, 11, 0.3); padding: 10px; border-radius: 6px; margin: 10px 0; border: 1px solid #f59e0b;">
@@ -10626,7 +10692,7 @@ function showGroupStageResults() {
       <h2>📊 Group Stage Results</h2>
       <div style="display: flex; gap: 8px;">
         <button onclick="showMatchWeeks()" class="btn-secondary" style="padding: 8px 12px;">
-          📅 Match Weeks
+          📅 Matchdays
         </button>
         <button onclick="showPlayerStats()" class="btn-secondary" style="padding: 8px 12px;">
           📈 Statistics
@@ -10639,9 +10705,9 @@ function showGroupStageResults() {
 
   groupNames.forEach(groupName => {
     const groupData = window.GROUP_RESULTS[groupName];
-    if (!groupData || !groupData.standings) return;
+    if (!groupData || !groupData.teams) return;
 
-    const standings = groupData.standings;
+    const standings = groupData.teams;
     const matches = groupData.matches || [];
 
     html += `
@@ -10679,11 +10745,11 @@ function showGroupStageResults() {
       html += `
         <tr style="background: ${bgColor}; border-left: ${borderLeft}; border-bottom: 1px solid #374151;">
           <td style="padding: 10px; color: #94a3b8; font-weight: bold;">${index + 1}</td>
-          <td style="padding: 10px; color: #e5e7eb; font-weight: 500;">${team.team}</td>
+          <td style="padding: 10px; color: #e5e7eb; font-weight: 500;">${team.team.name}</td>
           <td style="padding: 10px; text-align: center; color: #94a3b8;">${team.played}</td>
-          <td style="padding: 10px; text-align: center; color: #10b981;">${team.won}</td>
-          <td style="padding: 10px; text-align: center; color: #f59e0b;">${team.drawn}</td>
-          <td style="padding: 10px; text-align: center; color: #ef4444;">${team.lost}</td>
+          <td style="padding: 10px; text-align: center; color: #10b981;">${team.wins}</td>
+          <td style="padding: 10px; text-align: center; color: #f59e0b;">${team.draws}</td>
+          <td style="padding: 10px; text-align: center; color: #ef4444;">${team.losses}</td>
           <td style="padding: 10px; text-align: center; color: #60a5fa;">${team.goalsFor}</td>
           <td style="padding: 10px; text-align: center; color: #ef4444;">${team.goalsAgainst}</td>
           <td style="padding: 10px; text-align: center; color: ${team.goalDifference >= 0 ? '#10b981' : '#ef4444'}; font-weight: bold;">
@@ -12904,6 +12970,7 @@ function updateButtonStates() {
     allMatches: document.getElementById('btnAllMatches'),
     matchWeeks: document.getElementById('btnMatchWeeks'),
     bracket: document.getElementById('btnBracket'),
+    simpleBracket: document.getElementById('btnSimpleBracket'),
     overview: document.getElementById('btnOverview'),
     clubLegacy: document.getElementById('btnClubLegacy'),
     customMatch: document.getElementById('btnCustomMatch'),
@@ -12944,7 +13011,7 @@ function updateButtonStates() {
     buttons.allMatches.title = hasMatches ? 'View all match results' : 'Simulate matches first';
   }
 
-  // Match weeks button - enabled after group stage
+  // Matchdays button - enabled after group stage
   if (buttons.matchWeeks) {
     const hasSchedule = (MATCH_SCHEDULE.groupStage && MATCH_SCHEDULE.groupStage.length > 0) ||
                         (MATCH_SCHEDULE.knockoutStage && MATCH_SCHEDULE.knockoutStage.length > 0);
@@ -12956,6 +13023,12 @@ function updateButtonStates() {
   if (buttons.bracket) {
     buttons.bracket.disabled = !hasTournament;
     buttons.bracket.title = hasTournament ? 'View tournament bracket' : 'Complete tournament first';
+  }
+
+  // Simple Bracket button - enabled after tournament complete
+  if (buttons.simpleBracket) {
+    buttons.simpleBracket.disabled = !hasTournament;
+    buttons.simpleBracket.title = hasTournament ? 'View simple bracket' : 'Complete tournament first';
   }
 
   // Club legacy, custom match, history - always enabled
@@ -13032,21 +13105,43 @@ function showUtilityMessage(message, type = 'info') {
   }, 4000);
 }
 function openCustomMatchModal() {
-  // Populate dropdowns first
-  populateCustomMatchDropdowns();
-  
-  // Open the modal
-  if (typeof ModalManager !== 'undefined' && ModalManager.open) {
-    ModalManager.open('customMatchModal');
-  } else {
+  console.log('📋 Opening custom match modal...');
+
+  try {
+    // Populate dropdowns first
+    if (typeof populateCustomMatchDropdowns === 'function') {
+      populateCustomMatchDropdowns();
+    } else {
+      console.warn('⚠️ populateCustomMatchDropdowns not available');
+    }
+
+    // Open the modal
     const modal = document.getElementById('customMatchModal');
     if (modal) {
+      console.log('✅ Modal element found, opening...');
+
+      // Make sure it's visible
       modal.style.display = 'flex';
-      setTimeout(() => modal.classList.add('active'), 10);
+      modal.style.opacity = '0';
+
+      // Force reflow
+      modal.offsetHeight;
+
+      // Fade in with active class
+      requestAnimationFrame(() => {
+        modal.classList.add('active');
+        modal.style.opacity = '1';
+        modal.style.transition = 'opacity 0.3s ease';
+        console.log('✅ Modal activated with active class');
+      });
+    } else {
+      console.error('❌ customMatchModal element not found in DOM');
+      showUtilityMessage('Custom match modal not found', 'error');
     }
+  } catch (error) {
+    console.error('❌ Error in openCustomMatchModal:', error);
+    showUtilityMessage('Error opening custom match: ' + error.message, 'error');
   }
-  
-  console.log('✅ Custom match modal opened');
 }
 
 function simulateCustomMatchHandler() {
@@ -13919,7 +14014,7 @@ function showMatchWeeks() {
   const out = document.getElementById('output');
   if (!out) return;
 
-  console.log("📅 Loading match weeks...");
+  console.log("📅 Loading matchdays...");
 
   const groupMatches = [];
   const knockoutMatches = [];
@@ -13952,7 +14047,7 @@ function showMatchWeeks() {
       <div class="empty-state">
         <div class="empty-icon">📅</div>
         <h2>No Matches Available</h2>
-        <p class="output-sub">Complete the group stage or knockouts to view match weeks.</p>
+        <p class="output-sub">Complete the group stage or knockouts to view matchdays.</p>
       </div>
     `;
     return;
@@ -13960,7 +14055,7 @@ function showMatchWeeks() {
 
   let html = `
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <h2>📅 Match Weeks</h2>
+      <h2>📅 Matchdays</h2>
       <div style="display: flex; gap: 8px;">
         <button onclick="showTournamentOverview()" class="btn-secondary" style="padding: 8px 12px;">
           📊 All Matches
@@ -13972,60 +14067,63 @@ function showMatchWeeks() {
     </div>
   `;
 
-  // GROUP STAGE by matchday
+  // GROUP STAGE by matchday - Show ALL matches from ALL groups in each matchday
   if (groupMatches.length > 0) {
     const matchdays = [...new Set(groupMatches.map(m => m.matchday))].sort((a, b) => a - b);
 
     matchdays.forEach(matchday => {
+      const matchesInDay = groupMatches.filter(m => m.matchday === matchday);
+      const totalMatches = matchesInDay.length;
+      const groupsPlaying = [...new Set(matchesInDay.map(m => m.groupName))].length;
+
       html += `
-        <div style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid #3b82f6;">
-          <h3 style="margin: 0 0 15px 0; color: #60a5fa; font-size: 1.3em;">🗓️ Matchday ${matchday}</h3>
+        <div style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 25px; border-radius: 12px; margin-bottom: 25px; border-left: 4px solid #3b82f6;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #374151;">
+            <h3 style="margin: 0; color: #60a5fa; font-size: 1.5em;">🗓️ Matchday ${matchday}</h3>
+            <div style="display: flex; gap: 20px; color: #94a3b8; font-size: 0.9em;">
+              <span>📊 ${totalMatches} Fixtures</span>
+              <span>🏟️ ${groupsPlaying} Groups (2 per group)</span>
+            </div>
+          </div>
+
+          <div style="display: grid; gap: 8px;">
       `;
 
-      const groups = [...new Set(groupMatches.filter(m => m.matchday === matchday).map(m => m.groupName))].sort();
-
-      groups.forEach(groupName => {
-        const matches = groupMatches.filter(m => m.matchday === matchday && m.groupName === groupName);
-
-        if (matches.length > 0) {
-          html += `
-            <div style="background: rgba(30, 41, 59, 0.5); padding: 15px; border-radius: 8px; margin-bottom: 12px;">
-              <h4 style="color: #94a3b8; font-size: 1em; margin: 0 0 12px 0;">${groupName}</h4>
-              <div style="display: grid; gap: 10px;">
-          `;
-
-          matches.forEach(match => {
-            const matchDetails = MATCH_DETAILS_DB[match.matchId];
-            html += `
-              <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.6); padding: 12px 15px; border-radius: 6px;">
-                <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
-                  <span style="color: #e2e8f0; font-weight: 500; width: 150px;">${match.teamA}</span>
-                  <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="color: #fff; font-weight: bold; font-size: 1.2em;">${match.scoreA}</span>
-                    <span style="color: #64748b;">-</span>
-                    <span style="color: #fff; font-weight: bold; font-size: 1.2em;">${match.scoreB}</span>
-                  </div>
-                  <span style="color: #e2e8f0; font-weight: 500; width: 150px; text-align: right;">${match.teamB}</span>
+      // Show all matches from this matchday together
+      matchesInDay.forEach(match => {
+        const matchDetails = MATCH_DETAILS_DB[match.matchId];
+        html += `
+          <div onclick="${matchDetails ? `viewMatchDetails('${match.matchId}')` : ''}"
+               style="display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.6); padding: 12px 18px; border-radius: 8px; cursor: ${matchDetails ? 'pointer' : 'default'}; border: 1px solid #374151; transition: all 0.2s ease;"
+               onmouseover="this.style.borderColor='#3b82f6'; this.style.background='rgba(59, 130, 246, 0.1)'"
+               onmouseout="this.style.borderColor='#374151'; this.style.background='rgba(30, 41, 59, 0.6)'">
+            <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;">
+              <span style="color: #64748b; font-size: 0.85em; font-weight: 600; min-width: 80px;">${match.groupName}</span>
+              <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
+                <span style="color: #e2e8f0; font-weight: 500; flex: 1; text-align: right;">${match.teamA}</span>
+                <div style="display: flex; align-items: center; gap: 8px; background: rgba(15, 23, 42, 0.8); padding: 6px 12px; border-radius: 6px; min-width: 70px; justify-content: center;">
+                  <span style="color: #fff; font-weight: bold; font-size: 1.1em;">${match.scoreA}</span>
+                  <span style="color: #64748b;">-</span>
+                  <span style="color: #fff; font-weight: bold; font-size: 1.1em;">${match.scoreB}</span>
                 </div>
-                ${matchDetails ? `
-                  <button onclick="viewMatchDetails('${match.matchId}')" class="btn-secondary" style="padding: 6px 12px; margin-left: 15px;">
-                    📋 Details
-                  </button>
-                ` : ''}
+                <span style="color: #e2e8f0; font-weight: 500; flex: 1;">${match.teamB}</span>
               </div>
-            `;
-          });
-
-          html += `</div></div>`;
-        }
+            </div>
+            ${matchDetails ? `
+              <div style="color: #3b82f6; font-size: 0.85em; margin-left: 15px;">
+                View Details →
+              </div>
+            ` : ''}
+          </div>
+        `;
       });
 
-      html += `</div>`;
+      html += `</div></div>`;
     });
   }
 
   out.innerHTML = html;
-  console.log("✅ Match weeks loaded");
+  console.log("✅ Matchdays loaded");
 }
 function generateGlobalMatchWeekCard(week, weekIndex) {
   const weekMatches = week.matches || [];
@@ -15533,7 +15631,7 @@ document.addEventListener('DOMContentLoaded', function () {
   connectViewButton('btnKnockouts', runKnockouts, 'Knockouts');
   connectViewButton('btnStats', showPlayerStats, 'Player Stats');
   connectViewButton('btnAllMatches', showTournamentOverview, 'All Matches');
-  connectViewButton('btnMatchWeeks', showMatchWeeks, 'Match Weeks');
+  connectViewButton('btnMatchWeeks', showMatchWeeks, 'Matchdays');
   connectViewButton('btnClubLegacy', showClubLegacy, 'Club Legacy');
   connectViewButton('customMatchBtn', openCustomMatch, 'Custom Match');
   connectViewButton('btnHistory', openHistory, 'History');

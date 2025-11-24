@@ -298,6 +298,344 @@
       border: 1px solid rgba(59, 130, 246, 0.3);
     }
 
+    /* MANAGER PROFILE CARD */
+    .manager-profile-card {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 78, 59, 0.1));
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .manager-profile-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .manager-profile-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(6, 78, 59, 0.3));
+      border: 2px solid rgba(16, 185, 129, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .manager-profile-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .manager-profile-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .manager-profile-level {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+    }
+
+    .manager-level-badge {
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(6, 78, 59, 0.3));
+      border: 1px solid rgba(16, 185, 129, 0.5);
+      color: #10b981;
+      font-weight: 600;
+    }
+
+    .manager-level-xp {
+      color: var(--text-secondary);
+      font-size: 0.7rem;
+    }
+
+    .manager-xp-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .manager-xp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981, #059669);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+    }
+
+    .manager-profile-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .manager-stat {
+      text-align: center;
+      padding: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .manager-stat-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #10b981;
+      margin-bottom: 2px;
+    }
+
+    .manager-stat-label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* PROFILE TAB STYLES */
+    .profile-section {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .profile-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .profile-section-icon {
+      font-size: 1.2rem;
+    }
+
+    .profile-section-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: 0.5px;
+    }
+
+    .profile-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .profile-stat-card {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05));
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s ease;
+    }
+
+    .profile-stat-card:hover {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.1));
+      border-color: rgba(59, 130, 246, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .profile-stat-icon {
+      font-size: 1.8rem;
+      flex-shrink: 0;
+    }
+
+    .profile-stat-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .profile-stat-value {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--color-primary);
+      line-height: 1.2;
+    }
+
+    .profile-stat-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+
+    .profile-best-tournament {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .profile-empty-state {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .profile-empty-icon {
+      font-size: 2.5rem;
+      margin-bottom: 8px;
+      opacity: 0.5;
+    }
+
+    .profile-empty-text {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .profile-achievements {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .profile-achievement-card {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(6, 78, 59, 0.05));
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s ease;
+    }
+
+    .profile-achievement-card.locked {
+      background: rgba(0, 0, 0, 0.2);
+      border-color: rgba(100, 100, 100, 0.3);
+      opacity: 0.6;
+    }
+
+    .profile-achievement-card:not(.locked):hover {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 78, 59, 0.1));
+      transform: translateX(4px);
+    }
+
+    .profile-achievement-icon {
+      font-size: 1.8rem;
+      flex-shrink: 0;
+      filter: grayscale(0);
+    }
+
+    .profile-achievement-card.locked .profile-achievement-icon {
+      filter: grayscale(1);
+      opacity: 0.5;
+    }
+
+    .profile-achievement-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .profile-achievement-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .profile-achievement-card.locked .profile-achievement-name {
+      color: var(--text-muted);
+    }
+
+    .profile-achievement-desc {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      line-height: 1.3;
+    }
+
+    .profile-achievement-progress {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .profile-achievement-progress-bar {
+      flex: 1;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .profile-achievement-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981, #059669);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+
+    .profile-achievement-progress-text {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .profile-achievement-badge {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .profile-achievement-badge.common {
+      background: rgba(156, 163, 175, 0.2);
+      color: #9ca3af;
+      border: 1px solid rgba(156, 163, 175, 0.3);
+    }
+
+    .profile-achievement-badge.uncommon {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .profile-achievement-badge.rare {
+      background: rgba(59, 130, 246, 0.2);
+      color: #3b82f6;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .profile-achievement-badge.epic {
+      background: rgba(168, 85, 247, 0.2);
+      color: #a855f7;
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+
+    .profile-achievement-badge.legendary {
+      background: rgba(251, 191, 36, 0.2);
+      color: #fbbf24;
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
     /* TAB NAVIGATION */
     .sidebar-tabs {
       display: flex;
@@ -359,6 +697,7 @@
       overflow-x: hidden;
       flex: 1;
       min-height: 0;
+      max-height: calc(100vh - 220px);
       padding-right: 4px;
     }
 
@@ -2604,8 +2943,39 @@
   <div class="layout">
     <aside class="sidebar">
       <div class="sidebar-header">
-        <div class="sidebar-header-title">Tournament Controls</div>
+        <div class="sidebar-header-title">All-Time Sim</div>
         <div class="teams-pill"><span id="teamCount">64</span> teams</div>
+      </div>
+
+      <!-- Manager Profile Card -->
+      <div class="manager-profile-card">
+        <div class="manager-profile-header">
+          <div class="manager-profile-icon">⚽</div>
+          <div class="manager-profile-info">
+            <div class="manager-profile-name" id="managerName">Manager</div>
+            <div class="manager-profile-level">
+              <span class="manager-level-badge" id="managerLevel">Level 1</span>
+              <span class="manager-level-xp" id="managerXP">0 / 1000 XP</span>
+            </div>
+          </div>
+        </div>
+        <div class="manager-xp-bar">
+          <div class="manager-xp-fill" id="managerXPFill" style="width: 0%"></div>
+        </div>
+        <div class="manager-profile-stats">
+          <div class="manager-stat">
+            <div class="manager-stat-value" id="managerTournaments">0</div>
+            <div class="manager-stat-label">Tournaments</div>
+          </div>
+          <div class="manager-stat">
+            <div class="manager-stat-value" id="managerWinRate">0%</div>
+            <div class="manager-stat-label">Win Rate</div>
+          </div>
+          <div class="manager-stat">
+            <div class="manager-stat-value" id="managerGoals">0</div>
+            <div class="manager-stat-label">Total Goals</div>
+          </div>
+        </div>
       </div>
 
       <!-- Tab Navigation -->
@@ -2618,6 +2988,9 @@
         </button>
         <button class="sidebar-tab" data-tab="tools" onclick="switchTab('tools')">
           🛠️ Tools
+        </button>
+        <button class="sidebar-tab" data-tab="profile" onclick="switchTab('profile')">
+          👤 Profile
         </button>
         <button class="sidebar-tab" data-tab="settings" onclick="switchTab('settings')">
           ⚙️ Settings
@@ -2816,6 +3189,19 @@
           </div>
 
           <div class="rng-block">
+            <label for="difficultySelect">Difficulty Mode</label>
+            <div class="rng-presets" style="margin-top: 8px;">
+              <button class="rng-pill" type="button" data-difficulty="easy" onclick="setDifficulty('easy')">⭐ Beginner</button>
+              <button class="rng-pill active" type="button" data-difficulty="normal" onclick="setDifficulty('normal')">⭐⭐ Normal</button>
+              <button class="rng-pill" type="button" data-difficulty="hard" onclick="setDifficulty('hard')">⭐⭐⭐ Expert</button>
+              <button class="rng-pill" type="button" data-difficulty="legendary" onclick="setDifficulty('legendary')">⭐⭐⭐⭐ Legend</button>
+            </div>
+            <div style="font-size: 0.8em; color: var(--text-muted); margin-top: 6px;" id="difficultyDescription">
+              Balanced experience
+            </div>
+          </div>
+
+          <div class="rng-block">
             <label for="rngSlider">Upset factor</label>
             <div class="rng-row">
               <input id="rngSlider" type="range" min="0.5" max="1.5" step="0.05" value="1.0"
@@ -2828,6 +3214,76 @@
               <button class="rng-pill" type="button" data-rng-value="1.3">Chaos</button>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Profile Tab -->
+      <div class="tab-content" id="tab-profile">
+        <div class="control-column">
+
+          <!-- Career Stats Section -->
+          <div class="profile-section">
+            <div class="profile-section-header">
+              <span class="profile-section-icon">📊</span>
+              <span class="profile-section-title">Career Statistics</span>
+            </div>
+            <div class="profile-stats-grid">
+              <div class="profile-stat-card">
+                <div class="profile-stat-icon">🏆</div>
+                <div class="profile-stat-content">
+                  <div class="profile-stat-value" id="profileTournamentsWon">0</div>
+                  <div class="profile-stat-label">Championships</div>
+                </div>
+              </div>
+              <div class="profile-stat-card">
+                <div class="profile-stat-icon">📈</div>
+                <div class="profile-stat-content">
+                  <div class="profile-stat-value" id="profileTournamentsPlayed">0</div>
+                  <div class="profile-stat-label">Tournaments</div>
+                </div>
+              </div>
+              <div class="profile-stat-card">
+                <div class="profile-stat-icon">⚽</div>
+                <div class="profile-stat-content">
+                  <div class="profile-stat-value" id="profileTotalGoals">0</div>
+                  <div class="profile-stat-label">Total Goals</div>
+                </div>
+              </div>
+              <div class="profile-stat-card">
+                <div class="profile-stat-icon">🎯</div>
+                <div class="profile-stat-content">
+                  <div class="profile-stat-value" id="profileAvgGoals">0.0</div>
+                  <div class="profile-stat-label">Avg Goals/Match</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Best Tournament Section -->
+          <div class="profile-section">
+            <div class="profile-section-header">
+              <span class="profile-section-icon">⭐</span>
+              <span class="profile-section-title">Best Tournament</span>
+            </div>
+            <div class="profile-best-tournament" id="profileBestTournament">
+              <div class="profile-empty-state">
+                <div class="profile-empty-icon">🏟️</div>
+                <div class="profile-empty-text">Complete your first tournament!</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Achievement Progress Section -->
+          <div class="profile-section">
+            <div class="profile-section-header">
+              <span class="profile-section-icon">🏅</span>
+              <span class="profile-section-title">Achievement Progress</span>
+            </div>
+            <div class="profile-achievements" id="profileAchievements">
+              <!-- Achievements will be populated here -->
+            </div>
+          </div>
+
         </div>
       </div>
     </aside>
@@ -5615,6 +6071,380 @@ const TEAM_MAP = (window.TEAM_MAP = window.TEAM_MAP || new Map());
 const ALL_TIME_PLAYER_DB = (window.ALL_TIME_PLAYER_DB = window.ALL_TIME_PLAYER_DB || {});
 const TOURNAMENT_HISTORY = (window.TOURNAMENT_HISTORY = window.TOURNAMENT_HISTORY || []);
 
+/************* MANAGER CAREER MODE *************/
+
+// Manager profile system
+const MANAGER_PROFILE = window.MANAGER_PROFILE || {
+  name: 'Manager',
+  level: 1,
+  xp: 0,
+  xpToNextLevel: 1000,
+  tournamentsPlayed: 0,
+  tournamentsWon: 0,
+  totalGoals: 0,
+  totalMatches: 0,
+  achievements: [],
+  favoriteTeam: null,
+  winRate: 0,
+  avgGoalsPerMatch: 0,
+  bestTournament: null,
+  createdAt: new Date().toISOString()
+};
+
+// Load manager profile from localStorage
+try {
+  const savedProfile = localStorage.getItem('managerProfile');
+  if (savedProfile) {
+    Object.assign(MANAGER_PROFILE, JSON.parse(savedProfile));
+  }
+} catch (e) {
+  console.warn('Could not load manager profile:', e);
+}
+
+window.MANAGER_PROFILE = MANAGER_PROFILE;
+
+// Save manager profile to localStorage
+function saveManagerProfile() {
+  try {
+    localStorage.setItem('managerProfile', JSON.stringify(MANAGER_PROFILE));
+    updateManagerProfileUI();
+    console.log('✅ Manager profile saved');
+  } catch (e) {
+    console.error('❌ Failed to save manager profile:', e);
+  }
+}
+
+// Update manager profile UI
+function updateManagerProfileUI() {
+  // Update sidebar card
+  const nameEl = document.getElementById('managerName');
+  const levelEl = document.getElementById('managerLevel');
+  const xpEl = document.getElementById('managerXP');
+  const xpFillEl = document.getElementById('managerXPFill');
+  const tournamentsEl = document.getElementById('managerTournaments');
+  const winRateEl = document.getElementById('managerWinRate');
+  const goalsEl = document.getElementById('managerGoals');
+
+  if (nameEl) nameEl.textContent = MANAGER_PROFILE.name;
+  if (levelEl) levelEl.textContent = `Level ${MANAGER_PROFILE.level}`;
+  if (xpEl) xpEl.textContent = `${MANAGER_PROFILE.xp} / ${MANAGER_PROFILE.xpToNextLevel} XP`;
+
+  if (xpFillEl) {
+    const xpPercent = (MANAGER_PROFILE.xp / MANAGER_PROFILE.xpToNextLevel) * 100;
+    xpFillEl.style.width = `${xpPercent}%`;
+  }
+
+  if (tournamentsEl) tournamentsEl.textContent = MANAGER_PROFILE.tournamentsPlayed;
+  if (winRateEl) winRateEl.textContent = `${MANAGER_PROFILE.winRate}%`;
+  if (goalsEl) goalsEl.textContent = MANAGER_PROFILE.totalGoals;
+
+  // Update profile tab if it exists
+  const profileTournamentsWon = document.getElementById('profileTournamentsWon');
+  const profileTournamentsPlayed = document.getElementById('profileTournamentsPlayed');
+  const profileTotalGoals = document.getElementById('profileTotalGoals');
+  const profileAvgGoals = document.getElementById('profileAvgGoals');
+
+  if (profileTournamentsWon) profileTournamentsWon.textContent = MANAGER_PROFILE.tournamentsWon;
+  if (profileTournamentsPlayed) profileTournamentsPlayed.textContent = MANAGER_PROFILE.tournamentsPlayed;
+  if (profileTotalGoals) profileTotalGoals.textContent = MANAGER_PROFILE.totalGoals;
+  if (profileAvgGoals) profileAvgGoals.textContent = MANAGER_PROFILE.avgGoalsPerMatch || '0.0';
+
+  // Update best tournament
+  updateBestTournamentDisplay();
+
+  // Update achievements
+  updateAchievementsDisplay();
+}
+
+// Update best tournament display
+function updateBestTournamentDisplay() {
+  const container = document.getElementById('profileBestTournament');
+  if (!container) return;
+
+  if (!MANAGER_PROFILE.bestTournament) {
+    container.innerHTML = `
+      <div class="profile-empty-state">
+        <div class="profile-empty-icon">🏟️</div>
+        <div class="profile-empty-text">Complete your first tournament!</div>
+      </div>
+    `;
+    return;
+  }
+
+  const best = MANAGER_PROFILE.bestTournament;
+  const date = new Date(best.date).toLocaleDateString();
+
+  container.innerHTML = `
+    <div style="padding: 8px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <div style="font-size: 1.1rem; font-weight: 700; color: var(--color-primary);">
+          🏆 ${best.champion}
+        </div>
+        <div style="font-size: 0.7rem; color: var(--text-muted);">${date}</div>
+      </div>
+      <div style="display: flex; gap: 16px; margin-top: 12px;">
+        <div>
+          <div style="font-size: 1.5rem; font-weight: 700; color: #10b981;">${best.goals}</div>
+          <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Total Goals</div>
+        </div>
+        <div style="flex: 1;">
+          <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 4px;">Top Scorer</div>
+          <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-primary);">⚽ ${best.topScorer}</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Update achievements display
+function updateAchievementsDisplay() {
+  const container = document.getElementById('profileAchievements');
+  if (!container) return;
+
+  const achievementsHTML = Object.values(ACHIEVEMENTS).slice(0, 8).map(achievement => {
+    const isUnlocked = window.ACHIEVEMENTS_DATA.unlocked[achievement.id];
+    const lockedClass = isUnlocked ? '' : 'locked';
+    const rarity = achievement.rarity || 'common';
+    const points = achievement.points || 0;
+
+    let progressHTML = '';
+    if (achievement.requiresProgress && !isUnlocked) {
+      const currentProgress = window.ACHIEVEMENTS_DATA.stats[achievement.id.replace(/V?\d*$/, '')] || 0;
+      const maxProgress = achievement.maxProgress || 1;
+      const progressPercent = Math.min((currentProgress / maxProgress) * 100, 100);
+
+      progressHTML = `
+        <div class="profile-achievement-progress">
+          <div class="profile-achievement-progress-bar">
+            <div class="profile-achievement-progress-fill" style="width: ${progressPercent}%"></div>
+          </div>
+          <div class="profile-achievement-progress-text">${currentProgress}/${maxProgress}</div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="profile-achievement-card ${lockedClass}">
+        <div class="profile-achievement-icon">${achievement.icon}</div>
+        <div class="profile-achievement-info">
+          <div class="profile-achievement-name">${achievement.name}</div>
+          <div class="profile-achievement-desc">${achievement.description}</div>
+          ${progressHTML}
+        </div>
+        <div class="profile-achievement-badge ${rarity}">${rarity}</div>
+      </div>
+    `;
+  }).join('');
+
+  container.innerHTML = achievementsHTML || `
+    <div class="profile-empty-state">
+      <div class="profile-empty-icon">🏅</div>
+      <div class="profile-empty-text">Start unlocking achievements!</div>
+    </div>
+  `;
+}
+
+// Award XP to manager
+function awardManagerXP(xp, reason) {
+  // Apply difficulty multiplier
+  const difficulty = getCurrentDifficulty();
+  const multiplier = difficulty.xpMultiplier || 1.0;
+  const adjustedXP = Math.floor(xp * multiplier);
+
+  MANAGER_PROFILE.xp += adjustedXP;
+  console.log(`📈 +${adjustedXP} XP: ${reason}${multiplier !== 1.0 ? ` (${multiplier}x multiplier)` : ''}`);
+
+  // Check for level up
+  while (MANAGER_PROFILE.xp >= MANAGER_PROFILE.xpToNextLevel) {
+    MANAGER_PROFILE.level++;
+    MANAGER_PROFILE.xp -= MANAGER_PROFILE.xpToNextLevel;
+    MANAGER_PROFILE.xpToNextLevel = Math.floor(MANAGER_PROFILE.xpToNextLevel * 1.5);
+
+    // Show level up notification
+    if (typeof showNotification === 'function') {
+      showNotification('success',
+        `🎉 Level Up!`,
+        `Congratulations! You've reached Level ${MANAGER_PROFILE.level}!`,
+        4000);
+    }
+
+    console.log(`🎉 Level Up! Now level ${MANAGER_PROFILE.level}`);
+  }
+
+  saveManagerProfile();
+}
+
+// Update manager stats after tournament
+function updateManagerStats(tournamentData) {
+  MANAGER_PROFILE.tournamentsPlayed++;
+
+  if (tournamentData.champion) {
+    MANAGER_PROFILE.tournamentsWon++;
+  }
+
+  // Count goals and matches
+  if (tournamentData.matches) {
+    const totalMatches = tournamentData.matches.length;
+    const totalGoals = tournamentData.matches.reduce((sum, m) =>
+      sum + (m.scoreA || 0) + (m.scoreB || 0), 0);
+
+    MANAGER_PROFILE.totalMatches += totalMatches;
+    MANAGER_PROFILE.totalGoals += totalGoals;
+  }
+
+  // Calculate stats
+  if (MANAGER_PROFILE.totalMatches > 0) {
+    MANAGER_PROFILE.avgGoalsPerMatch = (MANAGER_PROFILE.totalGoals / MANAGER_PROFILE.totalMatches).toFixed(2);
+  }
+
+  if (MANAGER_PROFILE.tournamentsPlayed > 0) {
+    MANAGER_PROFILE.winRate = ((MANAGER_PROFILE.tournamentsWon / MANAGER_PROFILE.tournamentsPlayed) * 100).toFixed(1);
+  }
+
+  // Update best tournament
+  if (tournamentData.champion && tournamentData.matches) {
+    const tournamentGoals = tournamentData.matches.reduce((sum, m) =>
+      sum + (m.scoreA || 0) + (m.scoreB || 0), 0);
+
+    if (!MANAGER_PROFILE.bestTournament || tournamentGoals > MANAGER_PROFILE.bestTournament.goals) {
+      MANAGER_PROFILE.bestTournament = {
+        date: new Date().toISOString(),
+        champion: tournamentData.champion.name,
+        goals: tournamentGoals,
+        topScorer: tournamentData.topScorer ? `${tournamentData.topScorer.name} (${tournamentData.topScorer.goals} goals)` : 'Unknown'
+      };
+    }
+  }
+
+  // Award XP for completing tournament
+  awardManagerXP(100, 'Tournament completed');
+
+  // Award XP for winning
+  if (tournamentData.champion) {
+    awardManagerXP(200, 'Tournament champion!');
+  }
+
+  // Award XP for goals
+  if (tournamentData.matches) {
+    const matchesPlayed = tournamentData.matches.length;
+    awardManagerXP(matchesPlayed * 5, `${matchesPlayed} matches played`);
+  }
+
+  saveManagerProfile();
+}
+
+/************* DIFFICULTY MODES *************/
+
+// Difficulty mode definitions
+const DIFFICULTY_MODES = {
+  easy: {
+    id: 'easy',
+    name: '⭐ Beginner',
+    description: 'Perfect for first-time players',
+    upsetFactor: 0.5,        // Lower-rated teams less likely to win
+    injuryRate: 0,           // No injuries
+    xpMultiplier: 0.8,       // Less XP earned
+    icon: '⭐',
+    color: '#10b981'
+  },
+  normal: {
+    id: 'normal',
+    name: '⭐⭐ Normal',
+    description: 'Balanced experience',
+    upsetFactor: 1.0,
+    injuryRate: 0.05,
+    xpMultiplier: 1.0,
+    icon: '⭐⭐',
+    color: '#3b82f6'
+  },
+  hard: {
+    id: 'hard',
+    name: '⭐⭐⭐ Expert',
+    description: 'For experienced managers',
+    upsetFactor: 1.5,        // More upsets
+    injuryRate: 0.1,
+    xpMultiplier: 1.5,       // More XP earned
+    icon: '⭐⭐⭐',
+    color: '#a855f7'
+  },
+  legendary: {
+    id: 'legendary',
+    name: '⭐⭐⭐⭐ Legendary',
+    description: 'Ultimate challenge - are you ready?',
+    upsetFactor: 2.0,
+    injuryRate: 0.15,
+    xpMultiplier: 2.0,       // Double XP
+    adaptiveAI: true,        // AI learns from patterns
+    icon: '⭐⭐⭐⭐',
+    color: '#fbbf24'
+  }
+};
+
+// Current difficulty setting
+window.CURRENT_DIFFICULTY = window.CURRENT_DIFFICULTY || 'normal';
+
+// Load difficulty from localStorage
+try {
+  const savedDifficulty = localStorage.getItem('currentDifficulty');
+  if (savedDifficulty && DIFFICULTY_MODES[savedDifficulty]) {
+    window.CURRENT_DIFFICULTY = savedDifficulty;
+  }
+} catch (e) {
+  console.warn('Could not load difficulty setting:', e);
+}
+
+// Set difficulty mode
+function setDifficulty(difficultyId) {
+  if (!DIFFICULTY_MODES[difficultyId]) {
+    console.error(`Invalid difficulty: ${difficultyId}`);
+    return;
+  }
+
+  window.CURRENT_DIFFICULTY = difficultyId;
+
+  try {
+    localStorage.setItem('currentDifficulty', difficultyId);
+  } catch (e) {
+    console.error('Failed to save difficulty:', e);
+  }
+
+  const difficulty = DIFFICULTY_MODES[difficultyId];
+  console.log(`🎯 Difficulty set to: ${difficulty.name}`);
+
+  // Update RNG settings based on difficulty
+  RNG_SETTINGS.groupChaos = difficulty.upsetFactor;
+  RNG_SETTINGS.knockoutChaos = difficulty.upsetFactor * 1.1;
+
+  // Update UI
+  const buttons = document.querySelectorAll('[data-difficulty]');
+  buttons.forEach(btn => {
+    if (btn.getAttribute('data-difficulty') === difficultyId) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+
+  // Update description
+  const descEl = document.getElementById('difficultyDescription');
+  if (descEl) {
+    descEl.textContent = difficulty.description;
+    descEl.style.color = difficulty.color;
+  }
+
+  if (typeof showNotification === 'function') {
+    showNotification('info',
+      `Difficulty Changed`,
+      `${difficulty.icon} ${difficulty.name}: ${difficulty.description}`,
+      3000);
+  }
+}
+
+// Get current difficulty
+function getCurrentDifficulty() {
+  return DIFFICULTY_MODES[window.CURRENT_DIFFICULTY] || DIFFICULTY_MODES.normal;
+}
+
 const RNG_SETTINGS = (window.RNG_SETTINGS = window.RNG_SETTINGS || {
   groupChaos: 1.0,
   knockoutChaos: 1.1
@@ -5806,6 +6636,141 @@ const ACHIEVEMENTS = {
       if (!data.topScorer) return false;
       return data.topScorer.goals >= 10;
     }
+  },
+
+  firstBlood: {
+    id: 'firstBlood',
+    name: 'First Blood',
+    description: 'Score your first goal',
+    icon: '⚽',
+    rarity: 'common',
+    category: 'scoring',
+    points: 10,
+    check: (data) => data.totalGoals >= 1
+  },
+
+  hatTrickHero: {
+    id: 'hatTrickHero',
+    name: 'Hat-Trick Hero',
+    description: 'Score a hat-trick',
+    icon: '🎩',
+    rarity: 'uncommon',
+    category: 'player',
+    points: 30,
+    requiresProgress: true,
+    progress: 0,
+    maxProgress: 1,
+    check: (data) => data.hatTricks > 0
+  },
+
+  penaltySpecialist: {
+    id: 'penaltySpecialist',
+    name: 'Penalty Specialist',
+    description: 'Win 3 penalty shootouts',
+    icon: '🎯',
+    rarity: 'rare',
+    category: 'knockout',
+    points: 60,
+    requiresProgress: true,
+    progress: 0,
+    maxProgress: 3,
+    check: (data) => data.penaltyWins >= 3
+  },
+
+  demolition: {
+    id: 'demolition',
+    name: 'Demolition',
+    description: 'Win a match by 7+ goals',
+    icon: '💥',
+    rarity: 'epic',
+    category: 'match',
+    points: 120,
+    requiresProgress: true,
+    progress: 0,
+    maxProgress: 1,
+    check: (data) => data.bigWins > 0
+  },
+
+  invincible: {
+    id: 'invincible',
+    name: 'Invincible',
+    description: 'Win tournament without losing a match',
+    icon: '👑',
+    rarity: 'legendary',
+    category: 'tournament',
+    points: 500,
+    check: (data) => {
+      if (!data.champion || !data.matches) return false;
+      const championMatches = data.matches.filter(m =>
+        m.teamA === data.champion || m.teamB === data.champion
+      );
+      return championMatches.every(m => {
+        const isTeamA = m.teamA === data.champion;
+        return isTeamA ? m.scoreA >= m.scoreB : m.scoreB >= m.scoreA;
+      }) && championMatches.length > 0;
+    }
+  },
+
+  comebackKingV2: {
+    id: 'comebackKingV2',
+    name: 'Comeback King',
+    description: 'Win after being 3+ goals down',
+    icon: '💪',
+    rarity: 'epic',
+    category: 'match',
+    points: 100,
+    requiresProgress: true,
+    progress: 0,
+    maxProgress: 1,
+    check: (data) => data.bigComebacks > 0
+  },
+
+  perfectGroup: {
+    id: 'perfectGroup',
+    name: 'Perfect Group',
+    description: 'Win all 6 group stage matches',
+    icon: '✨',
+    rarity: 'rare',
+    category: 'group',
+    points: 75,
+    check: (data) => {
+      if (!data.groupResults) return false;
+      return Object.values(data.groupResults).some(group => {
+        const standings = group.teams || group.standings || [];
+        if (standings.length === 0) return false;
+        const winner = standings[0];
+        return winner && winner.wins === 6 && winner.losses === 0;
+      });
+    }
+  },
+
+  centuryClubV2: {
+    id: 'centuryClubV2',
+    name: 'Century Club',
+    description: 'Score 100+ goals in a tournament',
+    icon: '💯',
+    rarity: 'epic',
+    category: 'scoring',
+    points: 150,
+    check: (data) => {
+      if (!data.matches) return false;
+      const totalGoals = data.matches.reduce((sum, m) => sum + (m.scoreA || 0) + (m.scoreB || 0), 0);
+      return totalGoals >= 100;
+    }
+  },
+
+  cleanSweepV2: {
+    id: 'cleanSweepV2',
+    name: 'Clean Sweep',
+    description: 'Win 5 consecutive clean sheets',
+    icon: '🧤',
+    rarity: 'rare',
+    category: 'defense',
+    points: 80,
+    requiresProgress: true,
+    progress: 0,
+    maxProgress: 5,
+    check: (data) => data.consecutiveCleanSheets >= 5
   }
 };
 
@@ -5822,7 +6787,12 @@ window.ACHIEVEMENTS_DATA = JSON.parse(localStorage.getItem('achievementsData')) 
     consecutiveWins: 0,
     totalGoals: 0,
     tournamentsCompleted: 0,
-    knockoutUpsets: 0
+    knockoutUpsets: 0,
+    hatTricks: 0,
+    penaltyWins: 0,
+    bigWins: 0,
+    bigComebacks: 0,
+    consecutiveCleanSheets: 0
   }
 };
 
@@ -6037,6 +7007,39 @@ function unlockAchievement(achievementId) {
 
 // Show achievement unlock notification
 function showAchievementNotification(achievement) {
+  // Use new notification system if available
+  if (typeof showNotification === 'function') {
+    const pointsText = achievement.points ? ` | +${achievement.points} points` : '';
+    const rarityColor = {
+      'common': '#9ca3af',
+      'uncommon': '#10b981',
+      'rare': '#3b82f6',
+      'epic': '#a855f7',
+      'legendary': '#fbbf24'
+    }[achievement.rarity] || '#10b981';
+
+    showNotification('achievement',
+      `🏆 Achievement Unlocked!`,
+      `<div style="display: flex; align-items: center; gap: 12px;">
+        <div style="font-size: 2.5em;">${achievement.icon}</div>
+        <div>
+          <div style="font-weight: 700; font-size: 1.1em; color: ${rarityColor};">${achievement.name}</div>
+          <div style="color: var(--text-secondary); margin-top: 4px;">${achievement.description}</div>
+          <div style="color: var(--color-accent); margin-top: 4px; font-weight: 600;">${pointsText}</div>
+        </div>
+      </div>`,
+      5000);
+
+    // Play sound effect (optional)
+    try {
+      const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZUQ4NVanm8aFaDgpDm+Hyu3QlBi6E0PLaizsGHmu/8OScTw0PVKXl8aBeFApBmuDyu3MkBi2D0PLairwGH2y+8OWcTQ0OVKTl8Z9dDwpAmd/yu3IjBiyC0PKaisAGIGu98OWbTA0PU6Pl8Z5dDwo/mN/yu3EiBiuB0PKaisMGIWq88OWaTBIOUqLk8Z1cDgk+l97yu28hBimA0PKZicQGImm78OSZSxEOU6Hj8ZxbDgg9lt3yum4gBih/z/KYiMUGI2m68OSYSxEPUZ/i8ZpaDgc8lNzyu24fBid+zvKXiMYGJGi58OOXShEQUZ7h8ZlZDQc7k9vxu2weBiZ9zfKWh8cGJWe48OOWSREQUJzg8JhYDQc6ktrxumsfBiV8zPKVhscGJma378OWSBIPUJrg8JdXDAU5kdnxuWoeBSR7y/KUhsgGJ2W278KVRxIPT5nf8JdWCwU4kNjxuGkdBSN6yvKTh8kGKGS178GURxIOTpje75dVCgQ3j9fxt2kcBCJ5yPKSiMoGKWO0772TRhEOTpfd75ZUCgM2jtbxtmgcBCF4yPKRiMsGKmGz7r2SRREOTZbb75VTCgI1jdXxtWgcAyB3x/KQicsGK2Cy7rySRBEOS5Ta75RTCQIzjNTxs2caAx52xvKPicwGK1+x7ruRQhAOSZPZ75RSCQExitPxs2YaAh11xfKOiM0HLF6w7rqQQhANSZHY7pRQCAAwicfFBQECAwMNDg8PERISFBUVFxcYGRkaHBwdHR4eHyAgISIjIyQkJSUmJicoKCgpKSorKysrLCwtLS0tLi4uLy8wMDEwMDExMTIyMjMyMzMzNDQ0NDQ1NTY2Njc3NzY3Nzg4ODk5Ojk6Ojo7Ozs7Ozs8PDw8PDw9PT0+Pj4+Pj8/Pz8/QEBAQEBAQEBAQEBAQEBAQEBAQD8/Pz8/Pz8/Pj4+Pj4+Pj09PTw8PDw8PDw7Ozs7Ozs6Ojo5OTk5ODg4Nzc3NjY2NTU1NDQ0MzMzMjIyMTExMDAwLy8vLi4uLS0tLCwsKysrKioqKSkoKCgnJycmJiYlJSQkIyMjIiEhICAgHx4eHh0dHBwbGxoaGRkYGBcXFRUVFBMTEhEREA8PDw0NDAw=');
+      audio.volume = 0.3;
+      audio.play().catch(() => {});
+    } catch (e) {}
+    return;
+  }
+
+  // Fallback to old notification system
   const notification = document.getElementById('achievementNotification');
   if (!notification) return;
 
@@ -6047,18 +7050,12 @@ function showAchievementNotification(achievement) {
         <div class="achievement-notification-title">Achievement Unlocked!</div>
         <div class="achievement-notification-name">${achievement.name}</div>
         <div class="achievement-notification-description">${achievement.description}</div>
+        ${achievement.points ? `<div class="achievement-notification-points">+${achievement.points} points</div>` : ''}
       </div>
     </div>
   `;
 
   notification.classList.add('show');
-
-  // Play sound effect (optional)
-  try {
-    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZUQ4NVanm8aFaDgpDm+Hyu3QlBi6E0PLaizsGHmu/8OScTw0PVKXl8aBeFApBmuDyu3MkBi2D0PLairwGH2y+8OWcTQ0OVKTl8Z9dDwpAmd/yu3IjBiyC0PKaisAGIGu98OWbTA0PU6Pl8Z5dDwo/mN/yu3EiBiuB0PKaisMGIWq88OWaTBIOUqLk8Z1cDgk+l97yu28hBimA0PKZicQGImm78OSZSxEOU6Hj8ZxbDgg9lt3yum4gBih/z/KYiMUGI2m68OSYSxEPUZ/i8ZpaDgc8lNzyu24fBid+zvKXiMYGJGi58OOXShEQUZ7h8ZlZDQc7k9vxu2weBiZ9zfKWh8cGJWe48OOWSREQUJzg8JhYDQc6ktrxumsfBiV8zPKVhscGJma378OWSBIPUJrg8JdXDAU5kdnxuWoeBSR7y/KUhsgGJ2W278KVRxIPT5nf8JdWCwU4kNjxuGkdBSN6yvKTh8kGKGS178GURxIOTpje75dVCgQ3j9fxt2kcBCJ5yPKSiMoGKWO0772TRhEOTpfd75ZUCgM2jtbxtmgcBCF4yPKRiMsGKmGz7r2SRREOTZbb75VTCgI1jdXxtWgcAyB3x/KQicsGK2Cy7rySRBEOS5Ta75RTCQIzjNTxs2caAx52xvKPicwGK1+x7ruRQhAOSZPZ75RSCQExitPxs2YaAh11xfKOiM0HLF6w7rqQQhANSZHY7pRQCAAwicfFBQECAwMNDg8PERISFBUVFxcYGRkaHBwdHR4eHyAgISIjIyQkJSUmJicoKCgpKSorKysrLCwtLS0tLi4uLy8wMDEwMDExMTIyMjMyMzMzNDQ0NDQ1NTY2Njc3NzY3Nzg4ODk5Ojk6Ojo7Ozs7Ozs8PDw8PDw9PT0+Pj4+Pj8/Pz8/QEBAQEBAQEBAQEBAQEBAQEBAQD8/Pz8/Pz8/Pj4+Pj4+Pj09PTw8PDw8PDw7Ozs7Ozs6Ojo5OTk5ODg4Nzc3NjY2NTU1NDQ0MzMzMjIyMTExMDAwLy8vLi4uLS0tLCwsKysrKioqKSkoKCgnJycmJiYlJSQkIyMjIiEhICAgHx4eHh0dHBwbGxoaGRkYGBcXFRUVFBMTEhEREA8PDw0NDAw=');
-    audio.volume = 0.3;
-    audio.play().catch(() => {});
-  } catch (e) {}
 
   setTimeout(() => {
     notification.classList.remove('show');
@@ -10057,7 +11054,7 @@ function simulateKnockoutRounds(teams) {
 
       // Add to tournament history for comparison feature
       const totalGoals = allMatches.reduce((sum, match) => {
-        const m = MATCH_DB[match.matchId];
+        const m = MATCH_DETAILS_DB[match.matchId];
         return sum + (m ? (m.scoreA + m.scoreB) : 0);
       }, 0);
       const avgGoals = allMatches.length > 0 ? (totalGoals / allMatches.length).toFixed(2) : 0;
@@ -10072,6 +11069,15 @@ function simulateKnockoutRounds(teams) {
       });
 
       console.log(`📊 Tournament added to history. Total tournaments: ${TOURNAMENT_HISTORY.length}`);
+
+      // Update manager career mode stats
+      if (typeof updateManagerStats === 'function') {
+        updateManagerStats({
+          champion: results.champion,
+          matches: allMatches,
+          topScorer: tournamentData.topScorer
+        });
+      }
     } else {
       console.error("❌ No champion determined");
     }
@@ -11745,16 +12751,29 @@ function toggleStatsView() {
 function populateCustomMatchDropdowns() {
   const teamSelect1 = document.getElementById('customTeamA');
   const teamSelect2 = document.getElementById('customTeamB');
-  
-  if (!teamSelect1 || !teamSelect2) return;
-  
+
+  if (!teamSelect1 || !teamSelect2) {
+    console.error('❌ Custom match dropdowns not found in DOM');
+    return;
+  }
+
   // Get teams from either DRAWN_TEAMS or TEAM_POOL
-  const availableTeams = window.DRAWN_TEAMS && window.DRAWN_TEAMS.length > 0 
-    ? window.DRAWN_TEAMS 
-    : (typeof TEAM_POOL !== 'undefined' ? TEAM_POOL : []);
-  
+  let availableTeams = [];
+
+  if (window.DRAWN_TEAMS && window.DRAWN_TEAMS.length > 0) {
+    availableTeams = window.DRAWN_TEAMS;
+    console.log(`✅ Using ${availableTeams.length} drawn teams for custom match`);
+  } else if (window.TEAM_POOL && window.TEAM_POOL.length > 0) {
+    availableTeams = window.TEAM_POOL;
+    console.log(`✅ Using ${availableTeams.length} teams from TEAM_POOL for custom match`);
+  } else if (typeof TEAM_POOL !== 'undefined' && TEAM_POOL.length > 0) {
+    availableTeams = TEAM_POOL;
+    console.log(`✅ Using ${availableTeams.length} teams from global TEAM_POOL for custom match`);
+  }
+
   if (availableTeams.length === 0) {
-    console.warn('⚠️ No teams available for custom match');
+    console.error('❌ No teams available for custom match');
+    showUtilityMessage('No teams available. Please generate groups first.', 'warning');
     return;
   }
   
@@ -16094,6 +17113,29 @@ document.addEventListener('DOMContentLoaded', function () {
   injectTopPerformerStyles();
   injectEnhancedLayoutStyles();
   populateCustomMatchDropdowns();
+
+  // Initialize manager profile UI
+  updateManagerProfileUI();
+
+  // Initialize difficulty UI
+  if (typeof setDifficulty === 'function') {
+    // Set UI to reflect saved difficulty
+    const buttons = document.querySelectorAll('[data-difficulty]');
+    buttons.forEach(btn => {
+      if (btn.getAttribute('data-difficulty') === window.CURRENT_DIFFICULTY) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+
+    const difficulty = getCurrentDifficulty();
+    const descEl = document.getElementById('difficultyDescription');
+    if (descEl && difficulty) {
+      descEl.textContent = difficulty.description;
+      descEl.style.color = difficulty.color;
+    }
+  }
 
   console.log("🎉 Simulator initialized successfully!");
 });

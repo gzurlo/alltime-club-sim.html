@@ -4818,36 +4818,78 @@ function initializeTheme() {
     toggleBtn.textContent = "🌙 Dark / ☀️ Light";
   }
 }
-
-function updateButtonStates() {
-  console.log("Updating button states...");
-
-  const btnDraw = document.getElementById("btnDraw");
-  const btnGroupStage = document.getElementById("btnGroupStage");
-  const btnKnockouts = document.getElementById("btnKnockouts");
-  const btnStats = document.getElementById("btnStats");
-
-  // Draw is always available
-  if (btnDraw) btnDraw.disabled = false;
-
-  // Group stage only after groups are drawn
-  if (btnGroupStage) btnGroupStage.disabled = !window.GROUPS;
-
-  // Knockouts only after group results exist
-  if (btnKnockouts) btnKnockouts.disabled = !window.GROUP_RESULTS;
-
-  // Stats only after there is a tournament object
-  if (btnStats) btnStats.disabled = !window.TOURNAMENT;
-  if (buttons.bracket) {
-    buttons.bracket.disabled = !hasTournament;
-    buttons.bracket.title = hasTournament ? 'View tournament bracket' : 'Complete tournament first';
+function updateButtonStatesEnhanced() {
+  const hasGroups = window.GROUPS && window.GROUPS.length > 0;
+  const hasGroupResults = window.GROUP_RESULTS && Object.keys(window.GROUP_RESULTS).length > 0;
+  const hasKnockouts = window.TOURNAMENT && window.TOURNAMENT.champion;
+  
+  // Step 1: Generate Groups
+  const btnDraw = document.getElementById('btnDraw');
+  if (btnDraw) {
+    btnDraw.disabled = false; // Always enabled
+    btnDraw.style.opacity = '1';
   }
-  const simpleBracketBtn = document.getElementById('btnSimpleBracket');
-if (simpleBracketBtn) {
-  simpleBracketBtn.disabled = !hasTournament;
-  simpleBracketBtn.style.opacity = hasTournament ? '1' : '0.5';
-  simpleBracketBtn.style.cursor = hasTournament ? 'pointer' : 'not-allowed';
+  
+  // Step 2: View Group Stage
+  const btnViewGroups = document.querySelectorAll('[onclick*="showGroupStageResults"]');
+  btnViewGroups.forEach(btn => {
+    btn.disabled = !hasGroups;
+    btn.style.opacity = hasGroups ? '1' : '0.5';
+  });
+  
+  // Step 3: Run Group Stage
+  const btnGroupStage = document.getElementById('btnGroupStage');
+  if (btnGroupStage) {
+    btnGroupStage.disabled = !hasGroups || hasGroupResults;
+    btnGroupStage.style.opacity = (hasGroups && !hasGroupResults) ? '1' : '0.5';
+  }
+  
+  // Step 4: Run Knockouts
+  const btnKnockouts = document.getElementById('btnKnockouts');
+  if (btnKnockouts) {
+    btnKnockouts.disabled = !hasGroupResults || hasKnockouts;
+    btnKnockouts.style.opacity = (hasGroupResults && !hasKnockouts) ? '1' : '0.5';
+  }
+  
+  // View buttons
+  const viewButtons = [
+    'btnStats',
+    'btnAllMatches',
+    'btnMatchWeeks',
+    'btnBracket',
+    'btnSimpleBracket',
+    'btnClubLegacy'
+  ];
+  
+  viewButtons.forEach(btnId => {
+    const btn = document.getElementById(btnId);
+    if (btn) {
+      const enabled = hasGroupResults || hasKnockouts;
+      btn.disabled = !enabled;
+      btn.style.opacity = enabled ? '1' : '0.5';
+    }
+  });
+  
+  console.log('✅ Button states updated');
 }
+
+// Loading indicator helper
+function showLoadingIndicator(message = 'Processing...') {
+  const out = document.getElementById('output');
+  if (!out) return;
+  
+  out.innerHTML = `
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px;">
+      <div style="width: 60px; height: 60px; border: 4px solid #374151; border-top: 4px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
+      <div style="color: #60a5fa; font-size: 1.2em; font-weight: 600;">${message}</div>
+    </div>
+    <style>
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+  `;
 }
 
 /************* GENERIC UTILITY MESSAGE *************/
@@ -5720,23 +5762,98 @@ function getTeamByName(teamName) {
  * Base rating for a player in a given match.
  * Can be extended with performance-based bonuses in trackEnhancedPlayerStats.
  */
-function calculateBaseRating(player, teamStrength, performance = {}) {
+ function calculateEnhancedPlayerRating(player, teamStrength, performance = {}, matchContext = {}) {
   if (!player || !player.quality) {
-    console.warn("⚠️ Invalid player in calculateBaseRating:", player);
+    console.warn('⚠️ Invalid player in rating calculation:', player);
     return 6.0;
   }
 
-  let rating = ((player.quality || 70) / 10) * 0.5;
-  rating += ((teamStrength || 70) / 100) * 0.3;
-
-  // Position-based tiny bias
-  if (player.pos === "GK") rating += 0.1;
-  if (["ST", "CF", "FW"].includes(player.pos)) rating += 0.05;
-
-  // Small random wiggle to avoid flat ratings
-  rating += (Math.random() - 0.5) * 0.5;
-
-  return Math.min(10, Math.max(4, rating));
+  const quality = player.quality || 70;
+  const position = player.pos || 'MF';
+  
+  // Base rating from quality (5.0 to 7.5 range)
+  let rating = 5.0 + ((quality / 100) * 2.5);
+  
+  // Team performance context
+  const teamPerformance = ((teamStrength || 70) - 70) / 100;
+  rating += teamPerformance * 0.3;
+  
+  // Match result impact
+  const isWinner = matchContext.isWinner || false;
+  const isDraw = matchContext.isDraw || false;
+  const teamScore = matchContext.teamScore || 0;
+  const oppScore = matchContext.oppScore || 0;
+  
+  if (isWinner) {
+    rating += 0.4; // Winning bonus
+  } else if (isDraw) {
+    rating += 0.1; // Small draw bonus
+  } else {
+    rating -= 0.3; // Losing penalty
+  }
+  
+  // Performance contributions
+  if (performance.goals > 0) {
+    rating += Math.min(performance.goals * 1.5, 3.0); // Goals are crucial (max +3.0)
+  }
+  
+  if (performance.assists > 0) {
+    rating += Math.min(performance.assists * 0.8, 2.0); // Assists are valuable (max +2.0)
+  }
+  
+  // Position-specific adjustments
+  const cleanSheet = performance.cleanSheet || false;
+  
+  if (['GK', 'CB', 'RB', 'LB', 'RWB', 'LWB'].includes(position)) {
+    // Defenders and GKs
+    if (cleanSheet) {
+      rating += 1.2; // Significant clean sheet bonus
+    } else if (oppScore >= 3) {
+      rating -= 0.8; // Heavy conceding penalty
+    } else if (oppScore === 2) {
+      rating -= 0.4; // Moderate conceding penalty
+    } else if (oppScore === 1) {
+      rating -= 0.1; // Light conceding penalty
+    }
+    
+    // GK specific
+    if (position === 'GK') {
+      rating = Math.max(rating, cleanSheet ? 7.0 : 6.0); // GK floor
+    }
+  } else if (['CDM', 'CM', 'CAM', 'RM', 'LM'].includes(position)) {
+    // Midfielders - balanced
+    if (performance.goals === 0 && performance.assists === 0 && !isWinner) {
+      rating -= 0.3; // Penalty for no contributions in a loss
+    }
+  } else if (['ST', 'CF', 'FW', 'LW', 'RW'].includes(position)) {
+    // Attackers - goal-dependent
+    if (performance.goals === 0) {
+      if (isWinner) {
+        rating -= 0.2; // Minor penalty if won without scoring
+      } else {
+        rating -= 0.5; // Bigger penalty if didn't score in loss/draw
+      }
+    }
+  }
+  
+  // High-scoring game bonus for all
+  const totalGoals = teamScore + oppScore;
+  if (totalGoals >= 5) {
+    rating += 0.3; // Exciting match bonus
+  }
+  
+  // Controlled randomness based on quality
+  // Higher quality = more consistent, less variance
+  const qualityFactor = quality / 100;
+  const maxVariance = 0.7 * (1 - (qualityFactor * 0.6)); // Top players: ±0.28, Average: ±0.49
+  const randomness = (Math.random() - 0.5) * 2 * maxVariance;
+  rating += randomness;
+  
+  // Realistic bounds (very rare to see outside 5.0-9.8)
+  rating = Math.max(5.0, Math.min(9.8, rating));
+  
+  // Round to 1 decimal
+  return Math.round(rating * 10) / 10;
 }
 
 /**
@@ -7787,23 +7904,144 @@ const ModalManager = {
 window.ModalManager = ModalManager;
 // Helper function to show group stage results (enhanced)
 function showGroupStageResults() {
-  if (!window.GROUP_RESULTS) {
-    const out = document.getElementById("output");
-    if (out) {
-      out.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">📊</div>
-          <h2>No Group Stage Data</h2>
-          <p class="output-sub">
-            Please run the group stage first to see results.
-          </p>
-        </div>
-      `;
-    }
+  const out = document.getElementById('output');
+  if (!out) return;
+
+  if (!window.GROUP_RESULTS || Object.keys(window.GROUP_RESULTS).length === 0) {
+    out.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📊</div>
+        <h2>No Group Stage Results</h2>
+        <p class="output-sub">Run the group stage simulation first.</p>
+        <button onclick="runGroupStage()" class="btn-primary" style="margin-top: 15px;">
+          🏃 Run Group Stage
+        </button>
+      </div>
+    `;
     return;
   }
 
-  renderGroupResults(window.GROUP_RESULTS);
+  const groupNames = Object.keys(window.GROUP_RESULTS).sort();
+  
+  let html = `
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2>📊 Group Stage Results</h2>
+      <div style="display: flex; gap: 8px;">
+        <button onclick="showMatchWeeks()" class="btn-secondary" style="padding: 8px 12px;">
+          📅 Match Weeks
+        </button>
+        <button onclick="showPlayerStats()" class="btn-secondary" style="padding: 8px 12px;">
+          📈 Statistics
+        </button>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 20px;">
+  `;
+
+  groupNames.forEach(groupName => {
+    const groupData = window.GROUP_RESULTS[groupName];
+    if (!groupData || !groupData.standings) return;
+
+    const standings = groupData.standings;
+    const matches = groupData.matches || [];
+
+    html += `
+      <div style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 20px; border-radius: 12px; border: 1px solid #475569;">
+        <!-- Group Header -->
+        <div style="text-align: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 2px solid #3b82f6;">
+          <h3 style="margin: 0; color: #60a5fa; font-size: 1.3em;">${groupName}</h3>
+        </div>
+
+        <!-- Standings Table -->
+        <div style="margin-bottom: 15px;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="background: rgba(59, 130, 246, 0.2); color: #94a3b8; font-size: 0.85em;">
+                <th style="padding: 8px; text-align: left;">#</th>
+                <th style="padding: 8px; text-align: left;">Team</th>
+                <th style="padding: 8px; text-align: center;">P</th>
+                <th style="padding: 8px; text-align: center;">W</th>
+                <th style="padding: 8px; text-align: center;">D</th>
+                <th style="padding: 8px; text-align: center;">L</th>
+                <th style="padding: 8px; text-align: center;">GF</th>
+                <th style="padding: 8px; text-align: center;">GA</th>
+                <th style="padding: 8px; text-align: center;">GD</th>
+                <th style="padding: 8px; text-align: center;">Pts</th>
+              </tr>
+            </thead>
+            <tbody>
+    `;
+
+    standings.forEach((team, index) => {
+      const isQualified = index < 2;
+      const bgColor = isQualified ? 'rgba(16, 185, 129, 0.1)' : 'rgba(30, 41, 59, 0.3)';
+      const borderLeft = isQualified ? '3px solid #10b981' : 'none';
+
+      html += `
+        <tr style="background: ${bgColor}; border-left: ${borderLeft}; border-bottom: 1px solid #374151;">
+          <td style="padding: 10px; color: #94a3b8; font-weight: bold;">${index + 1}</td>
+          <td style="padding: 10px; color: #e5e7eb; font-weight: 500;">${team.team}</td>
+          <td style="padding: 10px; text-align: center; color: #94a3b8;">${team.played}</td>
+          <td style="padding: 10px; text-align: center; color: #10b981;">${team.won}</td>
+          <td style="padding: 10px; text-align: center; color: #f59e0b;">${team.drawn}</td>
+          <td style="padding: 10px; text-align: center; color: #ef4444;">${team.lost}</td>
+          <td style="padding: 10px; text-align: center; color: #60a5fa;">${team.goalsFor}</td>
+          <td style="padding: 10px; text-align: center; color: #ef4444;">${team.goalsAgainst}</td>
+          <td style="padding: 10px; text-align: center; color: ${team.goalDifference >= 0 ? '#10b981' : '#ef4444'}; font-weight: bold;">
+            ${team.goalDifference >= 0 ? '+' : ''}${team.goalDifference}
+          </td>
+          <td style="padding: 10px; text-align: center; color: #fbbf24; font-weight: bold; font-size: 1.1em;">
+            ${team.points}
+          </td>
+        </tr>
+      `;
+    });
+
+    html += `
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Recent Matches -->
+        <div>
+          <div style="color: #94a3b8; font-size: 0.9em; font-weight: 600; margin-bottom: 8px; padding-left: 5px;">
+            📋 Recent Matches
+          </div>
+    `;
+
+    // Show last 3 matches from this group
+    const recentMatches = matches.slice(-3);
+    recentMatches.forEach(match => {
+      if (!match) return;
+      
+      html += `
+        <div onclick="viewMatchDetails('${match.matchId}')" 
+             style="background: rgba(30, 41, 59, 0.5); padding: 10px 12px; margin-bottom: 6px; border-radius: 6px; cursor: pointer; border: 1px solid #374151; transition: all 0.2s ease;"
+             onmouseover="this.style.borderColor='#3b82f6'; this.style.background='rgba(59, 130, 246, 0.1)'"
+             onmouseout="this.style.borderColor='#374151'; this.style.background='rgba(30, 41, 59, 0.5)'">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #e5e7eb; font-size: 0.9em; flex: 1;">${match.teamA}</span>
+            <div style="display: flex; align-items: center; gap: 8px; padding: 0 15px;">
+              <span style="color: white; font-weight: bold;">${match.scoreA}</span>
+              <span style="color: #6b7280;">-</span>
+              <span style="color: white; font-weight: bold;">${match.scoreB}</span>
+            </div>
+            <span style="color: #e5e7eb; font-size: 0.9em; flex: 1; text-align: right;">${match.teamB}</span>
+          </div>
+        </div>
+      `;
+    });
+
+    html += `
+        </div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+  out.innerHTML = html;
+  console.log('✅ Group stage results displayed');
 }
 /************* ENHANCED VIEW FUNCTIONS *************/
 function showPlayerStats() {
@@ -8297,31 +8535,54 @@ function toggleStatsView() {
  * is removed so you don't double-inject CSS.
  */
 /************* ENHANCED CUSTOM MATCH FUNCTIONS *************/
-
 function populateCustomMatchDropdowns() {
-  const teamASelect = document.getElementById("customTeamA");
-  const teamBSelect = document.getElementById("customTeamB");
-  if (!teamASelect || !teamBSelect) return;
-
-  const sortedTeams = [...TEAM_POOL].sort((a, b) => a.name.localeCompare(b.name));
-
-  teamASelect.innerHTML = "";
-  teamBSelect.innerHTML = "";
-
-  sortedTeams.forEach(team => {
-    const optionA = document.createElement("option");
-    optionA.value = team.name;
-    optionA.textContent = team.name;
-
-    const optionB = document.createElement("option");
-    optionB.value = team.name;
-    optionB.textContent = team.name;
-
-    teamASelect.appendChild(optionA);
-    teamBSelect.appendChild(optionB);
+  const teamSelect1 = document.getElementById('customTeamA');
+  const teamSelect2 = document.getElementById('customTeamB');
+  
+  if (!teamSelect1 || !teamSelect2) return;
+  
+  // Get teams from either DRAWN_TEAMS or TEAM_POOL
+  const availableTeams = window.DRAWN_TEAMS && window.DRAWN_TEAMS.length > 0 
+    ? window.DRAWN_TEAMS 
+    : (typeof TEAM_POOL !== 'undefined' ? TEAM_POOL : []);
+  
+  if (availableTeams.length === 0) {
+    console.warn('⚠️ No teams available for custom match');
+    return;
+  }
+  
+  // Clear existing options except the placeholder
+  teamSelect1.innerHTML = '<option value="">-- Select Team A --</option>';
+  teamSelect2.innerHTML = '<option value="">-- Select Team B --</option>';
+  
+  // Sort teams alphabetically
+  const sortedTeams = [...availableTeams].sort((a, b) => {
+    const nameA = a.name || 'Unknown';
+    const nameB = b.name || 'Unknown';
+    return nameA.localeCompare(nameB);
   });
+  
+  // Add options with proper validation
+  sortedTeams.forEach(team => {
+    if (!team || !team.name) return; // Skip invalid teams
+    
+    const teamName = team.name;
+    const teamSeason = team.season || 'Unknown Era';
+    
+    // Create option with clean display text
+    const option1 = document.createElement('option');
+    option1.value = teamName;
+    option1.textContent = `${teamName} (${teamSeason})`;
+    teamSelect1.appendChild(option1);
+    
+    const option2 = document.createElement('option');
+    option2.value = teamName;
+    option2.textContent = `${teamName} (${teamSeason})`;
+    teamSelect2.appendChild(option2);
+  });
+  
+  console.log(`✅ Custom match dropdowns populated with ${sortedTeams.length} teams`);
 }
-
 function updateTeamComparison() {
   const teamASelect = document.getElementById("customTeamA");
   const teamBSelect = document.getElementById("customTeamB");
@@ -10044,57 +10305,75 @@ function showUtilityMessage(message, type = 'info') {
   }, 4000);
 }
 function openCustomMatchModal() {
-  console.log("🎮 Opening custom match modal");
+  // Populate dropdowns first
+  populateCustomMatchDropdowns();
   
-  if (!window.DRAWN_TEAMS || window.DRAWN_TEAMS.length < 2) {
-    showUtilityMessage('⚠️ Generate groups first!', 'warning');
+  // Open the modal
+  if (typeof ModalManager !== 'undefined' && ModalManager.open) {
+    ModalManager.open('customMatchModal');
+  } else {
+    const modal = document.getElementById('customMatchModal');
+    if (modal) {
+      modal.style.display = 'flex';
+      setTimeout(() => modal.classList.add('active'), 10);
+    }
+  }
+  
+  console.log('✅ Custom match modal opened');
+}
+
+function simulateCustomMatchHandler() {
+  const teamASelect = document.getElementById('customTeamA');
+  const teamBSelect = document.getElementById('customTeamB');
+  
+  if (!teamASelect || !teamBSelect) {
+    showUtilityMessage('❌ Team selection not found', 'error');
     return;
   }
-
-  // Remove existing modal if any
-  const existing = document.getElementById('customMatchModal');
-  if (existing) existing.remove();
-
-  const modal = document.createElement('div');
-  modal.id = 'customMatchModal';
-  modal.className = 'modal-backdrop';
-  modal.style.cssText = `
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.85); display: flex; justify-content: center;
-    align-items: center; z-index: 10000; backdrop-filter: blur(5px);
-  `;
-
-  const teamOptions = window.DRAWN_TEAMS.map(t => 
-    `<option value="${t.name}">${t.name} (${t.overall})</option>`
-  ).join('');
-
-  modal.innerHTML = `
-    <div style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; border: 2px solid #3b82f6;">
-      <h3 style="margin: 0 0 20px 0; color: #60a5fa;">⚽ Custom Match</h3>
+  
+  const teamAName = teamASelect.value;
+  const teamBName = teamBSelect.value;
+  
+  if (!teamAName || !teamBName) {
+    showUtilityMessage('⚠️ Please select both teams', 'warning');
+    return;
+  }
+  
+  if (teamAName === teamBName) {
+    showUtilityMessage('⚠️ Please select different teams', 'warning');
+    return;
+  }
+  
+  // Find team objects
+  const availableTeams = window.DRAWN_TEAMS || TEAM_POOL || [];
+  const teamA = availableTeams.find(t => t.name === teamAName);
+  const teamB = availableTeams.find(t => t.name === teamBName);
+  
+  if (!teamA || !teamB) {
+    showUtilityMessage('❌ Team data not found', 'error');
+    return;
+  }
+  
+  // Simulate the match
+  if (typeof simulateMatch === 'function') {
+    console.log(`⚽ Simulating: ${teamAName} vs ${teamBName}`);
+    
+    const result = simulateMatch(teamA, teamB, false, 1.0, 'clear');
+    
+    if (result && result.matchId) {
+      // Close modal
+      closeCustomMatch();
       
-      <div style="margin-bottom: 15px;">
-        <label style="display: block; color: #94a3b8; margin-bottom: 8px;">Home Team</label>
-        <select id="customTeamA" style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #475569; border-radius: 6px; color: white;">
-          ${teamOptions}
-        </select>
-      </div>
+      // Show match details
+      setTimeout(() => {
+        viewMatchDetails(result.matchId);
+      }, 300);
       
-      <div style="margin-bottom: 20px;">
-        <label style="display: block; color: #94a3b8; margin-bottom: 8px;">Away Team</label>
-        <select id="customTeamB" style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #475569; border-radius: 6px; color: white;">
-          ${teamOptions}
-        </select>
-      </div>
-
-      <div style="display: flex; gap: 10px;">
-        <button onclick="closeCustomMatch()" class="btn-secondary" style="flex: 1; padding: 10px;">Cancel</button>
-        <button onclick="runCustomMatch()" class="btn-primary" style="flex: 1; padding: 10px;">⚽ Simulate</button>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(modal);
-  console.log("✅ Modal created");
+      showUtilityMessage(`✅ Match simulated: ${teamAName} ${result.scoreA} - ${result.scoreB} ${teamBName}`, 'success');
+    }
+  } else {
+    showUtilityMessage('❌ Match simulation function not available', 'error');
+  }
 }
 
 function closeCustomMatch() {
@@ -12054,8 +12333,7 @@ function filterMatchesByStage(stage) {
   html += `</div>`;
   out.innerHTML = html;
 }
-
-function showTournamentBracket() {
+function showTournamentBracketFixed() {
   const out = document.getElementById('output');
   if (!out) return;
 
@@ -12078,16 +12356,23 @@ function showTournamentBracket() {
   let html = `
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
       <h2>🏆 Tournament Bracket</h2>
-      <button onclick="showTournamentOverview()" class="btn-secondary" style="padding: 6px 12px;">
-        📅 View All Matches
-      </button>
+      <div style="display: flex; gap: 8px;">
+        <button onclick="showSimpleBracket()" class="btn-secondary" style="padding: 8px 12px;">
+          🏀 Simple View
+        </button>
+        <button onclick="showTournamentOverview()" class="btn-secondary" style="padding: 8px 12px;">
+          📅 All Matches
+        </button>
+      </div>
     </div>
 
-    <div style="background: #2d3748; padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #f59e0b;">
-      🏆 <strong>Champion:</strong> ${window.TOURNAMENT.champion?.name || 'TBD'}
+    <div style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; border: 2px solid #fbbf24;">
+      <div style="font-size: 1.5em; color: white; font-weight: bold;">
+        🏆 CHAMPION: ${window.TOURNAMENT.champion?.name || 'TBD'}
+      </div>
     </div>
 
-    <div class="bracket-container">
+    <div class="bracket-container" style="display: flex; gap: 20px; overflow-x: auto; padding: 20px; background: #0f172a; border-radius: 12px;">
   `;
 
   bracket.forEach(roundData => {
@@ -12097,11 +12382,11 @@ function showTournamentBracket() {
     if (matches.length === 0) return;
 
     html += `
-      <div class="bracket-round">
-        <h3 style="margin: 0 0 10px 0; color: #e5e7eb; font-size: 1.1rem; text-align: center; padding: 8px; background: rgba(59, 130, 246, 0.2); border-radius: 8px;">
+      <div class="bracket-round" style="flex: 1; min-width: 250px;">
+        <h3 style="text-align: center; color: #60a5fa; margin-bottom: 15px; font-size: 1.1em; padding: 10px; background: rgba(59, 130, 246, 0.2); border-radius: 8px;">
           ${roundName}
         </h3>
-        <div class="bracket-matches">
+        <div style="display: flex; flex-direction: column; gap: 20px;">
     `;
 
     matches.forEach(match => {
@@ -12112,54 +12397,106 @@ function showTournamentBracket() {
 
       if (isFinal) {
         const finalMatch = match.matchDetails || match;
+        const matchId = finalMatch.matchId || finalMatch.id;
+        
         html += `
-          <div class="bracket-match final-match" onclick="openMatchDetail('${finalMatch.matchId || finalMatch.id}')">
-            <div class="bracket-match-header" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white;">
+          <div onclick="viewMatchDetails('${matchId}')" 
+               style="background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 10px; overflow: hidden; border: 2px solid #f59e0b; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); cursor: pointer; transition: all 0.3s ease;"
+               onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 24px rgba(245, 158, 11, 0.5)'"
+               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(245, 158, 11, 0.3)'">
+            
+            <div style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 10px; text-align: center; color: white; font-weight: bold;">
               🏆 THE FINAL
             </div>
-            <div class="bracket-team ${finalMatch.scoreA > finalMatch.scoreB ? 'winner' : ''}">
-              <span class="team-name">${match.teamA?.name || 'Unknown'}</span>
-              <span class="team-score">${finalMatch.scoreA}</span>
-            </div>
-            <div class="bracket-team ${finalMatch.scoreB > finalMatch.scoreA ? 'winner' : ''}">
-              <span class="team-name">${match.teamB?.name || 'Unknown'}</span>
-              <span class="team-score">${finalMatch.scoreB}</span>
-            </div>
-            <div class="bracket-winner" style="background: #10b981; color: white; padding: 6px; text-align: center; font-weight: bold; border-radius: 0 0 8px 8px;">
-              🏆 ${winner}
+            
+            <div style="padding: 15px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 10px; background: ${finalMatch.scoreA > finalMatch.scoreB ? 'rgba(16, 185, 129, 0.2)' : 'rgba(30, 41, 59, 0.5)'}; border-radius: 6px; ${finalMatch.scoreA > finalMatch.scoreB ? 'border-left: 4px solid #10b981;' : ''}">
+                <span style="color: ${finalMatch.scoreA > finalMatch.scoreB ? '#10b981' : '#e5e7eb'}; font-weight: ${finalMatch.scoreA > finalMatch.scoreB ? 'bold' : '500'}; font-size: 1.05em;">
+                  ${match.teamA?.name || 'Unknown'}
+                </span>
+                <span style="color: white; font-weight: bold; font-size: 1.5em;">
+                  ${finalMatch.scoreA || 0}
+                </span>
+              </div>
+              
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: ${finalMatch.scoreB > finalMatch.scoreA ? 'rgba(16, 185, 129, 0.2)' : 'rgba(30, 41, 59, 0.5)'}; border-radius: 6px; ${finalMatch.scoreB > finalMatch.scoreA ? 'border-left: 4px solid #10b981;' : ''}">
+                <span style="color: ${finalMatch.scoreB > finalMatch.scoreA ? '#10b981' : '#e5e7eb'}; font-weight: ${finalMatch.scoreB > finalMatch.scoreA ? 'bold' : '500'}; font-size: 1.05em;">
+                  ${match.teamB?.name || 'Unknown'}
+                </span>
+                <span style="color: white; font-weight: bold; font-size: 1.5em;">
+                  ${finalMatch.scoreB || 0}
+                </span>
+              </div>
+
+              ${match.penaltiesUsed ? `
+                <div style="background: rgba(245, 158, 11, 0.2); padding: 8px; margin-top: 10px; text-align: center; color: #fbbf24; font-weight: bold; border-radius: 6px;">
+                  🎯 Penalties: ${match.penaltyScoreA}-${match.penaltyScoreB}
+                </div>
+              ` : ''}
+              
+              <div style="margin-top: 10px; text-align: center; color: #60a5fa; font-size: 0.9em;">
+                👆 Click for full match details
+              </div>
             </div>
           </div>
         `;
       } else {
-        // Two-leg tie
+        // Two-leg tie - make both legs clickable
         const firstLeg = match.firstLeg;
         const secondLeg = match.secondLeg;
-
+        const firstLegId = firstLeg?.matchId || firstLeg?.id;
+        const secondLegId = secondLeg?.matchId || secondLeg?.id;
+        
         html += `
-          <div class="bracket-match">
-            <div class="bracket-match-header">
+          <div style="background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 10px; overflow: hidden; border: 1px solid #374151; transition: all 0.2s ease;">
+            
+            <div style="background: rgba(59, 130, 246, 0.2); padding: 8px; text-align: center; color: #60a5fa; font-weight: 600; font-size: 0.9em;">
               ${roundName}
             </div>
             
-            <div class="bracket-team ${match.winner?.name === match.teamA?.name ? 'winner' : ''}">
-              <span class="team-name">${match.teamA?.name || 'Unknown'}</span>
-              <span class="team-score">${match.aggScoreA || 0}</span>
-            </div>
-            
-            <div class="bracket-team ${match.winner?.name === match.teamB?.name ? 'winner' : ''}">
-              <span class="team-name">${match.teamB?.name || 'Unknown'}</span>
-              <span class="team-score">${match.aggScoreB || 0}</span>
-            </div>
-
-            <div class="bracket-legs">
-              <div style="font-size: 0.75rem; color: #9ca3af; padding: 4px 8px;">
-                1st: ${firstLeg?.scoreA || 0}-${firstLeg?.scoreB || 0} • 
-                2nd: ${secondLeg?.scoreA || 0}-${secondLeg?.scoreB || 0}
+            <div style="padding: 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 10px; background: ${match.winner?.name === match.teamA?.name ? 'rgba(16, 185, 129, 0.15)' : 'rgba(30, 41, 59, 0.3)'}; border-radius: 6px; ${match.winner?.name === match.teamA?.name ? 'border-left: 3px solid #10b981;' : ''}">
+                <span style="color: ${match.winner?.name === match.teamA?.name ? '#10b981' : '#e5e7eb'}; font-weight: ${match.winner?.name === match.teamA?.name ? 'bold' : '500'};">
+                  ${match.teamA?.name || 'TBD'}
+                </span>
+                <span style="color: ${match.winner?.name === match.teamA?.name ? '#10b981' : 'white'}; font-weight: bold; font-size: 1.2em;">
+                  ${match.aggScoreA || 0}
+                </span>
               </div>
-            </div>
+              
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 10px; background: ${match.winner?.name === match.teamB?.name ? 'rgba(16, 185, 129, 0.15)' : 'rgba(30, 41, 59, 0.3)'}; border-radius: 6px; ${match.winner?.name === match.teamB?.name ? 'border-left: 3px solid #10b981;' : ''}">
+                <span style="color: ${match.winner?.name === match.teamB?.name ? '#10b981' : '#e5e7eb'}; font-weight: ${match.winner?.name === match.teamB?.name ? 'bold' : '500'};">
+                  ${match.teamB?.name || 'TBD'}
+                </span>
+                <span style="color: ${match.winner?.name === match.teamB?.name ? '#10b981' : 'white'}; font-weight: bold; font-size: 1.2em;">
+                  ${match.aggScoreB || 0}
+                </span>
+              </div>
 
-            <div class="bracket-winner">
-              → ${winner}
+              <!-- Clickable Legs -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                ${firstLegId ? `
+                  <button onclick="event.stopPropagation(); viewMatchDetails('${firstLegId}')" 
+                          class="btn-secondary" 
+                          style="padding: 6px; font-size: 0.8em; width: 100%;">
+                    1st Leg: ${firstLeg?.scoreA || 0}-${firstLeg?.scoreB || 0}
+                  </button>
+                ` : '<div></div>'}
+                
+                ${secondLegId ? `
+                  <button onclick="event.stopPropagation(); viewMatchDetails('${secondLegId}')" 
+                          class="btn-secondary" 
+                          style="padding: 6px; font-size: 0.8em; width: 100%;">
+                    2nd Leg: ${secondLeg?.scoreA || 0}-${secondLeg?.scoreB || 0}
+                  </button>
+                ` : '<div></div>'}
+              </div>
+
+              ${match.penaltiesUsed ? `
+                <div style="background: rgba(245, 158, 11, 0.15); padding: 6px; margin-top: 8px; text-align: center; color: #fbbf24; font-size: 0.85em; border-radius: 4px;">
+                  🎯 ${match.penaltyScoreA}-${match.penaltyScoreB} Pens
+                </div>
+              ` : ''}
             </div>
           </div>
         `;
@@ -12174,6 +12511,7 @@ function showTournamentBracket() {
 
   html += `</div>`;
   out.innerHTML = html;
+  console.log('✅ Tournament bracket rendered with clickable matches');
 }
 function showSimpleBracket() {
   const out = document.getElementById('output');

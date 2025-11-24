@@ -1393,6 +1393,7 @@
         name: "2009 Barcelona",
         season: 2009,
         strength: 95,
+        overall: 95,
         startingXI: [
           { name: "Víctor Valdés", pos: "GK", quality: 90 },
           { name: "Dani Alves", pos: "RB", quality: 94 },
@@ -1420,6 +1421,7 @@
         name: "2011 Barcelona",
         season: 2011,
         strength: 96,
+        overall: 96,
         startingXI: [
           { name: "Víctor Valdés", pos: "GK", quality: 91 },
           { name: "Dani Alves", pos: "RB", quality: 95 },
@@ -1447,6 +1449,7 @@
         name: "2005 AC Milan",
         season: 2005,
         strength: 93,
+        overall: 93,
         startingXI: [
           { name: "Dida", pos: "GK", quality: 90 },
           { name: "Cafu", pos: "RB", quality: 92 },
@@ -1474,6 +1477,7 @@
         name: "1994 AC Milan",
         season: 1994,
         strength: 94,
+        overall: 94,
         startingXI: [
           { name: "Sebastiano Rossi", pos: "GK", quality: 90 },
           { name: "Paolo Maldini", pos: "CB", quality: 95 },
@@ -1501,6 +1505,7 @@
         name: "1986 Steaua București",
         season: 1986,
         strength: 90,
+        overall: 90,
         startingXI: [
           { name: "Helmut Duckadam", pos: "GK", quality: 90 },
           { name: "Ștefan Iovan", pos: "RB", quality: 84 },
@@ -4190,7 +4195,51 @@ function exportTournament() {
     showUtilityMessage("Failed to export tournament.", "error");
   }
 }
+function downloadTournamentExport(encodedData) {
+  try {
+    // Decode the base64 data
+    const jsonString = atob(encodedData);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    
+    // Create download link
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tournament-export-${new Date().toISOString().slice(0, 10)}.json`;
+    
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    
+    URL.revokeObjectURL(url);
+    
+    showUtilityMessage('✅ Tournament exported successfully!', 'success');
+    console.log('✅ Tournament data downloaded');
+    
+  } catch (error) {
+    console.error('❌ Export download error:', error);
+    showUtilityMessage('❌ Export failed: ' + error.message, 'error');
+  }
+}
 
+function copyExportToClipboard(encodedData) {
+  try {
+    // Decode the base64 data for clipboard
+    const jsonString = atob(encodedData);
+    
+    navigator.clipboard.writeText(jsonString).then(() => {
+      showUtilityMessage('✅ Export data copied to clipboard!', 'success');
+      console.log('✅ Export data copied to clipboard');
+    }).catch(err => {
+      console.error('❌ Clipboard copy error:', err);
+      showUtilityMessage('❌ Failed to copy to clipboard', 'error');
+    });
+    
+  } catch (error) {
+    console.error('❌ Copy error:', error);
+    showUtilityMessage('❌ Copy failed: ' + error.message, 'error');
+  }
+}
 function resetTournament() {
   if (confirm("Are you sure you want to reset the tournament? All current progress will be lost.")) {
     performReset();
@@ -11285,22 +11334,170 @@ window.addEventListener('unhandledrejection', function (e) {
 })();
 
 /************* EXTRA UI HELPERS / DEFINITIONS *************/
-
 function showClubLegacy() {
   const out = document.getElementById('output');
   if (!out) return;
 
-  out.innerHTML = `
-    <div class="group-card">
-      <div class="group-title">🏛️ Club Legacy</div>
-      <div style="padding: 40px; text-align: center;">
-        <div style="font-size: 64px; margin-bottom: 20px;">🏆</div>
-        <p style="font-size: 1.2em; margin-bottom: 10px;"><strong>Club Legacy Records</strong></p>
-        <p style="color: #9ca3af; margin-bottom: 20px;">All-time club achievements across all tournaments.</p>
-        <button onclick="showTournamentOverview()" class="btn-primary">View Current Tournament</button>
+  // Collect all clubs with achievements
+  const clubs = new Set();
+  
+  if (CLUB_LEGACY_DB.champions) {
+    Object.keys(CLUB_LEGACY_DB.champions).forEach(club => clubs.add(club));
+  }
+  if (CLUB_LEGACY_DB.finals) {
+    Object.keys(CLUB_LEGACY_DB.finals).forEach(club => clubs.add(club));
+  }
+  if (CLUB_LEGACY_DB.semiFinals) {
+    Object.keys(CLUB_LEGACY_DB.semiFinals).forEach(club => clubs.add(club));
+  }
+  if (CLUB_LEGACY_DB.quarterFinals) {
+    Object.keys(CLUB_LEGACY_DB.quarterFinals).forEach(club => clubs.add(club));
+  }
+
+  if (clubs.size === 0) {
+    out.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🏛️</div>
+        <h2>No Legacy Data</h2>
+        <p class="output-sub">Complete tournaments to build club legacy records.</p>
+        <button onclick="showTournamentOverview()" class="btn-primary" style="margin-top: 15px;">
+          View Current Tournament
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  // Build legacy data array
+  const legacyData = Array.from(clubs).map(club => {
+    return {
+      club: club,
+      titles: CLUB_LEGACY_DB.champions?.[club] || 0,
+      finals: CLUB_LEGACY_DB.finals?.[club] || 0,
+      semis: CLUB_LEGACY_DB.semiFinals?.[club] || 0,
+      quarters: CLUB_LEGACY_DB.quarterFinals?.[club] || 0,
+      totalWins: CLUB_LEGACY_DB.totalWins?.[club] || 0
+    };
+  });
+
+  // Sort by titles (desc), then finals, then semis
+  legacyData.sort((a, b) => {
+    if (b.titles !== a.titles) return b.titles - a.titles;
+    if (b.finals !== a.finals) return b.finals - a.finals;
+    if (b.semis !== a.semis) return b.semis - a.semis;
+    return b.quarters - a.quarters;
+  });
+
+  let html = `
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2>🏛️ Club Legacy - All-Time Records</h2>
+      <div style="display: flex; gap: 8px;">
+        <button onclick="showTournamentOverview()" class="btn-secondary" style="padding: 8px 12px;">
+          📊 Current Tournament
+        </button>
+        <button onclick="showPlayerStats()" class="btn-secondary" style="padding: 8px 12px;">
+          📈 Player Stats
+        </button>
+      </div>
+    </div>
+
+    <div style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 20px; border-radius: 12px; border: 1px solid #475569; margin-bottom: 20px;">
+      <div style="text-align: center; margin-bottom: 15px;">
+        <h3 style="color: #fbbf24; margin: 0;">🏆 Hall of Champions</h3>
+        <p style="color: #94a3b8; font-size: 0.9em; margin-top: 5px;">
+          Tracking ${legacyData.length} clubs across all tournaments
+        </p>
+      </div>
+
+      <div class="legacy-table-container" style="overflow-x: auto;">
+        <table class="legacy-table" style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="background: rgba(59, 130, 246, 0.2); border-bottom: 2px solid #3b82f6;">
+              <th style="padding: 12px; text-align: left; color: #e5e7eb; font-weight: 600;">Rank</th>
+              <th style="padding: 12px; text-align: left; color: #e5e7eb; font-weight: 600;">Club</th>
+              <th style="padding: 12px; text-align: center; color: #fbbf24; font-weight: 600;">🏆 Titles</th>
+              <th style="padding: 12px; text-align: center; color: #9ca3af; font-weight: 600;">🥈 Finals</th>
+              <th style="padding: 12px; text-align: center; color: #cd7f32; font-weight: 600;">🥉 Semis</th>
+              <th style="padding: 12px; text-align: center; color: #6b7280; font-weight: 600;">📊 Quarters</th>
+              <th style="padding: 12px; text-align: center; color: #10b981; font-weight: 600;">💪 Total</th>
+            </tr>
+          </thead>
+          <tbody>
+  `;
+
+  legacyData.forEach((data, index) => {
+    const rank = index + 1;
+    const isTopThree = rank <= 3;
+    const rowBg = isTopThree 
+      ? 'background: rgba(245, 158, 11, 0.1); border-left: 3px solid #f59e0b;' 
+      : 'background: rgba(30, 41, 59, 0.3);';
+    
+    const rankDisplay = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+
+    html += `
+      <tr style="${rowBg} border-bottom: 1px solid #374151; transition: all 0.2s ease;"
+          onmouseover="this.style.background='rgba(59, 130, 246, 0.15)'"
+          onmouseout="this.style.background='${isTopThree ? 'rgba(245, 158, 11, 0.1)' : 'rgba(30, 41, 59, 0.3)'}'">
+        <td style="padding: 12px; color: #94a3b8; font-weight: bold; font-size: 1.1em;">
+          ${rankDisplay}
+        </td>
+        <td style="padding: 12px; color: #e5e7eb; font-weight: 600; font-size: 1em;">
+          ${data.club}
+        </td>
+        <td style="padding: 12px; text-align: center; color: ${data.titles > 0 ? '#fbbf24' : '#6b7280'}; font-weight: bold; font-size: 1.2em;">
+          ${data.titles || '-'}
+        </td>
+        <td style="padding: 12px; text-align: center; color: ${data.finals > 0 ? '#9ca3af' : '#6b7280'}; font-weight: 600;">
+          ${data.finals || '-'}
+        </td>
+        <td style="padding: 12px; text-align: center; color: ${data.semis > 0 ? '#cd7f32' : '#6b7280'}; font-weight: 600;">
+          ${data.semis || '-'}
+        </td>
+        <td style="padding: 12px; text-align: center; color: ${data.quarters > 0 ? '#6b7280' : '#4b5563'};">
+          ${data.quarters || '-'}
+        </td>
+        <td style="padding: 12px; text-align: center; color: #10b981; font-weight: bold; font-size: 1.1em;">
+          ${data.totalWins}
+        </td>
+      </tr>
+    `;
+  });
+
+  html += `
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px;">
+      <div style="background: rgba(245, 158, 11, 0.1); padding: 15px; border-radius: 8px; border: 1px solid #f59e0b; text-align: center;">
+        <div style="font-size: 2em; color: #fbbf24;">🏆</div>
+        <div style="font-size: 1.5em; font-weight: bold; color: #fbbf24; margin-top: 5px;">
+          ${legacyData.reduce((sum, d) => sum + d.titles, 0)}
+        </div>
+        <div style="color: #94a3b8; font-size: 0.9em; margin-top: 3px;">Total Titles</div>
+      </div>
+      
+      <div style="background: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 8px; border: 1px solid #3b82f6; text-align: center;">
+        <div style="font-size: 2em; color: #60a5fa;">🎯</div>
+        <div style="font-size: 1.5em; font-weight: bold; color: #60a5fa; margin-top: 5px;">
+          ${legacyData.length}
+        </div>
+        <div style="color: #94a3b8; font-size: 0.9em; margin-top: 3px;">Clubs Tracked</div>
+      </div>
+      
+      <div style="background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 8px; border: 1px solid #10b981; text-align: center;">
+        <div style="font-size: 2em; color: #10b981;">📊</div>
+        <div style="font-size: 1.5em; font-weight: bold; color: #10b981; margin-top: 5px;">
+          ${legacyData.reduce((sum, d) => sum + d.totalWins, 0)}
+        </div>
+        <div style="color: #94a3b8; font-size: 0.9em; margin-top: 3px;">Total Achievements</div>
       </div>
     </div>
   `;
+
+  out.innerHTML = html;
+  console.log('✅ Club legacy table rendered with', legacyData.length, 'clubs');
 }
 function showTournamentOverview() {
   const out = document.getElementById('output');
@@ -11596,13 +11793,15 @@ function generateMatchCard(match, matchNumber) {
             <span style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; padding: 3px 10px; border-radius: 12px; font-size: 0.8em;">
               🔥 ${match.importance}x
             </span>
-          ` : ''}
-            <!-- View Details Button -->
+     ` : ''}
+        </div>
+      </div>
+
+      <!-- View Details Button -->
       <div style="margin-top: 10px; text-align: center; padding-top: 10px; border-top: 1px solid #374151;">
-        <button onclick="openMatchDetail('${match.id}')" class="btn-secondary" style="padding: 6px 20px; font-size: 0.85em;">
+        <button onclick="openMatchDetail('${match.matchId || match.id}')" class="btn-secondary" style="padding: 6px 20px; font-size: 0.85em;">
           📊 View Full Details
         </button>
-        </div>
       </div>
 
     <!-- Score Display -->
@@ -11991,20 +12190,143 @@ function showSimpleBracket() {
     return;
   }
 
-  out.innerHTML = `
+  const bracket = window.TOURNAMENT.bracket;
+  const champion = window.TOURNAMENT.champion?.name || 'TBD';
+
+  let html = `
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-      <h2>🏀 Simple Bracket</h2>
+      <h2>🏀 Tournament Bracket</h2>
       <button onclick="showTournamentBracket()" class="btn-secondary" style="padding: 8px 12px;">
         📋 Detailed View
       </button>
     </div>
 
-    <div style="background: #2d3748; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
-      🏆 <strong>CHAMPION: ${window.TOURNAMENT.champion?.name || 'TBD'}</strong>
+    <div style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; border: 2px solid #fbbf24;">
+      <div style="font-size: 1.5em; color: white; font-weight: bold;">
+        🏆 CHAMPION: ${champion}
+      </div>
     </div>
 
-    <p style="color: #94a3b8; text-align: center;">Bracket view coming soon...</p>
+    <div class="simple-bracket" style="display: flex; justify-content: space-around; gap: 20px; overflow-x: auto; padding: 20px; background: #0f172a; border-radius: 12px;">
   `;
+
+  // Render each round as a column
+  bracket.forEach((roundData, roundIndex) => {
+    const roundName = roundData.round;
+    const matches = roundData.matches || [];
+    
+    if (matches.length === 0) return;
+
+    const isFinal = roundName === 'Final';
+    
+    html += `
+      <div class="bracket-round-column" style="flex: 1; min-width: 200px;">
+        <h3 style="text-align: center; color: #60a5fa; margin-bottom: 15px; font-size: 1em; padding: 8px; background: rgba(59, 130, 246, 0.2); border-radius: 8px;">
+          ${roundName}
+        </h3>
+        <div style="display: flex; flex-direction: column; gap: ${isFinal ? '0' : '25px'};">
+    `;
+
+    matches.forEach((match, matchIndex) => {
+      if (!match) return;
+
+      const winner = match.winner?.name;
+      
+      if (isFinal) {
+        // Final match - single game
+        const finalMatch = match.matchDetails || match;
+        const scoreA = finalMatch.scoreA || 0;
+        const scoreB = finalMatch.scoreB || 0;
+        const teamAWon = scoreA > scoreB;
+        const teamBWon = scoreB > scoreA;
+        
+        html += `
+          <div style="background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 10px; overflow: hidden; border: 2px solid #f59e0b; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
+            <div style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 8px; text-align: center; color: white; font-weight: bold; font-size: 0.9em;">
+              🏆 THE FINAL
+            </div>
+            
+            <div onclick="openMatchDetail('${finalMatch.matchId || finalMatch.id}')" style="cursor: pointer;">
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1px solid #374151; background: ${teamAWon ? 'rgba(16, 185, 129, 0.2)' : 'rgba(30, 41, 59, 0.5)'}; ${teamAWon ? 'border-left: 4px solid #10b981;' : ''}">
+                <span style="color: ${teamAWon ? '#10b981' : '#e5e7eb'}; font-weight: ${teamAWon ? 'bold' : '500'}; font-size: 0.95em;">
+                  ${match.teamA?.name || 'Unknown'}
+                </span>
+                <span style="color: white; font-weight: bold; font-size: 1.2em; min-width: 25px; text-align: center;">
+                  ${scoreA}
+                </span>
+              </div>
+              
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: ${teamBWon ? 'rgba(16, 185, 129, 0.2)' : 'rgba(30, 41, 59, 0.5)'}; ${teamBWon ? 'border-left: 4px solid #10b981;' : ''}">
+                <span style="color: ${teamBWon ? '#10b981' : '#e5e7eb'}; font-weight: ${teamBWon ? 'bold' : '500'}; font-size: 0.95em;">
+                  ${match.teamB?.name || 'Unknown'}
+                </span>
+                <span style="color: white; font-weight: bold; font-size: 1.2em; min-width: 25px; text-align: center;">
+                  ${scoreB}
+                </span>
+              </div>
+            </div>
+
+            ${match.penaltiesUsed ? `
+              <div style="background: rgba(245, 158, 11, 0.2); padding: 6px; text-align: center; color: #fbbf24; font-size: 0.85em; border-top: 1px solid #f59e0b;">
+                🎯 Penalties: ${match.penaltyScoreA}-${match.penaltyScoreB}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      } else {
+        // Two-leg tie
+        const aggScoreA = match.aggScoreA || 0;
+        const aggScoreB = match.aggScoreB || 0;
+        const teamAWon = winner === match.teamA?.name;
+        const teamBWon = winner === match.teamB?.name;
+        
+        html += `
+          <div style="background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 8px; overflow: hidden; border: 1px solid #374151; transition: all 0.2s ease;"
+               onmouseover="this.style.borderColor='#3b82f6'; this.style.transform='translateY(-2px)'"
+               onmouseout="this.style.borderColor='#374151'; this.style.transform='translateY(0)'">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1px solid #374151; background: ${teamAWon ? 'rgba(16, 185, 129, 0.15)' : 'rgba(30, 41, 59, 0.3)'}; ${teamAWon ? 'border-left: 3px solid #10b981;' : ''}">
+              <span style="color: ${teamAWon ? '#10b981' : '#e5e7eb'}; font-weight: ${teamAWon ? 'bold' : '500'}; font-size: 0.9em;">
+                ${match.teamA?.name || 'TBD'}
+              </span>
+              <span style="color: ${teamAWon ? '#10b981' : 'white'}; font-weight: bold; font-size: 1.1em; min-width: 25px; text-align: center;">
+                ${aggScoreA}
+              </span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: ${teamBWon ? 'rgba(16, 185, 129, 0.15)' : 'rgba(30, 41, 59, 0.3)'}; ${teamBWon ? 'border-left: 3px solid #10b981;' : ''}">
+              <span style="color: ${teamBWon ? '#10b981' : '#e5e7eb'}; font-weight: ${teamBWon ? 'bold' : '500'}; font-size: 0.9em;">
+                ${match.teamB?.name || 'TBD'}
+              </span>
+              <span style="color: ${teamBWon ? '#10b981' : 'white'}; font-weight: bold; font-size: 1.1em; min-width: 25px; text-align: center;">
+                ${aggScoreB}
+              </span>
+            </div>
+
+            ${match.penaltiesUsed ? `
+              <div style="background: rgba(245, 158, 11, 0.15); padding: 4px 8px; text-align: center; color: #fbbf24; font-size: 0.8em; border-top: 1px solid #374151;">
+                🎯 ${match.penaltyScoreA}-${match.penaltyScoreB} Pens
+              </div>
+            ` : `
+              <div style="padding: 4px 8px; text-align: center; color: #6b7280; font-size: 0.75em; border-top: 1px solid #374151;">
+                Agg: ${aggScoreA}-${aggScoreB}
+              </div>
+            `}
+          </div>
+        `;
+      }
+    });
+
+    html += `
+        </div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+  
+  out.innerHTML = html;
+  console.log('✅ Simple bracket rendered');
 }
 function showCustomMatchInterface() {
   openCustomMatch();
@@ -12148,7 +12470,7 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   // Connect all main buttons
-  connectViewButton('btnDraw', startTournament, 'Generate Groups');
+  connectViewButton('btnDraw', handleGenerateGroups, 'Generate Groups');
   connectViewButton('btnGroupStage', runGroupStage, 'Group Stage');
   connectViewButton('btnKnockouts', runKnockouts, 'Knockouts');
   connectViewButton('btnStats', showPlayerStats, 'Player Stats');

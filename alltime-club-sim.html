@@ -8868,12 +8868,15 @@ function generateMatchSummary(matchData, teamA, teamB) {
     .substr(2, 9)}`;
     MATCH_DETAILS_DB[matchId] = {
     id: matchId,
+    matchId: matchId,
     teamA: teamA.name,
     teamB: teamB.name,
     teamAObj: teamA,
     teamBObj: teamB,
-    scoreA: finalGoalsA,
-    scoreB: finalGoalsB,
+    scoreA: Number(finalGoalsA) || 0,
+    scoreB: Number(finalGoalsB) || 0,
+    goalsA: (Array.isArray(matchEvents?.goals) ? matchEvents.goals.filter(e => e.teamId === teamA.name || e.team === teamA.name) : []),
+    goalsB: (Array.isArray(matchEvents?.goals) ? matchEvents.goals.filter(e => e.teamId === teamB.name || e.team === teamB.name) : []),
     isHome,
     events: matchEvents,
     playerOfTheGame: determinePlayerOfTheGame(matchEvents, teamA, teamB),
@@ -9548,7 +9551,13 @@ function simulateKnockoutRounds(teams) {
       matches: results.final ? [results.final] : []
     });
 
-    results.champion = results.final?.winner || null;
+    // Ensure champion is properly formatted
+    const rawChampion = results.final?.winner || null;
+    results.champion = rawChampion ? {
+      name: rawChampion.name || rawChampion,
+      season: rawChampion.season || 'Unknown Era',
+      strength: rawChampion.strength || rawChampion.overall || 0
+    } : null;
 
     if (results.champion) {
       console.log(`🎉 TOURNAMENT CHAMPION: ${results.champion.name} 🏆`);
@@ -15558,8 +15567,240 @@ document.addEventListener('DOMContentLoaded', function () {
     themeToggle.addEventListener('click', toggleTheme);
   }
 
+  // Initialize new features
+  fixDuplicateButtons();
+  injectTopPerformerStyles();
+  injectEnhancedLayoutStyles();
+  populateCustomMatchDropdowns();
+
   console.log("🎉 Simulator initialized successfully!");
 });
+
+/************* COMPLETE FIXES SCRIPT *************/
+
+// Fix duplicate buttons
+function fixDuplicateButtons() {
+  const buttons = document.querySelectorAll('button');
+  const seen = new Map();
+
+  buttons.forEach(btn => {
+    const text = btn.textContent.trim();
+    if (text && seen.has(text)) {
+      const existing = seen.get(text);
+      if (existing.onclick === btn.onclick && existing.parentElement === btn.parentElement) {
+        btn.remove();
+        console.log('Removed duplicate button:', text);
+      }
+    } else if (text) {
+      seen.set(text, btn);
+    }
+  });
+}
+
+// Inject top performer styles
+function injectTopPerformerStyles() {
+  const styleId = 'top-performer-styles';
+  if (document.getElementById(styleId)) return;
+
+  const style = document.createElement('style');
+  style.id = styleId;
+  style.textContent = `
+    .top-performers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      padding: 20px 0;
+    }
+
+    .performer-card {
+      position: relative;
+      overflow: visible;
+    }
+
+    .performer-rank-badge {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.1em;
+      color: #000;
+      box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+      z-index: 10;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+// Inject enhanced layout styles
+function injectEnhancedLayoutStyles() {
+  const styleId = 'enhanced-layout-styles';
+  if (document.getElementById(styleId)) return;
+
+  const style = document.createElement('style');
+  style.id = styleId;
+  style.textContent = `
+    /* Enhanced match card styling */
+    .match-card-enhanced {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .match-card-enhanced:hover {
+      border-color: rgba(16, 185, 129, 0.6);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.2);
+    }
+
+    /* Enhanced button styling */
+    .btn-enhanced {
+      background: linear-gradient(135deg, #10b981, #059669);
+      border: none;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-enhanced:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-enhanced:active {
+      transform: translateY(0);
+    }
+
+    /* Modal improvements */
+    .modal-backdrop.active {
+      backdrop-filter: blur(8px);
+      background: rgba(0, 0, 0, 0.7);
+    }
+
+    .modal-content {
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    /* Scrollbar styling */
+    .modal-content::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .modal-content::-webkit-scrollbar-track {
+      background: rgba(30, 41, 59, 0.5);
+      border-radius: 4px;
+    }
+
+    .modal-content::-webkit-scrollbar-thumb {
+      background: rgba(16, 185, 129, 0.5);
+      border-radius: 4px;
+    }
+
+    .modal-content::-webkit-scrollbar-thumb:hover {
+      background: rgba(16, 185, 129, 0.7);
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+// Enhanced statistics display
+function showEnhancedStatistics() {
+  const out = document.getElementById('output');
+  if (!out) return;
+
+  const stats = calculateTournamentStats();
+  if (!stats) {
+    showPlayerStats();
+    return;
+  }
+
+  // Show both tournament stats and player stats
+  let html = `
+    <div style="margin-bottom: 30px;">
+      <h2 style="color: #10b981; margin-bottom: 20px;">📊 Tournament Statistics</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
+        <div class="stat-card">
+          <div class="stat-value">${stats.goalsPerGame}</div>
+          <div class="stat-label">Goals Per Game</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${stats.biggestWin.diff}</div>
+          <div class="stat-label">Biggest Win</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${stats.cleanSheets}</div>
+          <div class="stat-label">Clean Sheets</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${stats.totalMatches}</div>
+          <div class="stat-label">Total Matches</div>
+        </div>
+      </div>
+
+      <button onclick="showPlayerStats()" class="btn-enhanced" style="margin-top: 20px;">
+        📈 View Player Stats
+      </button>
+    </div>
+  `;
+
+  out.innerHTML = html;
+}
+
+// Ensure champion is properly formatted
+function ensureChampionFormat(championData) {
+  if (!championData) return null;
+
+  if (typeof championData === 'string') {
+    return {
+      name: championData,
+      season: 'Unknown Era',
+      strength: 0
+    };
+  }
+
+  if (typeof championData === 'object') {
+    return {
+      name: championData.name || 'Unknown',
+      season: championData.season || 'Unknown Era',
+      strength: championData.strength || championData.overall || 0
+    };
+  }
+
+  return null;
+}
+
+// Fix match details to ensure numeric scores
+function ensureMatchDetailsFormat(matchDetails) {
+  if (!matchDetails) return null;
+
+  return {
+    ...matchDetails,
+    scoreA: Number(matchDetails.scoreA) || 0,
+    scoreB: Number(matchDetails.scoreB) || 0,
+    goalsA: matchDetails.goalsA || [],
+    goalsB: matchDetails.goalsB || [],
+    teamA: matchDetails.teamA || 'Unknown',
+    teamB: matchDetails.teamB || 'Unknown'
+  };
+}
+
+console.log('✅ Complete fixes script loaded');
+
 </script>
 </body>
 </html>

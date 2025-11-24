@@ -6,6 +6,35 @@
   <title>All-Time Football Simulator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    :root {
+      /* Primary Actions */
+      --color-primary: #10b981;
+      --color-secondary: #3b82f6;
+      --color-accent: #f59e0b;
+      --color-danger: #ef4444;
+      --color-purple: #a855f7;
+
+      /* Tournament Stage Colors */
+      --color-groups: #3b82f6;
+      --color-knockout: #f59e0b;
+      --color-final: #fbbf24;
+
+      /* Status Colors */
+      --color-win: #10b981;
+      --color-draw: #94a3b8;
+      --color-loss: #ef4444;
+
+      /* Background Layers */
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-tertiary: #334155;
+
+      /* Text Colors */
+      --text-primary: #f7fafc;
+      --text-secondary: #d1d5db;
+      --text-muted: #9ca3af;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -213,6 +242,8 @@
       max-height: calc(100vh - 40px);
       overflow-y: auto;
       overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
     .sidebar::-webkit-scrollbar {
@@ -318,12 +349,40 @@
       border-radius: 2px;
     }
 
+    .sidebar-tabs {
+      flex-shrink: 0;
+    }
+
     .tab-content {
       display: none;
+      overflow-y: auto;
+      overflow-x: hidden;
+      flex: 1;
+      min-height: 0;
+      padding-right: 4px;
     }
 
     .tab-content.active {
-      display: block;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tab-content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .tab-content::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.3);
+      border-radius: 3px;
+    }
+
+    .tab-content::-webkit-scrollbar-thumb {
+      background: rgba(59, 130, 246, 0.5);
+      border-radius: 3px;
+    }
+
+    .tab-content::-webkit-scrollbar-thumb:hover {
+      background: rgba(59, 130, 246, 0.7);
     }
 
     .control-column {
@@ -331,6 +390,8 @@
       flex-direction: column;
       gap: 10px;
       margin-top: 8px;
+      width: 100%;
+      overflow-x: hidden;
     }
 
     .ctrl-btn {
@@ -2307,6 +2368,204 @@
     .control-btn-sim:active {
       transform: translateY(0);
     }
+
+    /* Tournament Progress Indicator */
+    .tournament-progress-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      background: linear-gradient(135deg, var(--bg-secondary), var(--bg-primary));
+      border-radius: 12px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tournament-progress-bar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--color-groups), var(--color-knockout), var(--color-final));
+    }
+
+    .progress-step {
+      flex: 1;
+      text-align: center;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.9em;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .progress-step:not(:last-child)::after {
+      content: '→';
+      position: absolute;
+      right: -12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255, 255, 255, 0.2);
+      font-size: 1.2em;
+    }
+
+    .progress-step.completed {
+      color: var(--color-primary);
+      background: rgba(16, 185, 129, 0.1);
+    }
+
+    .progress-step.active {
+      color: var(--text-primary);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(59, 130, 246, 0.2));
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+      transform: scale(1.05);
+    }
+
+    .progress-step.pending {
+      opacity: 0.5;
+    }
+
+    /* Smart Notifications */
+    .notification-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 400px;
+    }
+
+    .notification {
+      background: linear-gradient(135deg, var(--bg-secondary), var(--bg-primary));
+      border-radius: 12px;
+      padding: 16px 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      border-left: 4px solid var(--color-primary);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: slideIn 0.3s ease;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .notification:hover {
+      transform: translateX(-4px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    .notification.notification-goal {
+      border-left-color: var(--color-primary);
+    }
+
+    .notification.notification-upset {
+      border-left-color: var(--color-accent);
+    }
+
+    .notification.notification-milestone {
+      border-left-color: var(--color-final);
+    }
+
+    .notification.notification-achievement {
+      border-left-color: var(--color-purple);
+    }
+
+    .notification-icon {
+      font-size: 1.5em;
+      flex-shrink: 0;
+    }
+
+    .notification-content {
+      flex: 1;
+    }
+
+    .notification-title {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .notification-message {
+      font-size: 0.9em;
+      color: var(--text-muted);
+    }
+
+    .notification-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.2em;
+      padding: 0;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .notification-close:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-primary);
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+
+    .notification.removing {
+      animation: slideOut 0.3s ease forwards;
+    }
+
+    @media (max-width: 768px) {
+      .tournament-progress-bar {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .progress-step {
+        flex: 0 0 calc(33.333% - 6px);
+        font-size: 0.75em;
+      }
+
+      .progress-step:not(:last-child)::after {
+        display: none;
+      }
+
+      .notification-container {
+        left: 10px;
+        right: 10px;
+        max-width: none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -2328,6 +2587,19 @@
       </div>
     </div>
   </header>
+
+  <!-- Tournament Progress Indicator -->
+  <div class="tournament-progress-bar" id="tournamentProgress" style="display: none;">
+    <div class="progress-step pending" data-stage="groups">📊 Groups</div>
+    <div class="progress-step pending" data-stage="r32">🏆 R32</div>
+    <div class="progress-step pending" data-stage="r16">🥇 R16</div>
+    <div class="progress-step pending" data-stage="qf">🏅 QF</div>
+    <div class="progress-step pending" data-stage="sf">⭐ SF</div>
+    <div class="progress-step pending" data-stage="final">👑 Final</div>
+  </div>
+
+  <!-- Notification Container -->
+  <div class="notification-container" id="notificationContainer"></div>
 
   <div class="layout">
     <aside class="sidebar">
@@ -5437,7 +5709,9 @@ const ACHIEVEMENTS = {
     check: (data) => {
       if (!data.groupResults) return false;
       return Object.values(data.groupResults).some(group => {
-        const winner = group.standings[0];
+        const standings = group.teams || group.standings || [];
+        if (standings.length === 0) return false;
+        const winner = standings[0];
         return winner && winner.wins === 6 && winner.losses === 0;
       });
     }
@@ -8879,6 +9153,20 @@ function determinePlayerOfTheGame(matchEvents, teamA, teamB) {
     rating = Math.min(10, Math.max(1, rating));
     performance.finalRating = Math.round(rating * 10) / 10;
 
+    // Update avgRating for ALL players who played (not just POTG)
+    const playerKey = `${performance.team}::${performance.player}`;
+    if (PLAYER_DB[playerKey]) {
+      // Ensure player has apps count
+      if (!PLAYER_DB[playerKey].apps || PLAYER_DB[playerKey].apps === 0) {
+        PLAYER_DB[playerKey].apps = 1;
+      }
+
+      const currentApps = PLAYER_DB[playerKey].apps;
+      const currentTotal = (PLAYER_DB[playerKey].avgRating || 0) * (currentApps - 1);
+      PLAYER_DB[playerKey].avgRating = (currentTotal + performance.finalRating) / currentApps;
+      PLAYER_DB[playerKey].avgRating = Math.round(PLAYER_DB[playerKey].avgRating * 10) / 10;
+    }
+
     if (rating > bestRating) {
       bestRating = rating;
       bestPlayer = {
@@ -9305,57 +9593,61 @@ function organizeGroupMatchesIntoWeeks(matches, groupName) {
     return [];
   }
 
-  // In a 4-team group round-robin: 6 matchdays, 2 matches per matchday
-  // Matchday 1-3: First round, Matchday 4-6: Return fixtures
-  const homeMatches = matches.filter(m => m.type === 'home').map(m => m.match || m);
-  const awayMatches = matches.filter(m => m.type === 'away').map(m => m.match || m);
+  // Get all matches (unwrap from type wrappers)
+  const allMatches = matches.map(m => m.match || m);
+
+  // For a 4-team round-robin: 6 total matches
+  // Proper matchday schedule where each team plays once per matchday:
+  // In a 4-team group (A, B, C, D), the standard schedule is:
+  // MD1: A-B, C-D
+  // MD2: A-C, B-D
+  // MD3: A-D, B-C
+  // Then return fixtures in MD4-6
 
   const matchdays = [];
+  const usedMatches = new Set();
 
-  // Matchdays 1-3: First round (2 matches per matchday, each team plays once)
-  for (let day = 1; day <= 3; day++) {
-    const dayMatches = [];
-
-    // Take 2 matches from home matches for this matchday
-    const startIdx = (day - 1) * 2;
-    const endIdx = day * 2;
-
-    homeMatches.slice(startIdx, endIdx).forEach(match => {
-      dayMatches.push({
-        ...match,
-        matchday: day,
-        group: groupName,
-        matchweek: `Matchday ${day}`,
-        timestamp: new Date().toISOString()
-      });
-    });
-
-    if (dayMatches.length > 0) {
-      matchdays.push({
-        week: day,
-        name: `${groupName} - Matchday ${day}`,
-        matches: dayMatches,
-        group: groupName
-      });
+  // Function to check if any team appears twice in a matchday
+  const teamsInMatches = (matchList) => {
+    const teams = new Set();
+    for (const match of matchList) {
+      const teamA = match.teamA?.name || match.teamA;
+      const teamB = match.teamB?.name || match.teamB;
+      if (teams.has(teamA) || teams.has(teamB)) {
+        return false; // Team appears twice
+      }
+      teams.add(teamA);
+      teams.add(teamB);
     }
-  }
+    return true; // All teams unique
+  };
 
-  // Matchdays 4-6: Return fixtures (2 matches per matchday)
-  for (let day = 4; day <= 6; day++) {
+  // Organize matches into 6 matchdays ensuring no team plays twice per day
+  for (let day = 1; day <= 6; day++) {
     const dayMatches = [];
 
-    const startIdx = (day - 4) * 2;
-    const endIdx = (day - 3) * 2;
+    // Try to assign 2 matches to this matchday where no team plays twice
+    for (const match of allMatches) {
+      if (usedMatches.has(match.matchId)) continue;
 
-    awayMatches.slice(startIdx, endIdx).forEach(match => {
-      dayMatches.push({
-        ...match,
-        matchday: day,
-        group: groupName,
-        matchweek: `Matchday ${day}`,
-        timestamp: new Date().toISOString()
-      });
-    });
+      const teamA = match.teamA?.name || match.teamA;
+      const teamB = match.teamB?.name || match.teamB;
+
+      // Check if adding this match would cause a team to play twice
+      const tempMatches = [...dayMatches, match];
+      if (teamsInMatches(tempMatches)) {
+        dayMatches.push({
+          ...match,
+          matchday: day,
+          group: groupName,
+          matchweek: `Matchday ${day}`,
+          timestamp: new Date().toISOString()
+        });
+        usedMatches.add(match.matchId);
+
+        if (dayMatches.length >= 2) break; // 2 matches per matchday
+      }
+    }
 
     if (dayMatches.length > 0) {
       matchdays.push({
@@ -14286,7 +14578,7 @@ function generateGlobalMatchWeekCard(week, weekIndex) {
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 2px solid #374151;">
         <div>
           <h3 style="margin: 0; color: #e5e7eb; font-size: 1.2em;">
-            📅 Matchweek ${weekNumber}
+            📅 Matchday ${weekNumber}
           </h3>
           <div style="color: #9ca3af; font-size: 0.85em; margin-top: 3px;">
             ${weekMatches.length} matches across all groups
@@ -14786,7 +15078,7 @@ function showTournamentOverview() {
         <h2>📊 All Match Results</h2>
         <div style="display: flex; gap: 8px;">
           <button onclick="showMatchWeeks()" class="btn-secondary" style="padding: 8px 12px;">
-            📅 Match Weeks
+            📅 Matchdays
           </button>
           <button onclick="showPlayerStats()" class="btn-secondary" style="padding: 8px 12px;">
             📈 Statistics
@@ -16031,6 +16323,137 @@ function ensureMatchDetailsFormat(matchDetails) {
 
 console.log('✅ Complete fixes script loaded');
 
+</script>
+<script>
+// Tournament Progress Indicator Management
+function updateTournamentProgress(stage) {
+  const progressBar = document.getElementById('tournamentProgress');
+  if (!progressBar) return;
+
+  // Show the progress bar
+  progressBar.style.display = 'flex';
+
+  const stages = ['groups', 'r32', 'r16', 'qf', 'sf', 'final'];
+  const currentIndex = stages.indexOf(stage);
+
+  if (currentIndex === -1) return;
+
+  const steps = progressBar.querySelectorAll('.progress-step');
+  steps.forEach((step, index) => {
+    step.classList.remove('completed', 'active', 'pending');
+
+    if (index < currentIndex) {
+      step.classList.add('completed');
+    } else if (index === currentIndex) {
+      step.classList.add('active');
+    } else {
+      step.classList.add('pending');
+    }
+  });
+}
+
+// Smart Notification System
+function showNotification(type, title, message, duration = 4000) {
+  const container = document.getElementById('notificationContainer');
+  if (!container) return;
+
+  const icons = {
+    goal: '⚽',
+    upset: '🚨',
+    milestone: '🎉',
+    achievement: '🏆',
+    tournament: '🏁',
+    info: 'ℹ️',
+    success: '✅',
+    warning: '⚠️',
+    error: '❌'
+  };
+
+  const notification = document.createElement('div');
+  notification.className = `notification notification-${type}`;
+  notification.innerHTML = `
+    <div class="notification-icon">${icons[type] || icons.info}</div>
+    <div class="notification-content">
+      <div class="notification-title">${title}</div>
+      <div class="notification-message">${message}</div>
+    </div>
+    <button class="notification-close" onclick="closeNotification(this)">✕</button>
+  `;
+
+  container.appendChild(notification);
+
+  // Auto-dismiss
+  if (duration > 0) {
+    setTimeout(() => {
+      closeNotification(notification.querySelector('.notification-close'));
+    }, duration);
+  }
+
+  // Click to dismiss
+  notification.addEventListener('click', (e) => {
+    if (!e.target.classList.contains('notification-close')) {
+      closeNotification(notification.querySelector('.notification-close'));
+    }
+  });
+}
+
+function closeNotification(closeBtn) {
+  const notification = closeBtn.closest('.notification');
+  if (!notification) return;
+
+  notification.classList.add('removing');
+  setTimeout(() => {
+    notification.remove();
+  }, 300);
+}
+
+// Hook into existing functions to show notifications
+const originalSimulateGroupStage = window.simulateGroupStage;
+if (originalSimulateGroupStage) {
+  window.simulateGroupStage = function(...args) {
+    updateTournamentProgress('groups');
+    const result = originalSimulateGroupStage.apply(this, args);
+    showNotification('tournament', 'Group Stage Complete', 'All groups have been simulated!', 3000);
+    return result;
+  };
+}
+
+const originalSimulateKnockoutRounds = window.simulateKnockoutRounds;
+if (originalSimulateKnockoutRounds) {
+  window.simulateKnockoutRounds = function(...args) {
+    const result = originalSimulateKnockoutRounds.apply(this, args);
+
+    if (result && result.champion) {
+      updateTournamentProgress('final');
+      showNotification('achievement', 'Tournament Complete!', `${result.champion.name} is the champion!`, 5000);
+    }
+
+    return result;
+  };
+}
+
+// Show progress indicator when groups are generated
+const originalHandleGenerateGroups = window.handleGenerateGroups;
+if (originalHandleGenerateGroups) {
+  window.handleGenerateGroups = function(...args) {
+    const result = originalHandleGenerateGroups.apply(this, args);
+    updateTournamentProgress('groups');
+    showNotification('success', 'Groups Generated', '16 groups have been created!', 3000);
+    return result;
+  };
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+  // Check current tournament state and update progress
+  if (window.TOURNAMENT && window.TOURNAMENT.champion) {
+    updateTournamentProgress('final');
+  } else if (window.KNOCKOUT_RESULTS && Object.keys(window.KNOCKOUT_RESULTS).length > 0) {
+    updateTournamentProgress('r16');
+  } else if (window.GROUP_RESULTS && Object.keys(window.GROUP_RESULTS).length > 0) {
+    updateTournamentProgress('groups');
+  }
+});
 </script>
 </body>
 </html>

@@ -240,8 +240,7 @@
       position: sticky;
       top: 20px;
       max-height: calc(100vh - 40px);
-      overflow-y: auto;
-      overflow-x: hidden;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
     }
@@ -268,24 +267,25 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
       border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+      flex-shrink: 0;
     }
 
     .sidebar-header-title {
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 700;
       letter-spacing: 0.03em;
       color: #e0e7ff;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .sidebar-header-title::before {
       content: '⚽';
-      font-size: 1.2rem;
+      font-size: 1.1rem;
     }
 
     .teams-pill {
@@ -302,29 +302,30 @@
     .manager-profile-card {
       background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 78, 59, 0.1));
       border: 1px solid rgba(16, 185, 129, 0.3);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      flex-shrink: 0;
     }
 
     .manager-profile-header {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
+      gap: 10px;
+      margin-bottom: 10px;
     }
 
     .manager-profile-icon {
-      width: 48px;
-      height: 48px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(6, 78, 59, 0.3));
       border: 2px solid rgba(16, 185, 129, 0.5);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
+      font-size: 1.3rem;
       flex-shrink: 0;
     }
 
@@ -334,10 +335,10 @@
     }
 
     .manager-profile-name {
-      font-size: 1rem;
+      font-size: 0.9rem;
       font-weight: 700;
       color: var(--text-primary);
-      margin-bottom: 4px;
+      margin-bottom: 3px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -346,96 +347,100 @@
     .manager-profile-level {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 0.75rem;
+      gap: 6px;
+      font-size: 0.7rem;
     }
 
     .manager-level-badge {
-      padding: 2px 8px;
-      border-radius: 4px;
+      padding: 2px 6px;
+      border-radius: 3px;
       background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(6, 78, 59, 0.3));
       border: 1px solid rgba(16, 185, 129, 0.5);
       color: #10b981;
       font-weight: 600;
+      font-size: 0.7rem;
     }
 
     .manager-level-xp {
       color: var(--text-secondary);
-      font-size: 0.7rem;
+      font-size: 0.65rem;
     }
 
     .manager-xp-bar {
       width: 100%;
-      height: 6px;
+      height: 4px;
       background: rgba(0, 0, 0, 0.3);
-      border-radius: 3px;
+      border-radius: 2px;
       overflow: hidden;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
 
     .manager-xp-fill {
       height: 100%;
       background: linear-gradient(90deg, #10b981, #059669);
-      border-radius: 3px;
+      border-radius: 2px;
       transition: width 0.5s ease;
-      box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+      box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
     }
 
     .manager-profile-stats {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
+      gap: 6px;
     }
 
     .manager-stat {
       text-align: center;
-      padding: 8px;
+      padding: 6px 4px;
       background: rgba(0, 0, 0, 0.2);
-      border-radius: 8px;
+      border-radius: 6px;
       border: 1px solid rgba(16, 185, 129, 0.2);
     }
 
     .manager-stat-value {
-      font-size: 1.1rem;
+      font-size: 0.95rem;
       font-weight: 700;
       color: #10b981;
       margin-bottom: 2px;
+      line-height: 1;
     }
 
     .manager-stat-label {
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
+      line-height: 1.2;
     }
 
     /* PROFILE TAB STYLES */
     .profile-section {
       background: rgba(0, 0, 0, 0.2);
       border: 1px solid rgba(59, 130, 246, 0.2);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+      flex-shrink: 0;
     }
 
     .profile-section-header {
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
-      padding-bottom: 8px;
+      gap: 6px;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
       border-bottom: 1px solid rgba(59, 130, 246, 0.2);
     }
 
     .profile-section-icon {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
     }
 
     .profile-section-title {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 700;
       color: var(--text-primary);
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
     }
 
     .profile-stats-grid {
@@ -639,25 +644,26 @@
     /* TAB NAVIGATION */
     .sidebar-tabs {
       display: flex;
-      gap: 4px;
-      margin-bottom: 16px;
-      padding: 4px;
+      gap: 3px;
+      margin-bottom: 10px;
+      padding: 3px;
       background: rgba(0, 0, 0, 0.2);
-      border-radius: 12px;
+      border-radius: 10px;
       border: 1px solid rgba(59, 130, 246, 0.15);
+      flex-shrink: 0;
     }
 
     .sidebar-tab {
       flex: 1;
-      padding: 8px 12px;
+      padding: 6px 6px;
       border: none;
       background: transparent;
       color: #94a3b8;
-      font-size: 0.75rem;
+      font-size: 0.65rem;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border-radius: 8px;
+      letter-spacing: 0.03em;
+      border-radius: 7px;
       cursor: pointer;
       transition: all 0.2s ease;
       position: relative;
@@ -695,10 +701,10 @@
       display: none;
       overflow-y: auto;
       overflow-x: hidden;
-      flex: 1;
+      flex: 1 1 auto;
       min-height: 0;
-      max-height: calc(100vh - 220px);
       padding-right: 4px;
+      padding-bottom: 8px;
     }
 
     .tab-content.active {
@@ -727,8 +733,7 @@
     .control-column {
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      margin-top: 8px;
+      gap: 8px;
       width: 100%;
       overflow-x: hidden;
     }
@@ -884,30 +889,31 @@
     }
 
     .file-row {
-      margin-top: 8px;
       display: flex;
       flex-direction: column;
       gap: 5px;
+      margin-bottom: 8px;
     }
 
     .rng-block {
-      margin-top: 16px;
-      padding: 16px;
-      border-radius: 12px;
+      padding: 12px;
+      border-radius: 10px;
       background: rgba(15, 23, 42, 0.6);
       backdrop-filter: blur(10px);
       border: 1px solid rgba(59, 130, 246, 0.2);
       font-size: 0.8rem;
       color: #cbd5e1;
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      margin-bottom: 8px;
+      flex-shrink: 0;
     }
 
     .rng-block label {
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       font-weight: 700;
       color: #e0e7ff;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
     }
 
     .rng-row {
@@ -960,16 +966,16 @@
     }
 
     .rng-presets {
-      margin-top: 12px;
+      margin-top: 8px;
       display: flex;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
     }
 
     .rng-pill {
       border-radius: 999px;
       border: 1px solid rgba(148, 163, 184, 0.3);
-      padding: 6px 14px;
+      padding: 5px 12px;
       font-size: 0.75rem;
       background: rgba(15, 23, 42, 0.5);
       backdrop-filter: blur(5px);
@@ -1517,13 +1523,12 @@
     }
 
     .small-btn {
-      margin-top: 8px;
-      padding: 10px 18px;
-      border-radius: 10px;
+      padding: 8px 16px;
+      border-radius: 8px;
       border: 1px solid rgba(16, 185, 129, 0.3);
       background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(5, 150, 105, 0.9));
       color: #f1f5f9;
-      font-size: 0.875rem;
+      font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;

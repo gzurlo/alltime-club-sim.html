@@ -2320,14 +2320,6 @@
             <span class="ctrl-btn-tag">Play</span>
           </button>
 
-          <button class="ctrl-btn btn-blue" id="viewGroupStageBtn" onclick="showGroupStageResults()">
-            <div class="ctrl-btn-main">
-              <span class="ctrl-btn-title">View Group Stage</span>
-              <span class="ctrl-btn-subtitle">Go back to group results</span>
-            </div>
-            <span class="ctrl-btn-tag">⬆️</span>
-          </button>
-
           <button class="ctrl-btn btn-orange" id="btnKnockouts" disabled>
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Run Knockouts</span>
@@ -8140,7 +8132,7 @@ function renderGroupDrawResults(groups) {
               ${team.season ? `<div style="color: #64748b; font-size: 0.75em;">${team.season}</div>` : ''}
             </div>
             <span style="color: #60a5fa; font-size: 0.9em; font-weight: bold; background: rgba(59, 130, 246, 0.1); padding: 4px 8px; border-radius: 4px;">
-              ${team.overall || 'N/A'}
+              ${team.overall || team.strength || 70}
             </span>
           </div>
         `;
@@ -9867,7 +9859,7 @@ function updateClubLegacyFromResults(results) {
     <div style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 25px; border-radius: 12px; text-align: center; margin-bottom: 25px; box-shadow: 0 8px 16px rgba(245, 158, 11, 0.3); border: 3px solid gold;">
       <div style="font-size: 3.5em; margin-bottom: 10px;">🏆</div>
       <h1 style="margin: 0; color: white; font-size: 2.2em; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">${champ.name}</h1>
-      <p style="margin: 8px 0 0 0; color: rgba(255, 255, 255, 0.95); font-size: 1.2em;">${champ.season || "Club Era"} • OVR ${champ.strength || "N/A"}</p>
+      <p style="margin: 8px 0 0 0; color: rgba(255, 255, 255, 0.95); font-size: 1.2em;">${champ.season || "Club Era"} • OVR ${champ.strength || champ.overall || 70}</p>
       <p style="margin: 5px 0 0 0; color: gold; font-size: 1.3em; font-weight: bold;">TOURNAMENT CHAMPIONS</p>
     </div>
   `;
@@ -10193,7 +10185,7 @@ function runGroupStage() {
       }
 
       enableStatsButton();
-      renderGroupResults(groupResults);
+      showGroupStageResults();
 
       console.log("✅ Group stage completed successfully");
       setTimeout(() => {

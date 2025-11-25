@@ -2980,6 +2980,126 @@
         max-width: none;
       }
     }
+
+/* ===========================
+   SIDEBAR POLISH OVERRIDES
+   (paste at end of <style>)
+   =========================== */
+
+/* Sidebar spacing + no clipping */
+.sidebar {
+  overflow: visible;              /* stop cropping shadows */
+}
+
+.control-column{
+  gap: 12px;                      /* less condensed stack */
+  overflow: visible;
+}
+
+/* Main sidebar action buttons */
+.ctrl-btn{
+  padding: 16px 16px;             /* bigger click target */
+  border-radius: 12px;            /* smoother look */
+  font-size: 0.95rem;             /* clearer text */
+  min-height: 64px;               /* consistent height */
+  line-height: 1.2;
+  overflow: visible;              /* stop clipping tag/glow */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Button inner layout */
+.ctrl-btn-main{
+  gap: 4px;
+}
+
+.ctrl-btn-title{
+  font-size: 1.02rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.ctrl-btn-subtitle{
+  font-size: 0.82rem;
+  opacity: 0.85;
+  font-weight: 500;
+}
+
+/* Right-side pill/tag */
+.ctrl-btn-tag{
+  font-size: 0.78rem;
+  padding: 5px 10px;
+  border-radius: 999px;
+  white-space: nowrap;            /* prevents wrap cropping */
+}
+
+/* Keep disabled readable but clearly inactive */
+.ctrl-btn:disabled{
+  opacity: 0.55;
+  filter: saturate(0.6);
+  cursor: not-allowed;
+}
+
+/* Tabs row more breathable */
+.sidebar-tabs{
+  gap: 6px;
+  padding: 8px;
+  flex-wrap: wrap;
+}
+
+/* Tabs bigger + cleaner */
+.sidebar-tab{
+  padding: 10px 8px;
+  font-size: 0.8rem;
+  border-radius: 9px;
+  min-width: 48%;
+}
+
+/* Make tab icon+label align nicer if you use icons */
+.sidebar-tab i,
+.sidebar-tab .tab-icon{
+  font-size: 1rem;
+  margin-bottom: 2px;
+  display: block;
+}
+
+/* PROFILE cards less cramped */
+.profile-stats-grid{
+  gap: 12px;
+}
+
+.profile-stat-card{
+  padding: 14px;
+  border-radius: 10px;
+  gap: 12px;
+  min-height: 70px;
+}
+
+.profile-stat-value{
+  font-size: 1.45rem;
+  font-weight: 800;
+}
+
+.profile-stat-label{
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+/* Mobile: don't over-bloat, but still readable */
+@media (max-width: 640px){
+  .ctrl-btn{
+    padding: 14px 14px;
+    min-height: 58px;
+    font-size: 0.9rem;
+  }
+  .ctrl-btn-title{ font-size: 0.98rem; }
+  .ctrl-btn-subtitle{ font-size: 0.78rem; }
+  .sidebar-tab{
+    min-width: 100%;
+    font-size: 0.78rem;
+  }
+}
   </style>
 </head>
 <body>
@@ -18272,7 +18392,10 @@ document.addEventListener('keydown', function(event) {
       else if (modalId === 'settingsModal') closeSettings();
       else if (modalId === 'statisticsModal') closeStatistics();
       else if (modalId === 'managerEditModal') closeManagerEditModal();
-      else if (modalId === 'resetConfirmModal') closeResetConfirmModal();
+      else if (modalId === 'resetConfirmModal') {
+        // Reset confirm modal is dynamically created, just remove it
+        latestModal.remove();
+      }
       else {
         // Generic close if no specific function
         latestModal.classList.remove('active');

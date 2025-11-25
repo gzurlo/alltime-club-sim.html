@@ -224,6 +224,7 @@
       grid-template-columns: 320px 1fr;
       gap: 20px;
       align-items: flex-start;
+      min-height: 0;
     }
 
     /* SIDEBAR */
@@ -240,7 +241,8 @@
       position: sticky;
       top: 20px;
       max-height: calc(100vh - 40px);
-      overflow: visible;
+      overflow-y: auto;
+      overflow-x: hidden;
       display: flex;
       flex-direction: column;
     }
@@ -1375,7 +1377,9 @@
       background: linear-gradient(135deg, rgba(17, 24, 39, 0.98), rgba(31, 41, 55, 0.98));
       /* backdrop-filter removed for performance */
       border-radius: 16px;
-      overflow: hidden;
+      max-height: 90vh;
+      overflow-y: auto;
+      overflow-x: hidden;
       box-shadow:
         0 20px 60px rgba(0, 0, 0, 0.6),
         0 0 0 1px rgba(59, 130, 246, 0.2);
@@ -1383,6 +1387,9 @@
       border: 1px solid rgba(59, 130, 246, 0.3);
       word-wrap: break-word;
       overflow-wrap: break-word;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
     }
 
     .btn-primary {
@@ -2986,14 +2993,18 @@
    (paste at end of <style>)
    =========================== */
 
-/* Sidebar spacing + no clipping */
+/* Sidebar spacing + scrollability fixes */
 .sidebar {
-  overflow: visible;              /* stop cropping shadows */
+  overflow-y: auto;               /* allow sidebar scrolling */
+  overflow-x: hidden;             /* prevent horizontal overflow */
 }
 
 .control-column{
   gap: 12px;                      /* less condensed stack */
-  overflow: visible;
+  overflow-y: auto;               /* allow scrolling */
+  overflow-x: hidden;             /* prevent horizontal overflow */
+  flex: 1;                        /* take available space */
+  min-height: 0;                  /* allow flex shrinking */
 }
 
 /* Main sidebar action buttons */
@@ -3066,28 +3077,32 @@
 
 /* PROFILE cards proportionate to sidebar */
 .profile-stats-grid{
-  gap: 12px;
+  gap: 10px;
+  overflow: visible;
 }
 
 .profile-stat-card{
-  padding: 12px;
+  padding: 10px;
   border-radius: 10px;
-  gap: 10px;
-  min-height: 64px;
+  gap: 8px;
+  min-height: 60px;
+  overflow: visible;
 }
 
 .profile-stat-icon{
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 }
 
 .profile-stat-value{
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 700;
+  line-height: 1.2;
 }
 
 .profile-stat-label{
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   opacity: 0.85;
+  line-height: 1.2;
 }
 
 /* Layout polish - visual appeal and spacing */
@@ -3232,6 +3247,24 @@
   background: rgba(59, 130, 246, 0.5);
 }
 
+/* Bracket responsive styling */
+.bracket-container{
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.bracket{
+  min-width: 720px;
+  width: max-content;
+}
+
+.simple-bracket{
+  min-width: 600px;
+  width: max-content;
+}
+
 /* Mobile: don't over-bloat, but still readable */
 @media (max-width: 640px){
   .ctrl-btn{
@@ -3253,6 +3286,24 @@
 
   .tracked-team-name{
     font-size: 0.9rem;
+  }
+
+  /* Bracket mobile optimizations */
+  .bracket{
+    min-width: 600px;
+  }
+
+  .simple-bracket{
+    min-width: 500px;
+  }
+
+  .bracket-round{
+    gap: 6px;
+  }
+
+  .match-card{
+    padding: 6px;
+    font-size: 12px;
   }
 }
   </style>
@@ -3760,11 +3811,12 @@
   </div>
 
   <!-- Track Team Modal -->
-  <div id="trackTeamModal" class="modal-backdrop">
+  <div id="trackTeamModal" class="modal-backdrop" onclick="closeTrackTeamModal()">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-content">
         <div class="modal-head">
           <h3>Choose Your Team</h3>
+          <button class="modal-close" onclick="closeTrackTeamModal()">✕</button>
         </div>
         <div class="modal-body">
           <p style="color: #94a3b8; margin-bottom: 16px;">This team's results will count toward your Manager career & achievements.</p>
@@ -3775,11 +3827,19 @@
             <option value="">-- Select a team --</option>
           </select>
 
-          <button onclick="confirmTrackedTeam()"
-                  style="width: 100%; padding: 12px; background: linear-gradient(135deg, #3b82f6, #2563eb);
-                         border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer;">
-            Confirm Selection
-          </button>
+          <div style="display: flex; gap: 10px;">
+            <button onclick="confirmTrackedTeam()"
+                    style="flex: 1; padding: 12px; background: linear-gradient(135deg, #3b82f6, #2563eb);
+                           border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer;">
+              Confirm Selection
+            </button>
+            <button onclick="closeTrackTeamModal()"
+                    style="flex: 1; padding: 12px; background: rgba(100, 100, 100, 0.3);
+                           border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: #e2e8f0;
+                           font-weight: 600; cursor: pointer;">
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -6913,6 +6973,12 @@ window.GROUP_RESULTS = window.GROUP_RESULTS || null;
 window.TOURNAMENT = window.TOURNAMENT || null;
 window.CURRENT_TOURNAMENT_ID = window.CURRENT_TOURNAMENT_ID || null;
 
+// Async locks to prevent duplicate simulations
+let isGroupStageRunning = false;
+let isKnockoutRunning = false;
+let isGeneratingGroups = false;
+let isQuickRunning = false;
+
 // New feature state
 const HEAD_TO_HEAD_RECORDS = (window.HEAD_TO_HEAD_RECORDS = window.HEAD_TO_HEAD_RECORDS || {});
 const TEAM_FORM_TRACKER = (window.TEAM_FORM_TRACKER = window.TEAM_FORM_TRACKER || {});
@@ -8423,10 +8489,21 @@ function showTemplateManager() {
 
 // Quick Tournament Mode
 function quickTournamentMode() {
+  // Prevent duplicate runs
+  if (isQuickRunning) {
+    console.warn("⚠️ Quick tournament already running - ignored");
+    showUtilityMessage("Quick tournament already in progress!", "warning");
+    return;
+  }
+
   if (!window.GROUPS) {
     showUtilityMessage('Generate groups first', 'info');
     return;
   }
+
+  isQuickRunning = true;
+  const btn = document.getElementById("btnQuickTournament");
+  if (btn) btn.disabled = true;
 
   showUtilityMessage('Running quick tournament...', 'info');
 
@@ -8444,6 +8521,8 @@ function quickTournamentMode() {
             // Show highlights after everything
             setTimeout(() => {
               showTournamentHighlights();
+              isQuickRunning = false;
+              if (btn) btn.disabled = false;
             }, 500);
           }
         }, 500);
@@ -8457,12 +8536,16 @@ function quickTournamentMode() {
 
         setTimeout(() => {
           showTournamentHighlights();
+          isQuickRunning = false;
+          if (btn) btn.disabled = false;
         }, 500);
       }
     }, 100);
   } else {
     // Everything done, just show highlights
     showTournamentHighlights();
+    isQuickRunning = false;
+    if (btn) btn.disabled = false;
   }
 }
 
@@ -9065,19 +9148,53 @@ function showTrackTeamModal() {
 
   if (select) {
     select.innerHTML = '<option value="">-- Select a team --</option>';
-    const teams = window.DRAWN_TEAMS || [];
-    teams.forEach(team => {
-      const option = document.createElement("option");
-      option.value = team.name;
-      option.textContent = team.name;
-      select.appendChild(option);
-    });
+
+    // Use DRAWN_TEAMS if available, otherwise use all teams from TEAM_POOL
+    let teams = window.DRAWN_TEAMS || [];
+
+    // If no drawn teams yet, show message and use full team pool
+    if (teams.length === 0) {
+      teams = TEAM_POOL || [];
+
+      // Add informational message
+      if (teams.length === 0) {
+        select.innerHTML = '<option value="">No teams available</option>';
+      } else {
+        // Populate with all available teams
+        teams.forEach(team => {
+          if (team && team.name) {
+            const option = document.createElement("option");
+            option.value = team.name;
+            option.textContent = team.name;
+            select.appendChild(option);
+          }
+        });
+      }
+    } else {
+      // Populate with drawn teams
+      teams.forEach(team => {
+        if (team && team.name) {
+          const option = document.createElement("option");
+          option.value = team.name;
+          option.textContent = team.name;
+          select.appendChild(option);
+        }
+      });
+    }
   }
 
   if (modal) {
     modal.classList.add("active");
     modal.style.display = "flex";
     modal.style.zIndex = "9999";
+  }
+}
+
+function closeTrackTeamModal() {
+  const modal = document.getElementById("trackTeamModal");
+  if (modal) {
+    modal.classList.remove("active");
+    modal.style.display = "none";
   }
 }
 
@@ -9089,13 +9206,7 @@ function confirmTrackedTeam() {
     MANAGER_PROFILE.favoriteTeam = teamName;
     saveManagerProfile();
     updateManagerProfileUI();
-
-    const modal = document.getElementById("trackTeamModal");
-    if (modal) {
-      modal.classList.remove("active");
-      modal.style.display = "none";
-    }
-
+    closeTrackTeamModal();
     showUtilityMessage(`Now tracking ${teamName}!`, "success");
   } else {
     showUtilityMessage("Please select a team", "error");
@@ -10070,9 +10181,18 @@ function createPots() {
   }
 }
 async function handleGenerateGroups() {
-  console.log("🎲 Generating groups...");
+  // Prevent duplicate runs
+  if (isGeneratingGroups) {
+    console.warn("⚠️ Group generation already running - ignored");
+    showUtilityMessage("Group generation already in progress!", "warning");
+    return;
+  }
+  isGeneratingGroups = true;
 
-  const groups = generateGroups();
+  try {
+    console.log("🎲 Generating groups...");
+
+    const groups = generateGroups();
 
   if (groups && groups.length > 0) {
     // Store globally
@@ -10108,6 +10228,9 @@ async function handleGenerateGroups() {
     console.log("🔍 handleGenerateGroups completed!");
   } else {
     showUtilityMessage('❌ Failed to generate groups', 'error');
+  }
+  } finally {
+    isGeneratingGroups = false;
   }
 }
 function renderGroupDrawResults(groups) {
@@ -12091,23 +12214,8 @@ function simulateKnockoutRounds(teams) {
       // Check all achievements
       checkAllAchievements(tournamentData);
 
-      // Add to tournament history for comparison feature
-      const totalGoals = allMatches.reduce((sum, match) => {
-        const m = MATCH_DETAILS_DB[match.matchId];
-        return sum + (m ? (m.scoreA + m.scoreB) : 0);
-      }, 0);
-      const avgGoals = allMatches.length > 0 ? (totalGoals / allMatches.length).toFixed(2) : 0;
-
-      TOURNAMENT_HISTORY.push({
-        champion: results.champion.name,
-        season: results.champion.season,
-        avgGoals: avgGoals,
-        upsets: 0, // Can be enhanced later
-        timestamp: new Date().toISOString(),
-        topScorer: tournamentData.topScorer?.name || 'Unknown'
-      });
-
-      console.log(`📊 Tournament added to history. Total tournaments: ${TOURNAMENT_HISTORY.length}`);
+      // NOTE: Tournament history is added in async version only (simulateKnockoutRoundsAsync)
+      // to prevent duplicate entries when using async flow
 
       // Update manager career mode stats
       if (typeof updateManagerStats === 'function') {
@@ -12644,6 +12752,14 @@ async function startTournament() {
 }
 
 async function runGroupStage() {
+  // Prevent duplicate runs
+  if (isGroupStageRunning) {
+    console.warn("⚠️ Group stage already running - ignored");
+    showUtilityMessage("Group stage simulation already in progress!", "warning");
+    return;
+  }
+  isGroupStageRunning = true;
+
   console.log("⚽ Starting group stage simulation...");
 
   const btnGroup = document.getElementById("btnGroupStage");
@@ -12651,6 +12767,7 @@ async function runGroupStage() {
 
   // Validate pre-conditions
   if (!window.GROUPS) {
+    isGroupStageRunning = false;
     showUtilityMessage("Please generate groups first by clicking 'Generate Groups'!", "error");
     return;
   }
@@ -12780,10 +12897,19 @@ async function runGroupStage() {
       }
     } finally {
       hideLoading();
+      isGroupStageRunning = false;
     }
 }
 
 async function runKnockouts() {
+  // Prevent duplicate runs
+  if (isKnockoutRunning) {
+    console.warn("⚠️ Knockout stage already running - ignored");
+    showUtilityMessage("Knockout simulation already in progress!", "warning");
+    return;
+  }
+  isKnockoutRunning = true;
+
   console.log("🎯 Starting knockout stage...");
 
   const btnKO = document.getElementById("btnKnockouts");
@@ -12791,6 +12917,7 @@ async function runKnockouts() {
 
   // Validate pre-conditions
   if (!window.GROUP_RESULTS) {
+    isKnockoutRunning = false;
     showUtilityMessage("Please run the group stage first by clicking 'Simulate Group Stage'!", "error");
     return;
   }
@@ -12799,6 +12926,7 @@ async function runKnockouts() {
   if (window.TOURNAMENT && window.TOURNAMENT.champion) {
     console.log("✅ Knockout stage already exists, displaying results...");
     renderKnockoutResults(window.TOURNAMENT);
+    isKnockoutRunning = false;
     return;
   }
 
@@ -12949,6 +13077,7 @@ async function runKnockouts() {
       }
     } finally {
       hideLoading();
+      isKnockoutRunning = false;
     }
 }
 
@@ -15141,20 +15270,23 @@ function performReset() {
 
 function createPreResetBackup() {
   try {
+    // Clear old backup first to prevent growth
+    localStorage.removeItem('preResetBackup');
+
+    // Store only essential data, not full match logs or player stats
     const backupData = {
-      groups: window.GROUPS,
-      groupResults: window.GROUP_RESULTS,
-      knockoutResults: window.TOURNAMENT,
-      matchDetails: { ...MATCH_DETAILS_DB },
-      playerStats: { ...PLAYER_DB },
-      clubLegacy: { ...CLUB_LEGACY_DB },
+      champion: window.TOURNAMENT?.champion || null,
+      groupCount: window.GROUPS?.length || 0,
+      matchCount: window.MATCH_SCHEDULE?.groupStage?.length || 0,
       backupDate: new Date().toISOString(),
       type: 'pre-reset-backup'
     };
 
     localStorage.setItem('preResetBackup', JSON.stringify(backupData));
+    console.log('✅ Slim backup created successfully');
   } catch (error) {
-    console.warn('Could not create pre-reset backup:', error);
+    console.warn('Backup skipped (quota):', error.message);
+    // Don't block reset if backup fails
   }
 }
 

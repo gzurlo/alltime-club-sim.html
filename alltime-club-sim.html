@@ -9692,9 +9692,15 @@ async function initTeamsAndPlayers() {
       console.warn("⚠️ Skipping invalid team in TEAM_POOL:", team);
     }
 
-    // Yield every 100 teams to prevent UI freeze
-    if (i % 100 === 0 && i > 0) {
+    // Yield every 50 teams to prevent UI freeze (increased frequency)
+    if (i % 50 === 0 && i > 0) {
       await new Promise(resolve => setTimeout(resolve, 0));
+
+      // Update loading progress if available
+      if (typeof updateLoadingProgress === 'function') {
+        const percent = Math.floor((i / TEAM_POOL.length) * 100);
+        document.getElementById("loadingText").textContent = `Loading teams... ${percent}%`;
+      }
     }
   }
 
@@ -11052,10 +11058,8 @@ async function simulateGroupStageAsync(groups, onProgress) {
           matchesSimulated += 2;
           if (onProgress) onProgress(matchesSimulated, totalMatches);
 
-          // Yield every 8 matches to allow UI repaint
-          if (matchesSimulated % 8 === 0) {
-            await new Promise(resolve => setTimeout(resolve, 0));
-          }
+          // Yield after every pair of matches to allow UI repaint (maximum responsiveness)
+          await new Promise(resolve => setTimeout(resolve, 0));
         } catch (error) {
           console.error(
             `❌ Error simulating match between ${teamA.name} and ${teamB.name}:`,

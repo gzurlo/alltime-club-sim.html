@@ -97,7 +97,7 @@
       padding: 20px 24px;
       border-radius: 16px;
       background: linear-gradient(135deg, rgba(17, 24, 39, 0.98), rgba(31, 41, 55, 0.95));
-      backdrop-filter: blur(20px);
+      /* backdrop-filter removed for performance */
       border: 1px solid rgba(16, 185, 129, 0.4);
       box-shadow:
         0 4px 24px rgba(0, 0, 0, 0.4),
@@ -176,7 +176,7 @@
       border: 1px solid rgba(16, 185, 129, 0.3);
       background: rgba(16, 185, 129, 0.1);
       color: #6ee7b7;
-      backdrop-filter: blur(10px);
+      /* backdrop-filter removed for performance */
       transition: all 0.2s ease;
     }
 
@@ -201,7 +201,7 @@
       cursor: pointer;
       font-weight: 600;
       background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 78, 59, 0.2));
-      backdrop-filter: blur(10px);
+      /* backdrop-filter removed for performance */
       color: #10b981;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       transition: all 0.3s ease;
@@ -230,7 +230,7 @@
 
     .sidebar {
       background: linear-gradient(135deg, rgba(17, 24, 39, 0.95), rgba(31, 41, 55, 0.9));
-      backdrop-filter: blur(20px);
+      /* backdrop-filter removed for performance */
       border-radius: 16px;
       padding: 20px;
       border: 1px solid rgba(59, 130, 246, 0.3);
@@ -779,7 +779,7 @@
       position: relative;
       overflow: hidden;
       transition: all 0.2s ease;
-      backdrop-filter: blur(10px);
+      /* backdrop-filter removed for performance */
     }
 
     .ctrl-btn-main {
@@ -805,7 +805,7 @@
       border-radius: 999px;
       border: 1px solid rgba(255, 255, 255, 0.2);
       background: rgba(0, 0, 0, 0.3);
-      backdrop-filter: blur(5px);
+      /* backdrop-filter removed for performance */
       font-weight: 600;
     }
 
@@ -921,7 +921,7 @@
       padding: 12px;
       border-radius: 10px;
       background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(10px);
+      /* backdrop-filter removed for performance */
       border: 1px solid rgba(59, 130, 246, 0.2);
       font-size: 0.8rem;
       color: #cbd5e1;
@@ -1000,7 +1000,7 @@
       padding: 5px 12px;
       font-size: 0.75rem;
       background: rgba(15, 23, 42, 0.5);
-      backdrop-filter: blur(5px);
+      /* backdrop-filter removed for performance */
       cursor: pointer;
       font-weight: 600;
       transition: all 0.2s ease;
@@ -1022,7 +1022,7 @@
 
     .panel {
       background: linear-gradient(135deg, rgba(17, 24, 39, 0.95), rgba(31, 41, 55, 0.9));
-      backdrop-filter: blur(20px);
+      /* backdrop-filter removed for performance */
       border-radius: 16px;
       padding: 24px;
       border: 1px solid rgba(16, 185, 129, 0.3);
@@ -1351,7 +1351,7 @@
       width: 100%;
       height: 100%;
       background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(8px);
+      /* backdrop-filter removed for performance */
       display: none;
       align-items: center;
       justify-content: center;
@@ -1373,7 +1373,7 @@
 
     .modal-content {
       background: linear-gradient(135deg, rgba(17, 24, 39, 0.98), rgba(31, 41, 55, 0.98));
-      backdrop-filter: blur(20px);
+      /* backdrop-filter removed for performance */
       border-radius: 16px;
       overflow: hidden;
       box-shadow:
@@ -1495,7 +1495,7 @@
       border-radius: 10px;
       border: 1px solid rgba(59, 130, 246, 0.3);
       background: rgba(15, 23, 42, 0.8);
-      backdrop-filter: blur(10px);
+      /* backdrop-filter removed for performance */
       color: #e0e7ff;
       font-size: 0.875rem;
       font-weight: 500;
@@ -1920,7 +1920,7 @@
     .trophy-cabinet {
       padding: 24px;
       background: linear-gradient(135deg, rgba(17, 24, 39, 0.95), rgba(31, 41, 55, 0.9));
-      backdrop-filter: blur(20px);
+      /* backdrop-filter removed for performance */
       border-radius: 16px;
       border: 1px solid rgba(249, 115, 22, 0.3);
       box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
@@ -2130,7 +2130,7 @@
       right: -400px;
       width: 350px;
       background: linear-gradient(135deg, rgba(17, 24, 39, 0.98), rgba(31, 41, 55, 0.98));
-      backdrop-filter: blur(20px);
+      /* backdrop-filter removed for performance */
       border-radius: 12px;
       border: 2px solid rgba(249, 115, 22, 0.6);
       box-shadow: 0 8px 32px rgba(249, 115, 22, 0.4);
@@ -2184,7 +2184,7 @@
       position: fixed;
       inset: 0;
       background: rgba(0, 0, 0, 0.65);
-      backdrop-filter: blur(4px);
+      /* backdrop-filter removed for performance */
       display: none;
       align-items: center;
       justify-content: center;
@@ -2359,7 +2359,7 @@
 
     /* Enhanced modal animations */
     .modal-backdrop {
-      backdrop-filter: blur(8px);
+      /* backdrop-filter removed for performance */
       animation: fadeIn 0.3s ease;
     }
 
@@ -3064,26 +3064,172 @@
   display: block;
 }
 
-/* PROFILE cards less cramped */
+/* PROFILE cards proportionate to sidebar */
 .profile-stats-grid{
   gap: 12px;
 }
 
 .profile-stat-card{
-  padding: 14px;
+  padding: 12px;
   border-radius: 10px;
-  gap: 12px;
-  min-height: 70px;
+  gap: 10px;
+  min-height: 64px;
+}
+
+.profile-stat-icon{
+  font-size: 1.2rem;
 }
 
 .profile-stat-value{
-  font-size: 1.45rem;
-  font-weight: 800;
+  font-size: 1.25rem;
+  font-weight: 700;
 }
 
 .profile-stat-label{
-  font-size: 0.95rem;
-  opacity: 0.9;
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+/* Layout polish - visual appeal and spacing */
+.profile-section{
+  margin-bottom: 12px;
+}
+
+.profile-section-header{
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+}
+
+.profile-section-title{
+  font-size: 0.85rem;
+}
+
+.profile-section-icon{
+  font-size: 1.1rem;
+}
+
+/* Tracked team card styling */
+.tracked-team-card{
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05));
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.tracked-team-header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.tracked-team-info{
+  flex: 1;
+  min-width: 0;
+}
+
+.tracked-team-label{
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tracked-team-name{
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tracked-team-hint{
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  opacity: 0.8;
+}
+
+/* Mini button polish */
+.mini-btn{
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Profile best tournament styling */
+.profile-best-tournament{
+  min-height: 60px;
+}
+
+/* Profile achievements spacing */
+.profile-achievements{
+  gap: 8px;
+}
+
+.profile-achievement-card{
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.profile-achievement-icon{
+  font-size: 1.3rem;
+}
+
+.profile-achievement-name{
+  font-size: 0.85rem;
+}
+
+.profile-achievement-desc{
+  font-size: 0.72rem;
+}
+
+/* Empty state styling */
+.profile-empty-state{
+  text-align: center;
+  padding: 20px 10px;
+}
+
+.profile-empty-icon{
+  font-size: 2rem;
+  margin-bottom: 8px;
+  opacity: 0.5;
+}
+
+.profile-empty-text{
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Manager profile card polish */
+.manager-profile-card{
+  margin-bottom: 12px;
+}
+
+/* Tab content spacing */
+.tab-content{
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(59, 130, 246, 0.3) transparent;
+}
+
+.tab-content::-webkit-scrollbar{
+  width: 6px;
+}
+
+.tab-content::-webkit-scrollbar-track{
+  background: transparent;
+}
+
+.tab-content::-webkit-scrollbar-thumb{
+  background: rgba(59, 130, 246, 0.3);
+  border-radius: 3px;
+}
+
+.tab-content::-webkit-scrollbar-thumb:hover{
+  background: rgba(59, 130, 246, 0.5);
 }
 
 /* Mobile: don't over-bloat, but still readable */
@@ -3098,6 +3244,15 @@
   .sidebar-tab{
     min-width: 100%;
     font-size: 0.78rem;
+  }
+
+  .profile-stat-card{
+    padding: 10px;
+    min-height: 56px;
+  }
+
+  .tracked-team-name{
+    font-size: 0.9rem;
   }
 }
   </style>
@@ -3457,10 +3612,30 @@
             </div>
           </div>
 
-          <!-- Best Tournament Section -->
+          <!-- Tracked Team Section -->
           <div class="profile-section">
             <div class="profile-section-header">
               <span class="profile-section-icon">⭐</span>
+              <span class="profile-section-title">Tracked Team</span>
+            </div>
+            <div class="tracked-team-card">
+              <div class="tracked-team-header">
+                <div class="tracked-team-info">
+                  <div class="tracked-team-label">Your Team</div>
+                  <div class="tracked-team-name" id="trackedTeamDisplay">No team selected</div>
+                </div>
+                <button class="mini-btn" onclick="showTrackTeamModal()">Change</button>
+              </div>
+              <div class="tracked-team-hint">
+                Your tracked team's progress counts toward your career stats and achievements
+              </div>
+            </div>
+          </div>
+
+          <!-- Best Tournament Section -->
+          <div class="profile-section">
+            <div class="profile-section-header">
+              <span class="profile-section-icon">🏆</span>
               <span class="profile-section-title">Best Tournament</span>
             </div>
             <div class="profile-best-tournament" id="profileBestTournament">
@@ -6413,6 +6588,13 @@ function updateManagerProfileUI() {
   if (profileTournamentsPlayed) profileTournamentsPlayed.textContent = MANAGER_PROFILE.tournamentsPlayed;
   if (profileTotalGoals) profileTotalGoals.textContent = MANAGER_PROFILE.totalGoals;
   if (profileAvgGoals) profileAvgGoals.textContent = MANAGER_PROFILE.avgGoalsPerMatch || '0.0';
+
+  // Update tracked team display
+  const trackedTeamDisplay = document.getElementById('trackedTeamDisplay');
+  if (trackedTeamDisplay) {
+    const trackedTeam = getTrackedTeamName();
+    trackedTeamDisplay.textContent = trackedTeam || 'No team selected';
+  }
 
   // Update best tournament
   updateBestTournamentDisplay();
@@ -9922,15 +10104,6 @@ async function handleGenerateGroups() {
     console.log("🔍 Button states updated, showing message...");
 
     showUtilityMessage('✅ Groups generated successfully!', 'success');
-
-    // Show tracked team modal if no team is selected
-    if (typeof MANAGER_PROFILE !== 'undefined' && !MANAGER_PROFILE.favoriteTeam) {
-      setTimeout(() => {
-        if (typeof showTrackTeamModal === 'function') {
-          showTrackTeamModal();
-        }
-      }, 500);
-    }
 
     console.log("🔍 handleGenerateGroups completed!");
   } else {
@@ -14880,7 +15053,7 @@ function showResetConfirmationModal() {
     justify-content: center;
     align-items: center;
     z-index: 1000;
-    backdrop-filter: blur(5px);
+    /* backdrop-filter removed for performance */
   `;
 
   const matchCount = Object.keys(MATCH_DETAILS_DB).length;
@@ -15419,7 +15592,7 @@ function showUtilityMessage(message, type = 'info') {
     max-width: 400px;
     text-align: center;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(10px);
+    /* backdrop-filter removed for performance */
     animation: slideUp 0.3s ease-out;
   `;
 
@@ -16237,7 +16410,7 @@ function injectModalStyles() {
       align-items: center;
       opacity: 0;
       transition: opacity 0.3s ease;
-      backdrop-filter: blur(5px);
+      /* backdrop-filter removed for performance */
     }
     
     .modal.active {
@@ -18170,7 +18343,7 @@ function injectEnhancedLayoutStyles() {
 
     /* Modal improvements */
     .modal-backdrop.active {
-      backdrop-filter: blur(8px);
+      /* backdrop-filter removed for performance */
       background: rgba(0, 0, 0, 0.7);
     }
 

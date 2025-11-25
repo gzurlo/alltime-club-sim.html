@@ -240,7 +240,7 @@
       position: sticky;
       top: 20px;
       max-height: calc(100vh - 40px);
-      overflow: hidden;
+      overflow: visible;
       display: flex;
       flex-direction: column;
     }
@@ -342,6 +342,24 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+
+    .mini-btn {
+      padding: 3px 8px;
+      font-size: 0.7rem;
+      background: rgba(59, 130, 246, 0.2);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 4px;
+      color: #3b82f6;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: 600;
+    }
+
+    .mini-btn:hover {
+      background: rgba(59, 130, 246, 0.3);
+      border-color: rgba(59, 130, 246, 0.5);
+      transform: translateY(-1px);
     }
 
     .manager-profile-level {
@@ -446,17 +464,17 @@
     .profile-stats-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
+      gap: 12px;
     }
 
     .profile-stat-card {
       background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05));
       border: 1px solid rgba(59, 130, 246, 0.3);
-      border-radius: 6px;
-      padding: 8px;
+      border-radius: 10px;
+      padding: 14px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
       transition: all 0.2s ease;
     }
 
@@ -477,18 +495,19 @@
     }
 
     .profile-stat-value {
-      font-size: 1.1rem;
+      font-size: 1.4rem;
       font-weight: 700;
       color: var(--color-primary);
       line-height: 1.1;
     }
 
     .profile-stat-label {
-      font-size: 0.65rem;
+      font-size: 0.95rem;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.3px;
       margin-top: 1px;
+      opacity: 0.9;
     }
 
     .profile-best-tournament {
@@ -644,22 +663,24 @@
     /* TAB NAVIGATION */
     .sidebar-tabs {
       display: flex;
-      gap: 3px;
+      gap: 6px;
       margin-bottom: 10px;
-      padding: 3px;
+      padding: 6px;
       background: rgba(0, 0, 0, 0.2);
       border-radius: 10px;
       border: 1px solid rgba(59, 130, 246, 0.15);
       flex-shrink: 0;
+      flex-wrap: wrap;
     }
 
     .sidebar-tab {
       flex: 1;
-      padding: 6px 6px;
+      min-width: 48%;
+      padding: 10px 8px;
       border: none;
       background: transparent;
       color: #94a3b8;
-      font-size: 0.65rem;
+      font-size: 0.9rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.03em;
@@ -733,16 +754,17 @@
     .control-column {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 12px;
       width: 100%;
       overflow-x: hidden;
+      padding-bottom: 12px;
     }
 
     .ctrl-btn {
       width: 100%;
       text-align: left;
-      padding: 12px 14px;
-      border-radius: 10px;
+      padding: 16px 16px;
+      border-radius: 12px;
       border: 1px solid rgba(255, 255, 255, 0.1);
       cursor: pointer;
       display: flex;
@@ -767,13 +789,13 @@
     }
 
     .ctrl-btn-title {
-      font-size: 0.85rem;
+      font-size: 1.05rem;
       font-weight: 700;
     }
 
     .ctrl-btn-subtitle {
-      font-size: 0.7rem;
-      opacity: 0.7;
+      font-size: 0.9rem;
+      opacity: 0.9;
       font-weight: 400;
     }
 
@@ -2957,7 +2979,10 @@
         <div class="manager-profile-header">
           <div class="manager-profile-icon">⚽</div>
           <div class="manager-profile-info">
-            <div class="manager-profile-name" id="managerName">Manager</div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div class="manager-profile-name" id="managerName">Manager</div>
+              <button class="mini-btn" onclick="openManagerEditModal()">Edit</button>
+            </div>
             <div class="manager-profile-level">
               <span class="manager-level-badge" id="managerLevel">Level 1</span>
               <span class="manager-level-xp" id="managerXP">0 / 1000 XP</span>
@@ -3027,6 +3052,14 @@
               <span class="ctrl-btn-subtitle">R32 → R16 → QF → SF → Final</span>
             </div>
             <span class="ctrl-btn-tag">KO</span>
+          </button>
+
+          <button class="ctrl-btn btn-red" id="resetTournamentBtn" onclick="showResetConfirmationModal()">
+            <div class="ctrl-btn-main">
+              <span class="ctrl-btn-title">Reset Tournament</span>
+              <span class="ctrl-btn-subtitle">Clear and start fresh</span>
+            </div>
+            <span class="ctrl-btn-tag">🗑️</span>
           </button>
         </div>
       </div>
@@ -3117,14 +3150,6 @@
               <span class="ctrl-btn-subtitle">Past champions</span>
             </div>
             <span class="ctrl-btn-tag">Log</span>
-          </button>
-
-          <button class="ctrl-btn btn-red" id="resetTournamentBtn" onclick="showResetConfirmationModal()">
-            <div class="ctrl-btn-main">
-              <span class="ctrl-btn-title">Reset Tournament</span>
-              <span class="ctrl-btn-subtitle">Clear and start fresh</span>
-            </div>
-            <span class="ctrl-btn-tag">🗑️</span>
           </button>
 
           <button class="ctrl-btn btn-blue" id="btnTournamentStats" onclick="showTournamentStatsSummary()">
@@ -3358,7 +3383,65 @@
       </div>
     </div>
   </div>
-  
+
+  <!-- Manager Edit Modal -->
+  <div id="managerEditModal" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-content">
+        <div class="modal-head">
+          <h3>Edit Manager Profile</h3>
+          <button class="modal-close" onclick="closeManagerEditModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <label style="display: block; margin-bottom: 8px; color: #e2e8f0; font-weight: 600;">Manager Name</label>
+          <input id="managerNameInput" type="text" placeholder="Enter your name"
+                 style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);
+                        background: rgba(0, 0, 0, 0.3); color: #e2e8f0; font-size: 1rem; margin-bottom: 20px;"/>
+
+          <div style="display: flex; gap: 10px;">
+            <button onclick="saveManagerEdits()"
+                    style="flex: 1; padding: 12px; background: linear-gradient(135deg, #10b981, #059669);
+                           border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer;">
+              Save Changes
+            </button>
+            <button onclick="closeManagerEditModal()"
+                    style="flex: 1; padding: 12px; background: rgba(100, 100, 100, 0.3);
+                           border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: #e2e8f0;
+                           font-weight: 600; cursor: pointer;">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Track Team Modal -->
+  <div id="trackTeamModal" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-content">
+        <div class="modal-head">
+          <h3>Choose Your Team</h3>
+        </div>
+        <div class="modal-body">
+          <p style="color: #94a3b8; margin-bottom: 16px;">This team's results will count toward your Manager career & achievements.</p>
+
+          <select id="trackTeamSelect"
+                  style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);
+                         background: rgba(0, 0, 0, 0.3); color: #e2e8f0; font-size: 1rem; margin-bottom: 20px;">
+            <option value="">-- Select a team --</option>
+          </select>
+
+          <button onclick="confirmTrackedTeam()"
+                  style="width: 100%; padding: 12px; background: linear-gradient(135deg, #3b82f6, #2563eb);
+                         border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer;">
+            Confirm Selection
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- History modal -->
   <div id="historyModal" class="modal-backdrop">
     <div class="modal">
@@ -6281,21 +6364,31 @@ function awardManagerXP(xp, reason) {
 
 // Update manager stats after tournament
 function updateManagerStats(tournamentData) {
+  const tracked = getTrackedTeamName();
+  if (!tracked) return; // Nothing tracked, nothing earned
+
+  // Only count tournament if tracked team participated
+  const trackedMatches = (tournamentData.matches || []).filter(matchInvolvesTrackedTeam);
+  if (trackedMatches.length === 0) return;
+
   MANAGER_PROFILE.tournamentsPlayed++;
 
-  if (tournamentData.champion) {
+  // Only a "win" if tracked team is champion
+  if (tournamentData.champion && tournamentData.champion.name === tracked) {
     MANAGER_PROFILE.tournamentsWon++;
+    awardManagerXP(200, "Your team won the tournament!");
   }
 
-  // Count goals and matches
-  if (tournamentData.matches) {
-    const totalMatches = tournamentData.matches.length;
-    const totalGoals = tournamentData.matches.reduce((sum, m) =>
-      sum + (m.scoreA || 0) + (m.scoreB || 0), 0);
+  // Count goals and matches for tracked team only
+  const totalGoals = trackedMatches.reduce((sum, m) =>
+    sum + (m.scoreA || 0) + (m.scoreB || 0), 0);
 
-    MANAGER_PROFILE.totalMatches += totalMatches;
-    MANAGER_PROFILE.totalGoals += totalGoals;
-  }
+  MANAGER_PROFILE.totalMatches += trackedMatches.length;
+  MANAGER_PROFILE.totalGoals += totalGoals;
+
+  // Award XP for participation
+  awardManagerXP(100, "Tournament completed (tracked team)");
+  awardManagerXP(trackedMatches.length * 5, `${trackedMatches.length} tracked matches`);
 
   // Calculate stats
   if (MANAGER_PROFILE.totalMatches > 0) {
@@ -8556,6 +8649,97 @@ function closeCustomMatch() {
   if (modal) {
     modal.classList.remove("active");
     modal.style.display = "none";
+  }
+}
+
+// Manager Edit Modal Functions
+function openManagerEditModal() {
+  const modal = document.getElementById("managerEditModal");
+  const input = document.getElementById("managerNameInput");
+  if (input) {
+    input.value = MANAGER_PROFILE.name || "";
+  }
+  if (modal) {
+    modal.classList.add("active");
+    modal.style.display = "flex";
+    modal.style.zIndex = "9999";
+  }
+}
+
+function closeManagerEditModal() {
+  const modal = document.getElementById("managerEditModal");
+  if (modal) {
+    modal.classList.remove("active");
+    modal.style.display = "none";
+  }
+}
+
+function saveManagerEdits() {
+  const input = document.getElementById("managerNameInput");
+  const name = input ? input.value.trim() : "";
+
+  if (name) {
+    MANAGER_PROFILE.name = name;
+    saveManagerProfile();
+    updateManagerProfileUI();
+    closeManagerEditModal();
+    showUtilityMessage("Manager profile updated!", "success");
+  } else {
+    showUtilityMessage("Please enter a name", "error");
+  }
+}
+
+// Tracked Team Functions
+function getTrackedTeamName() {
+  return MANAGER_PROFILE.favoriteTeam || MANAGER_PROFILE.predictedWinner;
+}
+
+function matchInvolvesTrackedTeam(match) {
+  const tracked = getTrackedTeamName();
+  if (!tracked) return false;
+  return match.teamA?.name === tracked || match.teamB?.name === tracked;
+}
+
+function showTrackTeamModal() {
+  const modal = document.getElementById("trackTeamModal");
+  const select = document.getElementById("trackTeamSelect");
+
+  if (select) {
+    select.innerHTML = '<option value="">-- Select a team --</option>';
+    const teams = window.DRAWN_TEAMS || [];
+    teams.forEach(team => {
+      const option = document.createElement("option");
+      option.value = team.name;
+      option.textContent = team.name;
+      select.appendChild(option);
+    });
+  }
+
+  if (modal) {
+    modal.classList.add("active");
+    modal.style.display = "flex";
+    modal.style.zIndex = "9999";
+  }
+}
+
+function confirmTrackedTeam() {
+  const select = document.getElementById("trackTeamSelect");
+  const teamName = select ? select.value : "";
+
+  if (teamName) {
+    MANAGER_PROFILE.favoriteTeam = teamName;
+    saveManagerProfile();
+    updateManagerProfileUI();
+
+    const modal = document.getElementById("trackTeamModal");
+    if (modal) {
+      modal.classList.remove("active");
+      modal.style.display = "none";
+    }
+
+    showUtilityMessage(`Now tracking ${teamName}!`, "success");
+  } else {
+    showUtilityMessage("Please select a team", "error");
   }
 }
 
@@ -14560,8 +14744,8 @@ function showUtilityMessage(message, type = 'info') {
     }
   }, 4000);
 }
-function openCustomMatchModal() {
-  console.log('📋 Opening custom match modal...');
+function openCustomMatchModal(preselectA = null, preselectB = null) {
+  console.log('📋 Opening custom match modal...', { preselectA, preselectB });
 
   try {
     // Populate dropdowns first
@@ -14569,6 +14753,16 @@ function openCustomMatchModal() {
       populateCustomMatchDropdowns();
     } else {
       console.warn('⚠️ populateCustomMatchDropdowns not available');
+    }
+
+    // Apply preselections if provided
+    if (preselectA) {
+      const selectA = document.getElementById('customTeamA');
+      if (selectA) selectA.value = preselectA;
+    }
+    if (preselectB) {
+      const selectB = document.getElementById('customTeamB');
+      if (selectB) selectB.value = preselectB;
     }
 
     // Open the modal
@@ -14599,6 +14793,16 @@ function openCustomMatchModal() {
     console.error('❌ Error in openCustomMatchModal:', error);
     showUtilityMessage('Error opening custom match: ' + error.message, 'error');
   }
+}
+
+// Public wrapper for external calls
+function openCustomMatch(preA = null, preB = null) {
+  openCustomMatchModal(preA, preB);
+}
+
+// For Tools tab button
+function showCustomMatchInterface() {
+  openCustomMatch();
 }
 
 function simulateCustomMatchHandler_OLD() {
@@ -16251,7 +16455,11 @@ function viewMatchDetails(matchId) {
         <div style="display: grid; gap: 10px;">
     `;
 
-    match.events.goals.forEach(goal => {
+    // Sort goals chronologically by minute
+    const sortedGoals = [...match.events.goals]
+      .sort((a, b) => (a.minute ?? 0) - (b.minute ?? 0));
+
+    sortedGoals.forEach(goal => {
       html += `
         <div style="background: rgba(16, 185, 129, 0.1); padding: 12px; border-radius: 6px; border-left: 3px solid #10b981; display: flex; justify-content: space-between; align-items: center;">
           <div>
@@ -17012,12 +17220,17 @@ function handleGenerateGroups() {
     
     // RENDER THE GROUPS IMMEDIATELY
     renderGroupDrawResults(groups);
-    
+
     // Update button states
     updateButtonStates();
-    
+
     showUtilityMessage('✅ Groups generated successfully!', 'success');
-    
+
+    // Show tracked team modal if no team is selected
+    if (!MANAGER_PROFILE.favoriteTeam) {
+      setTimeout(() => showTrackTeamModal(), 500);
+    }
+
   } catch (error) {
     console.error("❌ Error in handleGenerateGroups:", error);
     showUtilityMessage('❌ Error: ' + error.message, 'error');

@@ -9769,12 +9769,22 @@ function createPots() {
       console.warn("⚠️ Using available teams (less than 64)");
     }
 
-    // Shuffle full pool and take up to 64 teams
-    const shuffledAllTeams = shuffleArray(TEAM_POOL);
-    const selectedTeams = shuffledAllTeams.slice(0, 64);
+    // Randomly select 64 teams without shuffling entire array (much faster!)
+    const selectedTeams = [];
+    const usedIndices = new Set();
 
-    // Filter out any invalid teams
-    const validTeams = selectedTeams.filter((team) => validateTeam(team));
+    while (selectedTeams.length < 64 && usedIndices.size < TEAM_POOL.length) {
+      const randomIndex = Math.floor(Math.random() * TEAM_POOL.length);
+      if (!usedIndices.has(randomIndex)) {
+        usedIndices.add(randomIndex);
+        const team = TEAM_POOL[randomIndex];
+        if (validateTeam(team)) {
+          selectedTeams.push(team);
+        }
+      }
+    }
+
+    const validTeams = selectedTeams;
 
     if (validTeams.length < 64) {
       console.warn(`⚠️ Only ${validTeams.length} valid teams available for pot creation`);
@@ -9838,9 +9848,11 @@ function createPots() {
     
     // Also store all drawn teams for custom match feature
     window.DRAWN_TEAMS = [];
+    const teamNames = new Set();
     groups.forEach(group => {
       group.teams.forEach(team => {
-        if (team && team.name && !window.DRAWN_TEAMS.find(t => t.name === team.name)) {
+        if (team && team.name && !teamNames.has(team.name)) {
+          teamNames.add(team.name);
           window.DRAWN_TEAMS.push(team);
         }
       });
@@ -9880,9 +9892,11 @@ function handleGenerateGroups() {
     
     // Store all teams
     window.DRAWN_TEAMS = [];
+    const teamNames = new Set();
     groups.forEach(group => {
       group.teams.forEach(team => {
-        if (team && team.name && !window.DRAWN_TEAMS.find(t => t.name === team.name)) {
+        if (team && team.name && !teamNames.has(team.name)) {
+          teamNames.add(team.name);
           window.DRAWN_TEAMS.push(team);
         }
       });

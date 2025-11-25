@@ -3561,7 +3561,7 @@
           <button class="modal-close" onclick="closeManagerEditModal()">✕</button>
         </div>
         <div class="modal-body">
-          <label style="display: block; margin-bottom: 8px; color: #e2e8f0; font-weight: 600;">Manager Name</label>
+          <label for="managerNameInput" style="display: block; margin-bottom: 8px; color: #e2e8f0; font-weight: 600;">Manager Name</label>
           <input id="managerNameInput" type="text" placeholder="Enter your name"
                  style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);
                         background: rgba(0, 0, 0, 0.3); color: #e2e8f0; font-size: 1rem; margin-bottom: 20px;"/>
@@ -12353,8 +12353,10 @@ async function startTournament() {
     MATCH_SCHEDULE.knockoutStage = [];
     window.CURRENT_TOURNAMENT_ID = Date.now();
 
-    // Reinitialize teams and players for new tournament
-    await initTeamsAndPlayers();
+    // Reinitialize teams and players for new tournament only if not already initialized
+    if (TEAM_MAP.size === 0) {
+      await initTeamsAndPlayers();
+    }
 
     const groups = generateGroups();
     if (!groups || groups.length === 0) {
@@ -17929,9 +17931,25 @@ function handleGenerateGroups() {
 document.addEventListener('DOMContentLoaded', async function () {
   console.log("🏁 Initializing All-Time Football Simulator...");
 
+  // Show early loading indicator
+  const loadingOverlay = document.getElementById("loadingOverlay");
+  if (loadingOverlay) {
+    const textEl = document.getElementById("loadingText");
+    if (textEl) textEl.textContent = "Initializing teams...";
+    loadingOverlay.classList.add("active");
+  }
+
+  // Small delay to let loading overlay show
+  await new Promise(resolve => setTimeout(resolve, 50));
+
   // Initialize TEAM_POOL first (async to prevent freezing on page load)
   if (typeof TEAM_POOL !== 'undefined' && TEAM_POOL.length > 0) {
     await initTeamsAndPlayers();
+  }
+
+  // Hide loading overlay
+  if (loadingOverlay) {
+    loadingOverlay.classList.remove("active");
   }
 
   if (typeof injectAllStyles === 'function') injectAllStyles();

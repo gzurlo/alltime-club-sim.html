@@ -9438,36 +9438,47 @@ function injectAllStyles() {
 /************* HIGH-LEVEL TOURNAMENT HELPERS *************/
 
 // Run entire tournament in one go (draw → groups → knockouts → overview)
-function runFullTournament() {
+async function runFullTournament() {
   console.log("🚀 Running full tournament...");
 
-  // 1) Draw groups if not already drawn
-  if (!window.GROUPS && typeof startTournament === "function") {
-    startTournament();
-  }
+  try {
+    // 1) Draw groups if not already drawn
+    if (!window.GROUPS && typeof startTournament === "function") {
+      startTournament();
+      // Wait a bit for UI to update
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
 
-  // 2) Run group stage if groups are ready but results not yet done
-  if (window.GROUPS && !window.GROUP_RESULTS && typeof runGroupStage === "function") {
-    runGroupStage();
-  }
+    // 2) Run group stage if groups are ready but results not yet done
+    if (window.GROUPS && !window.GROUP_RESULTS && typeof runGroupStage === "function") {
+      await runGroupStage();
+      // Wait a bit for UI to update
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
 
-  // 3) Run knockouts if group results exist but tournament object not yet created
-  if (window.GROUP_RESULTS && !window.TOURNAMENT && typeof runKnockouts === "function") {
-    runKnockouts();
-  }
+    // 3) Run knockouts if group results exist but tournament object not yet created
+    if (window.GROUP_RESULTS && !window.TOURNAMENT && typeof runKnockouts === "function") {
+      await runKnockouts();
+      // Wait a bit for UI to update
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
 
-  // 4) Show overview if everything is complete
-  if (window.TOURNAMENT && typeof showTournamentOverview === "function") {
-    showTournamentOverview();
-    showUtilityMessage("Full tournament completed successfully!", "success");
-  } else if (!window.TOURNAMENT) {
-    showUtilityMessage(
-      "Unable to complete full tournament. Please check that all stages are implemented.",
-      "error"
-    );
-  }
+    // 4) Show overview if everything is complete
+    if (window.TOURNAMENT && typeof showTournamentOverview === "function") {
+      showTournamentOverview();
+      showUtilityMessage("Full tournament completed successfully!", "success");
+    } else if (!window.TOURNAMENT) {
+      showUtilityMessage(
+        "Unable to complete full tournament. Please check that all stages are implemented.",
+        "error"
+      );
+    }
 
-  updateButtonStates();
+    updateButtonStates();
+  } catch (error) {
+    console.error("❌ Error running full tournament:", error);
+    showUtilityMessage("Error running full tournament. Please try again.", "error");
+  }
 }
 
 /************* ENHANCED STATS VIEW (MAIN PANEL) *************/
@@ -9665,12 +9676,14 @@ window.TEAM_POOL = window.TEAM_POOL || [];
  * Initialize TEAM_MAP and register players into PLAYER_DB.
  * Should be called once after TEAM_POOL is defined.
  */
-function initTeamsAndPlayers() {
+async function initTeamsAndPlayers() {
   // Clear any existing map entries to prevent duplicates on re-init
   TEAM_MAP.clear();
 
   let validCount = 0;
-  TEAM_POOL.forEach((team) => {
+
+  for (let i = 0; i < TEAM_POOL.length; i++) {
+    const team = TEAM_POOL[i];
     if (validateTeam(team)) {
       TEAM_MAP.set(team.name, team);
       registerTeamPlayers(team);
@@ -9678,7 +9691,12 @@ function initTeamsAndPlayers() {
     } else {
       console.warn("⚠️ Skipping invalid team in TEAM_POOL:", team);
     }
-  });
+
+    // Yield every 100 teams to prevent UI freeze
+    if (i % 100 === 0 && i > 0) {
+      await new Promise(resolve => setTimeout(resolve, 0));
+    }
+  }
 
   console.log("🏁 Teams initialized from TEAM_POOL:", TEAM_POOL.length);
   console.log("✅ Valid teams registered in TEAM_MAP:", validCount);
@@ -12313,8 +12331,11 @@ function updateClubLegacyFromResults(results) {
   }
 }
 /************* ENHANCED MAIN BUTTON FUNCTIONS *************/
-function startTournament() {
+async function startTournament() {
   console.log("🏁 Starting tournament...");
+
+  // Show loading overlay
+  if (typeof showLoading === "function") showLoading("Initializing tournament...");
 
   try {
     // Clear previous tournament data
@@ -12333,7 +12354,7 @@ function startTournament() {
     window.CURRENT_TOURNAMENT_ID = Date.now();
 
     // Reinitialize teams and players for new tournament
-    initTeamsAndPlayers();
+    await initTeamsAndPlayers();
 
     const groups = generateGroups();
     if (!groups || groups.length === 0) {
@@ -12397,6 +12418,8 @@ function startTournament() {
         </div>
       `;
     }
+  } finally {
+    if (typeof hideLoading === "function") hideLoading();
   }
 }
 
@@ -17903,12 +17926,12 @@ function handleGenerateGroups() {
 }
 /************* MASTER DOM INITIALIZER *************/
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
   console.log("🏁 Initializing All-Time Football Simulator...");
 
-  // Initialize TEAM_POOL first
+  // Initialize TEAM_POOL first (async to prevent freezing on page load)
   if (typeof TEAM_POOL !== 'undefined' && TEAM_POOL.length > 0) {
-    initTeamsAndPlayers();
+    await initTeamsAndPlayers();
   }
 
   if (typeof injectAllStyles === 'function') injectAllStyles();

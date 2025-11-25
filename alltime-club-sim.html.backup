@@ -9923,15 +9923,6 @@ async function handleGenerateGroups() {
 
     showUtilityMessage('✅ Groups generated successfully!', 'success');
 
-    // Show tracked team modal if no team is selected
-    if (typeof MANAGER_PROFILE !== 'undefined' && !MANAGER_PROFILE.favoriteTeam) {
-      setTimeout(() => {
-        if (typeof showTrackTeamModal === 'function') {
-          showTrackTeamModal();
-        }
-      }, 500);
-    }
-
     console.log("🔍 handleGenerateGroups completed!");
   } else {
     showUtilityMessage('❌ Failed to generate groups', 'error');
@@ -17919,6 +17910,57 @@ function updateClubLegacy(tournamentResults) {
   CLUB_LEGACY_DB.totalWins[champion] = (CLUB_LEGACY_DB.totalWins[champion] || 0) + 1;
 
   console.log(`🏆 ${champion} added to champions legacy`);
+}
+function handleGenerateGroups() {
+  console.log("🎲 Generate Groups button clicked");
+  
+  try {
+    // Generate the groups
+    const groups = generateGroups();
+    
+    if (!groups || groups.length === 0) {
+      showUtilityMessage('❌ Failed to generate groups', 'error');
+      return;
+    }
+
+    // Store globally
+    window.GROUPS = groups;
+    
+    // Store all teams for custom matches
+    window.DRAWN_TEAMS = [];
+    groups.forEach(group => {
+      if (group && group.teams) {
+        group.teams.forEach(team => {
+          if (team && team.name) {
+            const exists = window.DRAWN_TEAMS.find(t => t.name === team.name);
+            if (!exists) {
+              window.DRAWN_TEAMS.push(team);
+            }
+          }
+        });
+      }
+    });
+    
+    console.log("✅ Groups stored:", groups.length, "groups");
+    console.log("✅ Teams stored:", window.DRAWN_TEAMS.length, "teams");
+    
+    // RENDER THE GROUPS IMMEDIATELY
+    renderGroupDrawResults(groups);
+
+    // Update button states
+    updateButtonStates();
+
+    showUtilityMessage('✅ Groups generated successfully!', 'success');
+
+    // Show tracked team modal if no team is selected
+    if (!MANAGER_PROFILE.favoriteTeam) {
+      setTimeout(() => showTrackTeamModal(), 500);
+    }
+
+  } catch (error) {
+    console.error("❌ Error in handleGenerateGroups:", error);
+    showUtilityMessage('❌ Error: ' + error.message, 'error');
+  }
 }
 /************* MASTER DOM INITIALIZER *************/
 

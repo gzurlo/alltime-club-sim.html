@@ -3128,7 +3128,7 @@
       <!-- Tools Tab -->
       <div class="tab-content" id="tab-tools">
         <div class="control-column">
-          <button class="ctrl-btn btn-purple" id="customMatchBtn">
+          <button class="ctrl-btn btn-purple" id="customMatchBtn" onclick="openCustomMatch()">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Custom Match</span>
               <span class="ctrl-btn-subtitle">Simulate any matchup</span>
@@ -3385,8 +3385,8 @@
   </div>
 
   <!-- Manager Edit Modal -->
-  <div id="managerEditModal" class="modal-backdrop">
-    <div class="modal">
+  <div id="managerEditModal" class="modal-backdrop" onclick="closeManagerEditModal()">
+    <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-content">
         <div class="modal-head">
           <h3>Edit Manager Profile</h3>
@@ -3418,7 +3418,7 @@
 
   <!-- Track Team Modal -->
   <div id="trackTeamModal" class="modal-backdrop">
-    <div class="modal">
+    <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-content">
         <div class="modal-head">
           <h3>Choose Your Team</h3>
@@ -15296,7 +15296,7 @@ function populateTeamDetailModal(team) {
 
   html += `
       <div style="margin-top: 15px; display: flex; gap: 8px; justify-content: center;">
-        <button onclick="openCustomMatchModal('${team.name}', '')" class="btn-secondary" style="padding: 8px 16px;">
+        <button onclick="openCustomMatch('${team.name}', '')" class="btn-secondary" style="padding: 8px 16px;">
           ⚽ Simulate Match
         </button>
         <button onclick="viewTeamPlayers('${team.name}')" class="btn-secondary" style="padding: 8px 16px;">

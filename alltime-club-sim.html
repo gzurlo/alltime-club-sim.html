@@ -2179,6 +2179,54 @@
       color: #94a3b8;
     }
 
+    /* Loading Overlay */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .loading-card {
+      padding: 18px 20px;
+      border-radius: 14px;
+      background: rgba(10, 15, 30, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      text-align: center;
+      min-width: 220px;
+    }
+
+    .spinner {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.15);
+      border-top-color: rgba(120, 180, 255, 0.9);
+      animation: spin 0.9s linear infinite;
+      margin: 0 auto 10px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading-progress {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-top: 6px;
+      color: #94a3b8;
+    }
+
     .achievement-filter {
       display: flex;
       gap: 8px;
@@ -3332,8 +3380,8 @@
   </div>
 </div>
 
-<div id="matchDetailModal" class="modal-backdrop">
-    <div class="modal">
+<div id="matchDetailModal" class="modal-backdrop" onclick="closeMatchDetail()">
+    <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-content">
         <div class="modal-head">
           <h3 id="matchDetailTitle">Match Detail</h3>
@@ -3345,8 +3393,8 @@
   </div>
   
   <!-- Team detail modal -->
-  <div id="teamDetailModal" class="modal-backdrop">
-    <div class="modal">
+  <div id="teamDetailModal" class="modal-backdrop" onclick="closeTeamDetail()">
+    <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-content">
         <div class="modal-head">
           <h3 id="teamDetailTitle">Team Detail</h3>
@@ -3358,8 +3406,8 @@
   </div>
   
   <!-- Custom match modal -->
-  <div id="customMatchModal" class="modal-backdrop">
-    <div class="modal">
+  <div id="customMatchModal" class="modal-backdrop" onclick="closeCustomMatch()">
+    <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-content">
         <div class="modal-head">
           <h3>Custom Match</h3>
@@ -3443,8 +3491,8 @@
   </div>
 
   <!-- History modal -->
-  <div id="historyModal" class="modal-backdrop">
-    <div class="modal">
+  <div id="historyModal" class="modal-backdrop" onclick="closeHistory()">
+    <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-content">
         <div class="modal-head">
           <h3>Tournament History</h3>
@@ -3457,6 +3505,15 @@
 
   <!-- Achievement Notification -->
   <div id="achievementNotification" class="achievement-notification"></div>
+
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-card">
+      <div class="spinner"></div>
+      <div id="loadingText">Working...</div>
+      <div id="loadingProgress" class="loading-progress"></div>
+    </div>
+  </div>
 
 <script>
     const TEAM_POOL = [
@@ -10773,6 +10830,146 @@ function simulateGroupStage(groups) {
   console.log("🎉 Group stage simulation completed!");
   return results;
 }
+
+// Async non-blocking version of group stage simulation
+async function simulateGroupStageAsync(groups, onProgress) {
+  if (!groups || !Array.isArray(groups)) {
+    console.error("❌ Invalid groups provided to simulateGroupStageAsync");
+    return {};
+  }
+
+  const results = {};
+  MATCH_SCHEDULE.groupStage = [];
+
+  const totalMatches = groups.reduce((sum, group) => {
+    const teamCount = group.teams ? group.teams.length : 0;
+    return sum + (teamCount * (teamCount - 1)); // n*(n-1) for home-and-away
+  }, 0);
+
+  let matchesSimulated = 0;
+
+  console.log(`🏁 Starting async group stage simulation for ${groups.length} groups`);
+
+  for (const group of groups) {
+    if (!group || !group.name || !group.teams) {
+      console.warn(`⚠️ Invalid group:`, group);
+      continue;
+    }
+
+    const groupName = group.name;
+    console.log(`📊 Simulating ${groupName}...`);
+
+    results[groupName] = {
+      name: groupName,
+      teams: [],
+      matches: []
+    };
+
+    const teams = group.teams.filter((t) => t && t.name);
+
+    if (teams.length < 2) {
+      console.warn(`⚠️ Not enough valid teams in ${groupName}`);
+      results[groupName].teams = teams.map((team) => ({
+        team,
+        played: 0,
+        wins: 0,
+        draws: 0,
+        losses: 0,
+        goalsFor: 0,
+        goalsAgainst: 0,
+        points: 0
+      }));
+      continue;
+    }
+
+    const groupMatches = [];
+
+    // Home-and-away round-robin
+    for (let i = 0; i < teams.length; i++) {
+      for (let j = i + 1; j < teams.length; j++) {
+        const teamA = teams[i];
+        const teamB = teams[j];
+
+        if (!teamA || !teamB) continue;
+
+        try {
+          const homeMatch = simulateMatch(teamA, teamB, true);
+          const awayMatch = simulateMatch(teamA, teamB, false);
+
+          groupMatches.push({
+            type: "home",
+            match: homeMatch,
+            teamA,
+            teamB
+          });
+          groupMatches.push({
+            type: "away",
+            match: awayMatch,
+            teamA,
+            teamB
+          });
+
+          results[groupName].matches.push(homeMatch, awayMatch);
+
+          matchesSimulated += 2;
+          if (onProgress) onProgress(matchesSimulated, totalMatches);
+
+          // Yield every 8 matches to allow UI repaint
+          if (matchesSimulated % 8 === 0) {
+            await new Promise(resolve => setTimeout(resolve, 0));
+          }
+        } catch (error) {
+          console.error(
+            `❌ Error simulating match between ${teamA.name} and ${teamB.name}:`,
+            error
+          );
+        }
+      }
+    }
+
+    // Organize into matchweeks
+    try {
+      const matchweeks = organizeGroupMatchesIntoWeeks(groupMatches, groupName);
+      MATCH_SCHEDULE.groupStage.push(...matchweeks);
+
+      // Add matchday property to each match
+      matchweeks.forEach(weekData => {
+        const weekNumber = weekData.week;
+        weekData.matches.forEach(weekMatch => {
+          const actualMatch = weekMatch.match || weekMatch;
+          const matchId = actualMatch.matchId;
+
+          const originalMatch = results[groupName].matches.find(m =>
+            m.matchId === matchId
+          );
+          if (originalMatch) {
+            originalMatch.matchday = weekNumber;
+          }
+        });
+      });
+    } catch (error) {
+      console.error(`❌ Error organizing matchweeks for ${groupName}:`, error);
+    }
+
+    // Calculate standings
+    try {
+      results[groupName].teams = calculateStandings(
+        results[groupName].matches,
+        teams
+      );
+      console.log(
+        `✅ ${groupName} completed: ${results[groupName].matches.length} matches simulated`
+      );
+    } catch (error) {
+      console.error(`❌ Error calculating standings for ${groupName}:`, error);
+      results[groupName].teams = [];
+    }
+  }
+
+  console.log("🎉 Async group stage simulation completed!");
+  return results;
+}
+
 function organizeGroupMatchesIntoWeeks(matches, groupName) {
   if (!matches || !Array.isArray(matches)) {
     console.warn('⚠️ Invalid matches for organizeGroupMatchesIntoWeeks');
@@ -10931,6 +11128,303 @@ function getQualifiedTeams(groupResults) {
 
   console.log(`🎯 Total qualified teams: ${qualified.length}`);
   return qualified;
+}
+
+/**
+ * Async version: Simulate a single knockout round with yielding.
+ */
+async function simulateKnockoutRoundAsync(teams, roundName, matchImportance = 1.5, onProgress) {
+  if (!teams || !Array.isArray(teams) || teams.length === 0) {
+    console.error(`❌ No teams provided for ${roundName}`);
+    return [];
+  }
+
+  if (teams.length % 2 !== 0) {
+    console.warn(
+      `⚠️ Odd number of teams (${teams.length}) for ${roundName}, adjusting...`
+    );
+    teams = teams.slice(0, teams.length - 1);
+  }
+
+  const matches = [];
+  const shuffled = shuffleArray([...teams]);
+
+  console.log(`⚔️ Simulating ${roundName} with ${shuffled.length} teams...`);
+
+  for (let i = 0; i < shuffled.length; i += 2) {
+    if (i + 1 >= shuffled.length) break;
+
+    const teamA = shuffled[i];
+    const teamB = shuffled[i + 1];
+
+    if (!teamA || !teamB) {
+      console.warn(`⚠️ Invalid team pair in ${roundName} at index ${i}`);
+      continue;
+    }
+
+    console.log(`🎯 ${roundName} Match: ${teamA.name} vs ${teamB.name}`);
+
+    if (roundName === "Final") {
+      try {
+        const finalMatchLight = simulateMatch(teamA, teamB, false, 2.0);
+        let winner;
+        let penaltiesUsed = false;
+        let penaltyScoreA = 0;
+        let penaltyScoreB = 0;
+
+        if (finalMatchLight.scoreA > finalMatchLight.scoreB) {
+          winner = teamA;
+        } else if (finalMatchLight.scoreB > finalMatchLight.scoreA) {
+          winner = teamB;
+        } else {
+          penaltiesUsed = true;
+          const penaltyResult = simulatePenalties(teamA, teamB);
+          winner = penaltyResult.winner;
+          penaltyScoreA = penaltyResult.scoreA;
+          penaltyScoreB = penaltyResult.scoreB;
+          console.log(`🎯 Final went to penalties: ${winner.name} wins ${penaltyScoreA}-${penaltyScoreB}`);
+        }
+
+        const match = {
+          teamA,
+          teamB,
+          scoreA: finalMatchLight.scoreA,
+          scoreB: finalMatchLight.scoreB,
+          winner,
+          round: roundName,
+          matchDetails: finalMatchLight,
+          isFinal: true,
+          penaltiesUsed,
+          penaltyScoreA,
+          penaltyScoreB
+        };
+
+        if (MATCH_DETAILS_DB[finalMatchLight.matchId]) {
+          MATCH_DETAILS_DB[finalMatchLight.matchId].round = roundName;
+        }
+        matches.push(match);
+        console.log(
+          `🏆 Final: ${teamA.name} ${finalMatchLight.scoreA}-${finalMatchLight.scoreB} ${teamB.name}, Winner: ${match.winner.name}`
+        );
+      } catch (error) {
+        console.error(`❌ Error simulating final:`, error);
+      }
+    } else {
+      try {
+        const firstLeg = simulateMatch(teamA, teamB, false, matchImportance);
+        const secondLeg = simulateMatch(teamA, teamB, true, matchImportance);
+
+        const aggScoreA = (firstLeg.scoreA || 0) + (secondLeg.scoreA || 0);
+        const aggScoreB = (firstLeg.scoreB || 0) + (secondLeg.scoreB || 0);
+
+        let winner;
+        let penaltiesUsed = false;
+        let penaltyScoreA = 0;
+        let penaltyScoreB = 0;
+
+        if (aggScoreA > aggScoreB) {
+          winner = teamA;
+        } else if (aggScoreA < aggScoreB) {
+          winner = teamB;
+        } else {
+          const teamAAwayGoals = firstLeg.scoreA || 0;
+          const teamBAwayGoals = secondLeg.scoreB || 0;
+
+          if (teamAAwayGoals > teamBAwayGoals) {
+            winner = teamA;
+          } else if (teamBAwayGoals > teamAAwayGoals) {
+            winner = teamB;
+          } else {
+            penaltiesUsed = true;
+            const penaltyResult = simulatePenalties(teamA, teamB);
+            winner = penaltyResult.winner;
+            penaltyScoreA = penaltyResult.scoreA;
+            penaltyScoreB = penaltyResult.scoreB;
+            console.log(`🎯 ${roundName} went to penalties: ${winner.name} wins ${penaltyScoreA}-${penaltyScoreB}`);
+          }
+        }
+
+        const match = {
+          teamA,
+          teamB,
+          firstLeg,
+          secondLeg,
+          aggScoreA,
+          aggScoreB,
+          winner,
+          round: roundName,
+          awayGoalsA: firstLeg.scoreA || 0,
+          awayGoalsB: secondLeg.scoreB || 0,
+          penaltiesUsed,
+          penaltyScoreA,
+          penaltyScoreB
+        };
+
+        if (MATCH_DETAILS_DB[firstLeg.matchId]) {
+          MATCH_DETAILS_DB[firstLeg.matchId].round = roundName;
+        }
+        if (MATCH_DETAILS_DB[secondLeg.matchId]) {
+          MATCH_DETAILS_DB[secondLeg.matchId].round = roundName;
+        }
+        matches.push(match);
+
+        console.log(
+          `🔀 ${roundName}: ${teamA.name} ${aggScoreA}-${aggScoreB} ${teamB.name} (agg), Winner: ${winner.name}`
+        );
+      } catch (error) {
+        console.error(`❌ Error simulating ${roundName} match:`, error);
+      }
+    }
+
+    // Yield every match to allow UI updates
+    if (onProgress) onProgress(roundName, i / 2 + 1, Math.floor(shuffled.length / 2));
+    await new Promise(resolve => setTimeout(resolve, 0));
+  }
+
+  console.log(`✅ ${roundName} completed: ${matches.length} matches`);
+  return matches;
+}
+
+/**
+ * Async version: Simulate all knockout rounds with yielding.
+ */
+async function simulateKnockoutRoundsAsync(teams, onProgress) {
+  if (!teams || !Array.isArray(teams) || teams.length === 0) {
+    console.error("❌ No qualified teams for knockout stage");
+    return {
+      roundOf32: [],
+      roundOf16: [],
+      quarterFinals: [],
+      semiFinals: [],
+      final: null,
+      champion: null,
+      bracket: []
+    };
+  }
+
+  console.log("🏆 Starting async knockout tournament simulation...");
+  console.log(`🎯 Teams in knockout stage: ${teams.length}`);
+
+  MATCH_SCHEDULE.knockoutStage = [];
+
+  const results = {
+    roundOf32: [],
+    roundOf16: [],
+    quarterFinals: [],
+    semiFinals: [],
+    final: null,
+    champion: null,
+    bracket: []
+  };
+
+  try {
+    // Round of 32
+    if (onProgress) onProgress("Round of 32", 0, 0);
+    results.roundOf32 = await simulateKnockoutRoundAsync(teams, "Round of 32", 1.2, onProgress);
+    results.bracket.push({ round: "Round of 32", matches: results.roundOf32 });
+
+    if (results.roundOf32.length === 0) {
+      throw new Error("Round of 32 failed to produce matches");
+    }
+
+    // Round of 16
+    const roundOf16Teams = results.roundOf32.map((m) => m && m.winner).filter(Boolean);
+    if (onProgress) onProgress("Round of 16", 0, 0);
+    results.roundOf16 = await simulateKnockoutRoundAsync(roundOf16Teams, "Round of 16", 1.4, onProgress);
+    results.bracket.push({ round: "Round of 16", matches: results.roundOf16 });
+
+    // Quarter Finals
+    const quarterTeams = results.roundOf16.map((m) => m && m.winner).filter(Boolean);
+    if (onProgress) onProgress("Quarter Finals", 0, 0);
+    results.quarterFinals = await simulateKnockoutRoundAsync(quarterTeams, "Quarter Finals", 1.6, onProgress);
+    results.bracket.push({ round: "Quarter Finals", matches: results.quarterFinals });
+
+    // Semi Finals
+    const semiTeams = results.quarterFinals.map((m) => m && m.winner).filter(Boolean);
+    if (onProgress) onProgress("Semi Finals", 0, 0);
+    results.semiFinals = await simulateKnockoutRoundAsync(semiTeams, "Semi Finals", 1.8, onProgress);
+    results.bracket.push({ round: "Semi Finals", matches: results.semiFinals });
+
+    // Final
+    const finalTeams = results.semiFinals.map((m) => m && m.winner).filter(Boolean);
+    if (finalTeams.length >= 2) {
+      if (onProgress) onProgress("Final", 0, 0);
+      const finalMatches = await simulateKnockoutRoundAsync(finalTeams, "Final", 2.0, onProgress);
+      results.final = finalMatches[0] || null;
+    } else {
+      console.error("❌ Not enough teams for final:", finalTeams.length);
+      results.final = null;
+    }
+
+    results.bracket.push({
+      round: "Final",
+      matches: results.final ? [results.final] : []
+    });
+
+    // Ensure champion is properly formatted
+    const rawChampion = results.final?.winner || null;
+    results.champion = rawChampion ? {
+      name: rawChampion.name || rawChampion,
+      season: rawChampion.season || 'Unknown Era',
+      strength: rawChampion.strength || rawChampion.overall || 0
+    } : null;
+
+    if (results.champion) {
+      console.log(`🎉 TOURNAMENT CHAMPION: ${results.champion.name} 🏆`);
+
+      updateAchievementProgress('tournamentsCompleted', 1);
+
+      const allMatches = [
+        ...(results.roundOf32 || []),
+        ...(results.roundOf16 || []),
+        ...(results.quarterFinals || []),
+        ...(results.semiFinals || []),
+        results.final
+      ].filter(Boolean);
+
+      const tournamentData = {
+        champion: results.champion.name,
+        matches: allMatches,
+        groupResults: window.GROUP_RESULTS,
+        topScorer: window.PLAYER_DB ? Object.values(window.PLAYER_DB).sort((a, b) => b.goals - a.goals)[0] : null
+      };
+
+      checkAllAchievements(tournamentData);
+
+      const totalGoals = allMatches.reduce((sum, match) => {
+        const m = MATCH_DETAILS_DB[match.matchId];
+        return sum + (m ? (m.scoreA + m.scoreB) : 0);
+      }, 0);
+      const avgGoals = allMatches.length > 0 ? (totalGoals / allMatches.length).toFixed(2) : 0;
+
+      TOURNAMENT_HISTORY.push({
+        champion: results.champion.name,
+        season: results.champion.season,
+        avgGoals: avgGoals,
+        upsets: 0,
+        timestamp: new Date().toISOString(),
+        topScorer: tournamentData.topScorer?.name || 'Unknown'
+      });
+
+      console.log(`📊 Tournament added to history. Total tournaments: ${TOURNAMENT_HISTORY.length}`);
+
+      if (typeof updateManagerStats === 'function') {
+        updateManagerStats({
+          champion: results.champion,
+          matches: allMatches,
+          topScorer: tournamentData.topScorer
+        });
+      }
+    } else {
+      console.error("❌ No champion determined");
+    }
+
+    organizeKnockoutMatches(results);
+  } catch (error) {
+    console.error("❌ Error in knockout stage simulation:", error);
+  }
+
+  return results;
 }
 
 /**
@@ -11786,7 +12280,7 @@ function startTournament() {
   }
 }
 
-function runGroupStage() {
+async function runGroupStage() {
   console.log("⚽ Starting group stage simulation...");
 
   const btnGroup = document.getElementById("btnGroupStage");
@@ -11834,12 +12328,16 @@ function runGroupStage() {
     `;
   }
 
-  // Allow UI to paint
-  setTimeout(() => {
-    try {
-      console.log("🎯 Simulating group stage matches...");
+  // Show loading overlay
+  showLoading("Simulating group stage...");
 
-      const groupResults = simulateGroupStage(window.GROUPS);
+  // Allow UI to paint before starting simulation
+  await new Promise(resolve => setTimeout(resolve, 100));
+
+  try {
+    console.log("🎯 Simulating group stage matches...");
+
+    const groupResults = await simulateGroupStageAsync(window.GROUPS, updateLoadingProgress);
 
       if (!groupResults || Object.keys(groupResults).length === 0) {
         throw new Error("Group stage simulation failed to produce results");
@@ -11917,11 +12415,12 @@ function runGroupStage() {
           </div>
         `;
       }
+    } finally {
+      hideLoading();
     }
-  }, 100);
 }
 
-function runKnockouts() {
+async function runKnockouts() {
   console.log("🎯 Starting knockout stage...");
 
   const btnKO = document.getElementById("btnKnockouts");
@@ -11974,19 +12473,24 @@ function runKnockouts() {
     `;
   }
 
-  setTimeout(() => {
-    try {
-      console.log("🎯 Getting qualified teams...");
-      const qualifiedTeams = getQualifiedTeams(window.GROUP_RESULTS);
+  // Show loading overlay
+  showLoading("Simulating knockouts...");
 
-      if (!qualifiedTeams || qualifiedTeams.length === 0) {
-        throw new Error("No qualified teams found for knockout stage");
-      }
+  // Allow UI to paint before starting simulation
+  await new Promise(resolve => setTimeout(resolve, 100));
 
-      console.log(
-        `🎯 Simulating knockout rounds with ${qualifiedTeams.length} teams...`
-      );
-      const knockoutResults = simulateKnockoutRounds(qualifiedTeams);
+  try {
+    console.log("🎯 Getting qualified teams...");
+    const qualifiedTeams = getQualifiedTeams(window.GROUP_RESULTS);
+
+    if (!qualifiedTeams || qualifiedTeams.length === 0) {
+      throw new Error("No qualified teams found for knockout stage");
+    }
+
+    console.log(
+      `🎯 Simulating knockout rounds with ${qualifiedTeams.length} teams...`
+    );
+    const knockoutResults = await simulateKnockoutRoundsAsync(qualifiedTeams, updateKnockoutProgress);
 
       if (!knockoutResults || !knockoutResults.champion) {
         throw new Error(
@@ -12080,8 +12584,9 @@ function runKnockouts() {
           </div>
         `;
       }
+    } finally {
+      hideLoading();
     }
-  }, 100);
 }
 
 // Enhanced global function exports with fallbacks
@@ -14744,6 +15249,46 @@ function showUtilityMessage(message, type = 'info') {
     }
   }, 4000);
 }
+
+// Loading Overlay Functions
+function showLoading(text = "Working...") {
+  const overlay = document.getElementById("loadingOverlay");
+  if (!overlay) return;
+
+  const textEl = document.getElementById("loadingText");
+  const progressEl = document.getElementById("loadingProgress");
+
+  if (textEl) textEl.textContent = text;
+  if (progressEl) progressEl.textContent = "";
+
+  overlay.classList.add("active");
+}
+
+function updateLoadingProgress(done, total) {
+  const progressEl = document.getElementById("loadingProgress");
+  if (progressEl) {
+    progressEl.textContent = `${done}/${total} matches`;
+  }
+}
+
+function hideLoading() {
+  const overlay = document.getElementById("loadingOverlay");
+  if (overlay) {
+    overlay.classList.remove("active");
+  }
+}
+
+function updateKnockoutProgress(roundName, done, total) {
+  const progressEl = document.getElementById("loadingProgress");
+  if (progressEl) {
+    if (total > 0) {
+      progressEl.textContent = `${roundName}: ${done}/${total} matches`;
+    } else {
+      progressEl.textContent = roundName;
+    }
+  }
+}
+
 function openCustomMatchModal(preselectA = null, preselectB = null) {
   console.log('📋 Opening custom match modal...', { preselectA, preselectB });
 
@@ -17705,6 +18250,40 @@ if (originalHandleGenerateGroups) {
 }
 
 // Initialize on page load
+// Global escape key handler for modals
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape' || event.key === 'Esc') {
+    // Find all active modals (those with display flex or active class)
+    const activeModals = Array.from(document.querySelectorAll('.modal-backdrop')).filter(modal => {
+      const style = window.getComputedStyle(modal);
+      return style.display === 'flex' || modal.classList.contains('active');
+    });
+
+    // Close the most recently opened modal
+    if (activeModals.length > 0) {
+      const latestModal = activeModals[activeModals.length - 1];
+      const modalId = latestModal.id;
+
+      // Call the appropriate close function based on modal ID
+      if (modalId === 'customMatchModal') closeCustomMatch();
+      else if (modalId === 'historyModal') closeHistory();
+      else if (modalId === 'matchDetailModal') closeMatchDetail();
+      else if (modalId === 'teamDetailModal') closeTeamDetail();
+      else if (modalId === 'settingsModal') closeSettings();
+      else if (modalId === 'statisticsModal') closeStatistics();
+      else if (modalId === 'managerEditModal') closeManagerEditModal();
+      else if (modalId === 'resetConfirmModal') closeResetConfirmModal();
+      else {
+        // Generic close if no specific function
+        latestModal.classList.remove('active');
+        setTimeout(() => {
+          latestModal.style.display = 'none';
+        }, 300);
+      }
+    }
+  }
+});
+
 document.addEventListener('DOMContentLoaded', function() {
   // Check current tournament state and update progress
   if (window.TOURNAMENT && window.TOURNAMENT.champion) {

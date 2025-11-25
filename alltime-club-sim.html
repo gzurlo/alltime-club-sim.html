@@ -9860,13 +9860,19 @@ function createPots() {
     
     // RENDER THE GROUPS IMMEDIATELY
     renderGroupDrawResults(groups);
-    
+
+    console.log("🔍 [generateGroups] About to update button states...");
+
     // Update button states
     updateButtonStates();
-    
+
+    console.log("🔍 [generateGroups] Button states updated, showing message...");
+
     // Show success message
     showUtilityMessage('✅ Groups generated successfully!', 'success');
-    
+
+    console.log("🔍 [generateGroups] Returning groups...");
+
     return groups;
     
   } catch (error) {
@@ -9881,15 +9887,15 @@ function createPots() {
     }));
   }
 }
-function handleGenerateGroups() {
+async function handleGenerateGroups() {
   console.log("🎲 Generating groups...");
-  
+
   const groups = generateGroups();
-  
+
   if (groups && groups.length > 0) {
     // Store globally
     window.GROUPS = groups;
-    
+
     // Store all teams
     window.DRAWN_TEAMS = [];
     const teamNames = new Set();
@@ -9901,14 +9907,23 @@ function handleGenerateGroups() {
         }
       });
     });
-    
+
     // RENDER IMMEDIATELY
     renderGroupDrawResults(groups);
-    
+
+    console.log("🔍 About to update button states...");
+
+    // Yield to let the browser render
+    await new Promise(resolve => setTimeout(resolve, 0));
+
     // Update buttons
     updateButtonStates();
-    
+
+    console.log("🔍 Button states updated, showing message...");
+
     showUtilityMessage('✅ Groups generated successfully!', 'success');
+
+    console.log("🔍 handleGenerateGroups completed!");
   } else {
     showUtilityMessage('❌ Failed to generate groups', 'error');
   }
@@ -9985,9 +10000,12 @@ function renderGroupDrawResults(groups) {
   });
 
   html += `</div>`;
-  out.innerHTML = html;
-  
-  console.log("✅ Groups rendered successfully");
+
+  // Use requestAnimationFrame to avoid blocking
+  requestAnimationFrame(() => {
+    out.innerHTML = html;
+    console.log("✅ Groups rendered successfully");
+  });
 }
 function renderGroupResults(groupResults) {
   const out = document.getElementById('output');

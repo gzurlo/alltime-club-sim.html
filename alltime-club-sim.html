@@ -7516,6 +7516,23 @@ const ACHIEVEMENTS = {
     progress: 0,
     maxProgress: 5,
     check: (data) => data.winStreak >= 5
+  },
+
+  // Player Form Achievement
+  onFireManager: {
+    id: 'onFireManager',
+    name: 'On Fire Manager',
+    description: 'Have 3 or more players in hot form (🔥) simultaneously',
+    icon: '🔥',
+    rarity: 'rare',
+    category: 'players',
+    points: 100,
+    check: (data) => {
+      const hotPlayerCount = Object.values(PLAYER_DB).filter(
+        player => player.form && player.form.current >= 1
+      ).length;
+      return hotPlayerCount >= 3;
+    }
   }
 };
 
@@ -10498,10 +10515,334 @@ function registerTeamPlayers(team) {
         assists: 0,
         apps: 0,
         avgRating: 0,                // Updated over time by match engine
-        baseQuality: player.quality ?? 75
+        baseQuality: player.quality ?? 75,
+        // Player Form System
+        form: {
+          current: 0,                // -2 (cold) to +2 (hot)
+          recentMatches: [],         // Last 3 match ratings
+          indicator: '➡️'            // 🔥 (hot), ❄️ (cold), ➡️ (neutral)
+        }
       };
     }
   });
+}
+
+/************* SEEDED RANDOM NUMBER GENERATOR *************/
+
+/**
+ * Seeded Random Number Generator (Mulberry32)
+ * Allows deterministic match replay using match seeds
+ */
+class SeededRandom {
+  constructor(seed) {
+    this.seed = seed;
+  }
+
+  // Generate next random number between 0 and 1
+  next() {
+    let t = this.seed += 0x6D2B79F5;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  }
+
+  // Generate random integer between min and max (inclusive)
+  nextInt(min, max) {
+    return Math.floor(this.next() * (max - min + 1)) + min;
+  }
+
+  // Generate random number between min and max
+  nextFloat(min, max) {
+    return this.next() * (max - min) + min;
+  }
+}
+
+/************* MATCH REPLAY & COMPARISON SYSTEM *************/
+
+// Store match seeds for replay capability
+const MATCH_SEEDS = (window.MATCH_SEEDS = window.MATCH_SEEDS || {});
+
+/**
+ * Generate a unique match seed based on teams and timestamp
+ * @param {string} teamAName - Team A name
+ * @param {string} teamBName - Team B name
+ * @returns {number} - Seed for deterministic replay
+ */
+function generateMatchSeed(teamAName, teamBName) {
+  const str = `${teamAName}-${teamBName}-${Date.now()}`;
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  return Math.abs(hash);
+}
+
+/**
+ * Store match seed and result for replay
+ * @param {string} matchId - Unique match identifier
+ * @param {number} seed - Match seed
+ * @param {object} result - Match result data
+ */
+function storeMatchForReplay(matchId, seed, result) {
+  MATCH_SEEDS[matchId] = {
+    seed: seed,
+    timestamp: Date.now(),
+    teamA: result.teamA,
+    teamB: result.teamB,
+    scoreA: result.scoreA,
+    scoreB: result.scoreB,
+    matchEvents: result.matchEvents
+  };
+
+  // Save to localStorage
+  try {
+    localStorage.setItem('matchSeeds', JSON.stringify(MATCH_SEEDS));
+  } catch (e) {
+    console.warn('Could not save match seeds:', e);
+  }
+}
+
+/**
+ * Replay a match using its stored seed
+ * @param {string} matchId - Match ID to replay
+ * @returns {object} - Match result (should match original)
+ */
+function replayMatch(matchId) {
+  const matchData = MATCH_SEEDS[matchId];
+  if (!matchData) {
+    console.warn('⚠️ No seed found for match:', matchId);
+    return null;
+  }
+
+  console.log(`🔄 Replaying match: ${matchData.teamA} vs ${matchData.teamB} with seed ${matchData.seed}`);
+
+  // Find teams in TEAM_MAP
+  const teamA = TEAM_MAP.get(matchData.teamA);
+  const teamB = TEAM_MAP.get(matchData.teamB);
+
+  if (!teamA || !teamB) {
+    console.warn('⚠️ Teams not found for replay');
+    return null;
+  }
+
+  // Replay with same seed
+  return simulateMatchWithSeed(teamA, teamB, true, 1.0, 'clear', matchData.seed);
+}
+
+/**
+ * Simulate match with a specific seed for deterministic results
+ * This is a seeded version of simulateMatch() for replay capability
+ */
+function simulateMatchWithSeed(teamA, teamB, isHome, matchImportance = 1.0, weather = 'normal', seed = null) {
+  if (!teamA || !teamB) {
+    console.error("❌ Invalid teams provided to simulateMatchWithSeed");
+    return {
+      teamA: "Unknown Team A",
+      teamB: "Unknown Team B",
+      scoreA: 0,
+      scoreB: 0,
+      isHome,
+      matchId: "invalid_match"
+    };
+  }
+
+  // Generate or use provided seed
+  const matchSeed = seed !== null ? seed : generateMatchSeed(teamA.name, teamB.name);
+  const rng = new SeededRandom(matchSeed);
+
+  const chaosFactor = RNG_SETTINGS.groupChaos || 1.0;
+  const homeAdvantage = isHome ? 0.3 : -0.3;
+
+  // Use seeded RNG instead of Math.random()
+  const baseScoreA = rng.next() * ((teamA.strength || 70) / 25) * chaosFactor;
+  const baseScoreB = rng.next() * ((teamB.strength || 70) / 25) * chaosFactor;
+
+  const adjustedScoreA = baseScoreA + homeAdvantage + matchImportance * 0.1;
+  const adjustedScoreB = baseScoreB - homeAdvantage + matchImportance * 0.1;
+
+  const goalsA = Math.max(0, Math.floor(adjustedScoreA + rng.next() * chaosFactor));
+  const goalsB = Math.max(0, Math.floor(adjustedScoreB + rng.next() * chaosFactor));
+
+  const finalGoalsA = Math.min(goalsA, 7);
+  const finalGoalsB = Math.min(goalsB, 7);
+
+  // Track player stats
+  const matchEvents = trackEnhancedPlayerStats(teamA, teamB, finalGoalsA, finalGoalsB);
+
+  const matchId = `${teamA.name}_vs_${teamB.name}_${matchSeed}`;
+
+  const result = {
+    id: matchId,
+    matchId: matchId,
+    teamA: teamA.name,
+    teamB: teamB.name,
+    teamAObj: teamA,
+    teamBObj: teamB,
+    scoreA: Number(finalGoalsA) || 0,
+    scoreB: Number(finalGoalsB) || 0,
+    goalsA: (Array.isArray(matchEvents?.goals) ? matchEvents.goals.filter(e => e.teamId === teamA.name || e.team === teamA.name) : []),
+    goalsB: (Array.isArray(matchEvents?.goals) ? matchEvents.goals.filter(e => e.teamId === teamB.name || e.team === teamB.name) : []),
+    isHome,
+    events: matchEvents,
+    playerOfTheGame: determinePlayerOfTheGame(matchEvents, teamA, teamB),
+    timestamp: new Date().toISOString(),
+    venue: isHome ? `${teamA.name} Home` : "Neutral",
+    importance: matchImportance,
+    weather: weather,
+    seed: matchSeed
+  };
+
+  MATCH_DETAILS_DB[matchId] = result;
+
+  // Store seed for replay
+  if (seed === null) {
+    storeMatchForReplay(matchId, matchSeed, result);
+  }
+
+  console.log(`⚽ Match simulated (seed: ${matchSeed}): ${teamA.name} ${finalGoalsA}-${finalGoalsB} ${teamB.name} ${isHome ? "(H)" : "(A)"}`);
+
+  return result;
+}
+
+/**
+ * Compare two match scenarios side-by-side
+ * @param {string} matchId - Original match ID
+ * @param {object} whatIfChanges - Changes to apply (e.g., {teamAStrength: 80, weather: 'rainy'})
+ * @returns {object} - Comparison data
+ */
+function compareMatches(matchId, whatIfChanges = {}) {
+  const originalMatch = MATCH_SEEDS[matchId];
+  if (!originalMatch) {
+    console.warn('⚠️ Original match not found');
+    return null;
+  }
+
+  // Get teams
+  let teamA = TEAM_MAP.get(originalMatch.teamA);
+  let teamB = TEAM_MAP.get(originalMatch.teamB);
+
+  if (!teamA || !teamB) {
+    console.warn('⚠️ Teams not found');
+    return null;
+  }
+
+  // Apply what-if changes
+  if (whatIfChanges.teamAStrength) {
+    teamA = { ...teamA, strength: whatIfChanges.teamAStrength };
+  }
+  if (whatIfChanges.teamBStrength) {
+    teamB = { ...teamB, strength: whatIfChanges.teamBStrength };
+  }
+
+  // Simulate with same seed but different parameters
+  const whatIfResult = simulateMatchWithSeed(
+    teamA,
+    teamB,
+    true,
+    whatIfChanges.importance || 1.0,
+    whatIfChanges.weather || 'clear',
+    originalMatch.seed
+  );
+
+  return {
+    original: {
+      scoreA: originalMatch.scoreA,
+      scoreB: originalMatch.scoreB,
+      teamA: originalMatch.teamA,
+      teamB: originalMatch.teamB
+    },
+    whatIf: {
+      scoreA: whatIfResult.scoreA,
+      scoreB: whatIfResult.scoreB,
+      teamA: whatIfResult.teamA,
+      teamB: whatIfResult.teamB,
+      changes: whatIfChanges
+    }
+  };
+}
+
+/************* PLAYER FORM SYSTEM *************/
+
+/**
+ * Update player form based on match rating
+ * @param {string} playerKey - Player identifier in PLAYER_DB
+ * @param {number} matchRating - Rating from the match (5.0-10.0)
+ */
+function updatePlayerForm(playerKey, matchRating) {
+  const player = PLAYER_DB[playerKey];
+  if (!player || !player.form) return;
+
+  // Add rating to recent matches (keep last 3)
+  player.form.recentMatches.push(matchRating);
+  if (player.form.recentMatches.length > 3) {
+    player.form.recentMatches.shift();
+  }
+
+  // Calculate form based on recent performance
+  if (player.form.recentMatches.length >= 2) {
+    const avgRecent = player.form.recentMatches.reduce((a, b) => a + b, 0) / player.form.recentMatches.length;
+
+    // Form scale: -2 (cold) to +2 (hot)
+    if (avgRecent >= 8.5) {
+      player.form.current = 2;
+      player.form.indicator = '🔥';
+    } else if (avgRecent >= 7.5) {
+      player.form.current = 1;
+      player.form.indicator = '🔥';
+    } else if (avgRecent >= 6.5) {
+      player.form.current = 0;
+      player.form.indicator = '➡️';
+    } else if (avgRecent >= 5.5) {
+      player.form.current = -1;
+      player.form.indicator = '❄️';
+    } else {
+      player.form.current = -2;
+      player.form.indicator = '❄️';
+    }
+  }
+}
+
+/**
+ * Get form modifier for rating calculation
+ * @param {string} playerKey - Player identifier in PLAYER_DB
+ * @returns {number} - Modifier value (-0.6 to +0.6)
+ */
+function getPlayerFormModifier(playerKey) {
+  const player = PLAYER_DB[playerKey];
+  if (!player || !player.form) return 0;
+
+  // Each form level adds ±0.3 rating points
+  return player.form.current * 0.3;
+}
+
+/**
+ * Get hot players (form >= 1) for display
+ * @param {number} limit - Maximum number of players to return
+ * @returns {Array} - Array of hot players with their stats
+ */
+function getHotPlayers(limit = 5) {
+  return Object.entries(PLAYER_DB)
+    .filter(([key, player]) => player.form && player.form.current >= 1 && player.apps > 0)
+    .sort((a, b) => {
+      // Sort by form first, then avgRating
+      if (b[1].form.current !== a[1].form.current) {
+        return b[1].form.current - a[1].form.current;
+      }
+      return (b[1].avgRating || 0) - (a[1].avgRating || 0);
+    })
+    .slice(0, limit)
+    .map(([key, player]) => ({
+      name: player.name,
+      team: player.team,
+      pos: player.pos,
+      form: player.form.current,
+      indicator: player.form.indicator,
+      avgRating: player.avgRating,
+      apps: player.apps,
+      goals: player.goals
+    }));
 }
 
 /**
@@ -11276,13 +11617,20 @@ function trackEnhancedPlayerStats(teamA, teamB, goalsA, goalsB) {
     [...(team.startingXI || []), ...(team.bench || [])].forEach(player => {
       if (!player || !player.name) return;
       const key = `${team.name}::${player.name}`;
+
+      // Calculate base rating with form modifier
+      let baseRating = calculateBaseRating(player, team.strength || 70);
+      const formModifier = getPlayerFormModifier(key);
+      baseRating += formModifier;
+
       matchEvents.playerPerformances[key] = {
         player: player.name,
         team: team.name,
         position: player.pos,
         goals: 0,
         assists: 0,
-        baseRating: calculateBaseRating(player, team.strength || 70)
+        baseRating: baseRating,
+        formModifier: formModifier // Track for display
       };
     });
   };
@@ -11362,6 +11710,9 @@ function determinePlayerOfTheGame(matchEvents, teamA, teamB) {
       const currentTotal = (PLAYER_DB[playerKey].avgRating || 0) * (currentApps - 1);
       PLAYER_DB[playerKey].avgRating = (currentTotal + performance.finalRating) / currentApps;
       PLAYER_DB[playerKey].avgRating = Math.round(PLAYER_DB[playerKey].avgRating * 10) / 10;
+
+      // Update player form based on this match performance
+      updatePlayerForm(playerKey, performance.finalRating);
     }
 
     if (rating > bestRating) {
@@ -14008,6 +14359,46 @@ function showPlayerStats() {
     </div>
   `;
 
+  // Hot Players Section (Form System)
+  const hotPlayers = getHotPlayers(5);
+  if (hotPlayers.length > 0) {
+    html += `
+      <div style="background: linear-gradient(135deg, #dc2626, #991b1b); padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #f87171;">
+        <h3 style="margin: 0 0 15px 0; color: #fef2f2; display: flex; align-items: center; gap: 8px;">
+          <span>🔥</span> Hot Players (In Form)
+        </h3>
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="background: rgba(254, 242, 242, 0.1); border-bottom: 2px solid #fca5a5;">
+              <th style="padding: 12px; text-align: center; width: 50px;">Form</th>
+              <th style="padding: 12px; text-align: left;">Player</th>
+              <th style="padding: 12px; text-align: center;">⭐ Rating</th>
+              <th style="padding: 12px; text-align: center;">⚽ Goals</th>
+              <th style="padding: 12px; text-align: left;">Team</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+
+    hotPlayers.forEach(player => {
+      html += `
+        <tr style="border-bottom: 1px solid rgba(248, 113, 113, 0.3);">
+          <td style="padding: 12px; text-align: center; font-size: 1.5em;">${player.indicator}</td>
+          <td style="padding: 12px;"><strong style="color: #fef2f2;">${player.name}</strong> <span style="color: #94a3b8; font-size: 0.85em;">${player.pos}</span></td>
+          <td style="padding: 12px; text-align: center; color: #fbbf24; font-weight: 600;">${player.avgRating.toFixed(1)}</td>
+          <td style="padding: 12px; text-align: center; color: #fef2f2;">${player.goals}</td>
+          <td style="padding: 12px; color: #e5e7eb;">${player.team}</td>
+        </tr>
+      `;
+    });
+
+    html += `
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
   // Top Scorers Section
   if (topScorers.length > 0) {
     html += `
@@ -14031,10 +14422,11 @@ function showPlayerStats() {
     `;
 
     topScorers.forEach((player, index) => {
+      const formIndicator = player.form && player.form.indicator ? player.form.indicator : '';
       html += `
         <tr style="border-bottom: 1px solid rgba(71, 85, 105, 0.3);">
           <td style="padding: 12px; text-align: center; color: #94a3b8; font-weight: 600;">${index + 1}</td>
-          <td style="padding: 12px;"><strong style="color: #e2e8f0;">${player.name}</strong></td>
+          <td style="padding: 12px;"><strong style="color: #e2e8f0;">${formIndicator} ${player.name}</strong></td>
           <td style="padding: 12px; text-align: center; color: #3b82f6; font-weight: bold;">${player.goals}</td>
           ${viewMode === 'detailed' ? `<td style="padding: 12px; text-align: center; color: #94a3b8;">${player.assists || 0}</td>` : ''}
           ${viewMode === 'detailed' ? `<td style="padding: 12px; text-align: center; color: #94a3b8;">${player.apps}</td>` : ''}
@@ -14074,10 +14466,11 @@ function showPlayerStats() {
     `;
 
     topAssists.forEach((player, index) => {
+      const formIndicator = player.form && player.form.indicator ? player.form.indicator : '';
       html += `
         <tr style="border-bottom: 1px solid rgba(71, 85, 105, 0.3);">
           <td style="padding: 12px; text-align: center; color: #94a3b8; font-weight: 600;">${index + 1}</td>
-          <td style="padding: 12px;"><strong style="color: #e2e8f0;">${player.name}</strong></td>
+          <td style="padding: 12px;"><strong style="color: #e2e8f0;">${formIndicator} ${player.name}</strong></td>
           <td style="padding: 12px; text-align: center; color: #10b981; font-weight: bold;">${player.assists}</td>
           ${viewMode === 'detailed' ? `<td style="padding: 12px; text-align: center; color: #94a3b8;">${player.goals || 0}</td>` : ''}
           ${viewMode === 'detailed' ? `<td style="padding: 12px; text-align: center; color: #94a3b8;">${player.apps}</td>` : ''}
@@ -14117,10 +14510,11 @@ function showPlayerStats() {
     `;
 
     topRatings.forEach((player, index) => {
+      const formIndicator = player.form && player.form.indicator ? player.form.indicator : '';
       html += `
         <tr style="border-bottom: 1px solid rgba(71, 85, 105, 0.3);">
           <td style="padding: 12px; text-align: center; color: #94a3b8; font-weight: 600;">${index + 1}</td>
-          <td style="padding: 12px;"><strong style="color: #e2e8f0;">${player.name}</strong></td>
+          <td style="padding: 12px;"><strong style="color: #e2e8f0;">${formIndicator} ${player.name}</strong></td>
           <td style="padding: 12px; text-align: center;"><span style="color: ${getRatingColor(player.avgRating)}; font-weight: bold; font-size: 1.1em;">${player.avgRating}</span></td>
           ${viewMode === 'detailed' ? `<td style="padding: 12px; text-align: center; color: #94a3b8;">${player.goals || 0}</td>` : ''}
           ${viewMode === 'detailed' ? `<td style="padding: 12px; text-align: center; color: #94a3b8;">${player.assists || 0}</td>` : ''}

@@ -11517,14 +11517,16 @@ function initializePlayerMedicalStatus(playerKey) {
  */
 function checkForInjury(playerKey, intensity = 0.7) {
   const player = PLAYER_DB[playerKey];
-  if (!player || !player.medical) {
+  if (!player) return null;
+
+  if (!player.medical) {
     initializePlayerMedicalStatus(playerKey);
   }
 
   const difficulty = getCurrentDifficulty();
   const injuryRate = difficulty.injuryRate || 0;
 
-  if (injuryRate === 0 || player.medical.isInjured) return null;
+  if (injuryRate === 0 || !player.medical || player.medical.isInjured) return null;
 
   // Injury probability factors
   const baseChance = injuryRate * intensity;
@@ -11573,11 +11575,13 @@ function checkForInjury(playerKey, intensity = 0.7) {
  */
 function checkForCards(playerKey, position) {
   const player = PLAYER_DB[playerKey];
-  if (!player || !player.medical) {
+  if (!player) return null;
+
+  if (!player.medical) {
     initializePlayerMedicalStatus(playerKey);
   }
 
-  if (player.medical.isSuspended) return null;
+  if (!player.medical || player.medical.isSuspended) return null;
 
   // Defenders and midfielders more likely to get cards
   const positionMultiplier = {

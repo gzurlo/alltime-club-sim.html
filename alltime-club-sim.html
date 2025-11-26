@@ -3603,14 +3603,15 @@
           <div class="rng-block">
             <label for="rngSlider">Upset factor</label>
             <div class="rng-row">
-              <input id="rngSlider" type="range" min="0.5" max="1.5" step="0.05" value="1.0"
+              <input id="rngSlider" type="range" min="0.5" max="2.0" step="0.05" value="1.0"
                      oninput="updateRNG(this.value)">
               <span id="rngLabel">Balanced</span>
             </div>
             <div class="rng-presets">
-              <button class="rng-pill active" type="button" data-rng-value="0.7">Tight</button>
-              <button class="rng-pill" type="button" data-rng-value="1.0">Balanced</button>
+              <button class="rng-pill" type="button" data-rng-value="0.6">Tight</button>
+              <button class="rng-pill active" type="button" data-rng-value="1.0">Balanced</button>
               <button class="rng-pill" type="button" data-rng-value="1.3">Chaos</button>
+              <button class="rng-pill" type="button" data-rng-value="1.7">Extreme</button>
             </div>
           </div>
         </div>
@@ -8122,9 +8123,9 @@ function showTournamentStatsSummary() {
   }
 
   const content = `
-    <div style="padding: 20px;">
-      <h2 style="margin-bottom: 20px; color: #10b981;">Tournament Statistics</h2>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+    <div style="padding: 15px; max-width: 100%; overflow-x: hidden;">
+      <h2 style="margin-bottom: 15px; color: #10b981; font-size: 1.3em;">Tournament Statistics</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; max-width: 100%;">
         <div class="stat-card">
           <div class="stat-value">${stats.goalsPerGame}</div>
           <div class="stat-label">Goals Per Game</div>
@@ -9050,16 +9051,30 @@ function closeCustomMatch() {
 
 // Manager Edit Modal Functions
 function openManagerEditModal() {
+  console.log('👤 Opening manager edit modal...');
   const modal = document.getElementById("managerEditModal");
   const input = document.getElementById("managerNameInput");
+
+  if (!modal) {
+    console.error('❌ managerEditModal element not found');
+    showUtilityMessage('Manager edit modal not found', 'error');
+    return;
+  }
+
   if (input) {
     input.value = MANAGER_PROFILE.name || "";
+    console.log('✅ Set input value to:', MANAGER_PROFILE.name);
+  } else {
+    console.warn('⚠️ managerNameInput not found');
   }
-  if (modal) {
-    modal.classList.add("active");
-    modal.style.display = "flex";
-    modal.style.zIndex = "9999";
-  }
+
+  modal.classList.add("active");
+  modal.style.display = "flex";
+  modal.style.zIndex = "10000";
+  modal.style.opacity = "1";
+  modal.style.visibility = "visible";
+
+  console.log('✅ Manager edit modal opened');
 }
 
 function closeManagerEditModal() {
@@ -9150,8 +9165,10 @@ function showTrackTeamModal() {
   if (modal) {
     modal.classList.add("active");
     modal.style.display = "flex";
-    modal.style.zIndex = "9999";
-    console.log('✅ Modal opened with z-index 9999');
+    modal.style.zIndex = "10000";
+    modal.style.opacity = "1";
+    modal.style.visibility = "visible";
+    console.log('✅ Track team modal opened');
   } else {
     console.error('❌ trackTeamModal element not found');
   }
@@ -11845,6 +11862,14 @@ async function simulateKnockoutRoundsAsync(teams, onProgress) {
         topScorer: tournamentData.topScorer?.name || 'Unknown'
       });
 
+      // Save tournament history to localStorage
+      try {
+        localStorage.setItem('tournamentHistory', JSON.stringify(TOURNAMENT_HISTORY));
+        console.log(`💾 Tournament history saved to localStorage`);
+      } catch (e) {
+        console.error('❌ Failed to save tournament history:', e);
+      }
+
       console.log(`📊 Tournament added to history. Total tournaments: ${TOURNAMENT_HISTORY.length}`);
 
       if (typeof updateManagerStats === 'function') {
@@ -12862,10 +12887,9 @@ async function runGroupStage() {
 }
 
 async function runKnockouts() {
-  // Prevent duplicate runs
+  // Prevent duplicate runs (silent mode to avoid console spam)
   if (isKnockoutRunning) {
-    console.warn("⚠️ Knockout stage already running - ignored");
-    showUtilityMessage("Knockout simulation already in progress!", "warning");
+    console.log("⏸️ Knockout stage already running - request ignored");
     return;
   }
   isKnockoutRunning = true;
@@ -15358,10 +15382,10 @@ function updateRNGVisualization(value) {
     color = '#ef4444';
     emoji = '🌪️';
   } else {
-    txt = 'Insane';
-    description = 'Complete chaos, anything can happen';
+    txt = 'Extreme';
+    description = 'Complete unpredictability, anything can happen';
     color = '#8b5cf6';
-    emoji = '🤪';
+    emoji = '💥';
   }
 
   if (label) {
@@ -15770,21 +15794,14 @@ function openCustomMatchModal(preselectA = null, preselectB = null) {
     if (modal) {
       console.log('✅ Modal element found, opening...');
 
-      // Make sure it's visible with high z-index
+      // Make sure it's visible with high z-index - set immediately without animation
+      modal.classList.add('active');
       modal.style.display = 'flex';
-      modal.style.zIndex = '9999';
-      modal.style.opacity = '0';
+      modal.style.zIndex = '10000';
+      modal.style.opacity = '1';
+      modal.style.visibility = 'visible';
 
-      // Force reflow
-      modal.offsetHeight;
-
-      // Fade in with active class
-      requestAnimationFrame(() => {
-        modal.classList.add('active');
-        modal.style.opacity = '1';
-        modal.style.transition = 'opacity 0.3s ease';
-        console.log('✅ Modal activated with active class');
-      });
+      console.log('✅ Custom match modal opened');
     } else {
       console.error('❌ customMatchModal element not found in DOM');
       showUtilityMessage('Custom match modal not found', 'error');
@@ -18185,6 +18202,21 @@ function updateClubLegacy(tournamentResults) {
 
 document.addEventListener('DOMContentLoaded', async function () {
   console.log("🏁 Initializing All-Time Football Simulator...");
+
+  // Load tournament history from localStorage
+  try {
+    const savedHistory = localStorage.getItem('tournamentHistory');
+    if (savedHistory) {
+      const parsedHistory = JSON.parse(savedHistory);
+      if (Array.isArray(parsedHistory)) {
+        TOURNAMENT_HISTORY.length = 0;
+        TOURNAMENT_HISTORY.push(...parsedHistory);
+        console.log(`📊 Loaded ${TOURNAMENT_HISTORY.length} tournaments from localStorage`);
+      }
+    }
+  } catch (e) {
+    console.error('❌ Failed to load tournament history:', e);
+  }
 
   // Show early loading indicator
   const loadingOverlay = document.getElementById("loadingOverlay");

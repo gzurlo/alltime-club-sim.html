@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <title>All-Time Football Simulator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
   <style>
     :root {
       /* Primary Actions */
@@ -3529,6 +3530,14 @@
             <span class="ctrl-btn-tag">📊</span>
           </button>
 
+          <button class="ctrl-btn btn-red" id="btnMedicalRoom" onclick="showMedicalRoom()">
+            <div class="ctrl-btn-main">
+              <span class="ctrl-btn-title">Medical Room</span>
+              <span class="ctrl-btn-subtitle">Injuries & suspensions</span>
+            </div>
+            <span class="ctrl-btn-tag">🏥</span>
+          </button>
+
           <button class="ctrl-btn btn-green" id="btnClassicMatchups" onclick="showClassicMatchups()">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Classic Matchups</span>
@@ -6666,6 +6675,531 @@ try {
 }
 
 window.MANAGER_PROFILE = MANAGER_PROFILE;
+
+/************* TOURNAMENT PRESETS *************/
+
+const TOURNAMENT_PRESETS = {
+  'classic-champions': {
+    id: 'classic-champions',
+    name: '🏆 Classic Champions',
+    description: 'Legendary teams from football history',
+    icon: '🏆',
+    teamFilter: (team) => team.season < 2010,
+    difficulty: 'normal',
+    settings: {
+      upsetFactor: 1.0,
+      goalEnvironment: 1.2
+    }
+  },
+
+  'modern-era': {
+    id: 'modern-era',
+    name: '⚡ Modern Era',
+    description: 'Best teams from 2010-2020',
+    icon: '⚡',
+    teamFilter: (team) => team.season >= 2010,
+    difficulty: 'hard',
+    settings: {
+      upsetFactor: 0.8,
+      goalEnvironment: 1.4
+    }
+  },
+
+  'underdogs-only': {
+    id: 'underdogs-only',
+    name: '🎲 Underdog Special',
+    description: 'Lower-rated teams only (< 88)',
+    icon: '🎲',
+    teamFilter: (team) => team.strength < 88,
+    difficulty: 'hard',
+    settings: {
+      upsetFactor: 1.5,
+      goalEnvironment: 1.3
+    }
+  },
+
+  'super-elite': {
+    id: 'super-elite',
+    name: '👑 Super Elite',
+    description: 'Only the absolute best (95+)',
+    icon: '👑',
+    teamFilter: (team) => team.strength >= 95,
+    difficulty: 'legendary',
+    settings: {
+      upsetFactor: 1.0,
+      goalEnvironment: 1.5
+    }
+  },
+
+  'random-chaos': {
+    id: 'random-chaos',
+    name: '🌪️ Random Chaos',
+    description: 'Completely random teams, max chaos',
+    icon: '🌪️',
+    teamFilter: null,
+    difficulty: 'legendary',
+    settings: {
+      upsetFactor: 2.0,
+      goalEnvironment: 1.8
+    }
+  }
+};
+
+function showTournamentPresets() {
+  const out = document.getElementById('output');
+  if (!out) return;
+
+  out.innerHTML = `
+    <div class="presets-view">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+        <h2 style="margin: 0; color: #e5e7eb;">🎯 Quick Start Tournament</h2>
+        <button onclick="showTournamentOverview()" class="btn-secondary" style="padding: 8px 16px; background: rgba(71, 85, 105, 0.3); border: none; border-radius: 8px; color: #e5e7eb; cursor: pointer;">
+          ← Back
+        </button>
+      </div>
+
+      <p style="color: #94a3b8; margin-bottom: 25px;">
+        Choose a preset to instantly start a tournament with pre-configured teams and settings
+      </p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+        ${Object.values(TOURNAMENT_PRESETS).map(preset => `
+          <div class="preset-card" onclick="loadTournamentPreset('${preset.id}')" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.8)); padding: 25px; border-radius: 12px; border: 1px solid rgba(71, 85, 105, 0.3); cursor: pointer; transition: all 0.3s ease; text-align: center;">
+            <div style="font-size: 3em; margin-bottom: 10px;">${preset.icon}</div>
+            <h3 style="color: #e5e7eb; margin: 0 0 10px 0;">${preset.name}</h3>
+            <p style="color: #94a3b8; font-size: 0.9em; margin: 0 0 15px 0;">
+              ${preset.description}
+            </p>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid rgba(148, 163, 184, 0.2);">
+              <span style="font-size: 0.85em; color: #64748b;">
+                Difficulty: ${getDifficultyName(preset.difficulty)}
+              </span>
+              <button class="btn-primary" style="padding: 6px 16px; background: #3b82f6; border: none; border-radius: 8px; color: white; cursor: pointer; pointer-events: none;">
+                Load →
+              </button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div style="margin-top: 30px; padding: 20px; background: rgba(59, 130, 246, 0.1); border-radius: 12px; border: 1px solid #3b82f6;">
+        <h3 style="color: #3b82f6; margin: 0 0 10px 0;">⚙️ Custom Tournament</h3>
+        <p style="color: #94a3b8; margin: 0 0 15px 0;">
+          Create your own tournament with custom settings
+        </p>
+        <button onclick="showTournamentOverview()" class="btn-secondary" style="padding: 8px 16px; background: rgba(71, 85, 105, 0.3); border: none; border-radius: 8px; color: #e5e7eb; cursor: pointer;">
+          Build Custom Tournament
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function loadTournamentPreset(presetId) {
+  const preset = TOURNAMENT_PRESETS[presetId];
+  if (!preset) {
+    showUtilityMessage('❌ Preset not found', 'error');
+    return;
+  }
+
+  showUtilityMessage(`⏳ Loading ${preset.name}...`, 'info');
+
+  // Filter teams
+  let selectedTeams = window.TEAM_POOL || [];
+  if (preset.teamFilter) {
+    selectedTeams = selectedTeams.filter(preset.teamFilter);
+  }
+
+  if (selectedTeams.length < 32) {
+    showUtilityMessage(`❌ Not enough teams (found ${selectedTeams.length}, need 32)`, 'error');
+    return;
+  }
+
+  // Shuffle and select 32 teams
+  selectedTeams = shuffleArray(selectedTeams).slice(0, 32);
+
+  // Apply settings
+  if (typeof setDifficulty === 'function') {
+    setDifficulty(preset.difficulty);
+  }
+  if (window.RNG_SETTINGS) {
+    window.RNG_SETTINGS.groupChaos = preset.settings.upsetFactor;
+  }
+
+  // Draw groups
+  window.DRAWN_TEAMS = selectedTeams;
+  if (typeof generateGroups === 'function') {
+    generateGroups();
+  }
+
+  showUtilityMessage(`✅ ${preset.name} loaded! ${selectedTeams.length} teams ready`, 'success');
+
+  // Switch to tournament tab
+  if (typeof switchTab === 'function') {
+    switchTab('tournament');
+  }
+
+  // Show groups
+  setTimeout(() => {
+    if (typeof showTournamentOverview === 'function') {
+      showTournamentOverview();
+    }
+  }, 500);
+}
+
+function getDifficultyName(difficultyId) {
+  const names = {
+    easy: '⭐ Easy',
+    normal: '⭐⭐ Normal',
+    hard: '⭐⭐⭐ Hard',
+    legendary: '⭐⭐⭐⭐ Legend'
+  };
+  return names[difficultyId] || 'Unknown';
+}
+
+/************* ADVANCED STATISTICS DASHBOARD *************/
+
+function showAdvancedStatsDashboard() {
+  const out = document.getElementById('output');
+  if (!out) return;
+
+  const matches = getAllMatchesForStats();
+  if (matches.length === 0) {
+    out.innerHTML = `
+      <div class="empty-state" style="text-align: center; padding: 60px 20px;">
+        <div style="font-size: 4em; margin-bottom: 20px;">📊</div>
+        <h2 style="color: #e5e7eb; margin-bottom: 10px;">No Tournament Data</h2>
+        <p style="color: #94a3b8;">Complete a tournament to see advanced analytics</p>
+      </div>
+    `;
+    return;
+  }
+
+  out.innerHTML = `
+    <div class="stats-dashboard">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+        <h2 style="margin: 0; color: #e5e7eb;">📊 Advanced Analytics Dashboard</h2>
+        <div style="display: flex; gap: 10px;">
+          <button onclick="exportStatsAsCSV()" class="btn-secondary" style="padding: 8px 16px; background: rgba(71, 85, 105, 0.3); border: none; border-radius: 8px; color: #e5e7eb; cursor: pointer;">
+            📥 Export CSV
+          </button>
+          <button onclick="showAdvancedStatsDashboard()" class="btn-primary" style="padding: 8px 16px; background: #3b82f6; border: none; border-radius: 8px; color: white; cursor: pointer;">
+            🔄 Refresh
+          </button>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
+        ${renderKeyMetricsCards(matches)}
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 20px; margin-bottom: 30px;">
+        <div style="background: rgba(30, 41, 59, 0.5); padding: 20px; border-radius: 12px; border: 1px solid rgba(71, 85, 105, 0.3);">
+          <h3 style="margin: 0 0 15px 0; color: #94a3b8; font-size: 1.1em;">⚽ Goals by Round</h3>
+          <canvas id="goalsTimelineChart"></canvas>
+        </div>
+
+        <div style="background: rgba(30, 41, 59, 0.5); padding: 20px; border-radius: 12px; border: 1px solid rgba(71, 85, 105, 0.3);">
+          <h3 style="margin: 0 0 15px 0; color: #94a3b8; font-size: 1.1em;">📊 Team Performance</h3>
+          <canvas id="teamPerformanceChart"></canvas>
+        </div>
+
+        <div style="background: rgba(30, 41, 59, 0.5); padding: 20px; border-radius: 12px; border: 1px solid rgba(71, 85, 105, 0.3);">
+          <h3 style="margin: 0 0 15px 0; color: #94a3b8; font-size: 1.1em;">🎯 Goals by Position</h3>
+          <canvas id="positionGoalsChart"></canvas>
+        </div>
+
+        <div style="background: rgba(30, 41, 59, 0.5); padding: 20px; border-radius: 12px; border: 1px solid rgba(71, 85, 105, 0.3);">
+          <h3 style="margin: 0 0 15px 0; color: #94a3b8; font-size: 1.1em;">⏰ Goals by Minute</h3>
+          <canvas id="goalTimingChart"></canvas>
+        </div>
+      </div>
+
+      <div style="background: rgba(30, 41, 59, 0.3); padding: 25px; border-radius: 12px; border: 1px solid rgba(71, 85, 105, 0.3); margin-top: 30px;">
+        <h3 style="margin: 0 0 15px 0; color: #e5e7eb;">🎯 Player Consistency Rankings</h3>
+        <div id="consistencyTable"></div>
+      </div>
+    </div>
+  `;
+
+  setTimeout(() => {
+    renderGoalsTimelineChart(matches);
+    renderTeamPerformanceChart(matches);
+    renderPositionGoalsChart();
+    renderGoalTimingChart(matches);
+    renderConsistencyTable();
+  }, 100);
+}
+
+function getAllMatchesForStats() {
+  const matches = [];
+
+  if (window.GROUP_RESULTS) {
+    Object.values(window.GROUP_RESULTS).forEach(group => {
+      if (group.matches) matches.push(...group.matches);
+    });
+  }
+
+  if (window.TOURNAMENT && window.TOURNAMENT.allKnockoutMatches) {
+    matches.push(...window.TOURNAMENT.allKnockoutMatches);
+  }
+
+  return matches;
+}
+
+function renderKeyMetricsCards(matches) {
+  const totalGoals = matches.reduce((sum, m) => sum + ((m.scoreA || 0) + (m.scoreB || 0)), 0);
+  const avgGoals = matches.length > 0 ? (totalGoals / matches.length).toFixed(2) : '0.00';
+  const cleanSheets = matches.filter(m => m.scoreA === 0 || m.scoreB === 0).length;
+  const highScoring = matches.filter(m => ((m.scoreA || 0) + (m.scoreB || 0)) >= 5).length;
+
+  return `
+    <div style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+      <div style="font-size: 2.5em; font-weight: bold; margin-bottom: 5px;">${totalGoals}</div>
+      <div style="font-size: 0.9em; opacity: 0.9;">Total Goals</div>
+      <div style="font-size: 0.75em; opacity: 0.7; margin-top: 5px;">${avgGoals} per match</div>
+    </div>
+
+    <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+      <div style="font-size: 2.5em; font-weight: bold; margin-bottom: 5px;">${cleanSheets}</div>
+      <div style="font-size: 0.9em; opacity: 0.9;">Clean Sheets</div>
+      <div style="font-size: 0.75em; opacity: 0.7; margin-top: 5px;">${((cleanSheets/(matches.length||1))*100).toFixed(1)}% of matches</div>
+    </div>
+
+    <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+      <div style="font-size: 2.5em; font-weight: bold; margin-bottom: 5px;">${highScoring}</div>
+      <div style="font-size: 0.9em; opacity: 0.9;">High-Scoring (5+)</div>
+      <div style="font-size: 0.75em; opacity: 0.7; margin-top: 5px;">${((highScoring/(matches.length||1))*100).toFixed(1)}% of matches</div>
+    </div>
+
+    <div style="background: linear-gradient(135deg, #a855f7, #9333ea); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+      <div style="font-size: 2.5em; font-weight: bold; margin-bottom: 5px;">${matches.length}</div>
+      <div style="font-size: 0.9em; opacity: 0.9;">Total Matches</div>
+      <div style="font-size: 0.75em; opacity: 0.7; margin-top: 5px;">Tournament progress</div>
+    </div>
+  `;
+}
+
+function renderGoalsTimelineChart(matches) {
+  const ctx = document.getElementById('goalsTimelineChart');
+  if (!ctx) return;
+
+  const rounds = {};
+  matches.forEach(m => {
+    const round = m.round || 'Group';
+    if (!rounds[round]) rounds[round] = 0;
+    rounds[round] += (m.scoreA || 0) + (m.scoreB || 0);
+  });
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: Object.keys(rounds),
+      datasets: [{
+        label: 'Goals per Round',
+        data: Object.values(rounds),
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+        borderWidth: 3,
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148, 163, 184, 0.1)' } },
+        x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148, 163, 184, 0.1)' } }
+      }
+    }
+  });
+}
+
+function renderTeamPerformanceChart(matches) {
+  const ctx = document.getElementById('teamPerformanceChart');
+  if (!ctx) return;
+
+  const teams = {};
+  matches.forEach(m => {
+    if (!teams[m.teamA]) teams[m.teamA] = { strength: m.teamAObj?.strength || 80, goals: 0 };
+    if (!teams[m.teamB]) teams[m.teamB] = { strength: m.teamBObj?.strength || 80, goals: 0 };
+    teams[m.teamA].goals += m.scoreA || 0;
+    teams[m.teamB].goals += m.scoreB || 0;
+  });
+
+  const points = Object.entries(teams).map(([team, data]) => ({ x: data.strength, y: data.goals, team }));
+
+  new Chart(ctx, {
+    type: 'scatter',
+    data: {
+      datasets: [{
+        label: 'Teams',
+        data: points,
+        backgroundColor: '#3b82f6',
+        pointRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (context) => `${points[context.dataIndex].team}: ${context.parsed.y} goals`
+          }
+        }
+      },
+      scales: {
+        y: { title: { display: true, text: 'Goals Scored', color: '#94a3b8' }, ticks: { color: '#94a3b8' } },
+        x: { title: { display: true, text: 'Team Strength', color: '#94a3b8' }, ticks: { color: '#94a3b8' } }
+      }
+    }
+  });
+}
+
+function renderPositionGoalsChart() {
+  const ctx = document.getElementById('positionGoalsChart');
+  if (!ctx) return;
+
+  const positions = { FW: 0, MF: 0, DF: 0, Other: 0 };
+  Object.values(PLAYER_DB).forEach(player => {
+    const pos = player.pos || 'Other';
+    if (pos.includes('F') || pos === 'ST') positions.FW += player.goals || 0;
+    else if (pos.includes('M') || pos === 'AM' || pos === 'DM') positions.MF += player.goals || 0;
+    else if (pos.includes('B') || pos === 'CB') positions.DF += player.goals || 0;
+    else positions.Other += player.goals || 0;
+  });
+
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Forwards', 'Midfielders', 'Defenders', 'Others'],
+      datasets: [{
+        data: [positions.FW, positions.MF, positions.DF, positions.Other],
+        backgroundColor: ['#ef4444', '#f59e0b', '#10b981', '#3b82f6'],
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#94a3b8' } }
+      }
+    }
+  });
+}
+
+function renderGoalTimingChart(matches) {
+  const ctx = document.getElementById('goalTimingChart');
+  if (!ctx) return;
+
+  const bins = { '0-15': 0, '16-30': 0, '31-45': 0, '46-60': 0, '61-75': 0, '76-90': 0 };
+  matches.forEach(match => {
+    if (match.events && match.events.goals) {
+      match.events.goals.forEach(goal => {
+        const min = goal.minute || 0;
+        if (min <= 15) bins['0-15']++;
+        else if (min <= 30) bins['16-30']++;
+        else if (min <= 45) bins['31-45']++;
+        else if (min <= 60) bins['46-60']++;
+        else if (min <= 75) bins['61-75']++;
+        else bins['76-90']++;
+      });
+    }
+  });
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(bins),
+      datasets: [{
+        label: 'Goals',
+        data: Object.values(bins),
+        backgroundColor: '#a855f7'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { color: '#94a3b8' } },
+        x: { ticks: { color: '#94a3b8' } }
+      }
+    }
+  });
+}
+
+function renderConsistencyTable() {
+  const container = document.getElementById('consistencyTable');
+  if (!container) return;
+
+  const players = Object.values(PLAYER_DB)
+    .filter(p => p.apps >= 3)
+    .map(p => ({
+      name: p.name,
+      team: p.team,
+      avgRating: p.avgRating || 6.5,
+      apps: p.apps
+    }))
+    .sort((a, b) => b.avgRating - a.avgRating)
+    .slice(0, 10);
+
+  let html = `
+    <p style="color: #94a3b8; font-size: 0.9em; margin-bottom: 15px;">
+      Top consistent performers (minimum 3 appearances)
+    </p>
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr style="background: rgba(16, 185, 129, 0.1); border-bottom: 2px solid #10b981;">
+          <th style="padding: 12px; text-align: center;">#</th>
+          <th style="padding: 12px; text-align: left;">Player</th>
+          <th style="padding: 12px; text-align: center;">Avg Rating</th>
+          <th style="padding: 12px; text-align: center;">Apps</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  players.forEach((p, i) => {
+    html += `
+      <tr style="border-bottom: 1px solid rgba(148, 163, 184, 0.1);">
+        <td style="padding: 12px; text-align: center; color: #fbbf24; font-weight: bold;">${i + 1}</td>
+        <td style="padding: 12px;">
+          <div style="font-weight: 600; color: #e5e7eb;">${p.name}</div>
+          <div style="font-size: 0.85em; color: #94a3b8;">${p.team}</div>
+        </td>
+        <td style="padding: 12px; text-align: center; color: #3b82f6; font-weight: 600;">
+          ${p.avgRating.toFixed(1)}
+        </td>
+        <td style="padding: 12px; text-align: center; color: #94a3b8;">
+          ${p.apps}
+        </td>
+      </tr>
+    `;
+  });
+
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function exportStatsAsCSV() {
+  const matches = getAllMatchesForStats();
+  const csv = matches.map(m =>
+    `${m.round || 'Group'},${m.teamA},${m.teamB},${m.scoreA || 0},${m.scoreB || 0},${(m.scoreA || 0) + (m.scoreB || 0)}`
+  ).join('\n');
+
+  const fullCSV = 'Round,Team A,Team B,Score A,Score B,Total Goals\n' + csv;
+  const blob = new Blob([fullCSV], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'tournament-stats.csv';
+  a.click();
+  window.URL.revokeObjectURL(url);
+
+  showUtilityMessage('✅ Stats exported successfully!', 'success');
+}
 
 // Save manager profile to localStorage
 function saveManagerProfile() {
@@ -10364,11 +10898,6 @@ function viewTeamPlayers(teamName) {
 
 /************* CUSTOM MATCH HISTORY (LOCAL STORAGE) *************/
 
-function replaySavedMatch(matchId) {
-  console.log("Replaying saved match:", matchId);
-  showUtilityMessage("Match replay functionality coming soon!", "info");
-}
-
 function deleteSavedMatch(matchId) {
   try {
     const savedMatches = JSON.parse(localStorage.getItem("savedCustomMatches") || "[]");
@@ -10763,6 +11292,145 @@ function compareMatches(matchId, whatIfChanges = {}) {
   };
 }
 
+/**
+ * Replay a saved match and show comparison modal
+ */
+function replaySavedMatch(matchId) {
+  const original = MATCH_DETAILS_DB[matchId];
+  const replay = replayMatch(matchId);
+
+  if (!replay) {
+    showUtilityMessage("❌ Replay failed - match data not found", "error");
+    return;
+  }
+
+  showReplayComparisonModal(original, replay);
+}
+
+/**
+ * Display replay comparison modal
+ */
+function showReplayComparisonModal(original, replay) {
+  const modal = document.createElement('div');
+  modal.className = 'modal-backdrop';
+  modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 10000; display: flex; align-items: center; justify-content: center;';
+
+  modal.innerHTML = `
+    <div class="modal replay-comparison-modal" style="max-width: 900px; width: 90%; background: #1e293b; border-radius: 16px; max-height: 90vh; overflow-y: auto;" onclick="event.stopPropagation()">
+      <div style="padding: 20px; border-bottom: 1px solid rgba(71, 85, 105, 0.3); display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="margin: 0; color: #e5e7eb;">⏮️ Match Replay</h2>
+        <button onclick="this.closest('.modal-backdrop').remove()" style="background: none; border: none; color: #94a3b8; font-size: 1.5em; cursor: pointer;">×</button>
+      </div>
+
+      <div style="padding: 20px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <h3 style="color: #94a3b8; font-size: 0.9em; margin: 0;">${original.teamA} vs ${original.teamB}</h3>
+          <p style="color: #64748b; font-size: 0.8em; margin: 5px 0 0 0;">${new Date(original.timestamp).toLocaleString()}</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px;">
+          <div style="background: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 12px; border: 2px solid #3b82f6;">
+            <h3 style="text-align: center; color: #3b82f6; margin: 0 0 15px 0;">📜 Original</h3>
+            <div style="text-align: center; font-size: 2.5em; font-weight: bold; color: #e5e7eb; margin-bottom: 10px;">
+              ${original.scoreA} - ${original.scoreB}
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; font-size: 2em; color: #64748b;">VS</div>
+
+          <div style="background: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 12px; border: 2px solid #10b981;">
+            <h3 style="text-align: center; color: #10b981; margin: 0 0 15px 0;">🔄 Replay</h3>
+            <div style="text-align: center; font-size: 2.5em; font-weight: bold; color: #e5e7eb; margin-bottom: 10px;">
+              ${replay.scoreA} - ${replay.scoreB}
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 20px; padding: 15px; background: rgba(168, 85, 247, 0.1); border-radius: 8px; border: 1px solid #a855f7; text-align: center;">
+          <p style="color: #a855f7; font-size: 0.9em; margin: 0;">
+            ${original.scoreA === replay.scoreA && original.scoreB === replay.scoreB ? '✓ Identical scores - perfect deterministic replay' : '⚠️ Scores differ - check RNG implementation'}
+          </p>
+        </div>
+
+        <div style="margin-top: 20px; padding: 15px; background: rgba(0, 0, 0, 0.2); border-radius: 8px;">
+          <h4 style="color: #94a3b8; margin: 0 0 10px 0;">🎲 What-If Scenario</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+            <div>
+              <label style="color: #94a3b8; font-size: 0.85em; display: block; margin-bottom: 5px;">${original.teamA} Strength</label>
+              <input type="range" id="whatIfStrengthA" min="70" max="100" value="${original.teamAObj?.strength || 80}" style="width: 100%;">
+              <span id="strengthAValue" style="color: #e5e7eb;">${original.teamAObj?.strength || 80}</span>
+            </div>
+            <div>
+              <label style="color: #94a3b8; font-size: 0.85em; display: block; margin-bottom: 5px;">${original.teamB} Strength</label>
+              <input type="range" id="whatIfStrengthB" min="70" max="100" value="${original.teamBObj?.strength || 80}" style="width: 100%;">
+              <span id="strengthBValue" style="color: #e5e7eb;">${original.teamBObj?.strength || 80}</span>
+            </div>
+          </div>
+          <button onclick="runWhatIfScenario('${original.matchId}')" style="width: 100%; padding: 12px; background: #a855f7; border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer;">
+            🔮 Run What-If
+          </button>
+        </div>
+      </div>
+
+      <div style="padding: 15px 20px; border-top: 1px solid rgba(71, 85, 105, 0.3); display: flex; gap: 10px; justify-content: flex-end;">
+        <button onclick="this.closest('.modal-backdrop').remove()" style="padding: 10px 20px; background: rgba(71, 85, 105, 0.3); border: none; border-radius: 8px; color: #e5e7eb; cursor: pointer;">Close</button>
+        <button onclick="shareReplay('${original.matchId}')" style="padding: 10px 20px; background: #3b82f6; border: none; border-radius: 8px; color: white; cursor: pointer;">📤 Share</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  setTimeout(() => {
+    const sliderA = document.getElementById('whatIfStrengthA');
+    const sliderB = document.getElementById('whatIfStrengthB');
+    if (sliderA) sliderA.oninput = (e) => document.getElementById('strengthAValue').textContent = e.target.value;
+    if (sliderB) sliderB.oninput = (e) => document.getElementById('strengthBValue').textContent = e.target.value;
+  }, 100);
+
+  modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+}
+
+function runWhatIfScenario(matchId) {
+  const strengthA = parseInt(document.getElementById('whatIfStrengthA').value);
+  const strengthB = parseInt(document.getElementById('whatIfStrengthB').value);
+
+  const result = compareMatches(matchId, { teamAStrength: strengthA, teamBStrength: strengthB });
+  if (!result) return showUtilityMessage('❌ What-If failed', 'error');
+
+  const modal = document.querySelector('.replay-comparison-modal');
+  const existing = modal?.querySelector('.whatif-result');
+  if (existing) existing.remove();
+
+  const section = document.createElement('div');
+  section.className = 'whatif-result';
+  section.style.cssText = 'margin-top: 20px; padding: 20px; background: rgba(168, 85, 247, 0.15); border-radius: 12px; border: 2px solid #a855f7; text-align: center;';
+  section.innerHTML = `
+    <h3 style="color: #a855f7; margin: 0 0 15px 0;">🔮 What-If Result</h3>
+    <div style="font-size: 2em; font-weight: bold; color: #e5e7eb; margin-bottom: 10px;">
+      ${result.whatIf.scoreA} - ${result.whatIf.scoreB}
+    </div>
+    <p style="color: #d1d5db; font-size: 0.9em; margin: 0;">
+      ${result.whatIf.teamA} (${strengthA}) vs ${result.whatIf.teamB} (${strengthB})
+    </p>
+  `;
+
+  modal?.querySelector('[style*="padding: 20px"]').appendChild(section);
+  section.scrollIntoView({ behavior: 'smooth' });
+}
+
+function shareReplay(matchId) {
+  const match = MATCH_DETAILS_DB[matchId];
+  if (!match) return;
+
+  const text = `⚽ Match Replay\n${match.teamA} vs ${match.teamB}\nScore: ${match.scoreA}-${match.scoreB}\nSeed: ${match.seed}`;
+
+  navigator.clipboard.writeText(text).then(
+    () => showUtilityMessage('✅ Copied to clipboard!', 'success'),
+    () => showUtilityMessage('❌ Copy failed', 'error')
+  );
+}
+
 /************* PLAYER FORM SYSTEM *************/
 
 /**
@@ -10815,6 +11483,361 @@ function getPlayerFormModifier(playerKey) {
 
   // Each form level adds ±0.3 rating points
   return player.form.current * 0.3;
+}
+
+/************* INJURY & SUSPENSION SYSTEM *************/
+
+/**
+ * Initialize player medical status
+ * @param {string} playerKey - Player identifier in PLAYER_DB
+ */
+function initializePlayerMedicalStatus(playerKey) {
+  const player = PLAYER_DB[playerKey];
+  if (!player) return;
+
+  if (!player.medical) {
+    player.medical = {
+      isInjured: false,
+      injuryType: null,
+      matchesOut: 0,
+      isSuspended: false,
+      yellowCards: 0,
+      redCard: false,
+      suspensionMatches: 0,
+      injuryHistory: []
+    };
+  }
+}
+
+/**
+ * Check for injury during match
+ * @param {string} playerKey - Player identifier
+ * @param {number} intensity - Match intensity (0-1)
+ * @returns {object|null} - Injury details if occurred
+ */
+function checkForInjury(playerKey, intensity = 0.7) {
+  const player = PLAYER_DB[playerKey];
+  if (!player || !player.medical) {
+    initializePlayerMedicalStatus(playerKey);
+  }
+
+  const difficulty = getCurrentDifficulty();
+  const injuryRate = difficulty.injuryRate || 0;
+
+  if (injuryRate === 0 || player.medical.isInjured) return null;
+
+  // Injury probability factors
+  const baseChance = injuryRate * intensity;
+  const roll = Math.random();
+
+  if (roll < baseChance) {
+    const injuryTypes = [
+      { type: 'Hamstring Strain', matches: 2, icon: '🦵' },
+      { type: 'Ankle Sprain', matches: 1, icon: '🦶' },
+      { type: 'Muscle Fatigue', matches: 1, icon: '💪' },
+      { type: 'Knee Injury', matches: 3, icon: '🦵' },
+      { type: 'Groin Strain', matches: 2, icon: '💪' },
+      { type: 'Shoulder Injury', matches: 2, icon: '💪' },
+      { type: 'Concussion', matches: 2, icon: '🤕' }
+    ];
+
+    const injury = injuryTypes[Math.floor(Math.random() * injuryTypes.length)];
+
+    player.medical.isInjured = true;
+    player.medical.injuryType = injury.type;
+    player.medical.matchesOut = injury.matches;
+    player.medical.injuryIcon = injury.icon;
+
+    player.medical.injuryHistory.push({
+      type: injury.type,
+      date: new Date().toISOString(),
+      matchesOut: injury.matches
+    });
+
+    return {
+      playerName: player.name,
+      injuryType: injury.type,
+      matchesOut: injury.matches,
+      icon: injury.icon
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Check for yellow/red cards during match
+ * @param {string} playerKey - Player identifier
+ * @param {string} position - Player position
+ * @returns {object|null} - Card details if issued
+ */
+function checkForCards(playerKey, position) {
+  const player = PLAYER_DB[playerKey];
+  if (!player || !player.medical) {
+    initializePlayerMedicalStatus(playerKey);
+  }
+
+  if (player.medical.isSuspended) return null;
+
+  // Defenders and midfielders more likely to get cards
+  const positionMultiplier = {
+    'GK': 0.3,
+    'DF': 1.5,
+    'MF': 1.2,
+    'FW': 0.8
+  };
+
+  const multiplier = positionMultiplier[position] || 1.0;
+  const yellowChance = 0.08 * multiplier; // 8% base chance
+  const redChance = 0.01 * multiplier;    // 1% base chance
+
+  const roll = Math.random();
+
+  // Red card (direct)
+  if (roll < redChance) {
+    player.medical.redCard = true;
+    player.medical.isSuspended = true;
+    player.medical.suspensionMatches = 3; // 3 match ban for red card
+
+    return {
+      playerName: player.name,
+      cardType: 'red',
+      icon: '🟥',
+      suspensionMatches: 3
+    };
+  }
+
+  // Yellow card
+  if (roll < yellowChance) {
+    player.medical.yellowCards += 1;
+
+    // 2 yellows = suspension
+    if (player.medical.yellowCards >= 2) {
+      player.medical.isSuspended = true;
+      player.medical.suspensionMatches = 1;
+      player.medical.yellowCards = 0; // Reset after suspension
+
+      return {
+        playerName: player.name,
+        cardType: 'double-yellow',
+        icon: '🟨🟨',
+        suspensionMatches: 1
+      };
+    }
+
+    return {
+      playerName: player.name,
+      cardType: 'yellow',
+      icon: '🟨',
+      suspensionMatches: 0
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Update player statuses after each match
+ * Reduces injury/suspension timers
+ */
+function updatePlayerMedicalStatuses() {
+  if (!window.PLAYER_DB) return;
+
+  Object.keys(PLAYER_DB).forEach(playerKey => {
+    const player = PLAYER_DB[playerKey];
+    if (!player.medical) return;
+
+    // Update injury status
+    if (player.medical.isInjured && player.medical.matchesOut > 0) {
+      player.medical.matchesOut -= 1;
+
+      if (player.medical.matchesOut === 0) {
+        player.medical.isInjured = false;
+        player.medical.injuryType = null;
+        player.medical.injuryIcon = null;
+      }
+    }
+
+    // Update suspension status
+    if (player.medical.isSuspended && player.medical.suspensionMatches > 0) {
+      player.medical.suspensionMatches -= 1;
+
+      if (player.medical.suspensionMatches === 0) {
+        player.medical.isSuspended = false;
+        player.medical.redCard = false;
+      }
+    }
+  });
+}
+
+/**
+ * Check if player is available for selection
+ * @param {string} playerKey - Player identifier
+ * @returns {object} - Availability status
+ */
+function isPlayerAvailable(playerKey) {
+  const player = PLAYER_DB[playerKey];
+  if (!player) return { available: false, reason: 'Player not found' };
+
+  if (!player.medical) {
+    initializePlayerMedicalStatus(playerKey);
+    return { available: true, reason: null };
+  }
+
+  if (player.medical.isInjured) {
+    return {
+      available: false,
+      reason: `Injured (${player.medical.injuryType})`,
+      icon: player.medical.injuryIcon || '🤕',
+      matchesOut: player.medical.matchesOut
+    };
+  }
+
+  if (player.medical.isSuspended) {
+    return {
+      available: false,
+      reason: player.medical.redCard ? 'Suspended (Red Card)' : 'Suspended (Yellow Cards)',
+      icon: player.medical.redCard ? '🟥' : '🟨🟨',
+      matchesOut: player.medical.suspensionMatches
+    };
+  }
+
+  return { available: true, reason: null };
+}
+
+/**
+ * Display Medical Room UI
+ */
+function showMedicalRoom() {
+  const out = document.getElementById('output');
+
+  if (!window.PLAYER_DB) {
+    out.innerHTML = '<p style="color: #94a3b8; text-align: center; padding: 40px;">No player data available. Start a tournament first.</p>';
+    return;
+  }
+
+  // Collect injured and suspended players
+  const injured = [];
+  const suspended = [];
+
+  Object.entries(PLAYER_DB).forEach(([key, player]) => {
+    if (!player.medical) return;
+
+    if (player.medical.isInjured) {
+      injured.push({
+        key,
+        name: player.name,
+        team: player.team,
+        position: player.position,
+        injuryType: player.medical.injuryType,
+        icon: player.medical.injuryIcon,
+        matchesOut: player.medical.matchesOut
+      });
+    }
+
+    if (player.medical.isSuspended) {
+      suspended.push({
+        key,
+        name: player.name,
+        team: player.team,
+        position: player.position,
+        reason: player.medical.redCard ? 'Red Card' : 'Yellow Cards',
+        icon: player.medical.redCard ? '🟥' : '🟨🟨',
+        matchesOut: player.medical.suspensionMatches
+      });
+    }
+  });
+
+  out.innerHTML = `
+    <div class="medical-room-view" style="padding: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h2 style="margin: 0; color: #e5e7eb;">🏥 Medical Room</h2>
+        <div style="color: #94a3b8; font-size: 0.9em;">
+          <span style="margin-right: 20px;">🤕 Injured: <strong style="color: #ef4444;">${injured.length}</strong></span>
+          <span>🟨 Suspended: <strong style="color: #fbbf24;">${suspended.length}</strong></span>
+        </div>
+      </div>
+
+      <!-- Injured Players Section -->
+      <div style="margin-bottom: 40px;">
+        <h3 style="color: #f87171; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+          🤕 Injured Players
+        </h3>
+
+        ${injured.length === 0 ? `
+          <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 20px; text-align: center; color: #10b981;">
+            ✅ No injured players - squad is healthy!
+          </div>
+        ` : `
+          <div style="display: grid; gap: 12px;">
+            ${injured.map(p => `
+              <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 15px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="flex: 1;">
+                  <div style="color: #e5e7eb; font-weight: 600; margin-bottom: 4px;">
+                    ${p.icon} ${p.name}
+                  </div>
+                  <div style="color: #94a3b8; font-size: 0.85em;">
+                    ${p.team} • ${p.position}
+                  </div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="color: #f87171; font-weight: 600; margin-bottom: 2px;">
+                    ${p.injuryType}
+                  </div>
+                  <div style="color: #94a3b8; font-size: 0.85em;">
+                    ${p.matchesOut} match${p.matchesOut > 1 ? 'es' : ''} out
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `}
+      </div>
+
+      <!-- Suspended Players Section -->
+      <div>
+        <h3 style="color: #fbbf24; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+          🟨 Suspended Players
+        </h3>
+
+        ${suspended.length === 0 ? `
+          <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 20px; text-align: center; color: #10b981;">
+            ✅ No suspended players - everyone is available!
+          </div>
+        ` : `
+          <div style="display: grid; gap: 12px;">
+            ${suspended.map(p => `
+              <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 8px; padding: 15px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="flex: 1;">
+                  <div style="color: #e5e7eb; font-weight: 600; margin-bottom: 4px;">
+                    ${p.icon} ${p.name}
+                  </div>
+                  <div style="color: #94a3b8; font-size: 0.85em;">
+                    ${p.team} • ${p.position}
+                  </div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="color: #fbbf24; font-weight: 600; margin-bottom: 2px;">
+                    ${p.reason}
+                  </div>
+                  <div style="color: #94a3b8; font-size: 0.85em;">
+                    ${p.matchesOut} match${p.matchesOut > 1 ? 'es' : ''} ban
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `}
+      </div>
+
+      <!-- Back Button -->
+      <div style="margin-top: 30px; text-align: center;">
+        <button onclick="showMainMenu()" style="background: #475569; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 1em;">
+          ← Back to Menu
+        </button>
+      </div>
+    </div>
+  `;
 }
 
 /**
@@ -11610,13 +12633,18 @@ function trackEnhancedPlayerStats(teamA, teamB, goalsA, goalsB) {
   const matchEvents = {
     goals: [],
     assists: [],
-    playerPerformances: {}
+    playerPerformances: {},
+    injuries: [],
+    cards: []
   };
 
   const initPerformance = (team) => {
     [...(team.startingXI || []), ...(team.bench || [])].forEach(player => {
       if (!player || !player.name) return;
       const key = `${team.name}::${player.name}`;
+
+      // Initialize medical status if needed
+      initializePlayerMedicalStatus(key);
 
       // Calculate base rating with form modifier
       let baseRating = calculateBaseRating(player, team.strength || 70);
@@ -11632,6 +12660,22 @@ function trackEnhancedPlayerStats(teamA, teamB, goalsA, goalsB) {
         baseRating: baseRating,
         formModifier: formModifier // Track for display
       };
+
+      // Check for injuries (only for starting XI)
+      if (team.startingXI && team.startingXI.includes(player)) {
+        const injury = checkForInjury(key, 0.7);
+        if (injury) {
+          matchEvents.injuries.push(injury);
+        }
+      }
+
+      // Check for cards (starting XI only)
+      if (team.startingXI && team.startingXI.includes(player)) {
+        const card = checkForCards(key, player.pos);
+        if (card) {
+          matchEvents.cards.push(card);
+        }
+      }
     });
   };
 
@@ -12219,6 +13263,9 @@ async function simulateGroupStageAsync(groups, onProgress) {
           matchesSimulated += 2;
           if (onProgress) onProgress(matchesSimulated, totalMatches);
 
+          // Update medical statuses after each match pair
+          updatePlayerMedicalStatuses();
+
           // Yield after every pair of matches to allow UI repaint (maximum responsiveness)
           await new Promise(resolve => setTimeout(resolve, 0));
         } catch (error) {
@@ -12578,6 +13625,9 @@ async function simulateKnockoutRoundAsync(teams, roundName, matchImportance = 1.
         console.error(`❌ Error simulating ${roundName} match:`, error);
       }
     }
+
+    // Update medical statuses after each match
+    updatePlayerMedicalStatuses();
 
     // Yield every match to allow UI updates
     if (onProgress) onProgress(roundName, i / 2 + 1, Math.floor(shuffled.length / 2));

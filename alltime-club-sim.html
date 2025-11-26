@@ -9107,11 +9107,20 @@ function openManagerEditModal() {
     console.warn('⚠️ managerFavoriteTeamSelect not found');
   }
 
+  // Ensure modal backdrop is visible
   modal.classList.add("active");
   modal.style.display = "flex";
   modal.style.zIndex = "10000";
   modal.style.opacity = "1";
   modal.style.visibility = "visible";
+
+  // Ensure inner modal content is also visible
+  const innerModal = modal.querySelector('.modal');
+  if (innerModal) {
+    innerModal.style.display = "block";
+    innerModal.style.opacity = "1";
+    innerModal.style.visibility = "visible";
+  }
 
   console.log('✅ Manager edit modal opened');
 }
@@ -9230,14 +9239,15 @@ function showTrackTeamModal() {
   modal.style.opacity = "1";
   modal.style.visibility = "visible";
 
+  // Ensure inner modal content is also visible
+  const innerModal = modal.querySelector('.modal');
+  if (innerModal) {
+    innerModal.style.display = "block";
+    innerModal.style.opacity = "1";
+    innerModal.style.visibility = "visible";
+  }
+
   console.log('✅ Track team modal opened with', select.options.length - 1, 'team options');
-  console.log('📊 Modal styles:', {
-    display: modal.style.display,
-    opacity: modal.style.opacity,
-    visibility: modal.style.visibility,
-    zIndex: modal.style.zIndex,
-    hasActiveClass: modal.classList.contains('active')
-  });
 }
 
 function closeTrackTeamModal() {
@@ -15866,6 +15876,14 @@ function openCustomMatchModal(preselectA = null, preselectB = null) {
       modal.style.zIndex = '10000';
       modal.style.opacity = '1';
       modal.style.visibility = 'visible';
+
+      // Ensure inner modal content is also visible
+      const innerModal = modal.querySelector('.modal');
+      if (innerModal) {
+        innerModal.style.display = 'block';
+        innerModal.style.opacity = '1';
+        innerModal.style.visibility = 'visible';
+      }
 
       console.log('✅ Custom match modal opened');
     } else {

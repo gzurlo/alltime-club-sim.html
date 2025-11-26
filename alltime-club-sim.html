@@ -3614,6 +3614,22 @@
               <button class="rng-pill" type="button" data-rng-value="1.7">Extreme</button>
             </div>
           </div>
+
+          <!-- Simulation Speed Control -->
+          <div class="control-section">
+            <label for="simSpeedSlider">Simulation Speed</label>
+            <div class="rng-row">
+              <input id="simSpeedSlider" type="range" min="0" max="3" step="1" value="1"
+                     oninput="updateSimSpeed(this.value)">
+              <span id="simSpeedLabel">Normal</span>
+            </div>
+            <div class="rng-presets">
+              <button class="rng-pill" type="button" data-speed-value="0">Instant</button>
+              <button class="rng-pill active" type="button" data-speed-value="1">Fast</button>
+              <button class="rng-pill" type="button" data-speed-value="2">Normal</button>
+              <button class="rng-pill" type="button" data-speed-value="3">Slow</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -3757,17 +3773,51 @@
         </div>
         <div class="modal-body">
           <div class="section-label">Pick your teams</div>
+          <input id="customMatchSearch" type="text" placeholder="🔍 Search teams..."
+                 style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);
+                        background: rgba(0, 0, 0, 0.3); color: #e2e8f0; font-size: 0.95rem; margin-bottom: 12px;"
+                 oninput="filterCustomMatchTeams(this.value)">
           <div class="custom-row">
-            <select id="customTeamA"></select>
-            <select id="customTeamB"></select>
+            <select id="customTeamA" size="6"></select>
+            <select id="customTeamB" size="6"></select>
           </div>
           <div id="teamComparison" style="display: none;"></div>
+
+          <div class="section-label" style="margin-top: 16px;">Match Settings</div>
+
           <div class="radio-row">
-            <label><input type="radio" name="customVenue" value="neutral" checked> Neutral venue</label><br>
-            <label><input type="radio" name="customVenue" value="homeA"> Team A home advantage</label><br>
-            <label><input type="radio" name="customVenue" value="homeB"> Team B home advantage</label>
+            <strong style="color: #e2e8f0; display: block; margin-bottom: 8px;">Venue</strong>
+            <label><input type="radio" name="customVenue" value="neutral" checked> ⚖️ Neutral venue</label><br>
+            <label><input type="radio" name="customVenue" value="homeA"> 🏠 Team A home advantage</label><br>
+            <label><input type="radio" name="customVenue" value="homeB"> 🏟️ Team B home advantage</label>
           </div>
-          <button class="small-btn" type="button" onclick="simulateCustomMatch()">Play Match</button>
+
+          <div class="radio-row" style="margin-top: 12px;">
+            <strong style="color: #e2e8f0; display: block; margin-bottom: 8px;">Weather Conditions</strong>
+            <label><input type="radio" name="customWeather" value="clear" checked> ☀️ Clear (Normal)</label><br>
+            <label><input type="radio" name="customWeather" value="rainy"> 🌧️ Rainy (Slower pace)</label><br>
+            <label><input type="radio" name="customWeather" value="windy"> 💨 Windy (More chaos)</label><br>
+            <label><input type="radio" name="customWeather" value="snowy"> ❄️ Snowy (Very unpredictable)</label><br>
+            <label><input type="radio" name="customWeather" value="hot"> 🔥 Hot (Affects stamina)</label>
+          </div>
+
+          <div style="margin-top: 12px;">
+            <label for="customImportance" style="color: #e2e8f0; display: block; margin-bottom: 8px;">
+              <strong>Match Importance</strong> <span id="customImportanceLabel" style="color: #3b82f6;">Normal</span>
+            </label>
+            <input id="customImportance" type="range" min="0.5" max="2.5" step="0.25" value="1.5"
+                   style="width: 100%;"
+                   oninput="updateCustomImportanceLabel(this.value)">
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #94a3b8; margin-top: 4px;">
+              <span>Friendly</span>
+              <span>Normal</span>
+              <span>Final</span>
+            </div>
+          </div>
+
+          <button class="small-btn" type="button" onclick="simulateCustomMatch()" style="margin-top: 16px;">
+            ⚽ Play Match
+          </button>
           <div id="customMatchResult" style="margin-top:8px;"></div>
         </div>
       </div>
@@ -3788,10 +3838,15 @@
                  style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);
                         background: rgba(0, 0, 0, 0.3); color: #e2e8f0; font-size: 1rem; margin-bottom: 20px;"/>
 
-          <label for="managerFavoriteTeamSelect" style="display: block; margin-bottom: 8px; color: #e2e8f0; font-weight: 600;">Favorite Team (Optional)</label>
+          <label for="managerFavoriteTeamSearch" style="display: block; margin-bottom: 8px; color: #e2e8f0; font-weight: 600;">Favorite Team (Optional)</label>
+          <input id="managerFavoriteTeamSearch" type="text" placeholder="🔍 Search teams..."
+                 style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);
+                        background: rgba(0, 0, 0, 0.3); color: #e2e8f0; font-size: 1rem; margin-bottom: 12px;"
+                 oninput="filterManagerFavoriteTeams(this.value)">
           <select id="managerFavoriteTeamSelect"
+                  size="6"
                   style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);
-                         background: rgba(0, 0, 0, 0.3); color: #e2e8f0; font-size: 1rem; margin-bottom: 20px;">
+                         background: rgba(0, 0, 0, 0.3); color: #e2e8f0; font-size: 1rem; margin-bottom: 20px; min-height: 150px;">
             <option value="">-- No team selected --</option>
           </select>
 
@@ -3824,9 +3879,15 @@
         <div class="modal-body">
           <p style="color: #94a3b8; margin-bottom: 16px;">This team's results will count toward your Manager career & achievements.</p>
 
+          <input id="trackTeamSearch" type="text" placeholder="🔍 Search teams by name, year, or country..."
+                 style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);
+                        background: rgba(0, 0, 0, 0.3); color: #e2e8f0; font-size: 1rem; margin-bottom: 12px;"
+                 oninput="filterTrackTeamOptions(this.value)">
+
           <select id="trackTeamSelect"
+                  size="8"
                   style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);
-                         background: rgba(0, 0, 0, 0.3); color: #e2e8f0; font-size: 1rem; margin-bottom: 20px;">
+                         background: rgba(0, 0, 0, 0.3); color: #e2e8f0; font-size: 1rem; margin-bottom: 20px; min-height: 200px;">
             <option value="">-- Select a team --</option>
           </select>
 
@@ -6970,6 +7031,17 @@ const RNG_SETTINGS = (window.RNG_SETTINGS = window.RNG_SETTINGS || {
   knockoutChaos: 1.1
 });
 
+// Simulation speed settings (milliseconds)
+const SIM_SPEED_SETTINGS = (window.SIM_SPEED_SETTINGS = window.SIM_SPEED_SETTINGS || {
+  current: 1,
+  speeds: {
+    0: 0,      // Instant
+    1: 50,     // Fast
+    2: 200,    // Normal
+    3: 500     // Slow
+  }
+});
+
 // Global tournament state
 window.GROUPS = window.GROUPS || null;
 window.GROUP_RESULTS = window.GROUP_RESULTS || null;
@@ -7297,6 +7369,153 @@ const ACHIEVEMENTS = {
     progress: 0,
     maxProgress: 5,
     check: (data) => data.consecutiveCleanSheets >= 5
+  },
+
+  // Custom Match Achievements
+  weatherWarrior: {
+    id: 'weatherWarrior',
+    name: 'Weather Warrior',
+    description: 'Win custom matches in all weather conditions',
+    icon: '⛈️',
+    rarity: 'rare',
+    category: 'custom',
+    points: 75,
+    requiresProgress: true,
+    progress: 0,
+    maxProgress: 5,
+    check: (data) => data.weatherWins >= 5
+  },
+
+  customMatchMaster: {
+    id: 'customMatchMaster',
+    name: 'Custom Match Master',
+    description: 'Play 25 custom matches',
+    icon: '🎮',
+    rarity: 'uncommon',
+    category: 'custom',
+    points: 50,
+    requiresProgress: true,
+    progress: 0,
+    maxProgress: 25,
+    check: (data) => data.customMatchesPlayed >= 25
+  },
+
+  blizzardVictory: {
+    id: 'blizzardVictory',
+    name: 'Blizzard Victory',
+    description: 'Win a custom match in snowy conditions',
+    icon: '❄️',
+    rarity: 'common',
+    category: 'custom',
+    points: 25,
+    requiresProgress: true,
+    progress: 0,
+    maxProgress: 1,
+    check: (data) => data.snowyWins > 0
+  },
+
+  heatwave: {
+    id: 'heatwave',
+    name: 'Heatwave Hero',
+    description: 'Win 5 matches in hot weather',
+    icon: '🔥',
+    rarity: 'uncommon',
+    category: 'custom',
+    points: 40,
+    requiresProgress: true,
+    progress: 0,
+    maxProgress: 5,
+    check: (data) => data.hotWins >= 5
+  },
+
+  // Career Achievements
+  favoriteTeamChampion: {
+    id: 'favoriteTeamChampion',
+    name: 'Favorite Team Champion',
+    description: 'Win a tournament with your tracked team',
+    icon: '❤️',
+    rarity: 'epic',
+    category: 'career',
+    points: 150,
+    requiresProgress: true,
+    progress: 0,
+    maxProgress: 1,
+    check: (data) => data.favoriteTeamWins > 0
+  },
+
+  dedication: {
+    id: 'dedication',
+    name: 'Dedication',
+    description: 'Track the same team for 10 tournaments',
+    icon: '🎯',
+    rarity: 'rare',
+    category: 'career',
+    points: 100,
+    requiresProgress: true,
+    progress: 0,
+    maxProgress: 10,
+    check: (data) => data.trackedTournaments >= 10
+  },
+
+  dynasty: {
+    id: 'dynasty',
+    name: 'Dynasty',
+    description: 'Win 3 tournaments with your tracked team',
+    icon: '👑',
+    rarity: 'legendary',
+    category: 'career',
+    points: 250,
+    requiresProgress: true,
+    progress: 0,
+    maxProgress: 3,
+    check: (data) => data.favoriteTeamWins >= 3
+  },
+
+  managerLevel10: {
+    id: 'managerLevel10',
+    name: 'Rising Star',
+    description: 'Reach Manager Level 10',
+    icon: '⭐',
+    rarity: 'common',
+    category: 'career',
+    points: 50,
+    check: (data) => MANAGER_PROFILE.level >= 10
+  },
+
+  managerLevel25: {
+    id: 'managerLevel25',
+    name: 'Veteran Manager',
+    description: 'Reach Manager Level 25',
+    icon: '🌟',
+    rarity: 'rare',
+    category: 'career',
+    points: 100,
+    check: (data) => MANAGER_PROFILE.level >= 25
+  },
+
+  managerLevel50: {
+    id: 'managerLevel50',
+    name: 'Legendary Manager',
+    description: 'Reach Manager Level 50',
+    icon: '✨',
+    rarity: 'legendary',
+    category: 'career',
+    points: 250,
+    check: (data) => MANAGER_PROFILE.level >= 50
+  },
+
+  streakMaster: {
+    id: 'streakMaster',
+    name: 'Streak Master',
+    description: 'Win 5 tournaments in a row',
+    icon: '🔥',
+    rarity: 'epic',
+    category: 'career',
+    points: 200,
+    requiresProgress: true,
+    progress: 0,
+    maxProgress: 5,
+    check: (data) => data.winStreak >= 5
   }
 };
 
@@ -7318,7 +7537,16 @@ window.ACHIEVEMENTS_DATA = JSON.parse(localStorage.getItem('achievementsData')) 
     penaltyWins: 0,
     bigWins: 0,
     bigComebacks: 0,
-    consecutiveCleanSheets: 0
+    consecutiveCleanSheets: 0,
+    // Custom match stats
+    weatherWins: 0,
+    customMatchesPlayed: 0,
+    snowyWins: 0,
+    hotWins: 0,
+    // Career stats
+    favoriteTeamWins: 0,
+    trackedTournaments: 0,
+    winStreak: 0
   }
 };
 
@@ -9281,12 +9509,199 @@ function closeAllModals() {
   });
 }
 
-/************* PLAYER FUNCTIONS *************/
+/************* ADVANCED FILTERING & SEARCH *************/
 
-function exportBracketData() {
-  console.log("Exporting bracket data...");
-  // Placeholder – could export knockout tree only
+// Filter track team options
+function filterTrackTeamOptions(searchTerm) {
+  const select = document.getElementById("trackTeamSelect");
+  if (!select) return;
+
+  const options = select.querySelectorAll('option');
+  searchTerm = searchTerm.toLowerCase();
+
+  options.forEach(option => {
+    if (option.value === '') {
+      option.style.display = ''; // Always show "Select a team" option
+      return;
+    }
+
+    const optionText = option.textContent.toLowerCase();
+    const matches = optionText.includes(searchTerm);
+    option.style.display = matches ? '' : 'none';
+  });
 }
+
+// Filter custom match teams
+function filterCustomMatchTeams(searchTerm) {
+  const selectA = document.getElementById("customTeamA");
+  const selectB = document.getElementById("customTeamB");
+  if (!selectA || !selectB) return;
+
+  searchTerm = searchTerm.toLowerCase();
+
+  [selectA, selectB].forEach(select => {
+    const options = select.querySelectorAll('option');
+    options.forEach(option => {
+      const optionText = option.textContent.toLowerCase();
+      const matches = optionText.includes(searchTerm);
+      option.style.display = matches ? '' : 'none';
+    });
+  });
+}
+
+// Filter manager favorite teams
+function filterManagerFavoriteTeams(searchTerm) {
+  const select = document.getElementById("managerFavoriteTeamSelect");
+  if (!select) return;
+
+  const options = select.querySelectorAll('option');
+  searchTerm = searchTerm.toLowerCase();
+
+  options.forEach(option => {
+    if (option.value === '') {
+      option.style.display = ''; // Always show "No team selected" option
+      return;
+    }
+
+    const optionText = option.textContent.toLowerCase();
+    const matches = optionText.includes(searchTerm);
+    option.style.display = matches ? '' : 'none';
+  });
+}
+
+/************* CUSTOM MATCH ENHANCEMENTS *************/
+
+// Update custom match importance label
+function updateCustomImportanceLabel(value) {
+  const v = parseFloat(value);
+  const label = document.getElementById('customImportanceLabel');
+  if (!label) return;
+
+  let text = 'Normal';
+  let color = '#3b82f6';
+
+  if (v <= 0.75) {
+    text = 'Friendly';
+    color = '#10b981';
+  } else if (v <= 1.25) {
+    text = 'Normal';
+    color = '#3b82f6';
+  } else if (v <= 1.75) {
+    text = 'Important';
+    color = '#f59e0b';
+  } else if (v <= 2.25) {
+    text = 'Critical';
+    color = '#ef4444';
+  } else {
+    text = 'Final';
+    color = '#8b5cf6';
+  }
+
+  label.textContent = text;
+  label.style.color = color;
+}
+
+// Simulate match with weather effects
+function simulateMatchWithWeather(teamA, teamB, isHome, importance, weather) {
+  // Apply weather modifiers
+  const weatherEffects = {
+    clear: { chaos: 1.0, description: 'Perfect conditions' },
+    rainy: { chaos: 1.2, description: 'Slippery pitch, slower play' },
+    windy: { chaos: 1.4, description: 'Unpredictable ball movement' },
+    snowy: { chaos: 1.6, description: 'Very difficult conditions' },
+    hot: { chaos: 1.1, description: 'Players tire faster' }
+  };
+
+  const effect = weatherEffects[weather] || weatherEffects.clear;
+  const adjustedImportance = importance * effect.chaos;
+
+  console.log(`🌤️ ${effect.description} (chaos: ${effect.chaos}x)`);
+
+  // Use existing simulateMatch function with adjusted parameters
+  const result = simulateMatch(teamA, teamB, isHome, adjustedImportance, weather);
+
+  // Add weather info to result
+  if (result && result.matchId) {
+    const matchDetails = MATCH_DETAILS_DB[result.matchId];
+    if (matchDetails) {
+      matchDetails.weather = weather;
+      matchDetails.weatherDescription = effect.description;
+    }
+  }
+
+  return result;
+}
+
+/************* SIMULATION SPEED CONTROL *************/
+
+function updateSimSpeed(value) {
+  const v = parseInt(value);
+  SIM_SPEED_SETTINGS.current = v;
+
+  const labels = ['Instant', 'Fast', 'Normal', 'Slow'];
+  const label = document.getElementById('simSpeedLabel');
+  if (label) {
+    label.textContent = labels[v] || 'Normal';
+  }
+
+  // Update button active state
+  document.querySelectorAll('.rng-pill[data-speed-value]').forEach(btn => {
+    const btnValue = parseInt(btn.getAttribute('data-speed-value'));
+    if (btnValue === v) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+
+  // Save to localStorage
+  try {
+    localStorage.setItem('simSpeed', v.toString());
+    console.log(`⚡ Simulation speed set to: ${labels[v]} (${SIM_SPEED_SETTINGS.speeds[v]}ms)`);
+  } catch (e) {
+    console.error('Failed to save simulation speed:', e);
+  }
+}
+
+function initializeSimSpeed() {
+  try {
+    const saved = localStorage.getItem('simSpeed');
+    if (saved !== null) {
+      const v = parseInt(saved);
+      if (v >= 0 && v <= 3) {
+        SIM_SPEED_SETTINGS.current = v;
+        const slider = document.getElementById('simSpeedSlider');
+        if (slider) slider.value = v;
+        updateSimSpeed(v);
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load simulation speed:', e);
+  }
+
+  // Setup button click handlers
+  document.querySelectorAll('.rng-pill[data-speed-value]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const v = parseInt(btn.getAttribute('data-speed-value'));
+      const slider = document.getElementById('simSpeedSlider');
+      if (slider) slider.value = v;
+      updateSimSpeed(v);
+    });
+  });
+}
+
+// Helper function to get current delay
+function getSimDelay() {
+  return SIM_SPEED_SETTINGS.speeds[SIM_SPEED_SETTINGS.current] || 200;
+}
+
+// Helper function for async delays in simulation
+function simDelay() {
+  const delay = getSimDelay();
+  return delay > 0 ? new Promise(resolve => setTimeout(resolve, delay)) : Promise.resolve();
+}
+
+/************* PLAYER FUNCTIONS *************/
 
 /************* CUSTOM MATCH FUNCTIONS *************/
 
@@ -9339,8 +9754,23 @@ function simulateCustomMatch() {
       }
     }
 
-    // Simulate the match
-    const result = simulateMatch(teamA, teamB, isHome, 1.0, 'Clear');
+    // Get weather setting
+    const weatherRadios = document.getElementsByName('customWeather');
+    let weather = 'clear';
+    for (const radio of weatherRadios) {
+      if (radio.checked) {
+        weather = radio.value;
+      }
+    }
+
+    // Get match importance
+    const importanceSlider = document.getElementById('customImportance');
+    const importance = importanceSlider ? parseFloat(importanceSlider.value) : 1.5;
+
+    console.log(`🌤️ Weather: ${weather}, 📊 Importance: ${importance}`);
+
+    // Simulate the match with custom settings
+    const result = simulateMatchWithWeather(teamA, teamB, isHome, importance, weather);
 
     if (!result || !result.matchId) {
       showUtilityMessage('❌ Failed to simulate match', 'error');
@@ -9575,16 +10005,6 @@ function updateTeamComparison(teamAName, teamBName) {
   return comparisonHTML;
 }
 /************* EXPORT / BACKUP FUNCTIONS *************/
-function exportTournamentCSV() {
-  console.log("Exporting tournament CSV...");
-  // Placeholder – could export standings as CSV later
-}
-
-function exportTournamentSummary() {
-  console.log("Exporting tournament summary...");
-  // Placeholder – text summary export
-}
-
 // backupToLocalStorage and restorePreResetBackup are defined later in the file
 
 /************* THEME & BUTTON STATE *************/
@@ -14378,13 +14798,13 @@ function analyzeCustomMatch(match, teamA, teamB, matchDetails) {
   return analysis;
 }
 
-function simulateRematch() {
+function simulateRematch_LEGACY() {
   const teamASelect = document.getElementById("customTeamA");
   const teamBSelect = document.getElementById("customTeamB");
   const venueSelect = document.getElementById("customVenue");
-  
+
   if (!teamASelect || !teamBSelect) return;
-  
+
   const teamAName = teamASelect.value;
   const teamBName = teamBSelect.value;
   
@@ -15394,21 +15814,7 @@ function applyThemeToCustomElements(isLight) {
   }
 }
 
-function initializeTheme() {
-  const savedTheme = localStorage.getItem('theme') || 'dark';
-  const body = document.body;
-
-  if (savedTheme === 'light') {
-    body.classList.add('light');
-  }
-
-  const themeBtn = document.getElementById('themeToggle');
-  if (themeBtn) {
-    themeBtn.innerHTML = savedTheme === 'light' ? '🌙 Dark' : '☀️ Light';
-  }
-
-  applyThemeToCustomElements(savedTheme === 'light');
-}
+// initializeTheme is defined earlier in the file at line ~10011
 
 /************* RNG SYSTEM (CLEANED / MERGED) *************/
 
@@ -18326,6 +18732,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   if (typeof injectAllStyles === 'function') injectAllStyles();
   if (typeof initializeTheme === 'function') initializeTheme();
   if (typeof initializeRNG === 'function') initializeRNG();
+  if (typeof initializeSimSpeed === 'function') initializeSimSpeed();
   if (typeof initializeExportFeatures === 'function') initializeExportFeatures();
   if (typeof initializeModalSystem === 'function') initializeModalSystem();
   if (typeof initializeCustomMatchInterface === 'function') initializeCustomMatchInterface();

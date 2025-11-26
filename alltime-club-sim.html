@@ -3788,6 +3788,13 @@
                  style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);
                         background: rgba(0, 0, 0, 0.3); color: #e2e8f0; font-size: 1rem; margin-bottom: 20px;"/>
 
+          <label for="managerFavoriteTeamSelect" style="display: block; margin-bottom: 8px; color: #e2e8f0; font-weight: 600;">Favorite Team (Optional)</label>
+          <select id="managerFavoriteTeamSelect"
+                  style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);
+                         background: rgba(0, 0, 0, 0.3); color: #e2e8f0; font-size: 1rem; margin-bottom: 20px;">
+            <option value="">-- No team selected --</option>
+          </select>
+
           <div style="display: flex; gap: 10px;">
             <button onclick="saveManagerEdits()"
                     style="flex: 1; padding: 12px; background: linear-gradient(135deg, #10b981, #059669);
@@ -9054,6 +9061,7 @@ function openManagerEditModal() {
   console.log('👤 Opening manager edit modal...');
   const modal = document.getElementById("managerEditModal");
   const input = document.getElementById("managerNameInput");
+  const teamSelect = document.getElementById("managerFavoriteTeamSelect");
 
   if (!modal) {
     console.error('❌ managerEditModal element not found');
@@ -9061,11 +9069,42 @@ function openManagerEditModal() {
     return;
   }
 
+  // Set manager name
   if (input) {
     input.value = MANAGER_PROFILE.name || "";
     console.log('✅ Set input value to:', MANAGER_PROFILE.name);
   } else {
     console.warn('⚠️ managerNameInput not found');
+  }
+
+  // Populate team dropdown
+  if (teamSelect) {
+    teamSelect.innerHTML = '<option value="">-- No team selected --</option>';
+
+    // Use TEAM_POOL to populate options
+    const teams = window.TEAM_POOL || [];
+    if (teams.length > 0) {
+      teams.forEach(team => {
+        if (team && team.name) {
+          const option = document.createElement("option");
+          option.value = team.name;
+          option.textContent = team.name;
+          teamSelect.appendChild(option);
+        }
+      });
+
+      // Set current favorite team if exists
+      const currentTeam = MANAGER_PROFILE.favoriteTeam || MANAGER_PROFILE.predictedWinner;
+      if (currentTeam) {
+        teamSelect.value = currentTeam;
+        console.log('✅ Set favorite team to:', currentTeam);
+      }
+      console.log('✅ Populated', teams.length, 'teams in dropdown');
+    } else {
+      console.warn('⚠️ No teams available in TEAM_POOL');
+    }
+  } else {
+    console.warn('⚠️ managerFavoriteTeamSelect not found');
   }
 
   modal.classList.add("active");
@@ -9087,10 +9126,25 @@ function closeManagerEditModal() {
 
 function saveManagerEdits() {
   const input = document.getElementById("managerNameInput");
+  const teamSelect = document.getElementById("managerFavoriteTeamSelect");
   const name = input ? input.value.trim() : "";
 
   if (name) {
     MANAGER_PROFILE.name = name;
+
+    // Save favorite team selection if changed
+    if (teamSelect) {
+      const selectedTeam = teamSelect.value;
+      if (selectedTeam) {
+        MANAGER_PROFILE.favoriteTeam = selectedTeam;
+        console.log('✅ Favorite team set to:', selectedTeam);
+      } else {
+        // Clear favorite team if "No team selected" is chosen
+        MANAGER_PROFILE.favoriteTeam = null;
+        console.log('✅ Favorite team cleared');
+      }
+    }
+
     saveManagerProfile();
     updateManagerProfileUI();
     closeManagerEditModal();
@@ -9116,8 +9170,15 @@ function showTrackTeamModal() {
   const modal = document.getElementById("trackTeamModal");
   const select = document.getElementById("trackTeamSelect");
 
+  if (!modal) {
+    console.error('❌ trackTeamModal element not found');
+    showUtilityMessage('Track team modal not found', 'error');
+    return;
+  }
+
   if (!select) {
     console.error('❌ trackTeamSelect element not found');
+    showUtilityMessage('Track team select not found', 'error');
     return;
   }
 
@@ -9162,16 +9223,21 @@ function showTrackTeamModal() {
     console.log(`✅ Added ${select.options.length - 1} teams to dropdown`);
   }
 
-  if (modal) {
-    modal.classList.add("active");
-    modal.style.display = "flex";
-    modal.style.zIndex = "10000";
-    modal.style.opacity = "1";
-    modal.style.visibility = "visible";
-    console.log('✅ Track team modal opened');
-  } else {
-    console.error('❌ trackTeamModal element not found');
-  }
+  // Open modal with immediate display (no animation)
+  modal.classList.add("active");
+  modal.style.display = "flex";
+  modal.style.zIndex = "10000";
+  modal.style.opacity = "1";
+  modal.style.visibility = "visible";
+
+  console.log('✅ Track team modal opened with', select.options.length - 1, 'team options');
+  console.log('📊 Modal styles:', {
+    display: modal.style.display,
+    opacity: modal.style.opacity,
+    visibility: modal.style.visibility,
+    zIndex: modal.style.zIndex,
+    hasActiveClass: modal.classList.contains('active')
+  });
 }
 
 function closeTrackTeamModal() {

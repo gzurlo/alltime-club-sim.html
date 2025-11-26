@@ -465,7 +465,7 @@
 
     .profile-stats-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 12px;
     }
 
@@ -15382,7 +15382,7 @@ function updateRNGVisualization(value) {
     description = 'Favourites usually win, few surprises';
     color = '#10b981';
     emoji = '🎯';
-  } else if (value <= 0.9) {
+  } else if (value <= 1.0) {
     txt = 'Balanced';
     description = 'Mix of expected results and mild upsets';
     color = '#3b82f6';

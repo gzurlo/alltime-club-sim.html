@@ -48,8 +48,7 @@
     html, body {
       margin: 0;
       padding: 0;
-      height: 100%;
-      overflow: hidden;
+      min-height: 100%;
     }
 
     body {
@@ -223,22 +222,16 @@
     }
 
     .page {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
       max-width: 1800px;
       margin: 0 auto;
       padding: 20px;
-      overflow: hidden;
     }
 
     .layout {
       display: grid;
       grid-template-columns: 320px 1fr;
       gap: 20px;
-      flex: 1;
-      min-height: 0;
-      overflow: hidden;
+      align-items: start;
     }
 
     /* SIDEBAR */
@@ -252,11 +245,13 @@
       box-shadow:
         0 4px 24px rgba(0, 0, 0, 0.4),
         inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      position: sticky;
+      top: 20px;
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+      overflow-x: hidden;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
-      height: 100%;
-      min-height: 0;
     }
 
     .sidebar::-webkit-scrollbar {
@@ -1045,7 +1040,6 @@
         0 4px 24px rgba(0, 0, 0, 0.4),
         inset 0 1px 0 rgba(255, 255, 255, 0.05);
       min-height: 500px;
-      overflow: hidden;
       position: relative;
     }
 

@@ -12069,9 +12069,6 @@ function generateSeasonFixtures(teams) {
     const matchday = [];
 
     for (let match = 0; match < numTeams / 2; match++) {
-      const home = (round + match) % (numTeams - 1);
-      const away = (numTeams - 1 - match + round) % (numTeams - 1);
-
       // Last team stays in place, others rotate
       let homeTeam, awayTeam;
 
@@ -12157,7 +12154,7 @@ function simulateMatchday(matchdayIndex) {
 
   SEASON_STATE.currentMatchday = matchdayIndex + 1;
 
-  console.log(`✅ Matchday ${SEASON_STATE.currentMatchday} completed`);
+  console.log(`✅ Matchday ${matchdayIndex + 1} completed`);
 
   // Sort table
   sortTable();
@@ -12264,14 +12261,22 @@ function endSeason() {
 
   // Update Career Mode if active
   if (CAREER_STATE.active && SEASON_STATE.table.length > 0) {
-    // Find user's team in the table (assuming first team or can be configured)
-    const userTeamEntry = SEASON_STATE.table[0]; // For now use champion, can be made configurable
+    // Find user's team in the table by club name
+    let userTeamEntry = SEASON_STATE.table.find(entry => entry.team.name === CAREER_STATE.clubName);
+
+    // If not found by exact match, use champion (first team)
+    if (!userTeamEntry) {
+      userTeamEntry = SEASON_STATE.table[0];
+    }
+
+    // Find position in table
+    const position = SEASON_STATE.table.indexOf(userTeamEntry) + 1;
 
     const topScorer = getTopScorer();
     const topAssists = getTopAssists();
 
     const seasonResults = {
-      position: 1, // Can be made dynamic based on user's team
+      position: position,
       points: userTeamEntry.points,
       wins: userTeamEntry.wins,
       draws: userTeamEntry.draws,
@@ -12521,10 +12526,11 @@ function simulateNextMatchday() {
     return;
   }
 
+  const matchdayNumber = SEASON_STATE.currentMatchday + 1; // Display the actual matchday number (1-based)
   const results = simulateMatchday(SEASON_STATE.currentMatchday);
 
   if (results) {
-    showUtilityMessage(`Matchday ${SEASON_STATE.currentMatchday} simulated!`, 'success');
+    showUtilityMessage(`Matchday ${matchdayNumber} simulated!`, 'success');
 
     // Refresh table display
     setTimeout(() => {
@@ -12676,6 +12682,7 @@ function updateStreaks(seasonResults) {
     CAREER_STATE.currentStreak.wins++;
     CAREER_STATE.currentStreak.unbeaten++;
 
+    // Update win streak record
     if (CAREER_STATE.currentStreak.wins > CAREER_STATE.records.longestWinStreak.streak) {
       CAREER_STATE.records.longestWinStreak = {
         streak: CAREER_STATE.currentStreak.wins,
@@ -12683,20 +12690,31 @@ function updateStreaks(seasonResults) {
         endSeason: CAREER_STATE.currentSeason
       };
     }
+
+    // Update unbeaten record
+    if (CAREER_STATE.currentStreak.unbeaten > CAREER_STATE.records.longestUnbeatenRun.run) {
+      CAREER_STATE.records.longestUnbeatenRun = {
+        run: CAREER_STATE.currentStreak.unbeaten,
+        startSeason: CAREER_STATE.currentSeason - CAREER_STATE.currentStreak.unbeaten + 1,
+        endSeason: CAREER_STATE.currentSeason
+      };
+    }
   } else if (seasonResults.position <= 3) {
     CAREER_STATE.currentStreak.wins = 0;
     CAREER_STATE.currentStreak.unbeaten++;
+
+    // Update unbeaten record
+    if (CAREER_STATE.currentStreak.unbeaten > CAREER_STATE.records.longestUnbeatenRun.run) {
+      CAREER_STATE.records.longestUnbeatenRun = {
+        run: CAREER_STATE.currentStreak.unbeaten,
+        startSeason: CAREER_STATE.currentSeason - CAREER_STATE.currentStreak.unbeaten + 1,
+        endSeason: CAREER_STATE.currentSeason
+      };
+    }
   } else {
+    // Streak ended - reset both
     CAREER_STATE.currentStreak.wins = 0;
     CAREER_STATE.currentStreak.unbeaten = 0;
-  }
-
-  if (CAREER_STATE.currentStreak.unbeaten > CAREER_STATE.records.longestUnbeatenRun.run) {
-    CAREER_STATE.records.longestUnbeatenRun = {
-      run: CAREER_STATE.currentStreak.unbeaten,
-      startSeason: CAREER_STATE.currentSeason - CAREER_STATE.currentStreak.unbeaten + 1,
-      endSeason: CAREER_STATE.currentSeason
-    };
   }
 }
 

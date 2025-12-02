@@ -3435,6 +3435,385 @@
     font-size: 12px;
   }
 }
+
+/* ========================================
+   AESTHETIC ENHANCEMENTS - ANIMATIONS & EFFECTS
+   ======================================== */
+
+/* Goal Celebration Animation */
+@keyframes goalExplosion {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+  }
+  25% {
+    transform: scale(1.2) rotate(5deg);
+    box-shadow:
+      0 0 40px rgba(16, 185, 129, 0.8),
+      0 0 80px rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    transform: scale(0.95) rotate(-5deg);
+  }
+  75% {
+    transform: scale(1.1) rotate(3deg);
+    box-shadow:
+      0 0 60px rgba(16, 185, 129, 0.6),
+      0 0 120px rgba(16, 185, 129, 0.3);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+  }
+}
+
+.btn-goal-celebration {
+  animation: goalExplosion 0.8s ease-out !important;
+}
+
+/* Loading State Animations */
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+}
+
+.btn-loading {
+  background:
+    linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgba(37, 99, 235, 0.9)),
+    linear-gradient(90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.3) 50%,
+      transparent 100%
+    ) !important;
+  background-size: 100% 100%, 200% 100% !important;
+  animation: shimmer 1.5s infinite !important;
+  pointer-events: none !important;
+  position: relative;
+  cursor: wait !important;
+}
+
+.btn-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.btn-loading-pulse {
+  animation: pulse 2s infinite !important;
+}
+
+/* Success/Error States */
+@keyframes successPulse {
+  0% {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(5, 150, 105, 0.9));
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+  }
+  50% {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 1), rgba(5, 150, 105, 1));
+    box-shadow: 0 8px 40px rgba(16, 185, 129, 0.6);
+  }
+  100% {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(5, 150, 105, 0.9));
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+  }
+}
+
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+  20%, 40%, 60%, 80% { transform: translateX(10px); }
+}
+
+.btn-success {
+  animation: successPulse 0.6s ease !important;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(5, 150, 105, 0.9)) !important;
+}
+
+.btn-error {
+  animation: errorShake 0.6s ease !important;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(220, 38, 38, 0.9)) !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+}
+
+/* Enhanced Modal Animations */
+@keyframes slideInModal {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleInModal {
+  from {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes flipInModal {
+  from {
+    transform: perspective(1000px) rotateX(-90deg);
+    opacity: 0;
+  }
+  to {
+    transform: perspective(1000px) rotateX(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes blurIn {
+  from {
+    backdrop-filter: blur(0px);
+    background-color: rgba(0, 0, 0, 0);
+  }
+  to {
+    backdrop-filter: blur(8px);
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+}
+
+.modal-scale-in {
+  animation: scaleInModal 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.modal-slide-in {
+  animation: slideInModal 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.modal-flip-in {
+  animation: flipInModal 0.5s ease-out !important;
+}
+
+.modal-backdrop-blur {
+  animation: blurIn 0.3s ease !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* Enhanced Button Hover Effects */
+.btn-primary, .btn-secondary, .btn-orange, .btn-purple, .btn-blue, .ctrl-btn {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn-primary::before, .btn-secondary::before, .btn-orange::before,
+.btn-purple::before, .btn-blue::before, .ctrl-btn::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.btn-primary:hover::before, .btn-secondary:hover::before,
+.btn-orange:hover::before, .btn-purple:hover::before,
+.btn-blue:hover::before, .ctrl-btn:hover::before {
+  transform: translateX(100%);
+}
+
+.btn-primary:active, .btn-secondary:active, .btn-orange:active,
+.btn-purple:active, .btn-blue:active, .ctrl-btn:active {
+  transform: translateY(-2px) scale(0.98);
+}
+
+/* Confetti Particle */
+.confetti-particle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 10000;
+  border-radius: 50%;
+  will-change: transform, opacity;
+}
+
+/* Scorer Popup */
+.scorer-popup {
+  position: fixed;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95));
+  color: white;
+  padding: 15px 25px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1.2rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4);
+  z-index: 10001;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Stadium Night Theme (Optional - controlled by theme switcher) */
+body[data-theme="stadium"] {
+  background:
+    linear-gradient(180deg, #0a0e1a 0%, #1a1f2e 50%, #0a0e1a 100%),
+    radial-gradient(ellipse at bottom, rgba(0, 255, 65, 0.15) 0%, transparent 60%);
+  background-attachment: fixed;
+}
+
+body[data-theme="stadium"]::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 150%;
+  height: 100%;
+  background: radial-gradient(
+    ellipse at center top,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.02) 30%,
+    transparent 60%
+  );
+  pointer-events: none;
+  z-index: 0;
+  animation: floodlightPulse 8s ease-in-out infinite;
+}
+
+@keyframes floodlightPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+body[data-theme="stadium"] .page::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    radial-gradient(circle at 20% 80%, rgba(255, 215, 0, 0.1) 1px, transparent 1px),
+    radial-gradient(circle at 80% 60%, rgba(255, 56, 100, 0.1) 1px, transparent 1px);
+  background-size: 200px 200px, 300px 300px;
+  animation: crowdShimmer 20s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes crowdShimmer {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(-200px, -200px); }
+}
+
+/* Context-Aware Stage Theming */
+.stage-group {
+  border-color: var(--color-groups) !important;
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3) !important;
+}
+
+.stage-knockout {
+  border-color: var(--color-knockout) !important;
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3) !important;
+}
+
+.stage-semifinal {
+  border-color: var(--color-purple) !important;
+  box-shadow: 0 4px 20px rgba(168, 85, 247, 0.3) !important;
+}
+
+.stage-final {
+  border-color: var(--color-final) !important;
+  box-shadow: 0 4px 20px rgba(251, 191, 36, 0.3) !important;
+}
+
+/* Strength Indicators */
+.strength-legendary {
+  color: #fbbf24 !important;
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.6) !important;
+}
+
+.strength-elite {
+  color: #a855f7 !important;
+  text-shadow: 0 0 10px rgba(168, 85, 247, 0.6) !important;
+}
+
+.strength-strong {
+  color: #3b82f6 !important;
+  text-shadow: 0 0 10px rgba(59, 130, 246, 0.6) !important;
+}
+
+.strength-good {
+  color: #10b981 !important;
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.6) !important;
+}
+
+/* Particle trail effect */
+@keyframes particleTrail {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) scale(0);
+    opacity: 0;
+  }
+}
+
+.particle-trail {
+  animation: particleTrail 1s ease-out forwards;
+}
+
+/* Ripple effect on click */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  width: 20px;
+  height: 20px;
+  animation: ripple 0.6s ease-out;
+  pointer-events: none;
+}
+
   </style>
 </head>
 <body>
@@ -3616,6 +3995,14 @@
               <span class="ctrl-btn-subtitle">All-time achievements</span>
             </div>
             <span class="ctrl-btn-tag">Legacy</span>
+          </button>
+
+          <button class="ctrl-btn btn-orange" id="btnHallOfFame" onclick="showHallOfFame()">
+            <div class="ctrl-btn-main">
+              <span class="ctrl-btn-title">Hall of Fame</span>
+              <span class="ctrl-btn-subtitle">Legends & all-time records</span>
+            </div>
+            <span class="ctrl-btn-tag">🏛️</span>
           </button>
 
           <button class="ctrl-btn btn-blue" id="btnTopPerformers" onclick="showTopPerformersCarousel()">
@@ -13813,6 +14200,16 @@ function simulateMatchLive(teamA, teamB, round = 'Friendly', matchImportance = 1
   // Sort goals by minute
   LIVE_MATCH_STATE.goalTimes = allGoals.sort((a, b) => a.minute - b.minute);
 
+  // Initialize momentum system
+  if (typeof MOMENTUM_SYSTEM !== 'undefined') {
+    MOMENTUM_SYSTEM.reset();
+    // Display initial momentum
+    const momentumDisplay = document.getElementById('momentumDisplay');
+    if (momentumDisplay) {
+      momentumDisplay.innerHTML = MOMENTUM_SYSTEM.getVisualMomentum(teamA, teamB);
+    }
+  }
+
   // Start simulation
   addCommentaryEvent("⚽ Kick off!", 'info');
   startLiveSimulation();
@@ -13851,6 +14248,9 @@ function createLiveMatchModal(teamA, teamB, round) {
         <div style="margin-top: 15px; color: white; font-size: 1.3em; font-weight: 600;">
           ⏱️ <span id="liveMatchClock">0'</span>
         </div>
+      </div>
+      <div id="momentumDisplay" style="padding: 0 20px;">
+        <!-- Momentum bar will be inserted here -->
       </div>
       <div style="flex: 1; overflow-y: auto; padding: 20px; background: #0f172a;">
         <div style="color: #94a3b8; font-size: 0.9em; margin-bottom: 10px; font-weight: 600;">Commentary:</div>
@@ -13900,6 +14300,23 @@ function startLiveSimulation() {
       );
       updateLiveScore(LIVE_MATCH_STATE.scoreA, LIVE_MATCH_STATE.scoreB);
       playGoalAnimation();
+
+      // Trigger goal celebration with confetti
+      if (typeof celebrateGoal === 'function') {
+        const liveMatchModal = document.querySelector('.live-match-content');
+        if (liveMatchModal && goal.scorer) {
+          celebrateGoal(liveMatchModal, goal.scorer, goal.team === 'A' ? LIVE_MATCH_STATE.teamA.name : LIVE_MATCH_STATE.teamB.name);
+        }
+      }
+
+      // Update momentum system
+      if (typeof MOMENTUM_SYSTEM !== 'undefined') {
+        MOMENTUM_SYSTEM.updateMomentum('goal', goal.team);
+        const momentumDisplay = document.getElementById('momentumDisplay');
+        if (momentumDisplay) {
+          momentumDisplay.innerHTML = MOMENTUM_SYSTEM.getVisualMomentum(LIVE_MATCH_STATE.teamA, LIVE_MATCH_STATE.teamB);
+        }
+      }
     });
 
     // Half time
@@ -13927,6 +14344,16 @@ function startLiveSimulation() {
         `${cardType === 'yellow' ? '🟨' : '🟥'} ${LIVE_MATCH_STATE.currentMinute}' ${cardCommentary}`,
         'card'
       );
+
+      // Update momentum for cards
+      if (typeof MOMENTUM_SYSTEM !== 'undefined') {
+        const teamSide = team === LIVE_MATCH_STATE.teamA ? 'A' : 'B';
+        MOMENTUM_SYSTEM.updateMomentum(cardType === 'yellow' ? 'yellowCard' : 'redCard', teamSide);
+        const momentumDisplay = document.getElementById('momentumDisplay');
+        if (momentumDisplay) {
+          momentumDisplay.innerHTML = MOMENTUM_SYSTEM.getVisualMomentum(LIVE_MATCH_STATE.teamA, LIVE_MATCH_STATE.teamB);
+        }
+      }
     }
 
     // Dynamic match moments (3% chance per minute)
@@ -23679,6 +24106,1012 @@ function ensureMatchDetailsFormat(matchDetails) {
 }
 
 console.log('✅ Complete fixes script loaded');
+
+// ========================================
+// MOMENTUM SYSTEM - Dynamic Match Flow
+// ========================================
+const MOMENTUM_SYSTEM = {
+  current: 0, // -100 (Team B dominant) to +100 (Team A dominant)
+
+  events: {
+    goal: { shift: 30, decay: 0.9 },
+    miss: { shift: -15, decay: 0.95 },
+    save: { shift: 10, decay: 0.98 },
+    injury: { shift: -20, decay: 0.92 },
+    yellowCard: { shift: -8, decay: 0.97 },
+    redCard: { shift: -35, decay: 0.85 }
+  },
+
+  reset() {
+    this.current = 0;
+  },
+
+  applyMomentum(baseProb, team) {
+    const momentumEffect = this.current / 100; // -1 to +1
+
+    if (team === 'A') {
+      return baseProb * (1 + momentumEffect * 0.4);
+    } else {
+      return baseProb * (1 - momentumEffect * 0.4);
+    }
+  },
+
+  updateMomentum(event, team) {
+    const eventData = this.events[event];
+    if (!eventData) return;
+
+    const shift = eventData.shift * (team === 'A' ? 1 : -1);
+    this.current = Math.max(-100, Math.min(100, this.current + shift));
+
+    this.decay(eventData.decay);
+  },
+
+  decay(rate) {
+    this.current *= rate;
+    if (Math.abs(this.current) < 1) this.current = 0;
+  },
+
+  getVisualMomentum(teamA, teamB) {
+    const normalized = (this.current + 100) / 200; // 0 to 1
+    const barPosition = normalized * 100;
+
+    return `
+      <div class="momentum-bar" style="position: relative; height: 40px; display: flex; border-radius: 8px; overflow: hidden; margin: 15px 0;">
+        <div class="team-a-zone" style="width: 50%; background: linear-gradient(to right, #3b82f6, rgba(59, 130, 246, 0.3)); display: flex; align-items: center; padding: 0 15px; color: white; font-weight: 600; font-size: 0.85em;">
+          <span>${teamA.name}</span>
+        </div>
+        <div class="team-b-zone" style="width: 50%; background: linear-gradient(to left, #ef4444, rgba(239, 68, 68, 0.3)); display: flex; align-items: center; justify-content: flex-end; padding: 0 15px; color: white; font-weight: 600; font-size: 0.85em;">
+          <span>${teamB.name}</span>
+        </div>
+        <div class="momentum-indicator" style="position: absolute; top: 50%; left: ${barPosition}%; transform: translate(-50%, -50%); font-size: 1.5em; filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8)); transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);">
+          🔥
+        </div>
+      </div>
+      <div class="momentum-text" style="text-align: center; font-weight: 600; color: #fbbf24; margin-top: 5px; font-size: 0.85em;">
+        ${this.getMomentumDescription(teamA, teamB)}
+      </div>
+    `;
+  },
+
+  getMomentumDescription(teamA, teamB) {
+    const abs = Math.abs(this.current);
+    const team = this.current > 0 ? teamA.name : teamB.name;
+
+    if (abs > 70) return `${team} completely dominating`;
+    if (abs > 50) return `${team} in control`;
+    if (abs > 30) return `${team} with slight advantage`;
+    if (abs > 10) return `${team} edging it`;
+    return 'Evenly matched';
+  }
+};
+
+// ========================================
+// HALL OF FAME SYSTEM - Legends & Records
+// ========================================
+const HALL_OF_FAME = {
+  records: {
+    mostGoalsSingleTournament: { value: 0, holder: null, tournament: null, date: null },
+    mostGoalsSingleMatch: { value: 0, holder: null, match: null, date: null },
+    mostAssistsSingleTournament: { value: 0, holder: null, tournament: null, date: null },
+    highestAvgRating: { value: 0, holder: null, tournament: null, date: null },
+    longestWinStreak: { value: 0, holder: null, span: null, date: null },
+    mostCleanSheets: { value: 0, holder: null, tournament: null, date: null },
+    biggestComeback: { value: 0, match: null, from: null, to: null, date: null },
+    longestPenaltyShootout: { value: 0, match: null, score: null, date: null },
+    fastestHattrick: { value: Infinity, holder: null, match: null, date: null },
+    highestScoringMatch: { value: 0, match: null, score: null, date: null }
+  },
+
+  legends: [],
+
+  init() {
+    const saved = localStorage.getItem('hallOfFame');
+    if (saved) {
+      try {
+        const data = JSON.parse(saved);
+        this.records = data.records || this.records;
+        this.legends = data.legends || [];
+      } catch (e) {
+        console.error('Failed to load Hall of Fame:', e);
+      }
+    }
+  },
+
+  save() {
+    localStorage.setItem('hallOfFame', JSON.stringify({
+      records: this.records,
+      legends: this.legends
+    }));
+  },
+
+  checkRecords(tournament) {
+    const newRecords = [];
+
+    // Check player records if PLAYER_DB exists
+    if (typeof PLAYER_DB !== 'undefined') {
+      Object.values(PLAYER_DB).forEach(player => {
+        if (player.goals > this.records.mostGoalsSingleTournament.value) {
+          this.records.mostGoalsSingleTournament = {
+            value: player.goals,
+            holder: player.name,
+            tournament: tournament?.name || 'Tournament',
+            date: new Date().toISOString()
+          };
+          newRecords.push({
+            type: 'Most Goals (Tournament)',
+            holder: player.name,
+            value: player.goals
+          });
+        }
+
+        if (player.avgRating > this.records.highestAvgRating.value) {
+          this.records.highestAvgRating = {
+            value: player.avgRating,
+            holder: player.name,
+            tournament: tournament?.name || 'Tournament',
+            date: new Date().toISOString()
+          };
+          newRecords.push({
+            type: 'Highest Avg Rating',
+            holder: player.name,
+            value: player.avgRating.toFixed(2)
+          });
+        }
+      });
+    }
+
+    this.save();
+
+    if (newRecords.length > 0) {
+      this.showNewRecordsModal(newRecords);
+    }
+
+    return newRecords;
+  },
+
+  showNewRecordsModal(newRecords) {
+    const modal = `
+      <div class="modal-backdrop" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 10000; display: flex; align-items: center; justify-content: center;" onclick="this.remove()">
+        <div class="modal" style="max-width: 500px; width: 90%; background: linear-gradient(135deg, #1e293b, #334155); border-radius: 16px; padding: 30px; border: 2px solid #fbbf24;" onclick="event.stopPropagation()">
+          <h2 style="color: #fbbf24; margin-bottom: 20px; text-align: center; font-size: 1.8em;">🏆 New Records Set!</h2>
+          <div style="display: flex; flex-direction: column; gap: 15px;">
+            ${newRecords.map(record => `
+              <div style="background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 8px; padding: 15px;">
+                <div style="color: #fbbf24; font-weight: 700; margin-bottom: 5px;">${record.type}</div>
+                <div style="color: #f7fafc; font-size: 1.3em; font-weight: 600;">${record.holder}</div>
+                <div style="color: #10b981; font-size: 1.5em; font-weight: 700; margin-top: 5px;">${record.value}</div>
+              </div>
+            `).join('')}
+          </div>
+          <button onclick="this.closest('.modal-backdrop').remove()" style="width: 100%; margin-top: 20px; background: #fbbf24; color: #0f172a; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 1em;">
+            Amazing!
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modal);
+  },
+
+  inductLegend(player, reason) {
+    const legend = {
+      name: player.name,
+      team: player.team,
+      pos: player.pos,
+      inductionDate: new Date().toISOString(),
+      reason: reason,
+      careerStats: {
+        totalGoals: player.goals || 0,
+        totalAssists: player.assists || 0,
+        avgRating: player.avgRating || 0,
+        appearances: player.apps || 0
+      }
+    };
+
+    this.legends.push(legend);
+    this.save();
+    this.showInductionCeremony(legend);
+  },
+
+  showInductionCeremony(legend) {
+    const modal = `
+      <div class="modal-backdrop" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); z-index: 10000; display: flex; align-items: center; justify-content: center;" onclick="this.remove()">
+        <div class="modal" style="max-width: 600px; width: 90%; background: linear-gradient(135deg, #1e293b, #334155); border-radius: 16px; padding: 40px; border: 3px solid #fbbf24; text-align: center;" onclick="event.stopPropagation()">
+          <div style="font-size: 4em; margin-bottom: 20px;">🏛️</div>
+          <h2 style="color: #fbbf24; margin-bottom: 15px; font-size: 2em;">Hall of Fame Induction!</h2>
+          <h3 style="color: #f7fafc; margin-bottom: 10px; font-size: 1.5em;">${legend.name}</h3>
+          <div style="color: #94a3b8; margin-bottom: 20px;">${legend.team} - ${legend.pos}</div>
+          <div style="background: rgba(251, 191, 36, 0.1); border-radius: 12px; padding: 20px; margin: 20px 0;">
+            <div style="color: #fbbf24; font-style: italic; margin-bottom: 15px;">"${legend.reason}"</div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px;">
+              <div>
+                <div style="color: #94a3b8; font-size: 0.85em;">Goals</div>
+                <div style="color: #10b981; font-size: 1.5em; font-weight: 700;">${legend.careerStats.totalGoals}</div>
+              </div>
+              <div>
+                <div style="color: #94a3b8; font-size: 0.85em;">Assists</div>
+                <div style="color: #3b82f6; font-size: 1.5em; font-weight: 700;">${legend.careerStats.totalAssists}</div>
+              </div>
+              <div>
+                <div style="color: #94a3b8; font-size: 0.85em;">Avg Rating</div>
+                <div style="color: #fbbf24; font-size: 1.5em; font-weight: 700;">${legend.careerStats.avgRating.toFixed(1)}</div>
+              </div>
+              <div>
+                <div style="color: #94a3b8; font-size: 0.85em;">Apps</div>
+                <div style="color: #a855f7; font-size: 1.5em; font-weight: 700;">${legend.careerStats.appearances}</div>
+              </div>
+            </div>
+          </div>
+          <button onclick="this.closest('.modal-backdrop').remove()" style="width: 100%; margin-top: 20px; background: #fbbf24; color: #0f172a; border: none; padding: 15px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 1.1em;">
+            🎉 Congratulations!
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modal);
+  },
+
+  checkInductionEligibility(player) {
+    if (!player) return;
+
+    const criteria = {
+      goals: (player.goals || 0) >= 15,
+      avgRating: (player.avgRating || 0) >= 8.5,
+      apps: (player.apps || 0) >= 10
+    };
+
+    const meetsThreshold = Object.values(criteria).filter(Boolean).length >= 2;
+
+    if (meetsThreshold && !this.isInHallOfFame(player.name)) {
+      this.inductLegend(player, 'Exceptional career performance');
+    }
+  },
+
+  isInHallOfFame(playerName) {
+    return this.legends.some(l => l.name === playerName);
+  }
+};
+
+function showHallOfFame() {
+  const formatRecordName = (key) => {
+    return key.replace(/([A-Z])/g, ' $1')
+      .replace(/^./, str => str.toUpperCase())
+      .trim();
+  };
+
+  const out = document.getElementById('output');
+
+  out.innerHTML = `
+    <div class="hall-of-fame" style="padding: 20px;">
+      <div style="text-align: center; margin-bottom: 40px;">
+        <h1 style="font-size: 3em; color: #fbbf24; margin-bottom: 10px;">🏛️ Hall of Fame</h1>
+        <p style="color: #94a3b8; font-size: 1.1em;">Immortalized Legends & All-Time Records</p>
+      </div>
+
+      <div class="records-section" style="margin-bottom: 50px;">
+        <h2 style="color: #10b981; margin-bottom: 20px; font-size: 1.8em;">📊 All-Time Records</h2>
+        <div class="records-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+          ${Object.entries(HALL_OF_FAME.records).map(([key, record]) => `
+            <div class="record-card" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1)); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 20px;">
+              <div style="color: #94a3b8; font-size: 0.85em; margin-bottom: 8px; font-weight: 600;">${formatRecordName(key)}</div>
+              <div style="color: #10b981; font-size: 2em; font-weight: 700; margin: 10px 0;">${record.value !== Infinity ? record.value : '-'}</div>
+              <div style="color: #f7fafc; font-weight: 600; margin-bottom: 5px;">${record.holder || 'No record set'}</div>
+              ${record.date ? `<div style="color: #64748b; font-size: 0.75em;">${new Date(record.date).toLocaleDateString()}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="legends-section">
+        <h2 style="color: #fbbf24; margin-bottom: 20px; font-size: 1.8em;">⭐ Inducted Legends</h2>
+        ${HALL_OF_FAME.legends.length === 0 ? `
+          <div style="text-align: center; padding: 60px 20px; background: rgba(100, 116, 139, 0.1); border-radius: 12px; border: 1px dashed rgba(148, 163, 184, 0.3);">
+            <div style="font-size: 3em; margin-bottom: 15px; opacity: 0.3;">🏆</div>
+            <p style="color: #64748b; font-size: 1.1em;">
+              No legends inducted yet.<br>Achieve greatness to join the Hall of Fame!
+            </p>
+          </div>
+        ` : `
+          <div class="legends-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px;">
+            ${HALL_OF_FAME.legends.map(legend => `
+              <div class="legend-card" style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(168, 85, 247, 0.1)); border: 2px solid rgba(251, 191, 36, 0.4); border-radius: 12px; padding: 25px;">
+                <div style="margin-bottom: 15px;">
+                  <h3 style="color: #fbbf24; font-size: 1.4em; margin-bottom: 5px;">${legend.name}</h3>
+                  <div style="color: #94a3b8; font-size: 0.9em;">${legend.team} - ${legend.pos}</div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 15px 0; padding: 15px; background: rgba(0, 0, 0, 0.2); border-radius: 8px;">
+                  <div>
+                    <div style="color: #94a3b8; font-size: 0.75em;">Goals</div>
+                    <div style="color: #10b981; font-size: 1.3em; font-weight: 700;">⚽ ${legend.careerStats.totalGoals}</div>
+                  </div>
+                  <div>
+                    <div style="color: #94a3b8; font-size: 0.75em;">Assists</div>
+                    <div style="color: #3b82f6; font-size: 1.3em; font-weight: 700;">🎯 ${legend.careerStats.totalAssists}</div>
+                  </div>
+                  <div>
+                    <div style="color: #94a3b8; font-size: 0.75em;">Rating</div>
+                    <div style="color: #fbbf24; font-size: 1.3em; font-weight: 700;">⭐ ${legend.careerStats.avgRating.toFixed(1)}</div>
+                  </div>
+                  <div>
+                    <div style="color: #94a3b8; font-size: 0.75em;">Apps</div>
+                    <div style="color: #a855f7; font-size: 1.3em; font-weight: 700;">📅 ${legend.careerStats.appearances}</div>
+                  </div>
+                </div>
+                <div style="color: #cbd5e1; font-style: italic; font-size: 0.9em; padding: 10px; background: rgba(251, 191, 36, 0.05); border-left: 3px solid #fbbf24; border-radius: 4px;">
+                  "${legend.reason}"
+                </div>
+                <div style="color: #64748b; font-size: 0.75em; margin-top: 12px; text-align: center;">
+                  Inducted: ${new Date(legend.inductionDate).toLocaleDateString()}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `}
+      </div>
+
+      <div style="margin-top: 40px; text-align: center;">
+        <button onclick="closeAllModals(); showOutput()" class="btn-primary" style="background: #3b82f6; color: white; border: none; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1em;">
+          ← Back
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// ========================================
+// KEYBOARD SHORTCUTS
+// ========================================
+document.addEventListener('keydown', (e) => {
+  // Only if not typing in input or textarea
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+  const shortcuts = {
+    'Space': () => {
+      e.preventDefault();
+      if (typeof simulateNextMatchday === 'function') {
+        simulateNextMatchday();
+      }
+    },
+    'KeyS': () => {
+      e.preventDefault();
+      if (typeof quickSaveTournament === 'function') {
+        quickSaveTournament();
+      }
+    },
+    'KeyR': () => {
+      e.preventDefault();
+      if (typeof showStandings === 'function') {
+        showStandings();
+      }
+    },
+    'KeyP': () => {
+      e.preventDefault();
+      if (typeof showPlayerStats === 'function') {
+        showPlayerStats();
+      }
+    },
+    'KeyH': () => {
+      e.preventDefault();
+      showHallOfFame();
+    },
+    'Escape': () => {
+      if (typeof closeAllModals === 'function') {
+        closeAllModals();
+      }
+    }
+  };
+
+  if (e.ctrlKey || e.metaKey) {
+    if (e.code === 'KeyS') {
+      e.preventDefault();
+      if (typeof exportTournament === 'function') {
+        exportTournament();
+      }
+    }
+  } else {
+    const action = shortcuts[e.code];
+    if (action) {
+      action();
+    }
+  }
+});
+
+function showKeyboardShortcuts() {
+  const modal = `
+    <div class="modal-backdrop" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 10000; display: flex; align-items: center; justify-content: center;" onclick="this.remove()">
+      <div class="modal" style="max-width: 500px; width: 90%; background: #1e293b; border-radius: 16px; padding: 30px; border: 1px solid rgba(16, 185, 129, 0.3);" onclick="event.stopPropagation()">
+        <h3 style="color: #10b981; margin-bottom: 20px; font-size: 1.5em;">⌨️ Keyboard Shortcuts</h3>
+        <table style="width: 100%; color: #f7fafc; font-size: 0.95em;">
+          <tr style="border-bottom: 1px solid rgba(71, 85, 105, 0.3);">
+            <td style="padding: 12px 8px; font-weight: 600; color: #fbbf24;">Space</td>
+            <td style="padding: 12px 8px; color: #cbd5e1;">Simulate next match</td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(71, 85, 105, 0.3);">
+            <td style="padding: 12px 8px; font-weight: 600; color: #fbbf24;">S</td>
+            <td style="padding: 12px 8px; color: #cbd5e1;">Quick save</td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(71, 85, 105, 0.3);">
+            <td style="padding: 12px 8px; font-weight: 600; color: #fbbf24;">R</td>
+            <td style="padding: 12px 8px; color: #cbd5e1;">View results/standings</td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(71, 85, 105, 0.3);">
+            <td style="padding: 12px 8px; font-weight: 600; color: #fbbf24;">P</td>
+            <td style="padding: 12px 8px; color: #cbd5e1;">View player stats</td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(71, 85, 105, 0.3);">
+            <td style="padding: 12px 8px; font-weight: 600; color: #fbbf24;">H</td>
+            <td style="padding: 12px 8px; color: #cbd5e1;">Hall of Fame</td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(71, 85, 105, 0.3);">
+            <td style="padding: 12px 8px; font-weight: 600; color: #fbbf24;">ESC</td>
+            <td style="padding: 12px 8px; color: #cbd5e1;">Close modals</td>
+          </tr>
+          <tr>
+            <td style="padding: 12px 8px; font-weight: 600; color: #fbbf24;">Ctrl+S</td>
+            <td style="padding: 12px 8px; color: #cbd5e1;">Export tournament</td>
+          </tr>
+        </table>
+        <button onclick="this.closest('.modal-backdrop').remove()" style="width: 100%; margin-top: 20px; background: #10b981; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+          Got it!
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML('beforeend', modal);
+}
+
+// ========================================
+// ACHIEVEMENT PROGRESS TRACKER
+// ========================================
+function renderAchievementProgress() {
+  if (typeof ACHIEVEMENTS === 'undefined') return '';
+
+  const achievementsList = Object.values(ACHIEVEMENTS);
+  const nearCompletion = achievementsList
+    .filter(a => {
+      if (a.unlocked) return false;
+      if (!a.requiresProgress) return false;
+      const progress = a.progress || 0;
+      const max = a.maxProgress || 1;
+      return progress / max > 0.3;
+    })
+    .sort((a, b) => {
+      const progressA = (a.progress || 0) / (a.maxProgress || 1);
+      const progressB = (b.progress || 0) / (b.maxProgress || 1);
+      return progressB - progressA;
+    })
+    .slice(0, 3);
+
+  if (nearCompletion.length === 0) return '';
+
+  return `
+    <div class="achievement-progress-widget" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(59, 130, 246, 0.1)); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 12px; padding: 20px; margin: 20px 0;">
+      <h4 style="color: #a855f7; margin-bottom: 15px; font-size: 1.1em;">🎯 Achievement Progress</h4>
+      ${nearCompletion.map(ach => {
+        const progress = ach.progress || 0;
+        const max = ach.maxProgress || 1;
+        const percentage = (progress / max * 100).toFixed(0);
+        return `
+          <div class="progress-item" style="margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+              <div style="color: #f7fafc; font-weight: 600; font-size: 0.9em;">${ach.icon || '🏆'} ${ach.name}</div>
+              <div style="color: #94a3b8; font-size: 0.85em;">${progress}/${max}</div>
+            </div>
+            <div class="progress-bar" style="background: rgba(71, 85, 105, 0.3); height: 8px; border-radius: 4px; overflow: hidden;">
+              <div class="progress-fill" style="width: ${percentage}%; height: 100%; background: linear-gradient(90deg, #a855f7, #3b82f6); transition: width 0.3s ease; border-radius: 4px;"></div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+// ========================================
+// QUICK ACTIONS BAR
+// ========================================
+function createQuickActionsBar() {
+  // Check if already exists
+  if (document.getElementById('quickActionsBar')) return;
+
+  const bar = document.createElement('div');
+  bar.id = 'quickActionsBar';
+  bar.style.cssText = 'position: fixed; bottom: 30px; right: 30px; background: linear-gradient(135deg, #1e293b, #334155); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 12px; display: flex; gap: 10px; z-index: 9000; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);';
+
+  const buttons = [
+    { icon: '⚡', title: 'Simulate Next (Space)', action: 'simulateNextMatchday' },
+    { icon: '📊', title: 'Standings (R)', action: 'showStandings' },
+    { icon: '💾', title: 'Save (S)', action: 'quickSaveTournament' },
+    { icon: '🏛️', title: 'Hall of Fame (H)', action: 'showHallOfFame' },
+    { icon: '⌨️', title: 'Shortcuts', action: 'showKeyboardShortcuts' }
+  ];
+
+  buttons.forEach(btn => {
+    const button = document.createElement('button');
+    button.textContent = btn.icon;
+    button.title = btn.title;
+    button.style.cssText = 'background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #10b981; width: 45px; height: 45px; border-radius: 8px; cursor: pointer; font-size: 1.3em; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;';
+    button.onmouseover = () => {
+      button.style.background = 'rgba(16, 185, 129, 0.2)';
+      button.style.transform = 'translateY(-2px)';
+    };
+    button.onmouseout = () => {
+      button.style.background = 'rgba(16, 185, 129, 0.1)';
+      button.style.transform = 'translateY(0)';
+    };
+    button.onclick = () => {
+      if (typeof window[btn.action] === 'function') {
+        window[btn.action]();
+      }
+    };
+    bar.appendChild(button);
+  });
+
+  document.body.appendChild(bar);
+}
+
+function quickSaveTournament() {
+  if (typeof saveToLocalStorage === 'function') {
+    saveToLocalStorage();
+    showNotification('success', 'Saved', 'Tournament saved successfully', 2000);
+  }
+}
+
+// Initialize systems on page load
+window.addEventListener('load', () => {
+  HALL_OF_FAME.init();
+  createQuickActionsBar();
+
+  console.log('✅ New features loaded: Momentum System, Hall of Fame, Keyboard Shortcuts, Achievement Tracker, Quick Actions');
+});
+
+console.log('🎮 Enhanced features loaded successfully!');
+
+// ========================================
+// AESTHETIC ENHANCEMENTS - ANIMATION FUNCTIONS
+// ========================================
+
+/**
+ * Goal Celebration System
+ * Creates confetti particles and scorer popup when a goal is scored
+ */
+function celebrateGoal(button, scorer, teamName) {
+  if (!button) return;
+
+  // Add celebration animation to button
+  button.classList.add('btn-goal-celebration');
+
+  // Create confetti
+  createConfetti(button);
+
+  // Show scorer popup
+  if (scorer && scorer.name) {
+    showScorerPopup(scorer, button, teamName);
+  }
+
+  // Remove celebration class after animation
+  setTimeout(() => {
+    button.classList.remove('btn-goal-celebration');
+  }, 800);
+}
+
+/**
+ * Create confetti particles effect
+ */
+function createConfetti(origin) {
+  const colors = ['#10b981', '#fbbf24', '#3b82f6', '#ef4444', '#a855f7'];
+  const rect = origin.getBoundingClientRect();
+
+  for (let i = 0; i < 30; i++) {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti-particle';
+    confetti.style.cssText = `
+      width: ${Math.random() * 8 + 4}px;
+      height: ${Math.random() * 8 + 4}px;
+      background: ${colors[Math.floor(Math.random() * colors.length)]};
+      border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+      left: ${rect.left + rect.width / 2}px;
+      top: ${rect.top + rect.height / 2}px;
+    `;
+
+    document.body.appendChild(confetti);
+
+    // Physics simulation
+    const angle = Math.random() * Math.PI * 2;
+    const velocity = Math.random() * 300 + 200;
+    const vx = Math.cos(angle) * velocity;
+    const vy = Math.sin(angle) * velocity - 300;
+    const gravity = 800;
+    const rotation = Math.random() * 720 - 360;
+
+    let x = 0, y = 0, currentVy = vy, currentRotation = 0;
+    const startTime = Date.now();
+
+    const animate = () => {
+      const elapsed = (Date.now() - startTime) / 1000;
+
+      x = vx * elapsed;
+      currentVy = vy + gravity * elapsed;
+      y = vy * elapsed + 0.5 * gravity * elapsed * elapsed;
+      currentRotation = rotation * elapsed;
+
+      confetti.style.transform = `translate(${x}px, ${y}px) rotate(${currentRotation}deg)`;
+      confetti.style.opacity = Math.max(0, 1 - elapsed / 2);
+
+      if (y > 500 || elapsed > 2) {
+        confetti.remove();
+      } else {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }
+}
+
+/**
+ * Show scorer popup notification
+ */
+function showScorerPopup(scorer, origin, teamName) {
+  const popup = document.createElement('div');
+  popup.className = 'scorer-popup';
+
+  const rect = origin.getBoundingClientRect();
+  popup.style.left = rect.left + rect.width / 2 + 'px';
+  popup.style.top = rect.top - 60 + 'px';
+  popup.style.transform = 'translate(-50%, 0)';
+
+  popup.innerHTML = `⚽ ${scorer.name} scores!`;
+
+  document.body.appendChild(popup);
+
+  // Animate in
+  popup.animate([
+    { transform: 'translate(-50%, 20px) scale(0)', opacity: 0 },
+    { transform: 'translate(-50%, 0) scale(1)', opacity: 1 }
+  ], {
+    duration: 400,
+    easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)'
+  });
+
+  // Remove after delay
+  setTimeout(() => {
+    popup.animate([
+      { transform: 'translate(-50%, 0) scale(1)', opacity: 1 },
+      { transform: 'translate(-50%, -20px) scale(0)', opacity: 0 }
+    ], {
+      duration: 300,
+      easing: 'ease-in'
+    }).onfinish = () => popup.remove();
+  }, 2000);
+}
+
+/**
+ * Button Loading State Management
+ */
+function showLoadingState(button, loadingText = 'Loading...') {
+  if (!button) return () => {};
+
+  const originalText = button.textContent;
+  const originalHTML = button.innerHTML;
+  button.textContent = loadingText;
+  button.classList.add('btn-loading');
+  button.disabled = true;
+
+  return () => {
+    button.innerHTML = originalHTML;
+    button.classList.remove('btn-loading');
+    button.disabled = false;
+  };
+}
+
+/**
+ * Show success state on button
+ */
+function showButtonSuccess(button, duration = 2000) {
+  if (!button) return;
+
+  const originalText = button.textContent;
+  button.textContent = '✓ Success!';
+  button.classList.add('btn-success');
+
+  setTimeout(() => {
+    button.textContent = originalText;
+    button.classList.remove('btn-success');
+  }, duration);
+}
+
+/**
+ * Show error state on button
+ */
+function showButtonError(button, message = 'Error!', duration = 2000) {
+  if (!button) return;
+
+  const originalText = button.textContent;
+  button.textContent = '✗ ' + message;
+  button.classList.add('btn-error');
+
+  setTimeout(() => {
+    button.textContent = originalText;
+    button.classList.remove('btn-error');
+  }, duration);
+}
+
+/**
+ * Add ripple effect to element on click
+ */
+function createRipple(event) {
+  const button = event.currentTarget;
+  const ripple = document.createElement('span');
+  ripple.className = 'ripple';
+
+  const rect = button.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  const x = event.clientX - rect.left - size / 2;
+  const y = event.clientY - rect.top - size / 2;
+
+  ripple.style.width = ripple.style.height = size + 'px';
+  ripple.style.left = x + 'px';
+  ripple.style.top = y + 'px';
+
+  button.appendChild(ripple);
+
+  setTimeout(() => ripple.remove(), 600);
+}
+
+/**
+ * Context-Aware Theme System
+ */
+const STAGE_THEMES = {
+  'group': {
+    color: '#3b82f6',
+    gradient: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+    glow: 'rgba(59, 130, 246, 0.4)',
+    icon: '📊',
+    className: 'stage-group'
+  },
+  'knockout': {
+    color: '#f59e0b',
+    gradient: 'linear-gradient(135deg, #f59e0b, #d97706)',
+    glow: 'rgba(245, 158, 11, 0.4)',
+    icon: '⚔️',
+    className: 'stage-knockout'
+  },
+  'r16': {
+    color: '#f59e0b',
+    gradient: 'linear-gradient(135deg, #f59e0b, #d97706)',
+    glow: 'rgba(245, 158, 11, 0.4)',
+    icon: '⚔️',
+    className: 'stage-knockout'
+  },
+  'qf': {
+    color: '#f59e0b',
+    gradient: 'linear-gradient(135deg, #f59e0b, #d97706)',
+    glow: 'rgba(245, 158, 11, 0.4)',
+    icon: '⚔️',
+    className: 'stage-knockout'
+  },
+  'semifinal': {
+    color: '#a855f7',
+    gradient: 'linear-gradient(135deg, #a855f7, #9333ea)',
+    glow: 'rgba(168, 85, 247, 0.4)',
+    icon: '🔥',
+    className: 'stage-semifinal'
+  },
+  'sf': {
+    color: '#a855f7',
+    gradient: 'linear-gradient(135deg, #a855f7, #9333ea)',
+    glow: 'rgba(168, 85, 247, 0.4)',
+    icon: '🔥',
+    className: 'stage-semifinal'
+  },
+  'final': {
+    color: '#fbbf24',
+    gradient: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+    glow: 'rgba(251, 191, 36, 0.4)',
+    icon: '🏆',
+    className: 'stage-final'
+  }
+};
+
+function getStageTheme(stage) {
+  const stageKey = stage.toLowerCase().replace(/\s+/g, '');
+  return STAGE_THEMES[stageKey] || STAGE_THEMES.group;
+}
+
+function applyStageTheme(element, stage) {
+  if (!element) return;
+
+  const theme = getStageTheme(stage);
+
+  element.style.background = theme.gradient;
+  element.style.boxShadow = `0 4px 20px ${theme.glow}`;
+  element.style.borderColor = theme.color;
+  element.classList.add(theme.className);
+
+  // Add icon if element has stage-icon class
+  const icon = element.querySelector('.stage-icon');
+  if (icon) icon.textContent = theme.icon;
+}
+
+/**
+ * Strength Theme System
+ */
+function getStrengthTheme(strength) {
+  if (strength >= 95) return {
+    color: '#fbbf24',
+    label: 'LEGENDARY',
+    icon: '👑',
+    glow: 'rgba(251, 191, 36, 0.6)',
+    className: 'strength-legendary'
+  };
+  else if (strength >= 90) return {
+    color: '#a855f7',
+    label: 'ELITE',
+    icon: '⭐',
+    glow: 'rgba(168, 85, 247, 0.6)',
+    className: 'strength-elite'
+  };
+  else if (strength >= 85) return {
+    color: '#3b82f6',
+    label: 'STRONG',
+    icon: '💪',
+    glow: 'rgba(59, 130, 246, 0.6)',
+    className: 'strength-strong'
+  };
+  else if (strength >= 80) return {
+    color: '#10b981',
+    label: 'GOOD',
+    icon: '✓',
+    glow: 'rgba(16, 185, 129, 0.6)',
+    className: 'strength-good'
+  };
+  else return {
+    color: '#6b7280',
+    label: 'AVERAGE',
+    icon: '➡️',
+    glow: 'rgba(107, 114, 128, 0.6)',
+    className: 'strength-average'
+  };
+}
+
+function applyStrengthTheme(element, strength) {
+  if (!element) return;
+
+  const theme = getStrengthTheme(strength);
+  element.classList.add(theme.className);
+  element.style.color = theme.color;
+  element.style.textShadow = `0 0 10px ${theme.glow}`;
+}
+
+/**
+ * Theme Switcher System
+ */
+const THEME_MANAGER = {
+  current: localStorage.getItem('footballTheme') || 'default',
+
+  themes: {
+    default: 'Default',
+    stadium: 'Stadium Night'
+  },
+
+  switch(themeName) {
+    this.current = themeName;
+    document.body.setAttribute('data-theme', themeName);
+    localStorage.setItem('footballTheme', themeName);
+
+    // Notify user
+    if (typeof showNotification === 'function') {
+      showNotification('success', 'Theme Changed', `Switched to ${this.themes[themeName]} theme`, 2000);
+    }
+  },
+
+  init() {
+    const saved = localStorage.getItem('footballTheme');
+    if (saved && saved !== 'default') {
+      document.body.setAttribute('data-theme', saved);
+    }
+  }
+};
+
+function createThemeSwitcher() {
+  const switcher = document.createElement('div');
+  switcher.id = 'themeSwitcher';
+  switcher.style.cssText = `
+    position: fixed;
+    top: 80px;
+    right: 30px;
+    background: linear-gradient(135deg, #1e293b, #334155);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 8px;
+    padding: 8px;
+    z-index: 9000;
+    display: flex;
+    gap: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  `;
+
+  Object.entries(THEME_MANAGER.themes).forEach(([key, label]) => {
+    const btn = document.createElement('button');
+    btn.textContent = key === 'stadium' ? '🏟️' : '🎨';
+    btn.title = label;
+    btn.style.cssText = `
+      background: ${THEME_MANAGER.current === key ? 'rgba(16, 185, 129, 0.2)' : 'rgba(71, 85, 105, 0.3)'};
+      border: 1px solid ${THEME_MANAGER.current === key ? 'rgba(16, 185, 129, 0.5)' : 'rgba(71, 85, 105, 0.5)'};
+      color: #f7fafc;
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1.2em;
+      transition: all 0.2s ease;
+    `;
+
+    btn.onmouseover = () => {
+      btn.style.background = 'rgba(16, 185, 129, 0.3)';
+      btn.style.transform = 'translateY(-2px)';
+    };
+
+    btn.onmouseout = () => {
+      btn.style.background = THEME_MANAGER.current === key ? 'rgba(16, 185, 129, 0.2)' : 'rgba(71, 85, 105, 0.3)';
+      btn.style.transform = 'translateY(0)';
+    };
+
+    btn.onclick = () => {
+      THEME_MANAGER.switch(key);
+      // Recreate switcher to update active state
+      switcher.remove();
+      createThemeSwitcher();
+    };
+
+    switcher.appendChild(btn);
+  });
+
+  document.body.appendChild(switcher);
+}
+
+/**
+ * Enhanced Modal System
+ * Adds animations to modals
+ */
+function enhanceModal(modal) {
+  if (!modal) return;
+
+  // Add scale-in animation
+  modal.classList.add('modal-scale-in');
+
+  // Add blur backdrop if it's a backdrop
+  if (modal.classList.contains('modal-backdrop')) {
+    modal.classList.add('modal-backdrop-blur');
+  }
+}
+
+// Initialize aesthetic enhancements on page load
+window.addEventListener('load', () => {
+  THEME_MANAGER.init();
+  createThemeSwitcher();
+
+  // Add ripple effect to all buttons
+  document.querySelectorAll('button').forEach(button => {
+    button.addEventListener('click', createRipple);
+  });
+
+  console.log('✨ Aesthetic enhancements initialized!');
+});
+
+// Export functions for global access
+window.celebrateGoal = celebrateGoal;
+window.createConfetti = createConfetti;
+window.showLoadingState = showLoadingState;
+window.showButtonSuccess = showButtonSuccess;
+window.showButtonError = showButtonError;
+window.applyStageTheme = applyStageTheme;
+window.applyStrengthTheme = applyStrengthTheme;
+window.THEME_MANAGER = THEME_MANAGER;
+
+console.log('🎨 Aesthetic enhancement functions loaded!');
 
 </script>
 <script>

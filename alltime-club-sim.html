@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <title>All-Time Football Simulator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Simulate epic football tournaments with all-time great teams. Create custom tournaments, track statistics, and crown champions in this comprehensive football simulator.">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
   <style>
     :root {
@@ -36,19 +37,13 @@
       --text-muted: #9ca3af;
     }
 
-    * {
+    *, *::before, *::after {
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
-    }
-
-    *, *::before, *::after {
       box-sizing: border-box;
     }
 
     html, body {
-      margin: 0;
-      padding: 0;
       min-height: 100%;
     }
 
@@ -245,7 +240,7 @@
       position: sticky;
       top: 20px;
       max-height: calc(100vh - 40px);
-      overflow: hidden;
+      overflow-y: auto;
       display: flex;
       flex-direction: column;
     }
@@ -266,6 +261,65 @@
 
     .sidebar::-webkit-scrollbar-thumb:hover {
       background: rgba(59, 130, 246, 0.5);
+    }
+
+    /* Accessibility: Focus styles */
+    button:focus-visible,
+    a:focus-visible,
+    select:focus-visible,
+    input:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+
+    /* Error Display System */
+    .error-banner {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(239, 68, 68, 0.95);
+      color: white;
+      padding: 16px 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      z-index: 10005;
+      animation: slideInRight 0.3s ease;
+      max-width: 400px;
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .error-banner button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5em;
+      cursor: pointer;
+      padding: 0 8px;
+    }
+
+    /* Loading States */
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
     .sidebar-header {
@@ -25121,8 +25175,8 @@ function showHallOfFame() {
       </div>
 
       <div style="margin-top: 40px; text-align: center;">
-        <button onclick="closeAllModals(); showOutput()" class="btn-primary" style="background: #3b82f6; color: white; border: none; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1em;">
-          ← Back
+        <button onclick="closeAllModals()" class="btn-primary" style="background: #3b82f6; color: white; border: none; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1em;">
+          ← Back to Main
         </button>
       </div>
     </div>
@@ -25343,10 +25397,7 @@ window.addEventListener('load', () => {
     button.addEventListener('click', createRipple);
   });
 
-  // Initialize function wrappers (after all scripts have loaded)
-  if (typeof initializeFunctionWrappers === 'function') {
-    initializeFunctionWrappers();
-  }
+  // Function wrappers now self-initialize with retry mechanism (see initializeFunctionWrappersSafely IIFE)
 
   // Initialize accessibility enhancements
   if (typeof initializeAccessibility === 'function') {
@@ -25887,44 +25938,99 @@ function closeNotification(closeBtn) {
 
 // Hook into existing functions to show notifications
 // Function wrapping with proper timing - wrapped in load event to ensure functions exist
-function initializeFunctionWrappers() {
-  // Wrap simulateGroupStage
-  if (typeof window.simulateGroupStage === 'function') {
-    const originalSimulateGroupStage = window.simulateGroupStage;
-    window.simulateGroupStage = function(...args) {
-      updateTournamentProgress('groups');
-      const result = originalSimulateGroupStage.apply(this, args);
-      showNotification('tournament', 'Group Stage Complete', 'All groups have been simulated!', 3000);
-      return result;
-    };
+// Safe deferred initialization to prevent race conditions
+(function initializeFunctionWrappersSafely() {
+  'use strict';
+
+  const MAX_RETRIES = 50;
+  const RETRY_DELAY = 100; // ms
+  let retryCount = 0;
+
+  function attemptInitialization() {
+    // Check if required functions exist
+    const requiredFunctions = [
+      'simulateGroupStage',
+      'simulateKnockoutRounds',
+      'handleGenerateGroups'
+    ];
+
+    const allExist = requiredFunctions.every(fn => typeof window[fn] === 'function');
+
+    if (allExist) {
+      wrapFunctionsSafely();
+      console.log('✅ Function wrappers initialized successfully');
+    } else if (retryCount < MAX_RETRIES) {
+      retryCount++;
+      setTimeout(attemptInitialization, RETRY_DELAY);
+    } else {
+      const missing = requiredFunctions.filter(fn => typeof window[fn] !== 'function');
+      console.warn('⚠️ Some functions not found after max retries:', missing);
+    }
   }
 
-  // Wrap simulateKnockoutRounds
-  if (typeof window.simulateKnockoutRounds === 'function') {
-    const originalSimulateKnockoutRounds = window.simulateKnockoutRounds;
-    window.simulateKnockoutRounds = function(...args) {
-      const result = originalSimulateKnockoutRounds.apply(this, args);
+  function wrapFunctionsSafely() {
+    // Wrap simulateGroupStage
+    if (typeof window.simulateGroupStage === 'function') {
+      const original = window.simulateGroupStage;
+      window.simulateGroupStage = function(...args) {
+        if (typeof updateTournamentProgress === 'function') {
+          updateTournamentProgress('groups');
+        }
+        const result = original.apply(this, args);
+        if (typeof showNotification === 'function') {
+          showNotification('tournament', 'Group Stage Complete',
+            'All groups have been simulated!', 3000);
+        }
+        return result;
+      };
+    }
 
-      if (result && result.champion) {
-        updateTournamentProgress('final');
-        showNotification('achievement', 'Tournament Complete!', `${result.champion.name} is the champion!`, 5000);
-      }
+    // Wrap simulateKnockoutRounds
+    if (typeof window.simulateKnockoutRounds === 'function') {
+      const original = window.simulateKnockoutRounds;
+      window.simulateKnockoutRounds = function(...args) {
+        const result = original.apply(this, args);
+        if (result && result.champion) {
+          if (typeof updateTournamentProgress === 'function') {
+            updateTournamentProgress('final');
+          }
+          if (typeof showNotification === 'function') {
+            showNotification('achievement', 'Tournament Complete!',
+              `${result.champion.name} is the champion!`, 5000);
+          }
+          // Auto-induct tournament performers
+          if (typeof inductTournamentPerformers === 'function') {
+            setTimeout(() => inductTournamentPerformers(), 500);
+          }
+        }
+        return result;
+      };
+    }
 
-      return result;
-    };
+    // Wrap handleGenerateGroups
+    if (typeof window.handleGenerateGroups === 'function') {
+      const original = window.handleGenerateGroups;
+      window.handleGenerateGroups = function(...args) {
+        const result = original.apply(this, args);
+        if (typeof updateTournamentProgress === 'function') {
+          updateTournamentProgress('groups');
+        }
+        if (typeof showNotification === 'function') {
+          showNotification('success', 'Groups Generated',
+            'Groups have been created!', 3000);
+        }
+        return result;
+      };
+    }
   }
 
-  // Wrap handleGenerateGroups
-  if (typeof window.handleGenerateGroups === 'function') {
-    const originalHandleGenerateGroups = window.handleGenerateGroups;
-    window.handleGenerateGroups = function(...args) {
-      const result = originalHandleGenerateGroups.apply(this, args);
-      updateTournamentProgress('groups');
-      showNotification('success', 'Groups Generated', '16 groups have been created!', 3000);
-      return result;
-    };
+  // Start initialization after DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attemptInitialization);
+  } else {
+    attemptInitialization();
   }
-}
+})();
 
 // Initialize on page load
 // Global escape key handler for modals
@@ -27120,6 +27226,29 @@ function addNewFeatureButtons() {
         <div class="ctrl-btn-subtitle">View your accuracy</div>
       </div>
     </button>
+
+    <!-- Feature Guides Section -->
+    <div style="margin-top: 25px; padding: 15px; background: rgba(59, 130, 246, 0.05); border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.2);">
+      <h3 style="color: #3b82f6; margin-bottom: 12px; font-size: 0.95em; font-weight: 600;">📖 Feature Guides</h3>
+      <div style="display: grid; gap: 8px;">
+        <button onclick="FEATURE_GUIDES.showGuide('quickStart')"
+                style="padding: 8px 12px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 6px; color: #f7fafc; cursor: pointer; text-align: left; font-size: 0.85em; transition: all 0.2s;">
+          <span style="margin-right: 6px;">🏆</span> Quick Start Templates
+        </button>
+        <button onclick="FEATURE_GUIDES.showGuide('predictions')"
+                style="padding: 8px 12px; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 6px; color: #f7fafc; cursor: pointer; text-align: left; font-size: 0.85em; transition: all 0.2s;">
+          <span style="margin-right: 6px;">🔮</span> Predictions System
+        </button>
+        <button onclick="FEATURE_GUIDES.showGuide('hallOfFame')"
+                style="padding: 8px 12px; background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 6px; color: #f7fafc; cursor: pointer; text-align: left; font-size: 0.85em; transition: all 0.2s;">
+          <span style="margin-right: 6px;">🏛️</span> Hall of Fame
+        </button>
+        <button onclick="FEATURE_GUIDES.showGuide('seasons')"
+                style="padding: 8px 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 6px; color: #f7fafc; cursor: pointer; text-align: left; font-size: 0.85em; transition: all 0.2s;">
+          <span style="margin-right: 6px;">📅</span> Seasons Mode
+        </button>
+      </div>
+    </div>
   `;
 
   sidebar.appendChild(container);
@@ -27151,14 +27280,626 @@ window.SOUND_SYSTEM = SOUND_SYSTEM;
 window.QUICK_START_PRESETS = QUICK_START_PRESETS;
 window.PREDICTION_SYSTEM = PREDICTION_SYSTEM;
 
+// ========================================
+// COMPREHENSIVE ENHANCEMENTS
+// ========================================
+
+// Enhanced Hall of Fame - Auto-induct tournament performers
+function inductTournamentPerformers() {
+  if (!window.TOURNAMENT || !window.MATCH_HISTORY) return;
+
+  const tournamentMatches = window.MATCH_HISTORY.filter(m => m.tournamentId === window.TOURNAMENT.id);
+
+  // Track player statistics across tournament
+  const playerStats = {};
+
+  tournamentMatches.forEach(match => {
+    if (match.scorers) {
+      match.scorers.forEach(scorer => {
+        if (!playerStats[scorer.name]) {
+          playerStats[scorer.name] = {
+            name: scorer.name,
+            team: scorer.team,
+            pos: scorer.pos || 'FW',
+            goals: 0,
+            assists: 0,
+            apps: 0,
+            ratings: []
+          };
+        }
+        playerStats[scorer.name].goals++;
+        playerStats[scorer.name].apps++;
+        if (scorer.rating) playerStats[scorer.name].ratings.push(scorer.rating);
+      });
+    }
+  });
+
+  // Induct top scorer if they scored 5+ goals
+  const topScorer = Object.values(playerStats).sort((a, b) => b.goals - a.goals)[0];
+  if (topScorer && topScorer.goals >= 5 && typeof HALL_OF_FAME !== 'undefined') {
+    const avgRating = topScorer.ratings.length > 0
+      ? topScorer.ratings.reduce((a, b) => a + b, 0) / topScorer.ratings.length
+      : 7.5;
+
+    if (!HALL_OF_FAME.isInHallOfFame(topScorer.name)) {
+      HALL_OF_FAME.inductLegend({
+        name: topScorer.name,
+        team: topScorer.team,
+        pos: topScorer.pos,
+        goals: topScorer.goals,
+        assists: topScorer.assists,
+        apps: topScorer.apps,
+        avgRating: avgRating
+      }, `Tournament Top Scorer - ${topScorer.goals} goals`);
+    }
+  }
+
+  // Update Hall of Fame records
+  if (typeof HALL_OF_FAME !== 'undefined' && topScorer) {
+    HALL_OF_FAME.updateRecord('tournamentTopScorer', topScorer.goals, topScorer.name);
+  }
+}
+
+// Team datasets for Quick Start templates
+const TEMPLATE_TEAMS = {
+  eliteClubs: [
+    { name: 'Real Madrid', strength: 92, overallRating: 92 },
+    { name: 'Barcelona', strength: 90, overallRating: 90 },
+    { name: 'Bayern Munich', strength: 91, overallRating: 91 },
+    { name: 'Manchester City', strength: 91, overallRating: 91 },
+    { name: 'Liverpool', strength: 89, overallRating: 89 },
+    { name: 'Paris Saint-Germain', strength: 88, overallRating: 88 },
+    { name: 'Chelsea', strength: 87, overallRating: 87 },
+    { name: 'Manchester United', strength: 86, overallRating: 86 },
+    { name: 'Juventus', strength: 86, overallRating: 86 },
+    { name: 'Inter Milan', strength: 85, overallRating: 85 },
+    { name: 'AC Milan', strength: 84, overallRating: 84 },
+    { name: 'Atletico Madrid', strength: 85, overallRating: 85 },
+    { name: 'Borussia Dortmund', strength: 84, overallRating: 84 },
+    { name: 'Ajax', strength: 83, overallRating: 83 },
+    { name: 'Benfica', strength: 82, overallRating: 82 },
+    { name: 'Porto', strength: 82, overallRating: 82 },
+    { name: 'Tottenham', strength: 83, overallRating: 83 },
+    { name: 'Arsenal', strength: 84, overallRating: 84 },
+    { name: 'Napoli', strength: 83, overallRating: 83 },
+    { name: 'RB Leipzig', strength: 82, overallRating: 82 },
+    { name: 'Sevilla', strength: 81, overallRating: 81 },
+    { name: 'AS Roma', strength: 81, overallRating: 81 },
+    { name: 'Villarreal', strength: 80, overallRating: 80 },
+    { name: 'Bayer Leverkusen', strength: 81, overallRating: 81 },
+    { name: 'Atalanta', strength: 80, overallRating: 80 },
+    { name: 'Leicester City', strength: 79, overallRating: 79 },
+    { name: 'West Ham', strength: 78, overallRating: 78 },
+    { name: 'Real Sociedad', strength: 79, overallRating: 79 },
+    { name: 'Lazio', strength: 80, overallRating: 80 },
+    { name: 'Monaco', strength: 78, overallRating: 78 },
+    { name: 'Lyon', strength: 79, overallRating: 79 },
+    { name: 'Marseille', strength: 78, overallRating: 78 }
+  ],
+
+  midTierClubs: [
+    { name: 'Wolves', strength: 77, overallRating: 77 },
+    { name: 'Everton', strength: 76, overallRating: 76 },
+    { name: 'Newcastle', strength: 78, overallRating: 78 },
+    { name: 'Brighton', strength: 76, overallRating: 76 },
+    { name: 'Aston Villa', strength: 77, overallRating: 77 },
+    { name: 'Crystal Palace', strength: 75, overallRating: 75 },
+    { name: 'Southampton', strength: 74, overallRating: 74 },
+    { name: 'Fulham', strength: 75, overallRating: 75 },
+    { name: 'Brentford', strength: 74, overallRating: 74 },
+    { name: 'Bournemouth', strength: 73, overallRating: 73 },
+    { name: 'Nottingham Forest', strength: 74, overallRating: 74 },
+    { name: 'Leeds United', strength: 75, overallRating: 75 },
+    { name: 'Real Betis', strength: 78, overallRating: 78 },
+    { name: 'Athletic Bilbao', strength: 77, overallRating: 77 },
+    { name: 'Valencia', strength: 76, overallRating: 76 },
+    { name: 'Fiorentina', strength: 77, overallRating: 77 },
+    { name: 'Torino', strength: 75, overallRating: 75 },
+    { name: 'Bologna', strength: 74, overallRating: 74 },
+    { name: 'Udinese', strength: 73, overallRating: 73 },
+    { name: 'Sassuolo', strength: 74, overallRating: 74 },
+    { name: 'Freiburg', strength: 76, overallRating: 76 },
+    { name: 'Union Berlin', strength: 75, overallRating: 75 },
+    { name: 'Eintracht Frankfurt', strength: 77, overallRating: 77 },
+    { name: 'Hoffenheim', strength: 74, overallRating: 74 },
+    { name: 'Mainz', strength: 73, overallRating: 73 },
+    { name: 'Lille', strength: 77, overallRating: 77 },
+    { name: 'Nice', strength: 76, overallRating: 76 },
+    { name: 'Rennes', strength: 75, overallRating: 75 },
+    { name: 'Lens', strength: 74, overallRating: 74 },
+    { name: 'Strasbourg', strength: 73, overallRating: 73 },
+    { name: 'Montpellier', strength: 72, overallRating: 72 },
+    { name: 'Nantes', strength: 72, overallRating: 72 }
+  ]
+};
+
+// Enhance Quick Start Presets with team data
+if (window.QUICK_START_PRESETS) {
+  QUICK_START_PRESETS.getTeamsForTemplate = function(templateId) {
+    const template = this.templates[templateId];
+    if (!template) return [];
+
+    let teams = [];
+
+    // Use template teams or fallback to ALL_TEAMS
+    if (template.difficulty === 'hard' || template.difficulty === 'extreme') {
+      teams = [...TEMPLATE_TEAMS.eliteClubs];
+    } else {
+      teams = [...TEMPLATE_TEAMS.eliteClubs, ...TEMPLATE_TEAMS.midTierClubs];
+    }
+
+    // Apply template filter if it exists
+    if (template.teamFilter && window.ALL_TEAMS && window.ALL_TEAMS.length > 0) {
+      teams = window.ALL_TEAMS.filter(template.teamFilter);
+    }
+
+    // If still no teams, use template teams
+    if (teams.length === 0) {
+      teams = template.difficulty === 'hard' ? TEMPLATE_TEAMS.eliteClubs : TEMPLATE_TEAMS.midTierClubs;
+    }
+
+    return teams.slice(0, template.teamCount);
+  };
+
+  // Override apply to use new team getter
+  const originalApply = QUICK_START_PRESETS.apply;
+  QUICK_START_PRESETS.apply = function(templateId) {
+    const template = this.templates[templateId];
+    if (!template) {
+      console.error('Template not found:', templateId);
+      return;
+    }
+
+    try {
+      // Get teams for this template
+      let selectedTeams = this.getTeamsForTemplate(templateId);
+
+      if (selectedTeams.length < template.teamCount) {
+        if (typeof showNotification === 'function') {
+          showNotification('warning', 'Not Enough Teams',
+            `Only ${selectedTeams.length} teams available (need ${template.teamCount})`, 4000);
+        }
+        // Pad with generic teams if needed
+        while (selectedTeams.length < template.teamCount) {
+          selectedTeams.push({
+            name: `Team ${selectedTeams.length + 1}`,
+            strength: 75 + Math.floor(Math.random() * 10),
+            overallRating: 75 + Math.floor(Math.random() * 10)
+          });
+        }
+      }
+
+      // Save state before applying template
+      if (typeof HISTORY_MANAGER !== 'undefined') {
+        HISTORY_MANAGER.saveState();
+      }
+
+      // Apply teams
+      window.TEAMS = selectedTeams;
+      if (!window.ALL_TEAMS || window.ALL_TEAMS.length === 0) {
+        window.ALL_TEAMS = [...TEMPLATE_TEAMS.eliteClubs, ...TEMPLATE_TEAMS.midTierClubs];
+      }
+
+      // Generate groups if needed
+      if (typeof generateGroups === 'function' && template.teamCount >= 16) {
+        generateGroups();
+      }
+
+      // Update UI
+      if (typeof renderUI === 'function') {
+        renderUI();
+      }
+
+      if (typeof showNotification === 'function') {
+        showNotification('success', 'Template Applied',
+          `${template.name} tournament created with ${selectedTeams.length} teams`, 3000);
+      }
+
+      console.log(`✓ Applied template: ${template.name} with ${selectedTeams.length} teams`);
+    } catch (e) {
+      console.error('Failed to apply template:', e);
+      if (typeof showNotification === 'function') {
+        showNotification('error', 'Template Error', 'Failed to apply template', 3000);
+      }
+    }
+  };
+}
+
+// Enhanced Prediction System Integration
+if (window.PREDICTION_SYSTEM) {
+  // Add prediction prompt before matches
+  PREDICTION_SYSTEM.promptPrediction = function(team1, team2, matchId) {
+    if (this.predictions[matchId]) return; // Already predicted
+
+    const modal = document.createElement('div');
+    modal.className = 'modal-backdrop active';
+    modal.style.zIndex = '10003';
+    modal.innerHTML = `
+      <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-head">
+          <h2>🔮 Make Your Prediction</h2>
+          <button class="modal-close" onclick="this.closest('.modal-backdrop').remove()">✕</button>
+        </div>
+        <div style="padding: 20px;">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <div style="font-size: 1.2em; color: #10b981; font-weight: 600;">${team1.name || team1}</div>
+            <div style="margin: 10px 0; color: #94a3b8;">vs</div>
+            <div style="font-size: 1.2em; color: #3b82f6; font-weight: 600;">${team2.name || team2}</div>
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button onclick="PREDICTION_SYSTEM.predict('${matchId}', '${team1.name || team1}'); this.closest('.modal-backdrop').remove();"
+                    class="btn-primary" style="flex: 1; background: #10b981; padding: 15px;">
+              ${team1.name || team1} Wins
+            </button>
+            <button onclick="PREDICTION_SYSTEM.predict('${matchId}', 'draw'); this.closest('.modal-backdrop').remove();"
+                    class="btn-primary" style="flex: 1; background: #94a3b8; padding: 15px;">
+              Draw
+            </button>
+            <button onclick="PREDICTION_SYSTEM.predict('${matchId}', '${team2.name || team2}'); this.closest('.modal-backdrop').remove();"
+                    class="btn-primary" style="flex: 1; background: #3b82f6; padding: 15px;">
+              ${team2.name || team2} Wins
+            </button>
+          </div>
+          <button onclick="this.closest('.modal-backdrop').remove();"
+                  style="width: 100%; margin-top: 15px; padding: 10px; background: transparent; border: 1px solid #475569; border-radius: 8px; color: #94a3b8; cursor: pointer;">
+            Skip Prediction
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  };
+
+  // Enhanced showStats with better UI
+  const originalShowStats = PREDICTION_SYSTEM.showStats;
+  PREDICTION_SYSTEM.showStats = function() {
+    const accuracy = this.getAccuracy();
+    const total = Object.keys(this.results).length;
+    const correct = Object.values(this.results).filter(r => r.correct).length;
+
+    const modal = document.createElement('div');
+    modal.className = 'modal-backdrop active';
+    modal.style.zIndex = '10002';
+    modal.innerHTML = `
+      <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-head">
+          <h2>🔮 Prediction Statistics</h2>
+          <button class="modal-close" onclick="this.closest('.modal-backdrop').remove()">✕</button>
+        </div>
+        <div style="padding: 30px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <div style="font-size: 4em; font-weight: 700; color: ${accuracy >= 70 ? '#10b981' : accuracy >= 50 ? '#fbbf24' : '#ef4444'};">
+              ${accuracy}%
+            </div>
+            <div style="color: #94a3b8; font-size: 1.1em;">Prediction Accuracy</div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 30px;">
+            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 20px; text-align: center;">
+              <div style="font-size: 2.5em; font-weight: 700; color: #10b981;">${correct}</div>
+              <div style="color: #94a3b8; font-size: 0.9em;">Correct</div>
+            </div>
+            <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 20px; text-align: center;">
+              <div style="font-size: 2.5em; font-weight: 700; color: #ef4444;">${total - correct}</div>
+              <div style="color: #94a3b8; font-size: 0.9em;">Wrong</div>
+            </div>
+          </div>
+
+          ${total === 0 ? `
+            <div style="text-align: center; padding: 40px 20px; background: rgba(100, 116, 139, 0.1); border-radius: 12px;">
+              <div style="font-size: 3em; margin-bottom: 15px; opacity: 0.3;">🎯</div>
+              <p style="color: #94a3b8;">No predictions yet! Start making predictions during matches.</p>
+            </div>
+          ` : `
+            <div style="background: rgba(59, 130, 246, 0.05); border-radius: 12px; padding: 20px;">
+              <h3 style="color: #3b82f6; margin-bottom: 15px; font-size: 1.1em;">📊 Performance Rating</h3>
+              <div style="color: #f7fafc; font-size: 1.2em; font-weight: 600;">
+                ${accuracy >= 70 ? '🏆 Expert Predictor!' : accuracy >= 60 ? '⭐ Great Predictions!' : accuracy >= 50 ? '👍 Good Start!' : '💪 Keep Practicing!'}
+              </div>
+            </div>
+          `}
+
+          <button onclick="this.closest('.modal-backdrop').remove();"
+                  class="btn-primary" style="width: 100%; margin-top: 20px; padding: 12px;">
+            Close
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  };
+}
+
+// Feature Guide System
+const FEATURE_GUIDES = {
+  showGuide(featureName) {
+    const guides = {
+      seasons: {
+        title: '📅 Seasons Feature Guide',
+        content: `
+          <h3 style="color: #10b981; margin-bottom: 15px;">How to Use Seasons</h3>
+          <ol style="color: #cbd5e1; line-height: 1.8; padding-left: 20px;">
+            <li><strong>Start a Season:</strong> Click "Start New Season" to begin</li>
+            <li><strong>Manage Your Team:</strong> Track your team's progress through the league</li>
+            <li><strong>Simulate Matches:</strong> Play through matchdays one by one or simulate entire season</li>
+            <li><strong>View Standings:</strong> Check your position in the league table</li>
+            <li><strong>Season History:</strong> Review past seasons and achievements</li>
+          </ol>
+          <div style="margin-top: 20px; padding: 15px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; border-radius: 4px;">
+            <strong style="color: #3b82f6;">💡 Tip:</strong>
+            <span style="color: #cbd5e1;">Winning seasons earns you Manager XP and unlocks achievements!</span>
+          </div>
+        `
+      },
+      hallOfFame: {
+        title: '🏛️ Hall of Fame Guide',
+        content: `
+          <h3 style="color: #fbbf24; margin-bottom: 15px;">How to Induct Players</h3>
+          <ul style="color: #cbd5e1; line-height: 1.8; padding-left: 20px;">
+            <li><strong>Automatic Induction:</strong> Top scorers (5+ goals in tournament) are automatically inducted</li>
+            <li><strong>Tournament Champions:</strong> Winning teams get recorded in history</li>
+            <li><strong>Record Breakers:</strong> Players who break records are celebrated</li>
+            <li><strong>View Hall:</strong> Click "Hall of Fame" button to see all legends</li>
+          </ul>
+          <div style="margin-top: 20px; padding: 15px; background: rgba(251, 191, 36, 0.1); border-left: 3px solid #fbbf24; border-radius: 4px;">
+            <strong style="color: #fbbf24;">⭐ Legend Status:</strong>
+            <span style="color: #cbd5e1;">Players need 15+ goals OR 8.5+ avg rating OR 10+ apps (2 of 3) to be inducted</span>
+          </div>
+        `
+      },
+      predictions: {
+        title: '🔮 Predictions Guide',
+        content: `
+          <h3 style="color: #a855f7; margin-bottom: 15px;">How to Make Predictions</h3>
+          <ol style="color: #cbd5e1; line-height: 1.8; padding-left: 20px;">
+            <li><strong>Before Matches:</strong> You'll be prompted to predict the outcome</li>
+            <li><strong>Choose Winner:</strong> Select Team A, Draw, or Team B</li>
+            <li><strong>Track Accuracy:</strong> Your prediction success rate is tracked</li>
+            <li><strong>View Stats:</strong> Click "Prediction Stats" to see your performance</li>
+          </ol>
+          <div style="margin-top: 20px; padding: 15px; background: rgba(168, 85, 247, 0.1); border-left: 3px solid #a855f7; border-radius: 4px;">
+            <strong style="color: #a855f7;">🎯 Challenge:</strong>
+            <span style="color: #cbd5e1;">Can you achieve 70%+ accuracy and become an Expert Predictor?</span>
+          </div>
+        `
+      },
+      quickStart: {
+        title: '🏆 Quick Start Templates',
+        content: `
+          <h3 style="color: #3b82f6; margin-bottom: 15px;">Tournament Templates</h3>
+          <ul style="color: #cbd5e1; line-height: 1.8; padding-left: 20px;">
+            <li><strong>Champions League:</strong> Top 32 elite European clubs (85+ rating)</li>
+            <li><strong>World Cup:</strong> 32 diverse teams from around the world</li>
+            <li><strong>Underdogs:</strong> Lower-rated teams battle for glory (under 80 rating)</li>
+            <li><strong>Super Elite:</strong> Only the absolute best 16 teams (90+ rating)</li>
+            <li><strong>Quick 16:</strong> Fast tournament with 16 teams</li>
+            <li><strong>Classic 32:</strong> Traditional 32-team format</li>
+          </ul>
+          <div style="margin-top: 20px; padding: 15px; background: rgba(16, 185, 129, 0.1); border-left: 3px solid #10b981; border-radius: 4px;">
+            <strong style="color: #10b981;">⚡ Quick Setup:</strong>
+            <span style="color: #cbd5e1;">Templates auto-select teams and generate groups instantly!</span>
+          </div>
+        `
+      }
+    };
+
+    const guide = guides[featureName];
+    if (!guide) return;
+
+    const modal = document.createElement('div');
+    modal.className = 'modal-backdrop active';
+    modal.style.zIndex = '10004';
+    modal.innerHTML = `
+      <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-head">
+          <h2>${guide.title}</h2>
+          <button class="modal-close" onclick="this.closest('.modal-backdrop').remove()">✕</button>
+        </div>
+        <div style="padding: 30px;">
+          ${guide.content}
+          <button onclick="this.closest('.modal-backdrop').remove();"
+                  class="btn-primary" style="width: 100%; margin-top: 25px; padding: 12px; font-weight: 600;">
+            Got It!
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+};
+
+// ========================================
+// CRITICAL FIXES & IMPROVEMENTS
+// ========================================
+
+// Confetti Memory Management System
+const CONFETTI_MANAGER = {
+  activeParticles: new Set(),
+  maxParticles: 100,
+
+  createConfetti(element) {
+    if (this.activeParticles.size >= this.maxParticles) {
+      this.cleanOldest(30);
+    }
+
+    if (!element) return;
+
+    const rect = element.getBoundingClientRect();
+    const colors = ['#10b981', '#fbbf24', '#3b82f6', '#ef4444', '#a855f7'];
+
+    for (let i = 0; i < 30; i++) {
+      const confetti = document.createElement('div');
+      confetti.style.cssText = `
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        background: ${colors[Math.floor(Math.random() * colors.length)]};
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 10000;
+        left: ${rect.left + rect.width / 2}px;
+        top: ${rect.top + rect.height / 2}px;
+        will-change: transform, opacity;
+      `;
+
+      document.body.appendChild(confetti);
+      this.activeParticles.add(confetti);
+
+      const angle = (Math.PI * 2 * i) / 30;
+      const velocity = 3 + Math.random() * 3;
+      let vx = Math.cos(angle) * velocity;
+      let vy = Math.sin(angle) * velocity - 2;
+      let x = 0;
+      let y = 0;
+      let rotation = 0;
+      const startTime = performance.now();
+
+      const animate = (currentTime) => {
+        const elapsed = (currentTime - startTime) / 1000;
+
+        if (y > 500 || elapsed > 2) {
+          confetti.remove();
+          this.activeParticles.delete(confetti);
+          return;
+        }
+
+        vy += 0.3;
+        x += vx;
+        y += vy;
+        rotation += 5;
+
+        confetti.style.transform = `translate(${x}px, ${y}px) rotate(${rotation}deg)`;
+        confetti.style.opacity = Math.max(0, 1 - elapsed / 2);
+
+        requestAnimationFrame(animate);
+      };
+
+      requestAnimationFrame(animate);
+    }
+  },
+
+  cleanOldest(count) {
+    const particles = Array.from(this.activeParticles);
+    for (let i = 0; i < Math.min(count, particles.length); i++) {
+      particles[i].remove();
+      this.activeParticles.delete(particles[i]);
+    }
+  },
+
+  cleanAll() {
+    this.activeParticles.forEach(p => p.remove());
+    this.activeParticles.clear();
+  }
+};
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+  CONFETTI_MANAGER.cleanAll();
+});
+
+// Override createConfetti to use manager
+if (typeof window.createConfetti === 'function') {
+  window.createConfetti = function(element) {
+    CONFETTI_MANAGER.createConfetti(element);
+  };
+}
+
+// Enhanced localStorage with quota handling
+if (window.AUTO_SAVE) {
+  const originalSave = AUTO_SAVE.save;
+
+  AUTO_SAVE.save = function() {
+    try {
+      originalSave.call(this);
+    } catch (e) {
+      if (e.name === 'QuotaExceededError') {
+        console.warn('⚠️ Storage quota exceeded, attempting minimal save...');
+        this.saveMinimal();
+      } else {
+        console.error('❌ Save failed:', e);
+        if (typeof showNotification === 'function') {
+          showNotification('error', 'Save Failed', 'Could not save tournament', 3000);
+        }
+      }
+    }
+  };
+
+  AUTO_SAVE.saveMinimal = function() {
+    try {
+      const minimalState = {
+        version: '1.0',
+        timestamp: Date.now(),
+        champion: window.TOURNAMENT?.champion?.name,
+        groupCount: Object.keys(window.GROUP_RESULTS || {}).length
+      };
+
+      localStorage.setItem('tournament_minimal', JSON.stringify(minimalState));
+      console.log('✅ Minimal save successful');
+
+      if (typeof showNotification === 'function') {
+        showNotification('warning', 'Limited Save',
+          'Storage full - saved essential data only', 3000);
+      }
+    } catch (e) {
+      console.error('❌ Even minimal save failed:', e);
+    }
+  };
+}
+
+// Chart.js Safety Wrapper
+window.createChartSafely = function(canvasId, config) {
+  if (typeof Chart === 'undefined') {
+    console.error('❌ Chart.js not loaded');
+    const canvas = document.getElementById(canvasId);
+    if (canvas && canvas.parentElement) {
+      canvas.parentElement.innerHTML = `
+        <div style="padding: 20px; text-align: center; color: #ef4444; background: rgba(239, 68, 68, 0.1); border-radius: 8px;">
+          <p style="font-size: 1.2em; margin-bottom: 8px;">📊 Chart library not loaded</p>
+          <p style="font-size: 0.875rem; color: #9ca3af;">
+            Check internet connection and refresh page
+          </p>
+        </div>
+      `;
+    }
+    return null;
+  }
+
+  try {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) {
+      console.error(`Canvas element ${canvasId} not found`);
+      return null;
+    }
+    return new Chart(ctx.getContext('2d'), config);
+  } catch (error) {
+    console.error('❌ Chart creation failed:', error);
+    return null;
+  }
+};
+
+// Export enhanced global functions
+window.FEATURE_GUIDES = FEATURE_GUIDES;
+window.inductTournamentPerformers = inductTournamentPerformers;
+window.TEMPLATE_TEAMS = TEMPLATE_TEAMS;
+window.CONFETTI_MANAGER = CONFETTI_MANAGER;
+
 console.log('🚀 ALL NEW FEATURES LOADED SUCCESSFULLY!');
 console.log('   ✓ Live Match Simulation');
 console.log('   ✓ Export & Share System');
 console.log('   ✓ Undo/Redo System');
 console.log('   ✓ Sound Effects');
-console.log('   ✓ Tournament Templates');
-console.log('   ✓ Prediction System');
+console.log('   ✓ Quick Start Templates (with 64 teams)');
+console.log('   ✓ Enhanced Prediction System');
+console.log('   ✓ Hall of Fame Auto-Induction');
+console.log('   ✓ Feature Guides');
 console.log('   ✓ Print Support');
+console.log('');
+console.log('🔧 CRITICAL FIXES APPLIED:');
+console.log('   ✅ Function wrapping race condition fixed');
+console.log('   ✅ Confetti memory management added');
+console.log('   ✅ localStorage quota handling improved');
+console.log('   ✅ Chart.js safety wrapper added');
+console.log('   ✅ showOutput error fixed');
 
 </script>
 </body>

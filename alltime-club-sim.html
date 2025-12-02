@@ -222,11 +222,7 @@
       color: #bee3f8;
     }
 
-    .page {
-      max-width: 1800px;
-      margin: 0 auto;
-      padding: 20px;
-    }
+    /* .page styling defined above at lines 78-85 - removed duplicate */
 
     .layout {
       display: grid;
@@ -3014,7 +3010,7 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      animation: slideIn 0.3s ease;
+      animation: notificationSlideIn 0.3s ease;
       cursor: pointer;
       transition: all 0.2s ease;
     }
@@ -3081,7 +3077,7 @@
       color: var(--text-primary);
     }
 
-    @keyframes slideIn {
+    @keyframes notificationSlideIn {
       from {
         transform: translateX(400px);
         opacity: 0;
@@ -3092,7 +3088,7 @@
       }
     }
 
-    @keyframes slideOut {
+    @keyframes notificationSlideOut {
       from {
         transform: translateX(0);
         opacity: 1;
@@ -3104,7 +3100,7 @@
     }
 
     .notification.removing {
-      animation: slideOut 0.3s ease forwards;
+      animation: notificationSlideOut 0.3s ease forwards;
     }
 
     @media (max-width: 768px) {
@@ -3430,6 +3426,36 @@
     gap: 6px;
   }
 
+  /* Quick Actions Bar mobile optimization */
+  #quickActionsBar{
+    bottom: 10px !important;
+    right: 10px !important;
+    padding: 8px !important;
+    gap: 6px !important;
+    flex-wrap: wrap;
+    max-width: calc(100vw - 20px);
+  }
+
+  #quickActionsBar button{
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 1.1em !important;
+  }
+
+  /* Theme Switcher mobile optimization */
+  #themeSwitcher{
+    top: 60px !important;
+    right: 10px !important;
+    padding: 6px !important;
+    gap: 6px !important;
+  }
+
+  #themeSwitcher button{
+    width: 35px !important;
+    height: 35px !important;
+    font-size: 1em !important;
+  }
+
   .match-card{
     padding: 6px;
     font-size: 12px;
@@ -3472,25 +3498,7 @@
 }
 
 /* Loading State Animations */
-@keyframes shimmer {
-  0% { background-position: -1000px 0; }
-  100% { background-position: 1000px 0; }
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
-  }
-  50% {
-    transform: scale(1.05);
-    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
-  }
-}
+/* Note: shimmer, spin, pulse keyframes already defined in main CSS above */
 
 .btn-loading {
   background:
@@ -3812,6 +3820,623 @@ body[data-theme="stadium"] .page::after {
   height: 20px;
   animation: ripple 0.6s ease-out;
   pointer-events: none;
+}
+
+/* ========================================
+   ACCESSIBILITY - REDUCED MOTION SUPPORT
+   ======================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Disable confetti animations */
+  .confetti-particle {
+    display: none !important;
+  }
+
+  /* Disable ripple effects */
+  .ripple {
+    display: none !important;
+  }
+
+  /* Disable goal celebration animations */
+  .btn-goal-celebration {
+    animation: none !important;
+  }
+
+  /* Keep essential transitions but make them instant */
+  .modal-backdrop,
+  .notification,
+  .match-card {
+    animation: none !important;
+    transition: opacity 0.01ms !important;
+  }
+}
+
+/* ========================================
+   NEW FEATURES - CSS STYLES
+   ======================================== */
+
+/* Live Match Simulation */
+.live-match-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 10001;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.live-match-modal.active {
+  display: flex;
+}
+
+.live-match-container {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 900px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.live-scoreboard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1));
+  border-radius: 12px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.live-team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.live-team-name {
+  font-size: 1.4em;
+  font-weight: 700;
+  color: #f1f5f9;
+  text-align: center;
+}
+
+.live-score {
+  font-size: 4em;
+  font-weight: 900;
+  color: #10b981;
+  text-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+  font-variant-numeric: tabular-nums;
+}
+
+.live-clock {
+  font-size: 1.8em;
+  font-weight: 700;
+  color: #fbbf24;
+  padding: 12px 24px;
+  background: rgba(251, 191, 36, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  min-width: 100px;
+  text-align: center;
+}
+
+.live-controls {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.live-controls button {
+  padding: 10px 20px;
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  color: #60a5fa;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.live-controls button:hover {
+  background: rgba(59, 130, 246, 0.3);
+  transform: translateY(-2px);
+}
+
+.live-timeline {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  border: 1px solid rgba(71, 85, 105, 0.3);
+}
+
+.timeline-event {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px;
+  margin-bottom: 10px;
+  background: rgba(30, 41, 59, 0.6);
+  border-radius: 8px;
+  border-left: 3px solid rgba(71, 85, 105, 0.5);
+  animation: slideInLeft 0.3s ease;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.timeline-event.event-goal {
+  border-left-color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.timeline-event.event-yellow {
+  border-left-color: #fbbf24;
+}
+
+.timeline-event.event-red {
+  border-left-color: #ef4444;
+}
+
+.event-minute {
+  font-weight: 700;
+  color: #fbbf24;
+  font-size: 1.1em;
+  min-width: 40px;
+}
+
+.event-icon {
+  font-size: 1.5em;
+}
+
+.event-text {
+  color: #e2e8f0;
+  font-weight: 500;
+  flex: 1;
+}
+
+/* Export Menu */
+.export-menu {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1));
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 20px 0;
+}
+
+.export-menu h3 {
+  color: #60a5fa;
+  margin-bottom: 12px;
+  font-size: 1.1em;
+}
+
+.export-menu button {
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 12px;
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #60a5fa;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.export-menu button:hover {
+  background: rgba(59, 130, 246, 0.3);
+  transform: translateX(4px);
+}
+
+/* Undo/Redo Controls */
+.history-controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.history-controls button {
+  flex: 1;
+  padding: 10px;
+  background: rgba(168, 85, 247, 0.2);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  color: #c084fc;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.history-controls button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.history-controls button:not(:disabled):hover {
+  background: rgba(168, 85, 247, 0.3);
+  transform: scale(1.05);
+}
+
+/* Search & Filter */
+.search-filter-container {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.6));
+  border: 1px solid rgba(71, 85, 105, 0.3);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 14px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(71, 85, 105, 0.4);
+  border-radius: 8px;
+  color: #f1f5f9;
+  font-size: 1em;
+  margin-bottom: 16px;
+  transition: all 0.2s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.filter-group {
+  margin-bottom: 16px;
+}
+
+.filter-group label {
+  display: block;
+  color: #94a3b8;
+  font-size: 0.9em;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.filter-group select,
+.filter-group input[type="range"] {
+  width: 100%;
+  padding: 10px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(71, 85, 105, 0.4);
+  border-radius: 8px;
+  color: #f1f5f9;
+}
+
+.rating-display {
+  display: flex;
+  justify-content: space-between;
+  color: #10b981;
+  font-weight: 600;
+  font-size: 0.9em;
+  margin-top: 4px;
+}
+
+.filtered-teams-list {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-top: 16px;
+}
+
+.team-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  margin-bottom: 8px;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(71, 85, 105, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.team-card:hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.4);
+  transform: translateX(4px);
+}
+
+.team-card-name {
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.team-card-rating {
+  padding: 4px 12px;
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 6px;
+  color: #10b981;
+  font-weight: 700;
+  font-size: 0.9em;
+}
+
+.no-results {
+  text-align: center;
+  color: #64748b;
+  padding: 40px;
+  font-style: italic;
+}
+
+/* Sound Controls */
+.sound-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(168, 85, 247, 0.1);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.sound-toggle {
+  padding: 8px 16px;
+  background: rgba(168, 85, 247, 0.2);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  color: #c084fc;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.sound-toggle:hover {
+  background: rgba(168, 85, 247, 0.3);
+}
+
+.sound-toggle.muted {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
+.volume-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(168, 85, 247, 0.2);
+  outline: none;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #c084fc;
+  cursor: pointer;
+}
+
+/* Tournament Templates */
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.template-card {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.8));
+  border: 1px solid rgba(71, 85, 105, 0.3);
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.template-card:hover {
+  border-color: #10b981;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.2);
+}
+
+.template-icon {
+  font-size: 3em;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.template-name {
+  font-size: 1.2em;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.template-desc {
+  font-size: 0.9em;
+  color: #94a3b8;
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* Prediction System */
+.prediction-panel {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.1));
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.prediction-match {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.prediction-team {
+  flex: 1;
+  text-align: center;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.prediction-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.prediction-btn {
+  padding: 8px 16px;
+  background: rgba(251, 191, 36, 0.2);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  color: #fbbf24;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.prediction-btn:hover {
+  background: rgba(251, 191, 36, 0.3);
+  transform: scale(1.05);
+}
+
+.prediction-btn.selected {
+  background: rgba(251, 191, 36, 0.4);
+  border-color: #fbbf24;
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.3);
+}
+
+.prediction-score {
+  text-align: center;
+  padding: 16px;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+.prediction-accuracy {
+  font-size: 2em;
+  font-weight: 900;
+  color: #10b981;
+}
+
+/* Print Styles */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .sidebar,
+  header,
+  .theme-toggle-btn,
+  #quickActionsBar,
+  #themeSwitcher,
+  .ctrl-btn,
+  .export-menu,
+  .history-controls,
+  .sound-controls,
+  button {
+    display: none !important;
+  }
+
+  .main-content,
+  .control-column,
+  #output {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 20px !important;
+  }
+
+  .bracket-container,
+  .group-grid,
+  table {
+    page-break-inside: avoid;
+  }
+
+  * {
+    background: white !important;
+    color: black !important;
+    border-color: #333 !important;
+  }
+
+  h1, h2, h3 {
+    color: #000 !important;
+  }
+}
+
+/* Mobile Optimizations for New Features */
+@media (max-width: 640px) {
+  .live-scoreboard {
+    flex-direction: column;
+    padding: 20px;
+    gap: 16px;
+  }
+
+  .live-score {
+    font-size: 3em;
+  }
+
+  .live-clock {
+    font-size: 1.4em;
+  }
+
+  .template-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .export-menu button {
+    font-size: 0.9em;
+  }
+
+  .live-controls {
+    flex-direction: column;
+  }
+
+  .live-controls button {
+    width: 100%;
+  }
 }
 
   </style>
@@ -7504,6 +8129,13 @@ function renderGoalsTimelineChart(matches) {
   const ctx = document.getElementById('goalsTimelineChart');
   if (!ctx) return;
 
+  // Check if Chart.js is loaded
+  if (typeof Chart === 'undefined') {
+    console.warn('Chart.js not loaded - skipping chart render');
+    ctx.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 20px;">Chart.js library required for visualization</p>';
+    return;
+  }
+
   const rounds = {};
   matches.forEach(m => {
     const round = m.round || 'Group';
@@ -7511,34 +8143,45 @@ function renderGoalsTimelineChart(matches) {
     rounds[round] += (m.scoreA || 0) + (m.scoreB || 0);
   });
 
-  new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: Object.keys(rounds),
-      datasets: [{
-        label: 'Goals per Round',
-        data: Object.values(rounds),
-        borderColor: '#10b981',
-        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-        borderWidth: 3,
-        fill: true,
-        tension: 0.4
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { beginAtZero: true, ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148, 163, 184, 0.1)' } },
-        x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148, 163, 184, 0.1)' } }
+  try {
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: Object.keys(rounds),
+        datasets: [{
+          label: 'Goals per Round',
+          data: Object.values(rounds),
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148, 163, 184, 0.1)' } },
+          x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148, 163, 184, 0.1)' } }
+        }
       }
-    }
-  });
+    });
+  } catch (error) {
+    console.error('Failed to render chart:', error);
+    ctx.innerHTML = '<p style="text-align: center; color: #ef4444; padding: 20px;">Failed to render chart</p>';
+  }
 }
 
 function renderTeamPerformanceChart(matches) {
   const ctx = document.getElementById('teamPerformanceChart');
   if (!ctx) return;
+
+  if (typeof Chart === 'undefined') {
+    console.warn('Chart.js not loaded - skipping chart render');
+    ctx.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 20px;">Chart.js library required for visualization</p>';
+    return;
+  }
 
   const teams = {};
   matches.forEach(m => {
@@ -7550,7 +8193,8 @@ function renderTeamPerformanceChart(matches) {
 
   const points = Object.entries(teams).map(([team, data]) => ({ x: data.strength, y: data.goals, team }));
 
-  new Chart(ctx, {
+  try {
+    new Chart(ctx, {
     type: 'scatter',
     data: {
       datasets: [{
@@ -7576,11 +8220,21 @@ function renderTeamPerformanceChart(matches) {
       }
     }
   });
+  } catch (error) {
+    console.error('Failed to render chart:', error);
+    ctx.innerHTML = '<p style="text-align: center; color: #ef4444; padding: 20px;">Failed to render chart</p>';
+  }
 }
 
 function renderPositionGoalsChart() {
   const ctx = document.getElementById('positionGoalsChart');
   if (!ctx) return;
+
+  if (typeof Chart === 'undefined') {
+    console.warn('Chart.js not loaded - skipping chart render');
+    ctx.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 20px;">Chart.js library required for visualization</p>';
+    return;
+  }
 
   const positions = { FW: 0, MF: 0, DF: 0, Other: 0 };
   Object.values(PLAYER_DB).forEach(player => {
@@ -7591,28 +8245,39 @@ function renderPositionGoalsChart() {
     else positions.Other += player.goals || 0;
   });
 
-  new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: ['Forwards', 'Midfielders', 'Defenders', 'Others'],
-      datasets: [{
-        data: [positions.FW, positions.MF, positions.DF, positions.Other],
-        backgroundColor: ['#ef4444', '#f59e0b', '#10b981', '#3b82f6'],
-        borderWidth: 2
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { position: 'bottom', labels: { color: '#94a3b8' } }
+  try {
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Forwards', 'Midfielders', 'Defenders', 'Others'],
+        datasets: [{
+          data: [positions.FW, positions.MF, positions.DF, positions.Other],
+          backgroundColor: ['#ef4444', '#f59e0b', '#10b981', '#3b82f6'],
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom', labels: { color: '#94a3b8' } }
+        }
       }
-    }
-  });
+    });
+  } catch (error) {
+    console.error('Failed to render chart:', error);
+    ctx.innerHTML = '<p style="text-align: center; color: #ef4444; padding: 20px;">Failed to render chart</p>';
+  }
 }
 
 function renderGoalTimingChart(matches) {
   const ctx = document.getElementById('goalTimingChart');
   if (!ctx) return;
+
+  if (typeof Chart === 'undefined') {
+    console.warn('Chart.js not loaded - skipping chart render');
+    ctx.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 20px;">Chart.js library required for visualization</p>';
+    return;
+  }
 
   const bins = { '0-15': 0, '16-30': 0, '31-45': 0, '46-60': 0, '61-75': 0, '76-90': 0 };
   matches.forEach(match => {
@@ -7629,7 +8294,8 @@ function renderGoalTimingChart(matches) {
     }
   });
 
-  new Chart(ctx, {
+  try {
+    new Chart(ctx, {
     type: 'bar',
     data: {
       labels: Object.keys(bins),
@@ -7648,6 +8314,10 @@ function renderGoalTimingChart(matches) {
       }
     }
   });
+  } catch (error) {
+    console.error('Failed to render chart:', error);
+    ctx.innerHTML = '<p style="text-align: center; color: #ef4444; padding: 20px;">Failed to render chart</p>';
+  }
 }
 
 function renderConsistencyTable() {
@@ -24494,12 +25164,8 @@ document.addEventListener('keydown', (e) => {
     'KeyH': () => {
       e.preventDefault();
       showHallOfFame();
-    },
-    'Escape': () => {
-      if (typeof closeAllModals === 'function') {
-        closeAllModals();
-      }
     }
+    // Note: Escape key handled by global escape handler below
   };
 
   if (e.ctrlKey || e.metaKey) {
@@ -24618,20 +25284,23 @@ function createQuickActionsBar() {
 
   const bar = document.createElement('div');
   bar.id = 'quickActionsBar';
+  bar.setAttribute('role', 'toolbar');
+  bar.setAttribute('aria-label', 'Quick Actions');
   bar.style.cssText = 'position: fixed; bottom: 30px; right: 30px; background: linear-gradient(135deg, #1e293b, #334155); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 12px; display: flex; gap: 10px; z-index: 9000; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);';
 
   const buttons = [
-    { icon: '⚡', title: 'Simulate Next (Space)', action: 'simulateNextMatchday' },
-    { icon: '📊', title: 'Standings (R)', action: 'showStandings' },
-    { icon: '💾', title: 'Save (S)', action: 'quickSaveTournament' },
-    { icon: '🏛️', title: 'Hall of Fame (H)', action: 'showHallOfFame' },
-    { icon: '⌨️', title: 'Shortcuts', action: 'showKeyboardShortcuts' }
+    { icon: '⚡', title: 'Simulate Next (Space)', action: 'simulateNextMatchday', ariaLabel: 'Simulate next matchday' },
+    { icon: '📊', title: 'Standings (R)', action: 'showStandings', ariaLabel: 'Show tournament standings' },
+    { icon: '💾', title: 'Save (S)', action: 'quickSaveTournament', ariaLabel: 'Quick save tournament' },
+    { icon: '🏛️', title: 'Hall of Fame (H)', action: 'showHallOfFame', ariaLabel: 'Show Hall of Fame' },
+    { icon: '⌨️', title: 'Shortcuts', action: 'showKeyboardShortcuts', ariaLabel: 'Show keyboard shortcuts' }
   ];
 
   buttons.forEach(btn => {
     const button = document.createElement('button');
     button.textContent = btn.icon;
     button.title = btn.title;
+    button.setAttribute('aria-label', btn.ariaLabel);
     button.style.cssText = 'background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #10b981; width: 45px; height: 45px; border-radius: 8px; cursor: pointer; font-size: 1.3em; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;';
     button.onmouseover = () => {
       button.style.background = 'rgba(16, 185, 129, 0.2)';
@@ -24659,12 +25328,37 @@ function quickSaveTournament() {
   }
 }
 
-// Initialize systems on page load
+// Initialize all systems on page load
 window.addEventListener('load', () => {
+  // Core features initialization
   HALL_OF_FAME.init();
   createQuickActionsBar();
 
-  console.log('✅ New features loaded: Momentum System, Hall of Fame, Keyboard Shortcuts, Achievement Tracker, Quick Actions');
+  // Aesthetic features initialization
+  THEME_MANAGER.init();
+  createThemeSwitcher();
+
+  // Add ripple effect to all buttons
+  document.querySelectorAll('button').forEach(button => {
+    button.addEventListener('click', createRipple);
+  });
+
+  // Initialize function wrappers (after all scripts have loaded)
+  if (typeof initializeFunctionWrappers === 'function') {
+    initializeFunctionWrappers();
+  }
+
+  // Initialize accessibility enhancements
+  if (typeof initializeAccessibility === 'function') {
+    initializeAccessibility();
+  }
+
+  // Initialize auto-save system
+  if (typeof AUTO_SAVE !== 'undefined' && AUTO_SAVE.startAutoSave) {
+    AUTO_SAVE.startAutoSave();
+  }
+
+  console.log('✅ All features loaded: Momentum System, Hall of Fame, Keyboard Shortcuts, Achievement Tracker, Quick Actions, Theme System');
 });
 
 console.log('🎮 Enhanced features loaded successfully!');
@@ -25019,6 +25713,8 @@ const THEME_MANAGER = {
 function createThemeSwitcher() {
   const switcher = document.createElement('div');
   switcher.id = 'themeSwitcher';
+  switcher.setAttribute('role', 'radiogroup');
+  switcher.setAttribute('aria-label', 'Theme selector');
   switcher.style.cssText = `
     position: fixed;
     top: 80px;
@@ -25037,6 +25733,9 @@ function createThemeSwitcher() {
     const btn = document.createElement('button');
     btn.textContent = key === 'stadium' ? '🏟️' : '🎨';
     btn.title = label;
+    btn.setAttribute('role', 'radio');
+    btn.setAttribute('aria-label', `Switch to ${label} theme`);
+    btn.setAttribute('aria-checked', THEME_MANAGER.current === key ? 'true' : 'false');
     btn.style.cssText = `
       background: ${THEME_MANAGER.current === key ? 'rgba(16, 185, 129, 0.2)' : 'rgba(71, 85, 105, 0.3)'};
       border: 1px solid ${THEME_MANAGER.current === key ? 'rgba(16, 185, 129, 0.5)' : 'rgba(71, 85, 105, 0.5)'};
@@ -25088,18 +25787,7 @@ function enhanceModal(modal) {
   }
 }
 
-// Initialize aesthetic enhancements on page load
-window.addEventListener('load', () => {
-  THEME_MANAGER.init();
-  createThemeSwitcher();
-
-  // Add ripple effect to all buttons
-  document.querySelectorAll('button').forEach(button => {
-    button.addEventListener('click', createRipple);
-  });
-
-  console.log('✨ Aesthetic enhancements initialized!');
-});
+// Aesthetic enhancements initialized with core features in main load event listener above
 
 // Export functions for global access
 window.celebrateGoal = celebrateGoal;
@@ -25198,39 +25886,44 @@ function closeNotification(closeBtn) {
 }
 
 // Hook into existing functions to show notifications
-const originalSimulateGroupStage = window.simulateGroupStage;
-if (originalSimulateGroupStage) {
-  window.simulateGroupStage = function(...args) {
-    updateTournamentProgress('groups');
-    const result = originalSimulateGroupStage.apply(this, args);
-    showNotification('tournament', 'Group Stage Complete', 'All groups have been simulated!', 3000);
-    return result;
-  };
-}
+// Function wrapping with proper timing - wrapped in load event to ensure functions exist
+function initializeFunctionWrappers() {
+  // Wrap simulateGroupStage
+  if (typeof window.simulateGroupStage === 'function') {
+    const originalSimulateGroupStage = window.simulateGroupStage;
+    window.simulateGroupStage = function(...args) {
+      updateTournamentProgress('groups');
+      const result = originalSimulateGroupStage.apply(this, args);
+      showNotification('tournament', 'Group Stage Complete', 'All groups have been simulated!', 3000);
+      return result;
+    };
+  }
 
-const originalSimulateKnockoutRounds = window.simulateKnockoutRounds;
-if (originalSimulateKnockoutRounds) {
-  window.simulateKnockoutRounds = function(...args) {
-    const result = originalSimulateKnockoutRounds.apply(this, args);
+  // Wrap simulateKnockoutRounds
+  if (typeof window.simulateKnockoutRounds === 'function') {
+    const originalSimulateKnockoutRounds = window.simulateKnockoutRounds;
+    window.simulateKnockoutRounds = function(...args) {
+      const result = originalSimulateKnockoutRounds.apply(this, args);
 
-    if (result && result.champion) {
-      updateTournamentProgress('final');
-      showNotification('achievement', 'Tournament Complete!', `${result.champion.name} is the champion!`, 5000);
-    }
+      if (result && result.champion) {
+        updateTournamentProgress('final');
+        showNotification('achievement', 'Tournament Complete!', `${result.champion.name} is the champion!`, 5000);
+      }
 
-    return result;
-  };
-}
+      return result;
+    };
+  }
 
-// Show progress indicator when groups are generated
-const originalHandleGenerateGroups = window.handleGenerateGroups;
-if (originalHandleGenerateGroups) {
-  window.handleGenerateGroups = function(...args) {
-    const result = originalHandleGenerateGroups.apply(this, args);
-    updateTournamentProgress('groups');
-    showNotification('success', 'Groups Generated', '16 groups have been created!', 3000);
-    return result;
-  };
+  // Wrap handleGenerateGroups
+  if (typeof window.handleGenerateGroups === 'function') {
+    const originalHandleGenerateGroups = window.handleGenerateGroups;
+    window.handleGenerateGroups = function(...args) {
+      const result = originalHandleGenerateGroups.apply(this, args);
+      updateTournamentProgress('groups');
+      showNotification('success', 'Groups Generated', '16 groups have been created!', 3000);
+      return result;
+    };
+  }
 }
 
 // Initialize on page load
@@ -25281,6 +25974,1192 @@ document.addEventListener('DOMContentLoaded', function() {
     updateTournamentProgress('groups');
   }
 });
+
+// ========================================
+// ACCESSIBILITY ENHANCEMENTS
+// ========================================
+function initializeAccessibility() {
+  // Add aria-live region for notifications
+  const notifContainer = document.getElementById('notificationContainer');
+  if (notifContainer) {
+    notifContainer.setAttribute('aria-live', 'polite');
+    notifContainer.setAttribute('aria-atomic', 'true');
+    notifContainer.setAttribute('role', 'status');
+  }
+
+  // Add skip-to-content link
+  const skipLink = document.createElement('a');
+  skipLink.href = '#main-content';
+  skipLink.className = 'skip-link';
+  skipLink.textContent = 'Skip to main content';
+  skipLink.style.cssText = `
+    position: absolute;
+    top: -50px;
+    left: 10px;
+    background: #10b981;
+    color: white;
+    padding: 12px 20px;
+    text-decoration: none;
+    border-radius: 4px;
+    z-index: 100000;
+    font-weight: 600;
+    transition: top 0.2s ease;
+  `;
+  skipLink.addEventListener('focus', () => {
+    skipLink.style.top = '10px';
+  });
+  skipLink.addEventListener('blur', () => {
+    skipLink.style.top = '-50px';
+  });
+  document.body.insertBefore(skipLink, document.body.firstChild);
+
+  // Add main content landmark
+  const mainContent = document.querySelector('#output') || document.querySelector('.control-column');
+  if (mainContent && !mainContent.id) {
+    mainContent.id = 'main-content';
+  }
+  if (mainContent) {
+    mainContent.setAttribute('role', 'main');
+    mainContent.setAttribute('aria-label', 'Tournament results and controls');
+  }
+
+  // Add tournament progress aria labels
+  const progressBar = document.getElementById('tournamentProgress');
+  if (progressBar) {
+    progressBar.setAttribute('role', 'progressbar');
+    progressBar.setAttribute('aria-label', 'Tournament progress');
+  }
+}
+
+// ========================================
+// AUTO-SAVE SYSTEM
+// ========================================
+const AUTO_SAVE = {
+  key: 'tournament_autosave_v1',
+  interval: null,
+  saveIntervalMs: 30000, // 30 seconds
+
+  save() {
+    try {
+      const state = {
+        version: '1.0',
+        timestamp: Date.now(),
+        teams: window.TEAMS,
+        groups: window.GROUPS,
+        groupResults: window.GROUP_RESULTS,
+        knockoutResults: window.KNOCKOUT_RESULTS,
+        tournament: window.TOURNAMENT,
+        matchHistory: window.MATCH_HISTORY || [],
+        hallOfFame: typeof HALL_OF_FAME !== 'undefined' ? HALL_OF_FAME.records : {}
+      };
+
+      localStorage.setItem(this.key, JSON.stringify(state));
+      console.log('✓ Auto-saved at', new Date().toLocaleTimeString());
+    } catch (e) {
+      console.error('Auto-save failed:', e);
+
+      // Handle quota exceeded
+      if (e.name === 'QuotaExceededError') {
+        this.cleanup();
+        // Try again after cleanup
+        try {
+          localStorage.setItem(this.key, JSON.stringify({
+            version: '1.0',
+            timestamp: Date.now(),
+            groups: window.GROUPS,
+            tournament: window.TOURNAMENT
+          }));
+        } catch (e2) {
+          console.error('Auto-save failed even after cleanup:', e2);
+        }
+      }
+    }
+  },
+
+  load() {
+    try {
+      const saved = localStorage.getItem(this.key);
+      if (!saved) return null;
+
+      const state = JSON.parse(saved);
+
+      // Validate version
+      if (state.version !== '1.0') {
+        console.warn('Incompatible save version');
+        return null;
+      }
+
+      return state;
+    } catch (e) {
+      console.error('Auto-restore failed:', e);
+      return null;
+    }
+  },
+
+  restore(state) {
+    if (!state) return false;
+
+    try {
+      // Restore global state
+      if (state.teams) window.TEAMS = state.teams;
+      if (state.groups) window.GROUPS = state.groups;
+      if (state.groupResults) window.GROUP_RESULTS = state.groupResults;
+      if (state.knockoutResults) window.KNOCKOUT_RESULTS = state.knockoutResults;
+      if (state.tournament) window.TOURNAMENT = state.tournament;
+      if (state.matchHistory) window.MATCH_HISTORY = state.matchHistory;
+
+      // Restore Hall of Fame
+      if (state.hallOfFame && typeof HALL_OF_FAME !== 'undefined') {
+        HALL_OF_FAME.records = state.hallOfFame;
+      }
+
+      console.log('✓ State restored from', new Date(state.timestamp).toLocaleString());
+      return true;
+    } catch (e) {
+      console.error('Restore failed:', e);
+      return false;
+    }
+  },
+
+  startAutoSave() {
+    // Check for existing save on startup
+    const saved = this.load();
+    if (saved && saved.timestamp) {
+      const ageMinutes = Math.floor((Date.now() - saved.timestamp) / 60000);
+
+      if (ageMinutes < 60 && confirm(`Resume tournament from ${ageMinutes} minute${ageMinutes !== 1 ? 's' : ''} ago?`)) {
+        if (this.restore(saved)) {
+          // Refresh UI if functions exist
+          if (typeof renderGroups === 'function') renderGroups();
+          if (typeof updateTournamentBracket === 'function') updateTournamentBracket();
+
+          showNotification('success', 'Tournament Restored', 'Your progress has been restored', 3000);
+        }
+      }
+    }
+
+    // Start periodic auto-save
+    this.interval = setInterval(() => {
+      // Only save if there's actual tournament data
+      if (window.GROUPS || window.TOURNAMENT) {
+        this.save();
+      }
+    }, this.saveIntervalMs);
+
+    console.log('✓ Auto-save started (every 30 seconds)');
+  },
+
+  stopAutoSave() {
+    if (this.interval) {
+      clearInterval(this.interval);
+      this.interval = null;
+      console.log('✓ Auto-save stopped');
+    }
+  },
+
+  cleanup() {
+    // Remove old autosaves
+    const keys = Object.keys(localStorage);
+    keys.forEach(key => {
+      if (key.startsWith('tournament_autosave_') && key !== this.key) {
+        localStorage.removeItem(key);
+        console.log('Cleaned up old save:', key);
+      }
+    });
+  },
+
+  clear() {
+    localStorage.removeItem(this.key);
+    console.log('✓ Auto-save cleared');
+  }
+};
+
+// Save before page unload
+window.addEventListener('beforeunload', () => {
+  if (window.GROUPS || window.TOURNAMENT) {
+    AUTO_SAVE.save();
+  }
+});
+
+// Export to global scope
+window.AUTO_SAVE = AUTO_SAVE;
+
+// ========================================
+// MEMORY LEAK PREVENTION
+// ========================================
+function cleanupEventListeners() {
+  // Clean up notification event listeners
+  document.querySelectorAll('.notification').forEach(notification => {
+    const closeBtn = notification.querySelector('.notification-close');
+    if (closeBtn) {
+      // Clone and replace to remove all event listeners
+      const newBtn = closeBtn.cloneNode(true);
+      closeBtn.parentNode.replaceChild(newBtn, closeBtn);
+    }
+  });
+}
+
+// Periodically clean up old notifications
+setInterval(() => {
+  const container = document.getElementById('notificationContainer');
+  if (container && container.children.length > 5) {
+    // Remove old notifications beyond 5
+    Array.from(container.children)
+      .slice(5)
+      .forEach(el => el.remove());
+  }
+}, 60000); // Every minute
+
+// ========================================
+// ALL NEW FEATURES - JAVASCRIPT
+// ========================================
+
+// ========================================
+// 1. LIVE MATCH SIMULATION SYSTEM
+// ========================================
+class LiveMatchSimulator {
+  constructor(team1, team2) {
+    this.team1 = team1;
+    this.team2 = team2;
+    this.minute = 0;
+    this.score = [0, 0];
+    this.events = [];
+    this.paused = false;
+    this.speed = 500; // ms per minute
+    this.interval = null;
+    this.modalId = 'liveMatchModal_' + Date.now();
+  }
+
+  start() {
+    this.createModal();
+    this.renderUI();
+    this.interval = setInterval(() => this.tick(), this.speed);
+  }
+
+  createModal() {
+    const modal = document.createElement('div');
+    modal.id = this.modalId;
+    modal.className = 'live-match-modal active';
+    modal.innerHTML = `
+      <div class="live-match-container">
+        <div id="liveMatchContent_${this.modalId}"></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+
+  tick() {
+    if (this.paused) return;
+
+    this.minute++;
+    this.updateClock();
+
+    // Calculate event probabilities based on team strength
+    const strength1 = this.team1.overallRating || this.team1.strength || 80;
+    const strength2 = this.team2.overallRating || this.team2.strength || 80;
+    const totalStrength = strength1 + strength2;
+    const goalChance1 = (strength1 / totalStrength) * 0.05;
+    const goalChance2 = (strength2 / totalStrength) * 0.05;
+
+    // Goal events
+    const rand = Math.random();
+    if (rand < goalChance1) {
+      this.addGoal(0);
+    } else if (rand < goalChance1 + goalChance2) {
+      this.addGoal(1);
+    }
+
+    // Other events (15% chance)
+    if (Math.random() < 0.15) {
+      this.addRandomEvent();
+    }
+
+    // End match at 90 minutes
+    if (this.minute >= 90) {
+      this.endMatch();
+    }
+  }
+
+  addGoal(teamIndex) {
+    this.score[teamIndex]++;
+    const team = teamIndex === 0 ? this.team1 : this.team2;
+    const event = {
+      minute: this.minute,
+      type: 'goal',
+      team: team.name,
+      icon: '⚽',
+      text: `GOAL! ${team.name} scores!`,
+      teamIndex
+    };
+    this.events.unshift(event);
+    this.renderEvent(event);
+    this.updateScore();
+
+    // Trigger celebration with confetti
+    if (typeof createConfetti === 'function') {
+      const modal = document.getElementById(this.modalId);
+      if (modal) createConfetti(modal);
+    }
+
+    // Play goal sound
+    if (typeof SOUND_SYSTEM !== 'undefined') {
+      SOUND_SYSTEM.play('goal');
+    }
+  }
+
+  addRandomEvent() {
+    const eventTypes = [
+      { type: 'yellow', icon: '🟨', text: 'Yellow card' },
+      { type: 'sub', icon: '↔️', text: 'Substitution' },
+      { type: 'save', icon: '🧤', text: 'Great save!' },
+      { type: 'chance', icon: '🎯', text: 'Close chance!' },
+      { type: 'offside', icon: '🚩', text: 'Offside' },
+      { type: 'corner', icon: '⛳', text: 'Corner kick' },
+      { type: 'foul', icon: '⚠️', text: 'Foul' }
+    ];
+
+    const event = eventTypes[Math.floor(Math.random() * eventTypes.length)];
+    const team = Math.random() < 0.5 ? this.team1 : this.team2;
+
+    const fullEvent = {
+      minute: this.minute,
+      ...event,
+      team: team.name,
+      text: `${event.text} - ${team.name}`
+    };
+
+    this.events.unshift(fullEvent);
+    this.renderEvent(fullEvent);
+  }
+
+  renderUI() {
+    const container = document.getElementById('liveMatchContent_' + this.modalId);
+    if (!container) return;
+
+    container.innerHTML = `
+      <div class="live-scoreboard">
+        <div class="live-team">
+          <div class="live-team-name">${this.team1.name}</div>
+          <div class="live-score" id="score1_${this.modalId}">0</div>
+        </div>
+        <div class="live-clock" id="clock_${this.modalId}">0'</div>
+        <div class="live-team">
+          <div class="live-team-name">${this.team2.name}</div>
+          <div class="live-score" id="score2_${this.modalId}">0</div>
+        </div>
+      </div>
+      <div class="live-controls">
+        <button onclick="window.currentLiveMatch.togglePause()">⏸️ Pause/Resume</button>
+        <button onclick="window.currentLiveMatch.setSpeed(100)">⏩ Fast (2x)</button>
+        <button onclick="window.currentLiveMatch.setSpeed(500)">▶️ Normal</button>
+        <button onclick="window.currentLiveMatch.setSpeed(1000)">⏪ Slow</button>
+        <button onclick="window.currentLiveMatch.close()">❌ Close</button>
+      </div>
+      <div class="live-timeline" id="timeline_${this.modalId}"></div>
+    `;
+  }
+
+  renderEvent(event) {
+    const timeline = document.getElementById('timeline_' + this.modalId);
+    if (!timeline) return;
+
+    const el = document.createElement('div');
+    el.className = `timeline-event event-${event.type}`;
+    el.innerHTML = `
+      <span class="event-minute">${event.minute}'</span>
+      <span class="event-icon">${event.icon}</span>
+      <span class="event-text">${event.text}</span>
+    `;
+    timeline.insertBefore(el, timeline.firstChild);
+  }
+
+  updateScore() {
+    const score1 = document.getElementById('score1_' + this.modalId);
+    const score2 = document.getElementById('score2_' + this.modalId);
+    if (score1) score1.textContent = this.score[0];
+    if (score2) score2.textContent = this.score[1];
+  }
+
+  updateClock() {
+    const clock = document.getElementById('clock_' + this.modalId);
+    if (clock) clock.textContent = `${this.minute}'`;
+  }
+
+  togglePause() {
+    this.paused = !this.paused;
+    if (typeof showNotification === 'function') {
+      showNotification('info', this.paused ? 'Paused' : 'Resumed', '', 1000);
+    }
+  }
+
+  setSpeed(ms) {
+    this.speed = ms;
+    if (this.interval) {
+      clearInterval(this.interval);
+      this.interval = setInterval(() => this.tick(), this.speed);
+    }
+  }
+
+  endMatch() {
+    clearInterval(this.interval);
+    this.interval = null;
+
+    setTimeout(() => {
+      const winner = this.score[0] > this.score[1] ? this.team1.name :
+                     this.score[1] > this.score[0] ? this.team2.name : 'Draw';
+
+      if (typeof showNotification === 'function') {
+        showNotification('tournament', 'Full Time!',
+          `${this.team1.name} ${this.score[0]} - ${this.score[1]} ${this.team2.name}`, 5000);
+      }
+
+      // Play whistle sound
+      if (typeof SOUND_SYSTEM !== 'undefined') {
+        SOUND_SYSTEM.play('whistle');
+      }
+
+      // Save result to history
+      if (typeof HISTORY_MANAGER !== 'undefined') {
+        HISTORY_MANAGER.saveState();
+      }
+
+      // Close modal after 3 seconds
+      setTimeout(() => this.close(), 3000);
+    }, 1000);
+  }
+
+  close() {
+    const modal = document.getElementById(this.modalId);
+    if (modal) {
+      modal.classList.remove('active');
+      setTimeout(() => modal.remove(), 300);
+    }
+    if (this.interval) {
+      clearInterval(this.interval);
+    }
+    window.currentLiveMatch = null;
+  }
+}
+
+// Global function to start live match
+function startLiveMatch(team1, team2) {
+  if (!team1 || !team2) {
+    if (typeof showNotification === 'function') {
+      showNotification('error', 'Error', 'Invalid teams for live match', 2000);
+    }
+    return;
+  }
+
+  window.currentLiveMatch = new LiveMatchSimulator(team1, team2);
+  window.currentLiveMatch.start();
+}
+
+// ========================================
+// 2. EXPORT & SHARE SYSTEM
+// ========================================
+const EXPORT_SYSTEM = {
+  exportAsJSON() {
+    try {
+      const data = {
+        version: '1.0',
+        timestamp: Date.now(),
+        tournament: window.TOURNAMENT,
+        groups: window.GROUPS,
+        groupResults: window.GROUP_RESULTS,
+        knockoutResults: window.KNOCKOUT_RESULTS,
+        matchHistory: window.MATCH_HISTORY || [],
+        hallOfFame: typeof HALL_OF_FAME !== 'undefined' ? HALL_OF_FAME.records : {}
+      };
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      this.downloadBlob(blob, `tournament-${Date.now()}.json`);
+    } catch (e) {
+      console.error('JSON export failed:', e);
+      if (typeof showNotification === 'function') {
+        showNotification('error', 'Export Failed', 'Could not export JSON', 3000);
+      }
+    }
+  },
+
+  exportAsCSV() {
+    try {
+      let csv = 'Group,Team,Played,Won,Drawn,Lost,GF,GA,GD,Points\n';
+
+      if (window.GROUP_RESULTS) {
+        Object.entries(window.GROUP_RESULTS).forEach(([groupName, group]) => {
+          if (group.teams) {
+            group.teams.forEach(team => {
+              csv += `${groupName},${team.name},${team.played || 0},${team.won || 0},${team.drawn || 0},${team.lost || 0},`;
+              csv += `${team.gf || 0},${team.ga || 0},${team.gd || 0},${team.points || 0}\n`;
+            });
+          }
+        });
+      }
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      this.downloadBlob(blob, `results-${Date.now()}.csv`);
+    } catch (e) {
+      console.error('CSV export failed:', e);
+      if (typeof showNotification === 'function') {
+        showNotification('error', 'Export Failed', 'Could not export CSV', 3000);
+      }
+    }
+  },
+
+  shareToClipboard() {
+    try {
+      let text = '🏆 All-Time Football Tournament Results\n\n';
+
+      if (window.TOURNAMENT && window.TOURNAMENT.champion) {
+        text += `🥇 Champion: ${window.TOURNAMENT.champion.name}\n`;
+        if (window.TOURNAMENT.runnerUp) {
+          text += `🥈 Runner-up: ${window.TOURNAMENT.runnerUp.name}\n`;
+        }
+        text += '\n';
+      }
+
+      if (window.GROUP_RESULTS) {
+        text += 'Group Stage Results:\n';
+        Object.entries(window.GROUP_RESULTS).forEach(([groupName, group]) => {
+          text += `\n${groupName.toUpperCase()}:\n`;
+          if (group.teams) {
+            group.teams.forEach((team, i) => {
+              text += `${i + 1}. ${team.name} - ${team.points || 0} pts (${team.gf || 0} GF, ${team.ga || 0} GA)\n`;
+            });
+          }
+        });
+      }
+
+      text += '\n🎮 Generated by All-Time Football Simulator';
+
+      navigator.clipboard.writeText(text).then(() => {
+        if (typeof showNotification === 'function') {
+          showNotification('success', 'Copied!', 'Results copied to clipboard', 2000);
+        }
+      }).catch(err => {
+        console.error('Copy failed:', err);
+        if (typeof showNotification === 'function') {
+          showNotification('error', 'Copy Failed', 'Could not copy to clipboard', 3000);
+        }
+      });
+    } catch (e) {
+      console.error('Share to clipboard failed:', e);
+    }
+  },
+
+  downloadBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    if (typeof showNotification === 'function') {
+      showNotification('success', 'Export Complete', `Downloaded ${filename}`, 3000);
+    }
+  }
+};
+
+// ========================================
+// 3. UNDO/REDO SYSTEM
+// ========================================
+const HISTORY_MANAGER = {
+  past: [],
+  future: [],
+  maxHistory: 50,
+
+  saveState() {
+    try {
+      const state = {
+        timestamp: Date.now(),
+        teams: window.TEAMS ? JSON.parse(JSON.stringify(window.TEAMS)) : null,
+        groups: window.GROUPS ? JSON.parse(JSON.stringify(window.GROUPS)) : null,
+        groupResults: window.GROUP_RESULTS ? JSON.parse(JSON.stringify(window.GROUP_RESULTS)) : null,
+        knockoutResults: window.KNOCKOUT_RESULTS ? JSON.parse(JSON.stringify(window.KNOCKOUT_RESULTS)) : null,
+        tournament: window.TOURNAMENT ? JSON.parse(JSON.stringify(window.TOURNAMENT)) : null
+      };
+
+      this.past.push(state);
+
+      // Clear future when new action taken
+      this.future = [];
+
+      // Limit history size
+      if (this.past.length > this.maxHistory) {
+        this.past.shift();
+      }
+
+      this.updateUI();
+      console.log('✓ State saved to history. Total states:', this.past.length);
+    } catch (e) {
+      console.error('Failed to save state:', e);
+    }
+  },
+
+  undo() {
+    if (this.past.length === 0) {
+      if (typeof showNotification === 'function') {
+        showNotification('info', 'Nothing to Undo', 'No previous states available', 2000);
+      }
+      return;
+    }
+
+    try {
+      // Save current state to future
+      const current = {
+        timestamp: Date.now(),
+        teams: window.TEAMS,
+        groups: window.GROUPS,
+        groupResults: window.GROUP_RESULTS,
+        knockoutResults: window.KNOCKOUT_RESULTS,
+        tournament: window.TOURNAMENT
+      };
+
+      this.future.push(current);
+
+      // Restore previous state
+      const previous = this.past.pop();
+      this.restoreState(previous);
+
+      this.updateUI();
+
+      if (typeof showNotification === 'function') {
+        showNotification('info', 'Undo', 'Reverted to previous state', 2000);
+      }
+    } catch (e) {
+      console.error('Undo failed:', e);
+    }
+  },
+
+  redo() {
+    if (this.future.length === 0) {
+      if (typeof showNotification === 'function') {
+        showNotification('info', 'Nothing to Redo', 'No future states available', 2000);
+      }
+      return;
+    }
+
+    try {
+      // Save current state to past
+      const current = {
+        timestamp: Date.now(),
+        teams: window.TEAMS,
+        groups: window.GROUPS,
+        groupResults: window.GROUP_RESULTS,
+        knockoutResults: window.KNOCKOUT_RESULTS,
+        tournament: window.TOURNAMENT
+      };
+
+      this.past.push(current);
+
+      // Restore next state
+      const next = this.future.pop();
+      this.restoreState(next);
+
+      this.updateUI();
+
+      if (typeof showNotification === 'function') {
+        showNotification('info', 'Redo', 'Restored next state', 2000);
+      }
+    } catch (e) {
+      console.error('Redo failed:', e);
+    }
+  },
+
+  restoreState(state) {
+    if (!state) return;
+
+    if (state.teams) window.TEAMS = state.teams;
+    if (state.groups) window.GROUPS = state.groups;
+    if (state.groupResults) window.GROUP_RESULTS = state.groupResults;
+    if (state.knockoutResults) window.KNOCKOUT_RESULTS = state.knockoutResults;
+    if (state.tournament) window.TOURNAMENT = state.tournament;
+
+    // Refresh UI
+    if (typeof renderGroups === 'function') renderGroups();
+    if (typeof updateTournamentBracket === 'function') updateTournamentBracket();
+    if (typeof showStandings === 'function' && document.querySelector('.standings-visible')) {
+      showStandings();
+    }
+  },
+
+  updateUI() {
+    const undoBtn = document.getElementById('undoBtn');
+    const redoBtn = document.getElementById('redoBtn');
+
+    if (undoBtn) {
+      undoBtn.disabled = this.past.length === 0;
+      undoBtn.title = this.past.length > 0 ?
+        `Undo (${this.past.length} state${this.past.length !== 1 ? 's' : ''} available)` :
+        'Nothing to undo';
+    }
+
+    if (redoBtn) {
+      redoBtn.disabled = this.future.length === 0;
+      redoBtn.title = this.future.length > 0 ?
+        `Redo (${this.future.length} state${this.future.length !== 1 ? 's' : ''} available)` :
+        'Nothing to redo';
+    }
+  },
+
+  clear() {
+    this.past = [];
+    this.future = [];
+    this.updateUI();
+    console.log('✓ History cleared');
+  }
+};
+
+// Add keyboard shortcuts for undo/redo
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'z') {
+    e.preventDefault();
+    HISTORY_MANAGER.undo();
+  } else if ((e.ctrlKey || e.metaKey) && (e.shiftKey && e.key === 'z' || e.key === 'y')) {
+    e.preventDefault();
+    HISTORY_MANAGER.redo();
+  }
+});
+
+// ========================================
+// 4. SOUND EFFECTS SYSTEM
+// ========================================
+const SOUND_SYSTEM = {
+  enabled: localStorage.getItem('soundEnabled') !== 'false',
+  volume: parseFloat(localStorage.getItem('soundVolume') || '0.5'),
+
+  // Sound definitions using Web Audio API with simple oscillator
+  sounds: {
+    goal: { freq: 600, duration: 0.3, type: 'sine' },
+    whistle: { freq: 800, duration: 0.2, type: 'square' },
+    click: { freq: 400, duration: 0.05, type: 'sine' },
+    success: { freq: 523.25, duration: 0.2, type: 'sine' },
+    error: { freq: 200, duration: 0.3, type: 'triangle' }
+  },
+
+  audioContext: null,
+
+  init() {
+    try {
+      this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      console.log('✓ Sound system initialized');
+    } catch (e) {
+      console.warn('Web Audio API not supported:', e);
+    }
+  },
+
+  play(soundName) {
+    if (!this.enabled || !this.audioContext || this.volume === 0) return;
+
+    const sound = this.sounds[soundName];
+    if (!sound) return;
+
+    try {
+      const oscillator = this.audioContext.createOscillator();
+      const gainNode = this.audioContext.createGain();
+
+      oscillator.type = sound.type;
+      oscillator.frequency.value = sound.freq;
+
+      gainNode.gain.setValueAtTime(this.volume, this.audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + sound.duration);
+
+      oscillator.connect(gainNode);
+      gainNode.connect(this.audioContext.destination);
+
+      oscillator.start(this.audioContext.currentTime);
+      oscillator.stop(this.audioContext.currentTime + sound.duration);
+    } catch (e) {
+      console.error('Sound playback failed:', e);
+    }
+  },
+
+  toggle() {
+    this.enabled = !this.enabled;
+    localStorage.setItem('soundEnabled', this.enabled);
+    this.updateUI();
+
+    if (typeof showNotification === 'function') {
+      showNotification('info', this.enabled ? '🔊 Sound On' : '🔇 Sound Off', '', 1500);
+    }
+
+    if (this.enabled) {
+      this.play('click');
+    }
+  },
+
+  setVolume(value) {
+    this.volume = Math.max(0, Math.min(1, parseFloat(value)));
+    localStorage.setItem('soundVolume', this.volume);
+    this.updateUI();
+  },
+
+  updateUI() {
+    const toggle = document.getElementById('soundToggle');
+    const slider = document.getElementById('volumeSlider');
+
+    if (toggle) {
+      toggle.textContent = this.enabled ? '🔊 Sound On' : '🔇 Sound Off';
+      toggle.classList.toggle('muted', !this.enabled);
+    }
+
+    if (slider) {
+      slider.value = this.volume;
+      slider.disabled = !this.enabled;
+    }
+  }
+};
+
+// Initialize sound system
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => SOUND_SYSTEM.init());
+} else {
+  SOUND_SYSTEM.init();
+}
+
+// ========================================
+// 5. QUICK START TOURNAMENT PRESETS
+// ========================================
+const QUICK_START_PRESETS = {
+  templates: {
+    'champions-league': {
+      name: 'Champions League',
+      icon: '🏆',
+      description: 'Top European clubs competing for glory',
+      teamCount: 32,
+      difficulty: 'hard',
+      teamFilter: team => (team.overallRating || team.strength || 75) >= 85
+    },
+    'world-cup': {
+      name: 'World Cup',
+      icon: '🌍',
+      description: 'International tournament with diverse teams',
+      teamCount: 32,
+      difficulty: 'medium',
+      teamFilter: null
+    },
+    'underdogs': {
+      name: 'Underdogs Only',
+      icon: '🐕',
+      description: 'Lower-rated teams battle for supremacy',
+      teamCount: 32,
+      difficulty: 'balanced',
+      teamFilter: team => (team.overallRating || team.strength || 75) < 80
+    },
+    'super-elite': {
+      name: 'Super Elite',
+      icon: '👑',
+      description: 'Only the absolute best teams',
+      teamCount: 16,
+      difficulty: 'extreme',
+      teamFilter: team => (team.overallRating || team.strength || 75) >= 90
+    },
+    'quick-tournament': {
+      name: 'Quick 16',
+      icon: '⚡',
+      description: 'Fast 16-team knockout tournament',
+      teamCount: 16,
+      difficulty: 'medium',
+      teamFilter: null
+    },
+    'classic-32': {
+      name: 'Classic 32',
+      icon: '⚽',
+      description: 'Traditional 32-team format',
+      teamCount: 32,
+      difficulty: 'medium',
+      teamFilter: null
+    }
+  },
+
+  apply(templateId) {
+    const template = this.templates[templateId];
+    if (!template) {
+      console.error('Template not found:', templateId);
+      return;
+    }
+
+    try {
+      // Get all available teams
+      let availableTeams = window.ALL_TEAMS || window.TEAMS || [];
+
+      // Apply filter if specified
+      if (template.teamFilter) {
+        availableTeams = availableTeams.filter(template.teamFilter);
+      }
+
+      // Shuffle and select required number of teams
+      const shuffled = [...availableTeams].sort(() => Math.random() - 0.5);
+      const selectedTeams = shuffled.slice(0, template.teamCount);
+
+      if (selectedTeams.length < template.teamCount) {
+        if (typeof showNotification === 'function') {
+          showNotification('warning', 'Not Enough Teams',
+            `Only ${selectedTeams.length} teams match criteria (need ${template.teamCount})`, 4000);
+        }
+        return;
+      }
+
+      // Save state before applying template
+      if (typeof HISTORY_MANAGER !== 'undefined') {
+        HISTORY_MANAGER.saveState();
+      }
+
+      // Apply teams
+      window.TEAMS = selectedTeams;
+
+      // Generate groups if needed
+      if (typeof generateGroups === 'function' && template.teamCount >= 16) {
+        generateGroups();
+      }
+
+      // Update UI
+      if (typeof renderUI === 'function') {
+        renderUI();
+      }
+
+      if (typeof showNotification === 'function') {
+        showNotification('success', 'Template Applied',
+          `${template.name} tournament created with ${selectedTeams.length} teams`, 3000);
+      }
+
+      // Play sound
+      if (typeof SOUND_SYSTEM !== 'undefined') {
+        SOUND_SYSTEM.play('success');
+      }
+
+      console.log(`✓ Applied template: ${template.name}`);
+    } catch (e) {
+      console.error('Failed to apply template:', e);
+      if (typeof showNotification === 'function') {
+        showNotification('error', 'Template Failed', 'Could not apply tournament template', 3000);
+      }
+    }
+  },
+
+  show() {
+    const modal = document.createElement('div');
+    modal.className = 'modal-backdrop active';
+    modal.style.zIndex = '10002';
+    modal.innerHTML = `
+      <div class="modal-content" style="max-width: 900px;">
+        <div class="modal-head">
+          <h2>🏆 Quick Start Templates</h2>
+          <button class="modal-close" onclick="this.closest('.modal-backdrop').remove()">✕</button>
+        </div>
+        <div class="template-grid">
+          ${Object.entries(this.templates).map(([id, t]) => `
+            <div class="template-card" onclick="QUICK_START_PRESETS.apply('${id}'); this.closest('.modal-backdrop').remove();">
+              <div class="template-icon">${t.icon}</div>
+              <div class="template-name">${t.name}</div>
+              <div class="template-desc">${t.description}</div>
+              <div style="text-align: center; margin-top: 12px; color: #10b981; font-weight: 600;">
+                ${t.teamCount} Teams • ${t.difficulty.charAt(0).toUpperCase() + t.difficulty.slice(1)}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+};
+
+// ========================================
+// 6. PREDICTION SYSTEM
+// ========================================
+const PREDICTION_SYSTEM = {
+  predictions: {},
+  results: {},
+
+  init() {
+    const saved = localStorage.getItem('predictions');
+    if (saved) {
+      try {
+        this.predictions = JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to load predictions:', e);
+      }
+    }
+  },
+
+  predict(matchId, winner) {
+    this.predictions[matchId] = {
+      winner,
+      timestamp: Date.now()
+    };
+    localStorage.setItem('predictions', JSON.stringify(this.predictions));
+
+    if (typeof showNotification === 'function') {
+      showNotification('success', 'Prediction Saved', `You predicted: ${winner}`, 2000);
+    }
+
+    if (typeof SOUND_SYSTEM !== 'undefined') {
+      SOUND_SYSTEM.play('click');
+    }
+  },
+
+  checkPrediction(matchId, actualWinner) {
+    const prediction = this.predictions[matchId];
+    if (!prediction) return null;
+
+    const correct = prediction.winner === actualWinner;
+    this.results[matchId] = {
+      predicted: prediction.winner,
+      actual: actualWinner,
+      correct
+    };
+
+    return correct;
+  },
+
+  getAccuracy() {
+    const total = Object.keys(this.results).length;
+    if (total === 0) return 0;
+
+    const correct = Object.values(this.results).filter(r => r.correct).length;
+    return Math.round((correct / total) * 100);
+  },
+
+  showStats() {
+    const accuracy = this.getAccuracy();
+    const total = Object.keys(this.results).length;
+    const correct = Object.values(this.results).filter(r => r.correct).length;
+
+    const modal = document.createElement('div');
+    modal.className = 'modal-backdrop active';
+    modal.innerHTML = `
+      <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-head">
+          <h2>🔮 Prediction Stats</h2>
+          <button class="modal-close" onclick="this.closest('.modal-backdrop').remove()">✕</button>
+        </div>
+        <div class="prediction-score">
+          <div class="prediction-accuracy">${accuracy}%</div>
+          <div style="color: #94a3b8; margin-top: 8px;">Prediction Accuracy</div>
+          <div style="color: #e2e8f0; margin-top: 16px; font-size: 1.1em;">
+            ${correct} correct out of ${total} predictions
+          </div>
+        </div>
+        <div style="text-align: center; margin-top: 24px;">
+          <button class="btn-primary" onclick="PREDICTION_SYSTEM.clear(); this.closest('.modal-backdrop').remove();">
+            Clear Predictions
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  },
+
+  clear() {
+    this.predictions = {};
+    this.results = {};
+    localStorage.removeItem('predictions');
+    if (typeof showNotification === 'function') {
+      showNotification('info', 'Predictions Cleared', '', 2000);
+    }
+  }
+};
+
+// Initialize prediction system
+PREDICTION_SYSTEM.init();
+
+// ========================================
+// UI HELPER FUNCTIONS
+// ========================================
+function addNewFeatureButtons() {
+  const sidebar = document.querySelector('.sidebar .tab-content.active') ||
+                 document.querySelector('.sidebar');
+  if (!sidebar) return;
+
+  // Create container for new features
+  const container = document.createElement('div');
+  container.id = 'newFeaturesContainer';
+  container.innerHTML = `
+    <!-- Export Menu -->
+    <div class="export-menu">
+      <h3>📤 Export & Share</h3>
+      <button onclick="EXPORT_SYSTEM.exportAsJSON()">📄 Export JSON</button>
+      <button onclick="EXPORT_SYSTEM.exportAsCSV()">📊 Export CSV</button>
+      <button onclick="EXPORT_SYSTEM.shareToClipboard()">📋 Copy Results</button>
+      <button onclick="window.print()">🖨️ Print</button>
+    </div>
+
+    <!-- History Controls -->
+    <div class="history-controls">
+      <button id="undoBtn" onclick="HISTORY_MANAGER.undo()" disabled title="Undo">
+        ↶ Undo
+      </button>
+      <button id="redoBtn" onclick="HISTORY_MANAGER.redo()" disabled title="Redo">
+        ↷ Redo
+      </button>
+    </div>
+
+    <!-- Sound Controls -->
+    <div class="sound-controls">
+      <button id="soundToggle" class="sound-toggle" onclick="SOUND_SYSTEM.toggle()">
+        🔊 Sound On
+      </button>
+      <input type="range" id="volumeSlider" class="volume-slider"
+             min="0" max="1" step="0.1" value="0.5"
+             oninput="SOUND_SYSTEM.setVolume(this.value)">
+    </div>
+
+    <!-- Feature Buttons -->
+    <button class="ctrl-btn btn-purple" onclick="QUICK_START_PRESETS.show()" style="margin-top: 12px;">
+      <div class="ctrl-btn-main">
+        <div class="ctrl-btn-title">🏆 Quick Start Templates</div>
+        <div class="ctrl-btn-subtitle">Fast tournament setups</div>
+      </div>
+    </button>
+
+    <button class="ctrl-btn btn-blue" onclick="PREDICTION_SYSTEM.showStats()" style="margin-top: 8px;">
+      <div class="ctrl-btn-main">
+        <div class="ctrl-btn-title">🔮 Prediction Stats</div>
+        <div class="ctrl-btn-subtitle">View your accuracy</div>
+      </div>
+    </button>
+  `;
+
+  sidebar.appendChild(container);
+
+  // Update UI
+  if (typeof SOUND_SYSTEM !== 'undefined') {
+    SOUND_SYSTEM.updateUI();
+  }
+  if (typeof HISTORY_MANAGER !== 'undefined') {
+    HISTORY_MANAGER.updateUI();
+  }
+}
+
+// Initialize all new features on load
+window.addEventListener('load', () => {
+  // Add feature buttons to sidebar
+  setTimeout(() => {
+    addNewFeatureButtons();
+    console.log('✅ All new features initialized and UI updated');
+  }, 100);
+});
+
+// Export all systems to global scope
+window.LiveMatchSimulator = LiveMatchSimulator;
+window.startLiveMatch = startLiveMatch;
+window.EXPORT_SYSTEM = EXPORT_SYSTEM;
+window.HISTORY_MANAGER = HISTORY_MANAGER;
+window.SOUND_SYSTEM = SOUND_SYSTEM;
+window.QUICK_START_PRESETS = QUICK_START_PRESETS;
+window.PREDICTION_SYSTEM = PREDICTION_SYSTEM;
+
+console.log('🚀 ALL NEW FEATURES LOADED SUCCESSFULLY!');
+console.log('   ✓ Live Match Simulation');
+console.log('   ✓ Export & Share System');
+console.log('   ✓ Undo/Redo System');
+console.log('   ✓ Sound Effects');
+console.log('   ✓ Tournament Templates');
+console.log('   ✓ Prediction System');
+console.log('   ✓ Print Support');
+
 </script>
 </body>
 </html>

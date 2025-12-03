@@ -4553,6 +4553,124 @@ body[data-theme="stadium"] .page::after {
   }
 }
 
+/* ========================================
+   OVERALL LAYOUT IMPROVEMENTS
+   ======================================== */
+
+/* Smooth Transitions */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+/* Button Improvements */
+.btn-primary, .btn-secondary, .btn-warning {
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary:hover, .btn-secondary:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+.btn-primary:active, .btn-secondary:active {
+  transform: translateY(0);
+}
+
+/* Card Hover Effects */
+[style*="border-radius: 16px"], [style*="border-radius: 12px"] {
+  transition: all 0.3s ease;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(30, 41, 59, 0.5);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(71, 85, 105, 0.8);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(94, 110, 135, 0.9);
+}
+
+/* Modal Backdrop */
+.modal-backdrop {
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive Improvements */
+@media (max-width: 768px) {
+  [style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  .modal-content {
+    max-width: 95% !important;
+    margin: 10px !important;
+  }
+}
+
+/* Focus Improvements */
+button:focus, input:focus, select:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Loading Animation */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Notification Slide */
+@keyframes slideInRight {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Text Selection */
+::selection {
+  background: rgba(16, 185, 129, 0.3);
+  color: #F1F5F9;
+}
+
   </style>
 </head>
 <body>
@@ -7976,6 +8094,262 @@ try {
 window.MANAGER_PROFILE = MANAGER_PROFILE;
 
 // ========================================
+// ENHANCED THEME SYSTEM
+// ========================================
+
+const THEMES = {
+  dark: {
+    name: 'Dark Mode',
+    icon: '🌙',
+    colors: {
+      primary: '#10B981',
+      secondary: '#3B82F6',
+      accent: '#8B5CF6',
+      warning: '#F59E0B',
+      danger: '#EF4444',
+      background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
+      cardBg: 'linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95))',
+      cardBorder: 'rgba(71, 85, 105, 0.4)',
+      text: '#F1F5F9',
+      textSecondary: '#94A3B8',
+      textMuted: '#64748B',
+      sidebarBg: 'rgba(15, 23, 42, 0.98)',
+      headerBg: 'rgba(30, 41, 59, 0.95)',
+      inputBg: 'rgba(30, 41, 59, 0.8)',
+      hoverEffect: 'rgba(16, 185, 129, 0.1)'
+    }
+  },
+
+  light: {
+    name: 'Light Mode',
+    icon: '☀️',
+    colors: {
+      primary: '#059669',
+      secondary: '#2563EB',
+      accent: '#7C3AED',
+      warning: '#D97706',
+      danger: '#DC2626',
+      background: 'linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%)',
+      cardBg: 'linear-gradient(135deg, #FFFFFF, #F8FAFC)',
+      cardBorder: 'rgba(203, 213, 225, 0.6)',
+      text: '#1E293B',
+      textSecondary: '#475569',
+      textMuted: '#64748B',
+      sidebarBg: 'rgba(255, 255, 255, 0.98)',
+      headerBg: 'rgba(248, 250, 252, 0.95)',
+      inputBg: 'rgba(248, 250, 252, 0.9)',
+      hoverEffect: 'rgba(5, 150, 105, 0.1)'
+    }
+  },
+
+  ocean: {
+    name: 'Ocean Blue',
+    icon: '🌊',
+    colors: {
+      primary: '#06B6D4',
+      secondary: '#0EA5E9',
+      accent: '#3B82F6',
+      warning: '#F59E0B',
+      danger: '#EF4444',
+      background: 'linear-gradient(135deg, #0C4A6E 0%, #075985 50%, #0369A1 100%)',
+      cardBg: 'linear-gradient(135deg, rgba(14, 116, 144, 0.95), rgba(8, 76, 97, 0.95))',
+      cardBorder: 'rgba(6, 182, 212, 0.3)',
+      text: '#F0F9FF',
+      textSecondary: '#BAE6FD',
+      textMuted: '#7DD3FC',
+      sidebarBg: 'rgba(8, 76, 97, 0.98)',
+      headerBg: 'rgba(14, 116, 144, 0.95)',
+      inputBg: 'rgba(8, 76, 97, 0.8)',
+      hoverEffect: 'rgba(6, 182, 212, 0.2)'
+    }
+  },
+
+  forest: {
+    name: 'Forest Green',
+    icon: '🌲',
+    colors: {
+      primary: '#10B981',
+      secondary: '#059669',
+      accent: '#34D399',
+      warning: '#F59E0B',
+      danger: '#EF4444',
+      background: 'linear-gradient(135deg, #064E3B 0%, #065F46 50%, #047857 100%)',
+      cardBg: 'linear-gradient(135deg, rgba(6, 95, 70, 0.95), rgba(6, 78, 59, 0.95))',
+      cardBorder: 'rgba(16, 185, 129, 0.3)',
+      text: '#ECFDF5',
+      textSecondary: '#A7F3D0',
+      textMuted: '#6EE7B7',
+      sidebarBg: 'rgba(6, 78, 59, 0.98)',
+      headerBg: 'rgba(6, 95, 70, 0.95)',
+      inputBg: 'rgba(6, 78, 59, 0.8)',
+      hoverEffect: 'rgba(16, 185, 129, 0.2)'
+    }
+  },
+
+  sunset: {
+    name: 'Sunset Orange',
+    icon: '🌅',
+    colors: {
+      primary: '#F59E0B',
+      secondary: '#EF4444',
+      accent: '#F97316',
+      warning: '#DC2626',
+      danger: '#B91C1C',
+      background: 'linear-gradient(135deg, #7C2D12 0%, #9A3412 50%, #C2410C 100%)',
+      cardBg: 'linear-gradient(135deg, rgba(154, 52, 18, 0.95), rgba(124, 45, 18, 0.95))',
+      cardBorder: 'rgba(245, 158, 11, 0.3)',
+      text: '#FFF7ED',
+      textSecondary: '#FED7AA',
+      textMuted: '#FDBA74',
+      sidebarBg: 'rgba(124, 45, 18, 0.98)',
+      headerBg: 'rgba(154, 52, 18, 0.95)',
+      inputBg: 'rgba(124, 45, 18, 0.8)',
+      hoverEffect: 'rgba(245, 158, 11, 0.2)'
+    }
+  },
+
+  royal: {
+    name: 'Royal Purple',
+    icon: '👑',
+    colors: {
+      primary: '#8B5CF6',
+      secondary: '#A78BFA',
+      accent: '#C084FC',
+      warning: '#F59E0B',
+      danger: '#EF4444',
+      background: 'linear-gradient(135deg, #4C1D95 0%, #5B21B6 50%, #6D28D9 100%)',
+      cardBg: 'linear-gradient(135deg, rgba(91, 33, 182, 0.95), rgba(76, 29, 149, 0.95))',
+      cardBorder: 'rgba(139, 92, 246, 0.3)',
+      text: '#FAF5FF',
+      textSecondary: '#E9D5FF',
+      textMuted: '#D8B4FE',
+      sidebarBg: 'rgba(76, 29, 149, 0.98)',
+      headerBg: 'rgba(91, 33, 182, 0.95)',
+      inputBg: 'rgba(76, 29, 149, 0.8)',
+      hoverEffect: 'rgba(139, 92, 246, 0.2)'
+    }
+  }
+};
+
+let currentTheme = 'dark';
+
+function applyTheme(themeName) {
+  if (!THEMES[themeName]) {
+    console.warn('Theme not found:', themeName);
+    return;
+  }
+
+  currentTheme = themeName;
+  const theme = THEMES[themeName];
+
+  // Apply to document root
+  const root = document.documentElement;
+  Object.entries(theme.colors).forEach(([key, value]) => {
+    root.style.setProperty(`--${key}`, value);
+  });
+
+  // Update body background
+  document.body.style.background = theme.colors.background;
+  document.body.style.color = theme.colors.text;
+
+  // Update all major UI elements
+  updateUIWithTheme(theme);
+
+  // Save preference
+  localStorage.setItem('selectedTheme', themeName);
+
+  console.log(`✓ Theme applied: ${theme.name}`);
+  showNotification('success', 'Theme Changed',
+    `Switched to ${theme.name}`, 2000);
+}
+
+function updateUIWithTheme(theme) {
+  // Update sidebar
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar) {
+    sidebar.style.background = theme.colors.sidebarBg;
+    sidebar.style.borderRight = `1px solid ${theme.colors.cardBorder}`;
+  }
+
+  // Update all cards
+  document.querySelectorAll('[class*="card"], [style*="background"]').forEach(el => {
+    if (el.classList.contains('card') || el.style.background.includes('gradient')) {
+      el.style.background = theme.colors.cardBg;
+      el.style.borderColor = theme.colors.cardBorder;
+      el.style.color = theme.colors.text;
+    }
+  });
+
+  // Update buttons
+  document.querySelectorAll('.btn-primary').forEach(btn => {
+    btn.style.background = `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.secondary})`;
+  });
+
+  // Update text elements
+  document.querySelectorAll('h1, h2, h3, h4, p, span, div').forEach(el => {
+    if (!el.style.color || el.style.color.includes('rgb')) {
+      el.style.color = theme.colors.text;
+    }
+  });
+}
+
+function showThemeSelector() {
+  const modal = document.createElement('div');
+  modal.className = 'modal-backdrop active';
+  modal.style.zIndex = '10005';
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-head">
+        <h2 style="color: ${THEMES[currentTheme].colors.primary};">🎨 Choose Theme</h2>
+        <button class="modal-close" onclick="this.closest('.modal-backdrop').remove()">✕</button>
+      </div>
+
+      <div style="padding: 30px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px;">
+          ${Object.entries(THEMES).map(([key, theme]) => `
+            <button onclick="applyTheme('${key}'); this.closest('.modal-backdrop').remove()"
+                    style="padding: 24px; background: ${theme.colors.cardBg};
+                           border: 3px solid ${currentTheme === key ? theme.colors.primary : theme.colors.cardBorder};
+                           border-radius: 16px; cursor: pointer; transition: all 0.3s;
+                           ${currentTheme === key ? 'box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);' : ''}"
+                    onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='${theme.colors.primary}'"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='${currentTheme === key ? theme.colors.primary : theme.colors.cardBorder}'">
+              <div style="font-size: 3em; margin-bottom: 10px;">${theme.icon}</div>
+              <div style="color: ${theme.colors.text}; font-weight: 700; margin-bottom: 8px;">
+                ${theme.name}
+              </div>
+              ${currentTheme === key ? `
+                <div style="color: ${theme.colors.primary}; font-size: 0.85em; font-weight: 600;">
+                  ✓ Active
+                </div>
+              ` : ''}
+
+              <!-- Theme Preview -->
+              <div style="display: flex; gap: 4px; margin-top: 12px; justify-content: center;">
+                <div style="width: 20px; height: 20px; background: ${theme.colors.primary};
+                            border-radius: 4px;"></div>
+                <div style="width: 20px; height: 20px; background: ${theme.colors.secondary};
+                            border-radius: 4px;"></div>
+                <div style="width: 20px; height: 20px; background: ${theme.colors.accent};
+                            border-radius: 4px;"></div>
+              </div>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+}
+
+// Load saved theme on startup
+window.addEventListener('DOMContentLoaded', () => {
+  const savedTheme = localStorage.getItem('selectedTheme') || 'dark';
+  applyTheme(savedTheme);
+});
+
+// ========================================
 // TOURNAMENT HISTORY SYSTEM - ENHANCED
 // ========================================
 
@@ -11011,6 +11385,313 @@ function showTournamentStatsSummary() {
   document.body.appendChild(modal);
 }
 
+// ========================================
+// ENHANCED TOURNAMENT STATS DISPLAY
+// ========================================
+
+function displayEnhancedTournamentStats() {
+  const out = document.getElementById('content') || document.getElementById('output');
+  if (!out) return;
+
+  out.innerHTML = `
+    <div style="max-width: 1000px; margin: 0 auto; padding: 20px;">
+      <div style="background: linear-gradient(135deg, var(--cardBg) 0%, color-mix(in srgb, var(--cardBg) 95%, var(--primary)) 100%); padding: 30px; border-radius: 16px; border: 1px solid var(--border);">
+        <h2 style="margin: 0 0 24px 0; color: var(--text); display: flex; align-items: center; gap: 10px;">
+          📊 Tournament Statistics
+        </h2>
+
+        <!-- Tab Navigation -->
+        <div style="display: flex; gap: 12px; margin-bottom: 24px; border-bottom: 2px solid var(--border); flex-wrap: wrap;">
+          <button onclick="switchStatsTab('current')" id="tab-current"
+                  class="stats-tab active"
+                  style="padding: 12px 24px; background: none; border: none; color: var(--primary); border-bottom: 3px solid var(--primary); cursor: pointer; font-weight: 600; transition: all 0.3s;">
+            Current Tournament
+          </button>
+          <button onclick="switchStatsTab('records')" id="tab-records"
+                  class="stats-tab"
+                  style="padding: 12px 24px; background: none; border: none; color: var(--textMuted); border-bottom: 3px solid transparent; cursor: pointer; font-weight: 600; transition: all 0.3s;">
+            All-Time Records
+          </button>
+          <button onclick="switchStatsTab('history')" id="tab-history"
+                  class="stats-tab"
+                  style="padding: 12px 24px; background: none; border: none; color: var(--textMuted); border-bottom: 3px solid transparent; cursor: pointer; font-weight: 600; transition: all 0.3s;">
+            Full History
+          </button>
+        </div>
+
+        <!-- Tab Content Container -->
+        <div id="stats-content">
+          ${createCurrentTournamentTab()}
+        </div>
+
+        <button onclick="showMainMenu()" class="btn-secondary" style="width: 100%; margin-top: 24px; padding: 12px;">
+          ← Back to Menu
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function createCurrentTournamentTab() {
+  const stats = calculateTournamentStats();
+  if (!stats) {
+    return '<div style="text-align: center; padding: 40px; color: var(--textMuted);">No active tournament data available</div>';
+  }
+
+  const topScorer = getTopScorer();
+
+  return `
+    <div class="stats-tab-content">
+      <!-- Quick Stats Grid -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+        <div style="background: var(--bg); padding: 20px; border-radius: 12px; border-left: 4px solid var(--primary);">
+          <div style="font-size: 32px; font-weight: bold; color: var(--primary); margin-bottom: 8px;">${stats.totalMatches || 0}</div>
+          <div style="color: var(--textMuted); font-size: 14px;">Total Matches</div>
+        </div>
+
+        <div style="background: var(--bg); padding: 20px; border-radius: 12px; border-left: 4px solid #3B82F6;">
+          <div style="font-size: 32px; font-weight: bold; color: #3B82F6; margin-bottom: 8px;">${stats.goalsPerGame || '0.0'}</div>
+          <div style="color: var(--textMuted); font-size: 14px;">Goals Per Game</div>
+        </div>
+
+        <div style="background: var(--bg); padding: 20px; border-radius: 12px; border-left: 4px solid #F59E0B;">
+          <div style="font-size: 32px; font-weight: bold; color: #F59E0B; margin-bottom: 8px;">${stats.biggestWin?.diff || 0}</div>
+          <div style="color: var(--textMuted); font-size: 14px;">Biggest Win Margin</div>
+        </div>
+
+        <div style="background: var(--bg); padding: 20px; border-radius: 12px; border-left: 4px solid #EF4444;">
+          <div style="font-size: 32px; font-weight: bold; color: #EF4444; margin-bottom: 8px;">${stats.upsets || 0}</div>
+          <div style="color: var(--textMuted); font-size: 14px;">Total Upsets</div>
+        </div>
+
+        <div style="background: var(--bg); padding: 20px; border-radius: 12px; border-left: 4px solid #8B5CF6;">
+          <div style="font-size: 32px; font-weight: bold; color: #8B5CF6; margin-bottom: 8px;">${stats.cleanSheets || 0}</div>
+          <div style="color: var(--textMuted); font-size: 14px;">Clean Sheets</div>
+        </div>
+
+        <div style="background: var(--bg); padding: 20px; border-radius: 12px; border-left: 4px solid #10B981;">
+          <div style="font-size: 32px; font-weight: bold; color: #10B981; margin-bottom: 8px;">${stats.hatTricks || 0}</div>
+          <div style="color: var(--textMuted); font-size: 14px;">Hat-tricks</div>
+        </div>
+      </div>
+
+      <!-- Top Scorers Section -->
+      ${topScorer ? `
+        <div style="background: var(--bg); padding: 24px; border-radius: 12px; margin-bottom: 24px;">
+          <h3 style="margin: 0 0 16px 0; color: var(--text); font-size: 18px; display: flex; align-items: center; gap: 8px;">
+            ⚽ Top Scorer
+          </h3>
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="font-size: 48px;">🥇</div>
+            <div style="flex: 1;">
+              <div style="font-size: 24px; font-weight: bold; color: var(--primary); margin-bottom: 4px;">${topScorer.name}</div>
+              <div style="color: var(--textMuted);">${topScorer.goals} Goals</div>
+            </div>
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- Match Highlights -->
+      ${stats.biggestWin ? `
+        <div style="background: var(--bg); padding: 24px; border-radius: 12px;">
+          <h3 style="margin: 0 0 16px 0; color: var(--text); font-size: 18px; display: flex; align-items: center; gap: 8px;">
+            🏆 Biggest Win
+          </h3>
+          <div style="padding: 16px; background: linear-gradient(90deg, rgba(16, 185, 129, 0.1), transparent); border-left: 4px solid var(--primary); border-radius: 8px;">
+            <div style="font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 8px;">
+              ${stats.biggestWin.winner} ${stats.biggestWin.score}
+            </div>
+            <div style="color: var(--textMuted);">Margin: ${stats.biggestWin.diff} goals</div>
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function createAllTimeRecordsTab() {
+  if (!TOURNAMENT_HISTORY_ENHANCED || !TOURNAMENT_HISTORY_ENHANCED.tournaments || TOURNAMENT_HISTORY_ENHANCED.tournaments.length === 0) {
+    return '<div style="text-align: center; padding: 40px; color: var(--textMuted);">No historical tournament data available</div>';
+  }
+
+  const allTimeStats = {
+    totalTournaments: TOURNAMENT_HISTORY_ENHANCED.tournaments.length,
+    totalMatches: 0,
+    totalGoals: 0,
+    mostChampionships: {},
+    biggestWinEver: { diff: 0, score: '', winner: '' }
+  };
+
+  // Aggregate all-time stats
+  TOURNAMENT_HISTORY_ENHANCED.tournaments.forEach(tournament => {
+    if (tournament.stats) {
+      allTimeStats.totalMatches += tournament.stats.totalMatches || 0;
+      allTimeStats.totalGoals += tournament.stats.totalGoals || 0;
+    }
+
+    // Track championships
+    if (tournament.champion) {
+      allTimeStats.mostChampionships[tournament.champion] =
+        (allTimeStats.mostChampionships[tournament.champion] || 0) + 1;
+    }
+
+    // Find biggest win
+    if (tournament.stats?.biggestWin && tournament.stats.biggestWin.diff > allTimeStats.biggestWinEver.diff) {
+      allTimeStats.biggestWinEver = tournament.stats.biggestWin;
+    }
+  });
+
+  // Get most successful team
+  let mostSuccessful = { team: 'None', count: 0 };
+  Object.entries(allTimeStats.mostChampionships).forEach(([team, count]) => {
+    if (count > mostSuccessful.count) {
+      mostSuccessful = { team, count };
+    }
+  });
+
+  const avgGoalsPerMatch = allTimeStats.totalMatches > 0 ?
+    (allTimeStats.totalGoals / allTimeStats.totalMatches).toFixed(2) : '0.00';
+
+  return `
+    <div class="stats-tab-content">
+      <!-- All-Time Stats Grid -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
+        <div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); padding: 24px; border-radius: 12px; color: white;">
+          <div style="font-size: 36px; font-weight: bold; margin-bottom: 8px;">${allTimeStats.totalTournaments}</div>
+          <div style="opacity: 0.9; font-size: 14px;">Total Tournaments</div>
+        </div>
+
+        <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); padding: 24px; border-radius: 12px; color: white;">
+          <div style="font-size: 36px; font-weight: bold; margin-bottom: 8px;">${allTimeStats.totalMatches}</div>
+          <div style="opacity: 0.9; font-size: 14px;">Total Matches Played</div>
+        </div>
+
+        <div style="background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); padding: 24px; border-radius: 12px; color: white;">
+          <div style="font-size: 36px; font-weight: bold; margin-bottom: 8px;">${allTimeStats.totalGoals}</div>
+          <div style="opacity: 0.9; font-size: 14px;">Total Goals Scored</div>
+        </div>
+
+        <div style="background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); padding: 24px; border-radius: 12px; color: white;">
+          <div style="font-size: 36px; font-weight: bold; margin-bottom: 8px;">${avgGoalsPerMatch}</div>
+          <div style="opacity: 0.9; font-size: 14px;">Avg Goals/Match</div>
+        </div>
+      </div>
+
+      <!-- Most Successful Team -->
+      ${mostSuccessful.count > 0 ? `
+        <div style="background: var(--bg); padding: 24px; border-radius: 12px; margin-bottom: 24px;">
+          <h3 style="margin: 0 0 16px 0; color: var(--text); font-size: 18px;">🏆 Most Successful Team</h3>
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="font-size: 64px;">👑</div>
+            <div>
+              <div style="font-size: 24px; font-weight: bold; color: var(--primary); margin-bottom: 4px;">${mostSuccessful.team}</div>
+              <div style="color: var(--textMuted);">${mostSuccessful.count} Championship${mostSuccessful.count > 1 ? 's' : ''}</div>
+            </div>
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- All-Time Biggest Win -->
+      ${allTimeStats.biggestWinEver.diff > 0 ? `
+        <div style="background: var(--bg); padding: 24px; border-radius: 12px;">
+          <h3 style="margin: 0 0 16px 0; color: var(--text); font-size: 18px;">🎯 All-Time Biggest Win</h3>
+          <div style="padding: 20px; background: linear-gradient(90deg, rgba(239, 68, 68, 0.1), transparent); border-left: 4px solid #EF4444; border-radius: 8px;">
+            <div style="font-size: 24px; font-weight: 600; color: var(--text); margin-bottom: 8px;">
+              ${allTimeStats.biggestWinEver.winner}
+            </div>
+            <div style="font-size: 20px; color: var(--primary); margin-bottom: 8px;">${allTimeStats.biggestWinEver.score}</div>
+            <div style="color: var(--textMuted);">Victory Margin: ${allTimeStats.biggestWinEver.diff} goals</div>
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function createFullHistoryTab() {
+  if (!TOURNAMENT_HISTORY_ENHANCED || !TOURNAMENT_HISTORY_ENHANCED.tournaments || TOURNAMENT_HISTORY_ENHANCED.tournaments.length === 0) {
+    return '<div style="text-align: center; padding: 40px; color: var(--textMuted);">No tournament history available</div>';
+  }
+
+  const tournaments = [...TOURNAMENT_HISTORY_ENHANCED.tournaments].reverse(); // Most recent first
+
+  let historyHTML = '<div class="stats-tab-content"><div style="display: flex; flex-direction: column; gap: 12px;">';
+
+  tournaments.forEach((tournament, index) => {
+    const date = tournament.timestamp ? new Date(tournament.timestamp).toLocaleDateString() : 'Unknown Date';
+    const champion = tournament.champion || 'Unknown';
+    const totalMatches = tournament.stats?.totalMatches || 0;
+    const totalGoals = tournament.stats?.totalGoals || 0;
+    const topScorer = tournament.topScorer?.name || 'Unknown';
+    const topScorerGoals = tournament.topScorer?.goals || 0;
+
+    historyHTML += `
+      <div style="background: var(--bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); transition: transform 0.2s; cursor: pointer;"
+           onmouseover="this.style.transform='translateX(4px)'; this.style.borderColor='var(--primary)';"
+           onmouseout="this.style.transform='translateX(0)'; this.style.borderColor='var(--border)';">
+        <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 16px;">
+          <div style="flex: 1; min-width: 200px;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+              <div style="font-size: 24px;">🏆</div>
+              <div>
+                <div style="font-size: 18px; font-weight: 600; color: var(--primary);">${champion}</div>
+                <div style="font-size: 12px; color: var(--textMuted);">${date}</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap;">
+              <div style="font-size: 14px; color: var(--textMuted);">
+                ⚽ <span style="color: var(--text); font-weight: 600;">${totalGoals}</span> goals
+              </div>
+              <div style="font-size: 14px; color: var(--textMuted);">
+                📊 <span style="color: var(--text); font-weight: 600;">${totalMatches}</span> matches
+              </div>
+              ${topScorerGoals > 0 ? `
+                <div style="font-size: 14px; color: var(--textMuted);">
+                  👟 <span style="color: var(--text); font-weight: 600;">${topScorer}</span> (${topScorerGoals})
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  historyHTML += '</div></div>';
+
+  return historyHTML;
+}
+
+function switchStatsTab(tabId) {
+  // Update tab styling
+  document.querySelectorAll('.stats-tab').forEach(tab => {
+    tab.style.color = 'var(--textMuted)';
+    tab.style.borderBottomColor = 'transparent';
+  });
+
+  const activeTab = document.getElementById(`tab-${tabId}`);
+  if (activeTab) {
+    activeTab.style.color = 'var(--primary)';
+    activeTab.style.borderBottomColor = 'var(--primary)';
+  }
+
+  // Update content
+  const contentDiv = document.getElementById('stats-content');
+  if (!contentDiv) return;
+
+  switch(tabId) {
+    case 'current':
+      contentDiv.innerHTML = createCurrentTournamentTab();
+      break;
+    case 'records':
+      contentDiv.innerHTML = createAllTimeRecordsTab();
+      break;
+    case 'history':
+      contentDiv.innerHTML = createFullHistoryTab();
+      break;
+  }
+}
+
 // Share Results to Clipboard
 function shareResultsToClipboard() {
   if (!window.TOURNAMENT) {
@@ -11286,17 +11967,215 @@ function saveTournamentTemplate() {
   showUtilityMessage('Template saved successfully!', 'success');
 }
 
-function loadTournamentTemplate(templateName) {
-  const template = TOURNAMENT_TEMPLATES.find(t => t.name === templateName);
+function loadTournamentTemplate(templateKey) {
+  const template = TOURNAMENT_TEMPLATES[templateKey];
   if (!template) {
-    showUtilityMessage('Template not found', 'error');
+    console.error('Template not found:', templateKey);
     return;
   }
 
-  RNG_SETTINGS.groupChaos = template.rngSettings.groupChaos;
-  RNG_SETTINGS.knockoutChaos = template.rngSettings.knockoutChaos;
+  showLoading(`Loading ${template.name}...`);
 
-  showUtilityMessage('Template loaded successfully!', 'success');
+  setTimeout(() => {
+    const selectedTeams = [];
+    const usedTeamNames = new Set();
+
+    // Step 1: Add all specified historic teams
+    template.teams.forEach(teamKey => {
+      const historicTeam = findHistoricTeam(teamKey);
+      if (historicTeam && !usedTeamNames.has(historicTeam.name)) {
+        selectedTeams.push(historicTeam);
+        usedTeamNames.add(historicTeam.name);
+      }
+    });
+
+    // Step 2: Fill remaining slots based on fillWith strategy
+    const remaining = template.teamCount - selectedTeams.length;
+
+    if (remaining > 0) {
+      let fillPool = [];
+
+      switch(template.fillWith) {
+        case 'worldCup':
+          fillPool = HISTORIC_TEAMS && HISTORIC_TEAMS.worldCup ? Object.values(HISTORIC_TEAMS.worldCup) : [];
+          break;
+        case 'championsLeague':
+          fillPool = HISTORIC_TEAMS && HISTORIC_TEAMS.championsLeague ? Object.values(HISTORIC_TEAMS.championsLeague) : [];
+          break;
+        case 'mixed':
+          fillPool = [
+            ...(HISTORIC_TEAMS && HISTORIC_TEAMS.worldCup ? Object.values(HISTORIC_TEAMS.worldCup) : []),
+            ...(HISTORIC_TEAMS && HISTORIC_TEAMS.championsLeague ? Object.values(HISTORIC_TEAMS.championsLeague) : [])
+          ];
+          break;
+        case 'current':
+        default:
+          fillPool = ALL_TEAMS || [];
+          break;
+      }
+
+      // Apply filters if specified
+      if (template.filters) {
+        if (template.filters.strengthRange) {
+          const [min, max] = template.filters.strengthRange;
+          fillPool = fillPool.filter(t => t.strength >= min && t.strength <= max);
+        }
+        if (template.filters.country) {
+          fillPool = fillPool.filter(t => t.country === template.filters.country);
+        }
+      }
+
+      // Remove already used teams
+      fillPool = fillPool.filter(t => !usedTeamNames.has(t.name));
+
+      // Shuffle and take remaining
+      fillPool.sort(() => Math.random() - 0.5);
+      const additionalTeams = fillPool.slice(0, remaining);
+      selectedTeams.push(...additionalTeams);
+    }
+
+    // Validate final count
+    if (selectedTeams.length !== template.teamCount) {
+      console.warn(`Team count mismatch: expected ${template.teamCount}, got ${selectedTeams.length}`);
+      // Adjust if needed
+      if (selectedTeams.length < template.teamCount) {
+        // Add more random teams
+        const moreTeams = (ALL_TEAMS || [])
+          .filter(t => !usedTeamNames.has(t.name))
+          .sort(() => Math.random() - 0.5)
+          .slice(0, template.teamCount - selectedTeams.length);
+        selectedTeams.push(...moreTeams);
+      } else {
+        // Trim excess
+        selectedTeams.splice(template.teamCount);
+      }
+    }
+
+    hideLoading();
+
+    // Start tournament with selected teams
+    if (template.format === 'knockout') {
+      startKnockoutOnlyWithTeams(selectedTeams, template.name);
+    } else {
+      startQuickTournamentWithTeams(selectedTeams, template.name);
+    }
+
+    showNotification('success', 'Template Loaded!',
+      `${template.name} started with ${selectedTeams.length} teams`, 3000);
+
+  }, 800);
+}
+
+function findHistoricTeam(teamKey) {
+  // Check World Cup teams
+  if (HISTORIC_TEAMS && HISTORIC_TEAMS.worldCup && HISTORIC_TEAMS.worldCup[teamKey]) {
+    return HISTORIC_TEAMS.worldCup[teamKey];
+  }
+
+  // Check Champions League teams
+  if (HISTORIC_TEAMS && HISTORIC_TEAMS.championsLeague && HISTORIC_TEAMS.championsLeague[teamKey]) {
+    return HISTORIC_TEAMS.championsLeague[teamKey];
+  }
+
+  // Try to find by name in ALL_TEAMS
+  const team = (ALL_TEAMS || []).find(t => t.name.toLowerCase().includes(teamKey.toLowerCase()));
+  return team || null;
+}
+
+function startKnockoutOnlyWithTeams(teams, tournamentName) {
+  // Initialize tournament tracking
+  if (typeof initializeTournamentTracking === 'function') {
+    initializeTournamentTracking(tournamentName, teams, 'knockout');
+  }
+
+  // Shuffle teams
+  teams.sort(() => Math.random() - 0.5);
+
+  // Determine starting round based on team count
+  let stage;
+  if (teams.length === 32) stage = 'round-of-32';
+  else if (teams.length === 16) stage = 'round-of-16';
+  else if (teams.length === 8) stage = 'quarter-finals';
+  else if (teams.length === 4) stage = 'semi-finals';
+  else if (teams.length === 2) stage = 'final';
+  else {
+    // Pad to nearest power of 2
+    const target = [2, 4, 8, 16, 32].find(n => n >= teams.length) || 16;
+    while (teams.length < target) {
+      const randomTeam = (ALL_TEAMS || [])[Math.floor(Math.random() * (ALL_TEAMS || []).length)];
+      if (randomTeam && !teams.find(t => t.name === randomTeam.name)) {
+        teams.push(randomTeam);
+      }
+    }
+    stage = target === 32 ? 'round-of-32' : target === 16 ? 'round-of-16' : 'quarter-finals';
+  }
+
+  // Initialize knockout stage
+  if (typeof initializeKnockoutStage === 'function') {
+    initializeKnockoutStage(teams, stage, false);
+  }
+
+  // Update UI
+  if (typeof updateTournamentStage === 'function') {
+    updateTournamentStage(stage);
+  }
+
+  // Display
+  if (typeof displayKnockoutStage === 'function') {
+    displayKnockoutStage(stage);
+  }
+}
+
+function startQuickTournamentWithTeams(teams, tournamentName) {
+  // Ensure team count is divisible by 4 for groups
+  const groupCount = Math.ceil(teams.length / 4);
+  const targetCount = groupCount * 4;
+
+  // Pad with random teams if needed
+  while (teams.length < targetCount) {
+    const randomTeam = (ALL_TEAMS || [])[Math.floor(Math.random() * (ALL_TEAMS || []).length)];
+    if (randomTeam && !teams.find(t => t.name === randomTeam.name)) {
+      teams.push(randomTeam);
+    }
+  }
+
+  // Trim if too many
+  teams.splice(targetCount);
+
+  // Initialize tournament tracking
+  if (typeof initializeTournamentTracking === 'function') {
+    initializeTournamentTracking(tournamentName, teams, 'groups');
+  }
+
+  // Create groups
+  teams.sort(() => Math.random() - 0.5);
+  const groups = [];
+
+  for (let i = 0; i < groupCount; i++) {
+    const group = teams.slice(i * 4, (i + 1) * 4).map(team => ({
+      ...team,
+      played: 0,
+      wins: 0,
+      draws: 0,
+      losses: 0,
+      goalsFor: 0,
+      goalsAgainst: 0,
+      points: 0
+    }));
+    groups.push(group);
+  }
+
+  window.GROUPS = groups;
+
+  // Update stage
+  if (typeof updateTournamentStage === 'function') {
+    updateTournamentStage('groups');
+  }
+
+  // Display groups
+  if (typeof displayGroups === 'function') {
+    displayGroups(groups);
+  }
 }
 
 function showTemplateManager() {
@@ -13905,25 +14784,37 @@ function shareLastTournament() {
 
 /************* SEASON MODE *************/
 
-// Season Mode State
+// Season Mode State - Enhanced
 let SEASON_STATE = {
   active: false,
+  seasonNumber: 1,
   currentMatchday: 0,
-  totalMatchdays: 0,
-  teams: [],
+  totalMatchdays: 38,
+  standings: [],
   fixtures: [],
+  results: [],
+  playerTeam: null,
+  seasonHistory: [],
+  topScorers: [],
+  statistics: {
+    totalGoals: 0,
+    totalMatches: 0,
+    averageGoals: 0,
+    biggestWin: null,
+    mostGoalsMatch: 0
+  },
+  // Legacy compatibility
+  teams: [],
   table: [],
   seasonStats: {
     topScorer: null,
     topAssists: null,
     cleanSheets: {},
     form: {},
-    playerStats: {} // Track all player performance
+    playerStats: {}
   },
-  seasonNumber: 1,
   startDate: null,
-  seasonHistory: [], // Store past seasons
-  currentStage: 'setup' // 'setup', 'active', 'completed'
+  currentStage: 'setup'
 };
 
 // League table entry structure
@@ -14854,6 +15745,1056 @@ function getSeasonTopScorer() {
 }
 
 // ========================================
+// ENHANCED SEASON FUNCTIONS
+// ========================================
+
+function simulateMatchday() {
+  if (!SEASON_STATE.active || !SEASON_STATE.fixtures) {
+    showNotification('error', 'Season Error', 'No active season found', 2000);
+    return;
+  }
+
+  const matchdayIndex = SEASON_STATE.currentMatchday;
+  if (matchdayIndex >= SEASON_STATE.fixtures.length) {
+    showNotification('info', 'Season Complete', 'All matchdays have been played', 2000);
+    return;
+  }
+
+  showLoading(`Simulating Matchday ${matchdayIndex + 1}...`);
+
+  setTimeout(() => {
+    const matchday = SEASON_STATE.fixtures[matchdayIndex];
+
+    if (Array.isArray(matchday)) {
+      matchday.forEach(match => {
+        if (!match.played) {
+          const homeTeam = match.home || match.homeTeam;
+          const awayTeam = match.away || match.awayTeam;
+
+          if (homeTeam && awayTeam) {
+            const result = simulateMatch(homeTeam, awayTeam, true, 1.0, 'normal');
+
+            match.played = true;
+            match.result = {
+              homeScore: result.scoreA,
+              awayScore: result.scoreB
+            };
+
+            // Update standings
+            updateStandings(homeTeam.name, awayTeam.name, result.scoreA, result.scoreB);
+
+            // Track for favorite club bonus
+            if (MANAGER_STATE.active && MANAGER_STATE.favoriteClub) {
+              const favoriteClub = MANAGER_STATE.favoriteClub;
+              if (homeTeam.name === favoriteClub || awayTeam.name === favoriteClub) {
+                const isWin = (homeTeam.name === favoriteClub && result.scoreA > result.scoreB) ||
+                              (awayTeam.name === favoriteClub && result.scoreB > result.scoreA);
+                if (isWin && typeof awardManagerXP === 'function') {
+                  awardManagerXP(15, `${favoriteClub} won! (+50% bonus)`);
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    SEASON_STATE.currentMatchday++;
+
+    hideLoading();
+
+    // Award XP
+    if (MANAGER_STATE.active && typeof awardManagerXP === 'function') {
+      awardManagerXP(10, 'Matchday completed');
+    }
+
+    // Save
+    if (typeof AUTO_SAVE !== 'undefined' && AUTO_SAVE.save) {
+      AUTO_SAVE.save();
+    }
+
+    displaySeasonMode();
+  }, 800);
+}
+
+function updateStandings(homeTeam, awayTeam, homeScore, awayScore) {
+  // Update in new standings format
+  if (SEASON_STATE.standings && Array.isArray(SEASON_STATE.standings)) {
+    const homeData = SEASON_STATE.standings.find(t => t.name === homeTeam);
+    const awayData = SEASON_STATE.standings.find(t => t.name === awayTeam);
+
+    if (homeData && awayData) {
+      homeData.played++;
+      awayData.played++;
+      homeData.goalsFor += homeScore;
+      homeData.goalsAgainst += awayScore;
+      awayData.goalsFor += awayScore;
+      awayData.goalsAgainst += homeScore;
+      homeData.goalDifference = homeData.goalsFor - homeData.goalsAgainst;
+      awayData.goalDifference = awayData.goalsFor - awayData.goalsAgainst;
+
+      if (homeScore > awayScore) {
+        homeData.wins++;
+        homeData.points += 3;
+        if (homeData.form) homeData.form.push('W');
+        awayData.losses++;
+        if (awayData.form) awayData.form.push('L');
+      } else if (awayScore > homeScore) {
+        awayData.wins++;
+        awayData.points += 3;
+        if (awayData.form) awayData.form.push('W');
+        homeData.losses++;
+        if (homeData.form) homeData.form.push('L');
+      } else {
+        homeData.draws++;
+        homeData.points++;
+        if (homeData.form) homeData.form.push('D');
+        awayData.draws++;
+        awayData.points++;
+        if (awayData.form) awayData.form.push('D');
+      }
+
+      if (homeData.form && homeData.form.length > 10) homeData.form.shift();
+      if (awayData.form && awayData.form.length > 10) awayData.form.shift();
+    }
+  }
+
+  // Update in legacy table format for compatibility
+  if (SEASON_STATE.table && Array.isArray(SEASON_STATE.table)) {
+    const homeEntry = SEASON_STATE.table.find(t => t.team && t.team.name === homeTeam);
+    const awayEntry = SEASON_STATE.table.find(t => t.team && t.team.name === awayTeam);
+
+    if (homeEntry && awayEntry) {
+      homeEntry.played++;
+      awayEntry.played++;
+      homeEntry.goalsFor += homeScore;
+      homeEntry.goalsAgainst += awayScore;
+      awayEntry.goalsFor += awayScore;
+      awayEntry.goalsAgainst += homeScore;
+      homeEntry.goalDifference = homeEntry.goalsFor - homeEntry.goalsAgainst;
+      awayEntry.goalDifference = awayEntry.goalsFor - awayEntry.goalsAgainst;
+
+      if (homeScore > awayScore) {
+        homeEntry.wins++;
+        homeEntry.points += 3;
+        if (homeEntry.form) homeEntry.form.push('W');
+        awayEntry.losses++;
+        if (awayEntry.form) awayEntry.form.push('L');
+      } else if (awayScore > homeScore) {
+        awayEntry.wins++;
+        awayEntry.points += 3;
+        if (awayEntry.form) awayEntry.form.push('W');
+        homeEntry.losses++;
+        if (homeEntry.form) homeEntry.form.push('L');
+      } else {
+        homeEntry.draws++;
+        homeEntry.points++;
+        if (homeEntry.form) homeEntry.form.push('D');
+        awayEntry.draws++;
+        awayEntry.points++;
+        if (awayEntry.form) awayEntry.form.push('D');
+      }
+
+      if (homeEntry.form && homeEntry.form.length > 5) homeEntry.form.shift();
+      if (awayEntry.form && awayEntry.form.length > 5) awayEntry.form.shift();
+    }
+  }
+}
+
+function simulateRestOfSeason() {
+  if (!SEASON_STATE.active) {
+    showNotification('error', 'Season Error', 'No active season found', 2000);
+    return;
+  }
+
+  if (!confirm('Simulate all remaining matchdays? This cannot be undone.')) {
+    return;
+  }
+
+  showLoading('Simulating rest of season...');
+
+  setTimeout(() => {
+    while (SEASON_STATE.currentMatchday < SEASON_STATE.totalMatchdays &&
+           SEASON_STATE.currentMatchday < SEASON_STATE.fixtures.length) {
+      const matchday = SEASON_STATE.fixtures[SEASON_STATE.currentMatchday];
+
+      if (Array.isArray(matchday)) {
+        matchday.forEach(match => {
+          if (!match.played) {
+            const homeTeam = match.home || match.homeTeam;
+            const awayTeam = match.away || match.awayTeam;
+
+            if (homeTeam && awayTeam) {
+              const result = simulateMatch(homeTeam, awayTeam, true, 1.0, 'normal');
+              match.played = true;
+              match.result = {
+                homeScore: result.scoreA,
+                awayScore: result.scoreB
+              };
+              updateStandings(homeTeam.name, awayTeam.name, result.scoreA, result.scoreB);
+            }
+          }
+        });
+      }
+
+      SEASON_STATE.currentMatchday++;
+    }
+
+    hideLoading();
+
+    if (MANAGER_STATE.active && typeof awardManagerXP === 'function') {
+      awardManagerXP(100, 'Season completed!');
+    }
+
+    // Save
+    if (typeof AUTO_SAVE !== 'undefined' && AUTO_SAVE.save) {
+      AUTO_SAVE.save();
+    }
+
+    displaySeasonMode();
+  }, 1500);
+}
+
+function abandonSeason() {
+  if (!confirm('Are you sure you want to abandon this season? All progress will be lost.')) {
+    return;
+  }
+
+  SEASON_STATE.active = false;
+  SEASON_STATE.currentMatchday = 0;
+  SEASON_STATE.standings = [];
+  SEASON_STATE.fixtures = [];
+  SEASON_STATE.results = [];
+  SEASON_STATE.table = [];
+  SEASON_STATE.teams = [];
+
+  showNotification('info', 'Season Abandoned', 'Season has been abandoned', 2000);
+  displaySeasonMode();
+}
+
+function viewSeasonFixtures() {
+  showNotification('info', 'Coming Soon', 'Full fixtures view coming soon', 2000);
+}
+
+function viewSeasonStats() {
+  showNotification('info', 'Coming Soon', 'Season statistics coming soon', 2000);
+}
+
+// ========================================
+// HALL OF FAME SYSTEM
+// ========================================
+
+// Note: HALL_OF_FAME is defined later in the file with full functionality
+
+function displayHallOfFame() {
+  const out = document.getElementById('output');
+  if (!out) return;
+
+  out.innerHTML = `
+    <div style="max-width: 1400px; margin: 0 auto;">
+      <!-- Header -->
+      <div style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.3), rgba(245, 158, 11, 0.3));
+                  border: 3px solid rgba(251, 191, 36, 0.6); border-radius: 20px; padding: 50px;
+                  text-align: center; margin-bottom: 40px; position: relative; overflow: hidden;">
+        <div style="position: absolute; top: -100px; right: -100px; font-size: 300px; opacity: 0.1;">🏆</div>
+        <div style="position: relative; z-index: 2;">
+          <h1 style="color: #FBBF24; font-size: 3.5em; margin-bottom: 15px; font-weight: 900;">
+            🏆 Hall of Fame
+          </h1>
+          <p style="color: var(--textSecondary); font-size: 1.3em;">
+            Honoring the greatest achievements in tournament history
+          </p>
+        </div>
+      </div>
+
+      <!-- Stats Overview -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                  gap: 20px; margin-bottom: 40px;">
+        ${[
+          { label: 'Tournaments Played', value: TOURNAMENT_HISTORY_ENHANCED?.totalTournamentsPlayed || 0, icon: '⚽', color: '#3B82F6' },
+          { label: 'Total Matches', value: TOURNAMENT_HISTORY_ENHANCED?.statistics?.totalMatches || 0, icon: '🎯', color: '#10B981' },
+          { label: 'Total Goals', value: TOURNAMENT_HISTORY_ENHANCED?.statistics?.totalGoals || 0, icon: '⚔️', color: '#EF4444' },
+          { label: 'Biggest Win', value: TOURNAMENT_HISTORY_ENHANCED?.statistics?.biggestWin ?
+            `${TOURNAMENT_HISTORY_ENHANCED.statistics.biggestWin.difference} goals` : 'N/A', icon: '📊', color: '#F59E0B' }
+        ].map(stat => `
+          <div style="background: var(--cardBg); border: 1px solid var(--cardBorder);
+                      border-radius: 16px; padding: 24px; text-align: center; transition: all 0.3s; cursor: pointer;"
+               onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='${stat.color}'"
+               onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='var(--cardBorder)'">
+            <div style="font-size: 3em; margin-bottom: 10px;">${stat.icon}</div>
+            <div style="color: ${stat.color}; font-size: 2em; font-weight: 900; margin-bottom: 8px;">
+              ${stat.value}
+            </div>
+            <div style="color: var(--textSecondary); font-size: 0.95em; font-weight: 600;">${stat.label}</div>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- Tab Navigation -->
+      <div style="display: flex; gap: 12px; margin-bottom: 30px; flex-wrap: wrap;
+                  border-bottom: 2px solid var(--cardBorder); padding-bottom: 15px;">
+        ${[
+          { id: 'champions', name: 'Champions', icon: '👑' },
+          { id: 'records', name: 'Records', icon: '📊' },
+          { id: 'moments', name: 'Greatest Moments', icon: '⭐' },
+          { id: 'legends', name: 'Legends', icon: '🎖️' }
+        ].map((tab, idx) => `
+          <button onclick="switchHallOfFameTab('${tab.id}')"
+                  id="hof-tab-${tab.id}"
+                  class="hof-tab ${idx === 0 ? 'active' : ''}"
+                  style="padding: 12px 24px; background: ${idx === 0 ? 'rgba(251, 191, 36, 0.2)' : 'var(--cardBg)'};
+                         border: 1px solid ${idx === 0 ? 'rgba(251, 191, 36, 0.4)' : 'var(--cardBorder)'};
+                         border-radius: 10px; color: ${idx === 0 ? '#FBBF24' : 'var(--textSecondary)'};
+                         font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 1em;"
+                  onmouseover="if (!this.classList.contains('active')) { this.style.borderColor='var(--primary)'; this.style.color='var(--primary)'; }"
+                  onmouseout="if (!this.classList.contains('active')) { this.style.borderColor='var(--cardBorder)'; this.style.color='var(--textSecondary)'; }">
+            ${tab.icon} ${tab.name}
+          </button>
+        `).join('')}
+      </div>
+
+      <!-- Tab Content -->
+      <div id="hofContent">
+        ${createChampionsTab()}
+      </div>
+
+      <div style="text-align: center; margin-top: 40px;">
+        <button onclick="showOutput('')" class="btn-secondary"
+                style="padding: 16px 32px; font-weight: 600; font-size: 1.1em;">
+          ← Back to Main Menu
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function createChampionsTab() {
+  const champions = TOURNAMENT_HISTORY_ENHANCED?.statistics?.championsByTeam || {};
+  const runnersUp = TOURNAMENT_HISTORY_ENHANCED?.statistics?.runnersUpByTeam || {};
+
+  if (Object.keys(champions).length === 0) {
+    return `
+      <div style="text-align: center; padding: 80px 20px; background: var(--cardBg);
+                  border-radius: 16px; border: 1px solid var(--cardBorder);">
+        <div style="font-size: 5em; margin-bottom: 20px; opacity: 0.5;">🏆</div>
+        <h3 style="color: var(--textSecondary); margin-bottom: 15px;">No Champions Yet</h3>
+        <p style="color: var(--textMuted);">Complete tournaments to start building your Hall of Fame</p>
+      </div>
+    `;
+  }
+
+  return `
+    <div>
+      <!-- Most Championships -->
+      <div style="background: var(--cardBg); border: 1px solid var(--cardBorder);
+                  border-radius: 16px; padding: 30px; margin-bottom: 30px;">
+        <h3 style="color: #FBBF24; margin-bottom: 25px; font-size: 1.5em; display: flex; align-items: center; gap: 12px;">
+          <span style="font-size: 1.3em;">👑</span>
+          Most Championships
+        </h3>
+
+        <div style="display: grid; gap: 16px;">
+          ${Object.entries(champions)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 10)
+            .map(([team, wins], idx) => {
+              const finals = wins + (runnersUp[team] || 0);
+              const winRate = finals > 0 ? ((wins / finals) * 100).toFixed(0) : 0;
+
+              return `
+                <div style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.8));
+                            border: 2px solid ${idx === 0 ? 'rgba(251, 191, 36, 0.5)' : 'var(--cardBorder)'};
+                            border-radius: 12px; padding: 24px; transition: all 0.3s;"
+                     onmouseover="this.style.transform='translateX(8px)'; this.style.borderColor='#FBBF24'"
+                     onmouseout="this.style.transform='translateX(0)'; this.style.borderColor='${idx === 0 ? 'rgba(251, 191, 36, 0.5)' : 'var(--cardBorder)'}'">
+
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 20px; flex: 1;">
+                      <!-- Rank -->
+                      <div style="width: 50px; height: 50px; border-radius: 50%;
+                                  background: ${idx === 0 ? 'linear-gradient(135deg, #FBBF24, #F59E0B)' :
+                                               idx === 1 ? 'linear-gradient(135deg, #94A3B8, #64748B)' :
+                                               idx === 2 ? 'linear-gradient(135deg, #CD7F32, #B8651B)' :
+                                               'rgba(71, 85, 105, 0.3)'};
+                                  display: flex; align-items: center; justify-content: center;
+                                  font-weight: 900; font-size: 1.3em; color: ${idx < 3 ? '#000' : 'var(--text)'};">
+                        ${idx + 1}
+                      </div>
+
+                      <!-- Team Info -->
+                      <div style="flex: 1;">
+                        <div style="font-weight: 700; font-size: 1.3em; color: var(--text); margin-bottom: 8px;">
+                          ${team}
+                        </div>
+                        <div style="display: flex; gap: 20px; color: var(--textSecondary); font-size: 0.9em;">
+                          <span>Finals: ${finals}</span>
+                          <span>Win Rate: ${winRate}%</span>
+                          ${runnersUp[team] ? `<span>Runner-up: ${runnersUp[team]}×</span>` : ''}
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Trophies -->
+                    <div style="text-align: center; padding: 16px 24px; background: rgba(251, 191, 36, 0.1);
+                                border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 10px;">
+                      <div style="font-size: 2em; margin-bottom: 5px;">🏆</div>
+                      <div style="color: #FBBF24; font-weight: 900; font-size: 1.8em;">${wins}</div>
+                      <div style="color: var(--textMuted); font-size: 0.75em; text-transform: uppercase;">
+                        ${wins === 1 ? 'Trophy' : 'Trophies'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+        </div>
+      </div>
+
+      <!-- Recent Champions -->
+      ${TOURNAMENT_HISTORY_ENHANCED?.completed && TOURNAMENT_HISTORY_ENHANCED.completed.length > 0 ? `
+        <div style="background: var(--cardBg); border: 1px solid var(--cardBorder);
+                    border-radius: 16px; padding: 30px;">
+          <h3 style="color: #10B981; margin-bottom: 25px; font-size: 1.5em; display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 1.3em;">📅</span>
+            Recent Champions
+          </h3>
+
+          <div style="display: grid; gap: 12px;">
+            ${TOURNAMENT_HISTORY_ENHANCED.completed.slice(-5).reverse().map((tournament, idx) => `
+              <div style="padding: 20px; background: rgba(15, 23, 42, 0.6); border-radius: 10px;
+                          display: flex; justify-content: space-between; align-items: center;
+                          border-left: 4px solid #10B981;">
+                <div>
+                  <div style="color: var(--text); font-weight: 700; font-size: 1.1em; margin-bottom: 5px;">
+                    ${tournament.champion || 'Unknown'}
+                  </div>
+                  <div style="color: var(--textSecondary); font-size: 0.9em;">
+                    ${tournament.name || 'Tournament'} • ${tournament.endDate ? new Date(tournament.endDate).toLocaleDateString() : 'N/A'}
+                  </div>
+                </div>
+                <button onclick="viewTournamentDetails(${idx})" class="btn-secondary"
+                        style="padding: 8px 16px; font-size: 0.9em;">
+                  View Details
+                </button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function createRecordsTab() {
+  const stats = TOURNAMENT_HISTORY_ENHANCED?.statistics || {};
+
+  return `
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px;">
+      <!-- Tournament Records -->
+      <div style="background: var(--cardBg); border: 1px solid var(--cardBorder);
+                  border-radius: 16px; padding: 30px;">
+        <h3 style="color: #3B82F6; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.3em;">🏆</span>
+          Tournament Records
+        </h3>
+
+        <div style="display: grid; gap: 16px;">
+          ${[
+            { label: 'Total Tournaments', value: TOURNAMENT_HISTORY_ENHANCED?.totalTournamentsPlayed || 0, icon: '⚽' },
+            { label: 'Total Matches', value: stats.totalMatches || 0, icon: '🎯' },
+            { label: 'Total Goals', value: stats.totalGoals || 0, icon: '⚔️' },
+            { label: 'Average Goals/Match', value: stats.totalMatches > 0 ?
+              (stats.totalGoals / stats.totalMatches).toFixed(2) : '0.00', icon: '📊' }
+          ].map(record => `
+            <div style="display: flex; justify-content: space-between; align-items: center;
+                        padding: 16px; background: rgba(15, 23, 42, 0.6); border-radius: 10px;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 1.5em;">${record.icon}</span>
+                <span style="color: var(--textSecondary);">${record.label}</span>
+              </div>
+              <span style="color: var(--text); font-weight: 700; font-size: 1.3em;">${record.value}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Match Records -->
+      <div style="background: var(--cardBg); border: 1px solid var(--cardBorder);
+                  border-radius: 16px; padding: 30px;">
+        <h3 style="color: #F59E0B; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.3em;">🎯</span>
+          Match Records
+        </h3>
+
+        <div style="display: grid; gap: 16px;">
+          ${stats.biggestWin ? `
+            <div style="padding: 20px; background: rgba(15, 23, 42, 0.6); border-radius: 10px;">
+              <div style="color: var(--textSecondary); font-size: 0.9em; margin-bottom: 10px;">Biggest Win</div>
+              <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 10px;">
+                <div style="text-align: right; flex: 1;">
+                  <div style="color: var(--text); font-weight: 700; font-size: 1.1em;">
+                    ${stats.biggestWin.teamA}
+                  </div>
+                </div>
+                <div style="padding: 10px 20px; background: rgba(16, 185, 129, 0.2);
+                            border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px;">
+                  <span style="color: #10B981; font-weight: 900; font-size: 1.5em;">
+                    ${stats.biggestWin.scoreA} - ${stats.biggestWin.scoreB}
+                  </span>
+                </div>
+                <div style="text-align: left; flex: 1;">
+                  <div style="color: var(--text); font-weight: 700; font-size: 1.1em;">
+                    ${stats.biggestWin.teamB}
+                  </div>
+                </div>
+              </div>
+              <div style="text-align: center; color: #F59E0B; font-weight: 600;">
+                Goal Difference: ${stats.biggestWin.difference}
+              </div>
+            </div>
+          ` : `
+            <div style="padding: 20px; background: rgba(15, 23, 42, 0.6); border-radius: 10px; text-align: center;">
+              <div style="color: var(--textMuted);">No records yet</div>
+            </div>
+          `}
+
+          <div style="padding: 16px; background: rgba(15, 23, 42, 0.6); border-radius: 10px;
+                      display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--textSecondary);">Most Goals in Match</span>
+            <span style="color: var(--text); font-weight: 700; font-size: 1.3em;">
+              ${stats.mostGoalsInMatch || 0}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function createMomentsTab() {
+  const moments = [];
+
+  // Generate moments from tournament history
+  if (TOURNAMENT_HISTORY_ENHANCED?.completed) {
+    TOURNAMENT_HISTORY_ENHANCED.completed.forEach(tournament => {
+      if (tournament.champion) {
+        moments.push({
+          type: 'championship',
+          title: `${tournament.champion} Crowned Champions`,
+          description: `${tournament.champion} won the ${tournament.name || 'tournament'}`,
+          date: tournament.endDate,
+          icon: '🏆',
+          color: '#FBBF24'
+        });
+      }
+
+      if (tournament.statistics?.biggestWin) {
+        const win = tournament.statistics.biggestWin;
+        moments.push({
+          type: 'bigwin',
+          title: 'Historic Victory',
+          description: `${win.teamA} ${win.scoreA}-${win.scoreB} ${win.teamB}`,
+          date: tournament.endDate,
+          icon: '⚔️',
+          color: '#EF4444'
+        });
+      }
+    });
+  }
+
+  if (moments.length === 0) {
+    return `
+      <div style="text-align: center; padding: 80px 20px; background: var(--cardBg);
+                  border-radius: 16px; border: 1px solid var(--cardBorder);">
+        <div style="font-size: 5em; margin-bottom: 20px; opacity: 0.5;">⭐</div>
+        <h3 style="color: var(--textSecondary); margin-bottom: 15px;">No Moments Yet</h3>
+        <p style="color: var(--textMuted);">Great moments will be captured as you play</p>
+      </div>
+    `;
+  }
+
+  return `
+    <div style="display: grid; gap: 20px;">
+      ${moments.slice(0, 20).map(moment => `
+        <div style="background: var(--cardBg); border: 1px solid var(--cardBorder);
+                    border-left: 4px solid ${moment.color}; border-radius: 12px; padding: 24px;
+                    transition: all 0.3s;"
+             onmouseover="this.style.transform='translateX(8px)'"
+             onmouseout="this.style.transform='translateX(0)'">
+          <div style="display: flex; gap: 20px; align-items: start;">
+            <div style="font-size: 3em;">${moment.icon}</div>
+            <div style="flex: 1;">
+              <h4 style="color: ${moment.color}; font-size: 1.3em; margin-bottom: 8px;">
+                ${moment.title}
+              </h4>
+              <p style="color: var(--textSecondary); margin-bottom: 10px; line-height: 1.6;">
+                ${moment.description}
+              </p>
+              <div style="color: var(--textMuted); font-size: 0.85em;">
+                ${moment.date ? new Date(moment.date).toLocaleDateString() : 'N/A'}
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function createLegendsTab() {
+  return `
+    <div style="text-align: center; padding: 80px 20px; background: var(--cardBg);
+                border-radius: 16px; border: 1px solid var(--cardBorder);">
+      <div style="font-size: 5em; margin-bottom: 20px; opacity: 0.5;">🎖️</div>
+      <h3 style="color: var(--textSecondary); margin-bottom: 15px;">Legends Coming Soon</h3>
+      <p style="color: var(--textMuted);">Individual player statistics and legends will be tracked in future updates</p>
+    </div>
+  `;
+}
+
+function switchHallOfFameTab(tabId) {
+  // Remove active class from all tabs
+  document.querySelectorAll('.hof-tab').forEach(tab => {
+    tab.classList.remove('active');
+    tab.style.background = 'var(--cardBg)';
+    tab.style.borderColor = 'var(--cardBorder)';
+    tab.style.color = 'var(--textSecondary)';
+  });
+
+  // Add active class to selected tab
+  const activeTab = document.getElementById(`hof-tab-${tabId}`);
+  if (activeTab) {
+    activeTab.classList.add('active');
+    activeTab.style.background = 'rgba(251, 191, 36, 0.2)';
+    activeTab.style.borderColor = 'rgba(251, 191, 36, 0.4)';
+    activeTab.style.color = '#FBBF24';
+  }
+
+  // Update content
+  const content = document.getElementById('hofContent');
+  if (!content) return;
+
+  switch(tabId) {
+    case 'champions':
+      content.innerHTML = createChampionsTab();
+      break;
+    case 'records':
+      content.innerHTML = createRecordsTab();
+      break;
+    case 'moments':
+      content.innerHTML = createMomentsTab();
+      break;
+    case 'legends':
+      content.innerHTML = createLegendsTab();
+      break;
+  }
+}
+
+function viewTournamentDetails(idx) {
+  showNotification('info', 'Coming Soon', 'Detailed tournament view coming soon', 2000);
+}
+
+// ========================================
+// STORAGE MANAGEMENT - FIX QUOTA ISSUES
+// ========================================
+
+const STORAGE_MANAGER = {
+  maxSize: 5 * 1024 * 1024, // 5MB limit
+  compressionEnabled: true,
+
+  getUsage() {
+    let total = 0;
+    for (let key in localStorage) {
+      if (localStorage.hasOwnProperty(key)) {
+        total += localStorage[key].length + key.length;
+      }
+    }
+    return total;
+  },
+
+  getUsageMB() {
+    return (this.getUsage() / (1024 * 1024)).toFixed(2);
+  },
+
+  isNearLimit() {
+    return this.getUsage() > (this.maxSize * 0.8);
+  },
+
+  // Simple compression using RLE-like encoding for repeated patterns
+  compress(data) {
+    if (!this.compressionEnabled) return data;
+
+    try {
+      const jsonString = JSON.stringify(data);
+
+      // Simple compression: encode repeated patterns
+      let compressed = jsonString
+        .replace(/"status":"([^"]+)"/g, (m, s) => `"s":"${s}"`)
+        .replace(/"timestamp":(\d+)/g, (m, t) => `"t":${t}`)
+        .replace(/"team1":"([^"]+)"/g, (m, t) => `"t1":"${t}"`)
+        .replace(/"team2":"([^"]+)"/g, (m, t) => `"t2":"${t}"`)
+        .replace(/"score1":(\d+)/g, (m, s) => `"s1":${s}`)
+        .replace(/"score2":(\d+)/g, (m, s) => `"s2":${s}`)
+        .replace(/"winner":"([^"]+)"/g, (m, w) => `"w":"${w}"`)
+        .replace(/"matchNumber":(\d+)/g, (m, n) => `"mn":${n}`);
+
+      return compressed;
+    } catch (e) {
+      console.error('Compression failed:', e);
+      return JSON.stringify(data);
+    }
+  },
+
+  decompress(compressedString) {
+    if (!this.compressionEnabled) return JSON.parse(compressedString);
+
+    try {
+      // Reverse compression
+      let decompressed = compressedString
+        .replace(/"s":"([^"]+)"/g, (m, s) => `"status":"${s}"`)
+        .replace(/"t":(\d+)/g, (m, t) => `"timestamp":${t}`)
+        .replace(/"t1":"([^"]+)"/g, (m, t) => `"team1":"${t}"`)
+        .replace(/"t2":"([^"]+)"/g, (m, t) => `"team2":"${t}"`)
+        .replace(/"s1":(\d+)/g, (m, s) => `"score1":${s}`)
+        .replace(/"s2":(\d+)/g, (m, s) => `"score2":${s}`)
+        .replace(/"w":"([^"]+)"/g, (m, w) => `"winner":"${w}"`)
+        .replace(/"mn":(\d+)/g, (m, n) => `"matchNumber":${n}`);
+
+      return JSON.parse(decompressed);
+    } catch (e) {
+      console.error('Decompression failed:', e);
+      return JSON.parse(compressedString);
+    }
+  },
+
+  safeSet(key, value) {
+    try {
+      const compressed = this.compress(value);
+
+      // Try to save
+      localStorage.setItem(key, compressed);
+      return true;
+    } catch (e) {
+      if (e.name === 'QuotaExceededError') {
+        console.warn('Storage quota exceeded, attempting cleanup...');
+
+        // Try smart cleanup
+        this.smartCleanup();
+
+        try {
+          localStorage.setItem(key, this.compress(value));
+          showNotification('warning', 'Storage Cleaned', 'Old data cleaned to make room', 2000);
+          return true;
+        } catch (e2) {
+          console.error('Storage still full after cleanup');
+
+          // Last resort: aggressive cleanup
+          this.aggressiveCleanup();
+
+          try {
+            localStorage.setItem(key, this.compress(value));
+            showNotification('warning', 'Aggressive Cleanup', 'Multiple backups removed', 2000);
+            return true;
+          } catch (e3) {
+            showNotification('error', 'Storage Full', 'Cannot save. Export your data!', 3000);
+            return false;
+          }
+        }
+      } else {
+        console.error('Storage error:', e);
+        return false;
+      }
+    }
+  },
+
+  safeGet(key) {
+    try {
+      const item = localStorage.getItem(key);
+      if (!item) return null;
+
+      return this.decompress(item);
+    } catch (e) {
+      console.error('Failed to retrieve ' + key + ':', e);
+      return null;
+    }
+  },
+
+  smartCleanup() {
+    console.log('Running smart cleanup...');
+
+    // 1. Remove old auto-backups (keep only last 3)
+    this.cleanOldBackups();
+
+    // 2. Trim tournament history to last 50 tournaments
+    try {
+      const history = this.safeGet('tournamentHistory');
+      if (history && history.length > 50) {
+        const trimmed = history.slice(-50);
+        this.safeSet('tournamentHistory', trimmed);
+        console.log(`Trimmed tournament history from ${history.length} to 50`);
+      }
+    } catch (e) {
+      console.error('Failed to trim history:', e);
+    }
+
+    // 3. Clean TOURNAMENT_HISTORY_ENHANCED
+    try {
+      const enhanced = this.safeGet('tournamentHistoryEnhanced');
+      if (enhanced && enhanced.tournaments && enhanced.tournaments.length > 50) {
+        enhanced.tournaments = enhanced.tournaments.slice(-50);
+        this.safeSet('tournamentHistoryEnhanced', enhanced);
+        console.log('Trimmed enhanced tournament history to 50');
+      }
+    } catch (e) {
+      console.error('Failed to trim enhanced history:', e);
+    }
+  },
+
+  aggressiveCleanup() {
+    console.log('Running aggressive cleanup...');
+
+    // Remove all backups except current state
+    for (let key in localStorage) {
+      if (key.startsWith('backup_') || key.startsWith('autoBackup_')) {
+        localStorage.removeItem(key);
+      }
+    }
+
+    // Trim histories to last 20
+    try {
+      const history = this.safeGet('tournamentHistory');
+      if (history && history.length > 20) {
+        this.safeSet('tournamentHistory', history.slice(-20));
+      }
+    } catch (e) {
+      console.error('Aggressive trim failed:', e);
+    }
+
+    try {
+      const enhanced = this.safeGet('tournamentHistoryEnhanced');
+      if (enhanced && enhanced.tournaments && enhanced.tournaments.length > 20) {
+        enhanced.tournaments = enhanced.tournaments.slice(-20);
+        this.safeSet('tournamentHistoryEnhanced', enhanced);
+      }
+    } catch (e) {
+      console.error('Aggressive trim of enhanced failed:', e);
+    }
+  },
+
+  cleanOldBackups() {
+    // Get all backup keys
+    const backupKeys = [];
+    for (let key in localStorage) {
+      if (key.startsWith('backup_') || key.startsWith('autoBackup_')) {
+        backupKeys.push(key);
+      }
+    }
+
+    // Sort by timestamp (extract from key)
+    backupKeys.sort((a, b) => {
+      const timeA = parseInt(a.split('_')[1]) || 0;
+      const timeB = parseInt(b.split('_')[1]) || 0;
+      return timeB - timeA; // Newest first
+    });
+
+    // Keep only last 3
+    if (backupKeys.length > 3) {
+      for (let i = 3; i < backupKeys.length; i++) {
+        localStorage.removeItem(backupKeys[i]);
+      }
+      console.log(`Removed ${backupKeys.length - 3} old backups`);
+    }
+  },
+
+  exportToFile() {
+    try {
+      const data = {
+        managerState: this.safeGet('managerState'),
+        tournamentHistory: this.safeGet('tournamentHistory'),
+        tournamentHistoryEnhanced: this.safeGet('tournamentHistoryEnhanced'),
+        seasonState: this.safeGet('seasonState'),
+        achievementProgress: this.safeGet('achievementProgress'),
+        predictionState: this.safeGet('predictionState'),
+        selectedTheme: localStorage.getItem('selectedTheme'),
+        exportDate: new Date().toISOString()
+      };
+
+      const jsonString = JSON.stringify(data, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `soccer-sim-backup-${Date.now()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showNotification('success', 'Export Complete', 'Data exported to file', 2000);
+    } catch (e) {
+      console.error('Export failed:', e);
+      showNotification('error', 'Export Failed', 'Could not export data', 2000);
+    }
+  },
+
+  importFromFile(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+
+        // Restore all data
+        if (data.managerState) this.safeSet('managerState', data.managerState);
+        if (data.tournamentHistory) this.safeSet('tournamentHistory', data.tournamentHistory);
+        if (data.tournamentHistoryEnhanced) this.safeSet('tournamentHistoryEnhanced', data.tournamentHistoryEnhanced);
+        if (data.seasonState) this.safeSet('seasonState', data.seasonState);
+        if (data.achievementProgress) this.safeSet('achievementProgress', data.achievementProgress);
+        if (data.predictionState) this.safeSet('predictionState', data.predictionState);
+        if (data.selectedTheme) localStorage.setItem('selectedTheme', data.selectedTheme);
+
+        showNotification('success', 'Import Complete', 'Data restored! Reloading...', 2000);
+        setTimeout(() => location.reload(), 2000);
+      } catch (e) {
+        console.error('Import failed:', e);
+        showNotification('error', 'Import Failed', 'Invalid backup file', 2000);
+      }
+    };
+    reader.readAsText(file);
+  },
+
+  displayStorageInfo() {
+    const usage = this.getUsageMB();
+    const maxMB = (this.maxSize / (1024 * 1024)).toFixed(2);
+    const percentage = ((this.getUsage() / this.maxSize) * 100).toFixed(1);
+
+    let backupCount = 0;
+    for (let key in localStorage) {
+      if (key.startsWith('backup_') || key.startsWith('autoBackup_')) {
+        backupCount++;
+      }
+    }
+
+    const statusColor = percentage > 80 ? '#EF4444' : percentage > 60 ? '#F59E0B' : '#10B981';
+
+    const out = document.getElementById('content') || document.getElementById('output');
+    if (!out) return;
+
+    out.innerHTML = `
+      <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, var(--cardBg) 0%, color-mix(in srgb, var(--cardBg) 95%, var(--primary)) 100%); padding: 30px; border-radius: 16px; border: 1px solid var(--border);">
+          <h2 style="margin: 0 0 24px 0; color: var(--text); display: flex; align-items: center; gap: 10px;">
+            💾 Storage Management
+          </h2>
+
+          <div style="background: var(--bg); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <span style="color: var(--textMuted);">Storage Used</span>
+              <span style="color: ${statusColor}; font-size: 20px; font-weight: bold;">${usage} MB / ${maxMB} MB</span>
+            </div>
+
+            <div style="background: var(--border); height: 24px; border-radius: 12px; overflow: hidden; margin-bottom: 10px;">
+              <div style="background: linear-gradient(90deg, ${statusColor}, color-mix(in srgb, ${statusColor} 70%, white)); height: 100%; width: ${percentage}%; transition: width 0.3s ease;"></div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; color: var(--textMuted); font-size: 14px;">
+              <span>${percentage}% Full</span>
+              <span>${backupCount} Backups</span>
+            </div>
+          </div>
+
+          ${percentage > 80 ? `
+            <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid #EF4444; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+              <div style="color: #EF4444; font-weight: 600; margin-bottom: 5px;">⚠️ Storage Almost Full</div>
+              <div style="color: var(--textMuted); font-size: 14px;">Consider cleaning up old data or exporting to a file.</div>
+            </div>
+          ` : ''}
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <button onclick="STORAGE_MANAGER.smartCleanup(); STORAGE_MANAGER.displayStorageInfo();"
+                    class="btn-primary" style="padding: 12px;">
+              🧹 Smart Cleanup
+            </button>
+
+            <button onclick="if(confirm('Remove old backups and trim history to last 20 tournaments?')) { STORAGE_MANAGER.aggressiveCleanup(); STORAGE_MANAGER.displayStorageInfo(); }"
+                    class="btn-danger" style="padding: 12px;">
+              🔥 Aggressive Cleanup
+            </button>
+
+            <button onclick="STORAGE_MANAGER.exportToFile();"
+                    class="btn-success" style="padding: 12px;">
+              📥 Export Data
+            </button>
+
+            <button onclick="const input = document.createElement('input'); input.type = 'file'; input.accept = '.json'; input.onchange = (e) => STORAGE_MANAGER.importFromFile(e.target.files[0]); input.click();"
+                    class="btn-secondary" style="padding: 12px;">
+              📤 Import Data
+            </button>
+          </div>
+
+          <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
+            <h3 style="margin: 0 0 12px 0; color: var(--text); font-size: 16px;">Storage Tips</h3>
+            <ul style="color: var(--textMuted); font-size: 14px; margin: 0; padding-left: 20px;">
+              <li style="margin-bottom: 8px;">Smart Cleanup keeps last 3 backups and 50 tournaments</li>
+              <li style="margin-bottom: 8px;">Aggressive Cleanup removes all backups and keeps only 20 tournaments</li>
+              <li style="margin-bottom: 8px;">Export regularly to save your progress to a file</li>
+              <li>Compression is automatically applied to all saved data</li>
+            </ul>
+          </div>
+
+          <button onclick="showMainMenu()" class="btn-secondary" style="width: 100%; margin-top: 20px; padding: 12px;">
+            ← Back to Menu
+          </button>
+        </div>
+      </div>
+    `;
+  }
+};
+
+// Override AUTO_SAVE to use STORAGE_MANAGER
+if (typeof AUTO_SAVE !== 'undefined') {
+  const originalSave = AUTO_SAVE.save;
+  AUTO_SAVE.save = function() {
+    if (!this.enabled) return;
+
+    const success = STORAGE_MANAGER.safeSet('managerState', MANAGER_STATE);
+    if (success) {
+      this.lastSave = Date.now();
+      console.log('✓ Auto-saved with compression at', new Date().toLocaleTimeString());
+    }
+  };
+
+  const originalLoad = AUTO_SAVE.load;
+  AUTO_SAVE.load = function() {
+    const saved = STORAGE_MANAGER.safeGet('managerState');
+    if (saved) {
+      Object.assign(MANAGER_STATE, saved);
+      console.log('✓ Loaded manager state from compressed storage');
+      return true;
+    }
+    return false;
+  };
+}
+
+// Override backupToLocalStorage if it exists
+if (typeof backupToLocalStorage === 'function') {
+  const originalBackup = backupToLocalStorage;
+  window.backupToLocalStorage = function() {
+    const timestamp = Date.now();
+    const backupData = {
+      managerState: MANAGER_STATE,
+      tournamentHistory: TOURNAMENT_HISTORY,
+      tournamentHistoryEnhanced: TOURNAMENT_HISTORY_ENHANCED,
+      timestamp: timestamp
+    };
+
+    STORAGE_MANAGER.safeSet(`backup_${timestamp}`, backupData);
+    STORAGE_MANAGER.cleanOldBackups();
+    showNotification('success', 'Backup Created', 'Progress saved successfully', 2000);
+  };
+}
+
+// ========================================
 // PREDICTION SYSTEM
 // ========================================
 
@@ -14871,6 +16812,11 @@ let PREDICTION_STATE = {
     knockout: { total: 0, correct: 0 },
     final: { total: 0, correct: 0 }
   },
+  byConfidence: {
+    low: { total: 0, correct: 0 },
+    medium: { total: 0, correct: 0 },
+    high: { total: 0, correct: 0 }
+  },
   confidenceLevels: {
     low: { total: 0, correct: 0 },
     medium: { total: 0, correct: 0 },
@@ -14884,6 +16830,450 @@ let PREDICTION_STATE = {
     underdog: false     // 5 upset predictions correct
   }
 };
+
+// ========================================
+// ENHANCED PREDICTIONS - INTERACTIVE
+// ========================================
+
+function enablePredictionsForMatch(teamA, teamB, stage, matchId) {
+  if (!PREDICTION_STATE.active) {
+    return Promise.resolve(null);
+  }
+
+  // Check if already predicted
+  if (PREDICTION_STATE.predictions[matchId]) {
+    console.log('Match already predicted');
+    return Promise.resolve(PREDICTION_STATE.predictions[matchId]);
+  }
+
+  return new Promise((resolve) => {
+    showPredictionModal(teamA, teamB, stage, matchId, resolve);
+  });
+}
+
+function showPredictionModal(teamA, teamB, stage, matchId, callback) {
+  const modal = document.createElement('div');
+  modal.className = 'modal-backdrop active';
+  modal.style.zIndex = '10006';
+
+  // Calculate win probabilities
+  const strengthDiff = teamA.strength - teamB.strength;
+  let probA = 50 + (strengthDiff * 0.7);
+  let probB = 50 - (strengthDiff * 0.7);
+  let probDraw = 25;
+
+  // Normalize
+  const total = probA + probB + probDraw;
+  probA = Math.max(5, Math.min(80, probA / total * 100));
+  probB = Math.max(5, Math.min(80, probB / total * 100));
+  probDraw = 100 - probA - probB;
+
+  const stageDisplay = STAGE_DISPLAY_NAMES && STAGE_DISPLAY_NAMES[normalizeStageNames ? normalizeStageNames(stage) : stage] || stage;
+
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-head" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(139, 92, 246, 0.2));">
+        <h2 style="color: #C084FC;">🔮 Make Your Prediction</h2>
+        <button class="modal-close" onclick="this.closest('.modal-backdrop').remove(); window._predictionCallback(null)">✕</button>
+      </div>
+
+      <div style="padding: 30px;">
+        <!-- Stage Info -->
+        <div style="text-align: center; margin-bottom: 25px;">
+          <div style="color: var(--textSecondary); font-size: 0.9em; margin-bottom: 10px;">
+            ${stageDisplay}
+          </div>
+        </div>
+
+        <!-- Teams Display -->
+        <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: center; margin-bottom: 30px;">
+          <!-- Team A -->
+          <div style="text-align: center;">
+            <div style="font-size: 3em; margin-bottom: 10px;">⚽</div>
+            <div style="color: var(--text); font-weight: 700; font-size: 1.3em; margin-bottom: 8px;">
+              ${teamA.name}
+            </div>
+            <div style="display: inline-block; padding: 6px 14px; background: rgba(16, 185, 129, 0.2);
+                        border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 20px;">
+              <span style="color: #10B981; font-weight: 700;">${teamA.strength}</span>
+            </div>
+          </div>
+
+          <div style="color: var(--textMuted); font-size: 2em; font-weight: 700;">VS</div>
+
+          <!-- Team B -->
+          <div style="text-align: center;">
+            <div style="font-size: 3em; margin-bottom: 10px;">⚽</div>
+            <div style="color: var(--text); font-weight: 700; font-size: 1.3em; margin-bottom: 8px;">
+              ${teamB.name}
+            </div>
+            <div style="display: inline-block; padding: 6px 14px; background: rgba(59, 130, 246, 0.2);
+                        border: 1px solid rgba(59, 130, 246, 0.4); border-radius: 20px;">
+              <span style="color: #60A5FA; font-weight: 700;">${teamB.strength}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Prediction Hint -->
+        <div style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3);
+                    border-radius: 10px; padding: 16px; margin-bottom: 25px;">
+          <div style="color: #C084FC; font-weight: 600; margin-bottom: 10px; text-align: center;">
+            📊 Win Probabilities
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: center;">
+            <div>
+              <div style="color: var(--textSecondary); font-size: 0.85em; margin-bottom: 5px;">
+                ${teamA.name}
+              </div>
+              <div style="color: #10B981; font-weight: 700; font-size: 1.3em;">
+                ${probA.toFixed(0)}%
+              </div>
+            </div>
+            <div>
+              <div style="color: var(--textSecondary); font-size: 0.85em; margin-bottom: 5px;">Draw</div>
+              <div style="color: #F59E0B; font-weight: 700; font-size: 1.3em;">
+                ${probDraw.toFixed(0)}%
+              </div>
+            </div>
+            <div>
+              <div style="color: var(--textSecondary); font-size: 0.85em; margin-bottom: 5px;">
+                ${teamB.name}
+              </div>
+              <div style="color: #60A5FA; font-weight: 700; font-size: 1.3em;">
+                ${probB.toFixed(0)}%
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prediction Options -->
+        <div style="margin-bottom: 25px;">
+          <label style="display: block; color: var(--textSecondary); margin-bottom: 12px; font-weight: 600;">
+            Select Your Prediction:
+          </label>
+          <div style="display: grid; gap: 12px;">
+            <button onclick="makePrediction('${matchId}', 'teamA', '${teamA.name}', '${teamB.name}')"
+                    class="prediction-btn"
+                    style="padding: 18px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.2));
+                           border: 2px solid rgba(16, 185, 129, 0.4); border-radius: 10px;
+                           color: #10B981; font-weight: 700; font-size: 1.1em; cursor: pointer; transition: all 0.2s;"
+                    onmouseover="this.style.transform='scale(1.02)'; this.style.borderColor='#10B981'"
+                    onmouseout="this.style.transform='scale(1)'; this.style.borderColor='rgba(16, 185, 129, 0.4)'">
+              ${teamA.name} Wins
+            </button>
+
+            <button onclick="makePrediction('${matchId}', 'draw', '${teamA.name}', '${teamB.name}')"
+                    class="prediction-btn"
+                    style="padding: 18px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.2));
+                           border: 2px solid rgba(245, 158, 11, 0.4); border-radius: 10px;
+                           color: #F59E0B; font-weight: 700; font-size: 1.1em; cursor: pointer; transition: all 0.2s;"
+                    onmouseover="this.style.transform='scale(1.02)'; this.style.borderColor='#F59E0B'"
+                    onmouseout="this.style.transform='scale(1)'; this.style.borderColor='rgba(245, 158, 11, 0.4)'">
+              Draw
+            </button>
+
+            <button onclick="makePrediction('${matchId}', 'teamB', '${teamA.name}', '${teamB.name}')"
+                    class="prediction-btn"
+                    style="padding: 18px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.2));
+                           border: 2px solid rgba(59, 130, 246, 0.4); border-radius: 10px;
+                           color: #60A5FA; font-weight: 700; font-size: 1.1em; cursor: pointer; transition: all 0.2s;"
+                    onmouseover="this.style.transform='scale(1.02)'; this.style.borderColor='#60A5FA'"
+                    onmouseout="this.style.transform='scale(1)'; this.style.borderColor='rgba(59, 130, 246, 0.4)'">
+              ${teamB.name} Wins
+            </button>
+          </div>
+        </div>
+
+        <!-- Confidence Level -->
+        <div style="margin-bottom: 25px;">
+          <label style="display: block; color: var(--textSecondary); margin-bottom: 12px; font-weight: 600;">
+            Confidence Level:
+          </label>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+            <button onclick="setPredictionConfidence(1)" id="confidence-1"
+                    class="confidence-btn active-confidence"
+                    style="padding: 12px; background: rgba(168, 85, 247, 0.2);
+                           border: 2px solid rgba(168, 85, 247, 0.4); border-radius: 8px;
+                           color: #C084FC; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+              Low
+            </button>
+            <button onclick="setPredictionConfidence(2)" id="confidence-2"
+                    class="confidence-btn"
+                    style="padding: 12px; background: var(--cardBg); border: 1px solid var(--cardBorder);
+                           border-radius: 8px; color: var(--textSecondary); font-weight: 600;
+                           cursor: pointer; transition: all 0.2s;">
+              Medium
+            </button>
+            <button onclick="setPredictionConfidence(3)" id="confidence-3"
+                    class="confidence-btn"
+                    style="padding: 12px; background: var(--cardBg); border: 1px solid var(--cardBorder);
+                           border-radius: 8px; color: var(--textSecondary); font-weight: 600;
+                           cursor: pointer; transition: all 0.2s;">
+              High
+            </button>
+          </div>
+        </div>
+
+        <!-- Your Stats -->
+        <div style="background: rgba(30, 41, 59, 0.6); border-radius: 10px; padding: 16px; margin-bottom: 20px;">
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: center;">
+            <div>
+              <div style="color: var(--textSecondary); font-size: 0.85em; margin-bottom: 5px;">Accuracy</div>
+              <div style="color: var(--text); font-weight: 700; font-size: 1.2em;">
+                ${PREDICTION_STATE.totalPredictions > 0 ?
+                  ((PREDICTION_STATE.correctPredictions / PREDICTION_STATE.totalPredictions) * 100).toFixed(1) : 0}%
+              </div>
+            </div>
+            <div>
+              <div style="color: var(--textSecondary); font-size: 0.85em; margin-bottom: 5px;">Streak</div>
+              <div style="color: var(--text); font-weight: 700; font-size: 1.2em;">
+                ${PREDICTION_STATE.streakCurrent || 0} 🔥
+              </div>
+            </div>
+            <div>
+              <div style="color: var(--textSecondary); font-size: 0.85em; margin-bottom: 5px;">Total</div>
+              <div style="color: var(--text); font-weight: 700; font-size: 1.2em;">
+                ${PREDICTION_STATE.totalPredictions || 0}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Skip Button -->
+        <div style="text-align: center;">
+          <button onclick="this.closest('.modal-backdrop').remove(); window._predictionCallback(null)"
+                  class="btn-secondary" style="padding: 12px 24px; font-weight: 600;">
+            Skip Prediction
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Store callback globally
+  window._predictionCallback = callback;
+  window._currentPredictionConfidence = 1;
+
+  document.body.appendChild(modal);
+}
+
+function setPredictionConfidence(level) {
+  window._currentPredictionConfidence = level;
+
+  // Update UI
+  document.querySelectorAll('.confidence-btn').forEach(btn => {
+    btn.style.background = 'var(--cardBg)';
+    btn.style.border = '1px solid var(--cardBorder)';
+    btn.style.color = 'var(--textSecondary)';
+  });
+
+  const activeBtn = document.getElementById(`confidence-${level}`);
+  if (activeBtn) {
+    activeBtn.style.background = 'rgba(168, 85, 247, 0.2)';
+    activeBtn.style.border = '2px solid rgba(168, 85, 247, 0.4)';
+    activeBtn.style.color = '#C084FC';
+  }
+}
+
+function makePrediction(matchId, prediction, teamAName, teamBName) {
+  const confidence = window._currentPredictionConfidence || 1;
+
+  // Store prediction
+  PREDICTION_STATE.predictions[matchId] = {
+    prediction: prediction,
+    confidence: confidence,
+    teamA: teamAName,
+    teamB: teamBName,
+    timestamp: Date.now()
+  };
+
+  PREDICTION_STATE.totalPredictions++;
+
+  // Update by confidence
+  const confKey = confidence === 1 ? 'low' : confidence === 2 ? 'medium' : 'high';
+  if (!PREDICTION_STATE.byConfidence[confKey]) {
+    PREDICTION_STATE.byConfidence[confKey] = { total: 0, correct: 0 };
+  }
+  PREDICTION_STATE.byConfidence[confKey].total++;
+
+  // Close modal
+  const modal = document.querySelector('.modal-backdrop');
+  if (modal) modal.remove();
+
+  // Show confirmation
+  const predictionText = prediction === 'teamA' ? teamAName :
+                        prediction === 'teamB' ? teamBName : 'Draw';
+  showNotification('success', 'Prediction Recorded!',
+    `You predicted: ${predictionText}`, 2000);
+
+  // Call callback
+  if (window._predictionCallback) {
+    window._predictionCallback(PREDICTION_STATE.predictions[matchId]);
+  }
+}
+
+// Update verifyPrediction to show better feedback
+function verifyPredictionEnhanced(matchId, actualResult) {
+  const prediction = PREDICTION_STATE.predictions[matchId];
+  if (!prediction) return;
+
+  // Determine actual outcome
+  let actualOutcome;
+  if (actualResult.scoreA > actualResult.scoreB) {
+    actualOutcome = 'teamA';
+  } else if (actualResult.scoreB > actualResult.scoreA) {
+    actualOutcome = 'teamB';
+  } else {
+    actualOutcome = 'draw';
+  }
+
+  // Check if correct
+  const correct = prediction.prediction === actualOutcome;
+
+  if (correct) {
+    PREDICTION_STATE.correctPredictions++;
+    PREDICTION_STATE.streakCurrent++;
+
+    if (PREDICTION_STATE.streakCurrent > PREDICTION_STATE.streakBest) {
+      PREDICTION_STATE.streakBest = PREDICTION_STATE.streakCurrent;
+    }
+
+    // Update by confidence
+    const confKey = prediction.confidence === 1 ? 'low' :
+                   prediction.confidence === 2 ? 'medium' : 'high';
+    PREDICTION_STATE.byConfidence[confKey].correct++;
+
+    // Award XP based on confidence
+    const xpReward = prediction.confidence === 3 ? 30 :
+                    prediction.confidence === 2 ? 20 : 10;
+    if (MANAGER_STATE.active) {
+      awardManagerXP(xpReward, `Correct prediction! (+${prediction.confidence === 3 ? 'high' : prediction.confidence === 2 ? 'medium' : 'low'} confidence)`);
+    }
+
+    // Show success notification
+    showPredictionResultModal(true, prediction, actualResult);
+  } else {
+    PREDICTION_STATE.streakCurrent = 0;
+    showPredictionResultModal(false, prediction, actualResult);
+  }
+
+  // Add to history
+  PREDICTION_STATE.predictionHistory.push({
+    matchId: matchId,
+    prediction: prediction,
+    actual: actualOutcome,
+    correct: correct,
+    result: actualResult,
+    timestamp: Date.now()
+  });
+
+  // Check achievements
+  checkPredictionAchievements();
+}
+
+function showPredictionResultModal(correct, prediction, actualResult) {
+  const modal = document.createElement('div');
+  modal.className = 'modal-backdrop active';
+  modal.style.zIndex = '10006';
+
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width: 500px; text-align: center;">
+      <div style="padding: 40px;">
+        <div style="font-size: 5em; margin-bottom: 20px;">
+          ${correct ? '✅' : '❌'}
+        </div>
+
+        <h2 style="color: ${correct ? '#10B981' : '#EF4444'}; font-size: 2em; margin-bottom: 15px;">
+          ${correct ? 'Correct Prediction!' : 'Wrong Prediction'}
+        </h2>
+
+        <div style="background: var(--cardBg); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+          <div style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 15px;">
+            <div style="text-align: center;">
+              <div style="color: var(--textSecondary); font-size: 0.85em; margin-bottom: 5px;">
+                ${prediction.teamA}
+              </div>
+              <div style="font-size: 2em; font-weight: 900; color: ${actualResult.scoreA > actualResult.scoreB ? '#10B981' : 'var(--textMuted)'};">
+                ${actualResult.scoreA}
+              </div>
+            </div>
+            <div style="color: var(--textMuted); font-size: 1.5em;">-</div>
+            <div style="text-align: center;">
+              <div style="color: var(--textSecondary); font-size: 0.85em; margin-bottom: 5px;">
+                ${prediction.teamB}
+              </div>
+              <div style="font-size: 2em; font-weight: 900; color: ${actualResult.scoreB > actualResult.scoreA ? '#10B981' : 'var(--textMuted)'};">
+                ${actualResult.scoreB}
+              </div>
+            </div>
+          </div>
+
+          <div style="padding: 12px; background: ${correct ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'};
+                      border: 1px solid ${correct ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)'};
+                      border-radius: 8px;">
+            <div style="color: ${correct ? '#10B981' : '#EF4444'}; font-weight: 600;">
+              You predicted: ${prediction.prediction === 'teamA' ? prediction.teamA :
+                              prediction.prediction === 'teamB' ? prediction.teamB : 'Draw'}
+            </div>
+          </div>
+        </div>
+
+        ${correct ? `
+          <div style="background: rgba(251, 191, 36, 0.2); border: 1px solid rgba(251, 191, 36, 0.4);
+                      border-radius: 10px; padding: 16px; margin-bottom: 20px;">
+            <div style="color: #FBBF24; font-weight: 700;">
+              🔥 Current Streak: ${PREDICTION_STATE.streakCurrent}
+            </div>
+          </div>
+        ` : ''}
+
+        <button onclick="this.closest('.modal-backdrop').remove()" class="btn-primary"
+                style="padding: 14px 32px; font-weight: 600;">
+          Continue
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  // Auto-close after 5 seconds
+  setTimeout(() => {
+    const m = document.querySelector('.modal-backdrop');
+    if (m && m.contains(modal.firstElementChild)) m.remove();
+  }, 5000);
+}
+
+function checkPredictionAchievements() {
+  // Check for achievements
+  if (PREDICTION_STATE.correctPredictions >= 10 && ACHIEVEMENT_PROGRESS && !ACHIEVEMENT_PROGRESS.unlockedAchievements.includes('prediction_novice')) {
+    const achievement = ACHIEVEMENTS_CONFIG && ACHIEVEMENTS_CONFIG.predictions ? ACHIEVEMENTS_CONFIG.predictions.find(a => a.id === 'novice') : null;
+    if (achievement && typeof unlockAchievement === 'function') {
+      unlockAchievement('prediction_novice', achievement);
+    }
+  }
+
+  if (PREDICTION_STATE.correctPredictions >= 25 && ACHIEVEMENT_PROGRESS && !ACHIEVEMENT_PROGRESS.unlockedAchievements.includes('prediction_expert')) {
+    const achievement = ACHIEVEMENTS_CONFIG && ACHIEVEMENTS_CONFIG.predictions ? ACHIEVEMENTS_CONFIG.predictions.find(a => a.id === 'expert') : null;
+    if (achievement && typeof unlockAchievement === 'function') {
+      unlockAchievement('prediction_expert', achievement);
+    }
+  }
+
+  if (PREDICTION_STATE.correctPredictions >= 50 && ACHIEVEMENT_PROGRESS && !ACHIEVEMENT_PROGRESS.unlockedAchievements.includes('prediction_master')) {
+    const achievement = ACHIEVEMENTS_CONFIG && ACHIEVEMENTS_CONFIG.predictions ? ACHIEVEMENTS_CONFIG.predictions.find(a => a.id === 'master') : null;
+    if (achievement && typeof unlockAchievement === 'function') {
+      unlockAchievement('prediction_master', achievement);
+    }
+  }
+
+  if (PREDICTION_STATE.streakCurrent >= 10 && ACHIEVEMENT_PROGRESS && !ACHIEVEMENT_PROGRESS.unlockedAchievements.includes('prediction_psychic')) {
+    const achievement = ACHIEVEMENTS_CONFIG && ACHIEVEMENTS_CONFIG.predictions ? ACHIEVEMENTS_CONFIG.predictions.find(a => a.id === 'psychic') : null;
+    if (achievement && typeof unlockAchievement === 'function') {
+      unlockAchievement('prediction_psychic', achievement);
+    }
+  }
+}
 
 // ========================================
 // ACHIEVEMENTS SYSTEM - FIXED
@@ -16191,73 +18581,123 @@ function showAchievementUnlock(achievement) {
 
 function displayManagerProfile() {
   if (!MANAGER_STATE.active) {
-    showNotification('info', 'No Manager', 'Create a manager profile to track your progress', 3000);
     showManagerSetup();
     return;
   }
 
-  const out = document.getElementById('content');
+  const out = document.getElementById('content') || document.getElementById('output');
   if (!out) return;
 
-  const progressPercent = (MANAGER_STATE.xp / MANAGER_STATE.xpToNextLevel * 100).toFixed(1);
+  // Calculate progress percentage
+  const xpProgress = (MANAGER_STATE.xp / MANAGER_STATE.xpToNextLevel * 100).toFixed(1);
+
+  // Get favorite club stats
+  const favoriteClub = MANAGER_STATE.favoriteClub || null;
+  const favoriteClubMatches = favoriteClub ?
+    (MANAGER_STATE.statistics.clubSpecificStats?.[favoriteClub]?.matches || 0) : 0;
+  const favoriteClubWins = favoriteClub ?
+    (MANAGER_STATE.statistics.clubSpecificStats?.[favoriteClub]?.wins || 0) : 0;
 
   out.innerHTML = `
-    <div style="max-width: 1400px; margin: 0 auto; padding: 20px;">
-      <!-- Header Card -->
-      <div style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(245, 158, 11, 0.2));
-                  border: 2px solid rgba(251, 191, 36, 0.4); border-radius: 16px; padding: 30px; margin-bottom: 30px;">
-        <div style="display: grid; grid-template-columns: auto 1fr auto; gap: 30px; align-items: center;">
-          <!-- Avatar -->
-          <div style="width: 120px; height: 120px; background: linear-gradient(135deg, #fbbf24, #f59e0b);
-                      border-radius: 50%; display: flex; align-items: center; justify-content: center;
-                      font-size: 4em; border: 4px solid rgba(251, 191, 36, 0.4);">
-            👤
+    <div style="max-width: 1200px; margin: 0 auto;">
+      <!-- Profile Header Card -->
+      <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15));
+                  border: 2px solid rgba(139, 92, 246, 0.4); border-radius: 20px; padding: 40px;
+                  margin-bottom: 30px; position: relative; overflow: hidden;">
+
+        <!-- Background Pattern -->
+        <div style="position: absolute; top: -50%; right: -50%; width: 200%; height: 200%;
+                    background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+                    animation: pulse 8s ease-in-out infinite;"></div>
+
+        <div style="position: relative; z-index: 2; display: grid; grid-template-columns: auto 1fr auto;
+                    gap: 30px; align-items: center;">
+
+          <!-- Avatar Column -->
+          <div style="text-align: center;">
+            ${createManagerAvatar('large', false)}
+            <button onclick="showManagerCustomization()"
+                    class="btn-secondary"
+                    style="margin-top: 15px; padding: 10px 20px; font-size: 0.9em; width: 100%;">
+              👔 Customize
+            </button>
           </div>
 
-          <!-- Info -->
+          <!-- Info Column -->
           <div>
-            <h1 style="color: #fbbf24; margin-bottom: 8px; font-size: 2.5em;">${MANAGER_STATE.managerName}</h1>
-            <div style="color: #94a3b8; font-size: 1.1em; margin-bottom: 15px;">
-              Managing ${MANAGER_STATE.teamName}
+            <h1 style="color: #A78BFA; font-size: 2.5em; margin-bottom: 8px; font-weight: 900;">
+              ${MANAGER_STATE.managerName}
+            </h1>
+            <div style="color: #94A3B8; font-size: 1.2em; margin-bottom: 20px;">
+              ${MANAGER_STATE.teamName}
             </div>
 
-            <!-- Level Progress -->
-            <div style="margin-bottom: 10px;">
+            <!-- Reputation & Level -->
+            <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+              <div style="padding: 8px 16px; background: rgba(251, 191, 36, 0.2);
+                          border: 1px solid rgba(251, 191, 36, 0.4); border-radius: 20px;">
+                <span style="color: #FBBF24; font-weight: 700;">👑 ${MANAGER_STATE.reputation}</span>
+              </div>
+              <div style="padding: 8px 16px; background: rgba(16, 185, 129, 0.2);
+                          border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 20px;">
+                <span style="color: #10B981; font-weight: 700;">Level ${MANAGER_STATE.level}</span>
+              </div>
+              <div style="padding: 8px 16px; background: rgba(59, 130, 246, 0.2);
+                          border: 1px solid rgba(59, 130, 246, 0.4); border-radius: 20px;">
+                <span style="color: #60A5FA; font-weight: 700;">${MANAGER_STATE.winRate}% Win Rate</span>
+              </div>
+              ${favoriteClub ? `
+                <div style="padding: 8px 16px; background: rgba(168, 85, 247, 0.2);
+                            border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 20px;">
+                  <span style="color: #C084FC; font-weight: 700;">❤️ ${favoriteClub}</span>
+                </div>
+              ` : ''}
+            </div>
+
+            <!-- XP Progress Bar -->
+            <div style="margin-bottom: 15px;">
               <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                <span style="color: #f1f5f9; font-weight: 600;">Level ${MANAGER_STATE.level}</span>
-                <span style="color: #fbbf24; font-weight: 600;">
-                  ${MANAGER_STATE.xp} / ${MANAGER_STATE.xpToNextLevel} XP
+                <span style="color: #94A3B8; font-size: 0.9em;">Experience Progress</span>
+                <span style="color: #10B981; font-weight: 700;">${MANAGER_STATE.xp} / ${MANAGER_STATE.xpToNextLevel} XP</span>
+              </div>
+              <div style="height: 12px; background: rgba(71, 85, 105, 0.3); border-radius: 6px; overflow: hidden;">
+                <div style="height: 100%; background: linear-gradient(90deg, #10B981, #34D399);
+                            width: ${xpProgress}%; transition: width 0.5s ease; border-radius: 6px;
+                            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);"></div>
+              </div>
+              <div style="text-align: right; margin-top: 5px;">
+                <span style="color: #64748B; font-size: 0.85em;">
+                  ${(MANAGER_STATE.xpToNextLevel - MANAGER_STATE.xp)} XP to Level ${MANAGER_STATE.level + 1}
                 </span>
               </div>
-              <div style="background: rgba(15, 23, 42, 0.6); height: 12px; border-radius: 6px; overflow: hidden;">
-                <div style="background: linear-gradient(90deg, #fbbf24, #f59e0b); height: 100%;
-                            width: ${progressPercent}%; transition: width 0.3s ease;"></div>
-              </div>
             </div>
 
-            <div style="display: flex; gap: 15px; margin-top: 15px;">
-              <span style="padding: 6px 14px; background: rgba(16, 185, 129, 0.2);
-                           border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 20px;
-                           color: #10b981; font-size: 0.9em; font-weight: 600;">
-                Reputation: ${MANAGER_STATE.reputation}
-              </span>
-              <span style="padding: 6px 14px; background: rgba(59, 130, 246, 0.2);
-                           border: 1px solid rgba(59, 130, 246, 0.4); border-radius: 20px;
-                           color: #60a5fa; font-size: 0.9em; font-weight: 600;">
-                Win Rate: ${MANAGER_STATE.winRate}%
+            <!-- Unlocked Items Count -->
+            <div style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3);
+                        border-radius: 10px; padding: 12px 16px;">
+              <span style="color: #C084FC; font-weight: 600;">
+                🎨 ${countUnlockedItems()} / ${getTotalItems()} Customization Items Unlocked
               </span>
             </div>
           </div>
 
-          <!-- Actions -->
-          <div style="text-align: right;">
+          <!-- Actions Column -->
+          <div style="display: flex; flex-direction: column; gap: 10px; min-width: 150px;">
             <button onclick="showManagerCustomization()" class="btn-primary"
-                    style="padding: 12px 24px; margin-bottom: 10px; width: 100%; font-weight: 600;">
+                    style="padding: 12px 20px; font-weight: 600; white-space: nowrap;">
               👔 Customize
             </button>
             <button onclick="showManagerStats()" class="btn-secondary"
-                    style="padding: 12px 24px; width: 100%; font-weight: 600;">
+                    style="padding: 12px 20px; font-weight: 600;">
               📊 Full Stats
+            </button>
+            <button onclick="editManagerProfile()" class="btn-secondary"
+                    style="padding: 12px 20px; font-weight: 600;">
+              ✏️ Edit Profile
+            </button>
+            <button onclick="showMainMenu()" class="btn-secondary"
+                    style="padding: 12px 20px; font-weight: 600;">
+              ← Back
             </button>
           </div>
         </div>
@@ -16265,44 +18705,113 @@ function displayManagerProfile() {
 
       <!-- Stats Grid -->
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                  gap: 16px; margin-bottom: 30px;">
+                  gap: 20px; margin-bottom: 30px;">
         ${[
-          { label: 'Matches', value: MANAGER_STATE.matchesManaged, icon: '⚽', color: '#10b981' },
-          { label: 'Tournaments Won', value: MANAGER_STATE.tournamentsWon, icon: '🏆', color: '#fbbf24' },
-          { label: 'Win Streak', value: MANAGER_STATE.statistics.longestWinStreak, icon: '🔥', color: '#ef4444' },
-          { label: 'Clean Sheets', value: MANAGER_STATE.statistics.cleanSheets, icon: '🛡️', color: '#3b82f6' },
-          { label: 'Total XP', value: MANAGER_STATE.totalXP.toLocaleString(), icon: '✨', color: '#c084fc' }
+          { icon: '⚽', label: 'Matches Managed', value: MANAGER_STATE.matchesManaged || 0, color: '#3B82F6' },
+          { icon: '🏆', label: 'Tournaments Won', value: MANAGER_STATE.tournamentsWon || 0, color: '#FBBF24' },
+          { icon: '🔥', label: 'Current Streak', value: MANAGER_STATE.statistics?.currentWinStreak || 0, color: '#EF4444' },
+          { icon: '🎯', label: 'Goals Scored', value: MANAGER_STATE.statistics?.goalsScored || 0, color: '#10B981' },
+          { icon: '🛡️', label: 'Clean Sheets', value: MANAGER_STATE.statistics?.cleanSheets || 0, color: '#8B5CF6' },
+          { icon: '💎', label: 'Total XP', value: MANAGER_STATE.totalXP || 0, color: '#06B6D4' }
         ].map(stat => `
-          <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.8));
-                      border: 1px solid rgba(71, 85, 105, 0.3); border-radius: 12px; padding: 20px; text-align: center;">
-            <div style="font-size: 2.5em; margin-bottom: 10px;">${stat.icon}</div>
-            <div style="color: ${stat.color}; font-size: 2em; font-weight: 800; margin-bottom: 5px;">
+          <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+                      border: 1px solid rgba(71, 85, 105, 0.4); border-radius: 16px; padding: 24px;
+                      text-align: center; transition: all 0.3s; cursor: pointer;"
+               onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='${stat.color}'"
+               onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(71, 85, 105, 0.4)'">
+            <div style="font-size: 3em; margin-bottom: 10px;">${stat.icon}</div>
+            <div style="color: ${stat.color}; font-size: 2.2em; font-weight: 900; margin-bottom: 8px;">
               ${stat.value}
             </div>
-            <div style="color: #94a3b8; font-size: 0.9em;">${stat.label}</div>
+            <div style="color: #94A3B8; font-size: 0.95em; font-weight: 600;">${stat.label}</div>
           </div>
         `).join('')}
       </div>
 
-      <!-- Recent Achievements -->
-      <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.8));
-                  border: 1px solid rgba(71, 85, 105, 0.3); border-radius: 16px; padding: 24px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-          <h2 style="color: #f59e0b; margin: 0;">🏆 Recent Achievements</h2>
-          <button onclick="showAllAchievements()" class="small-btn">View All →</button>
+      ${favoriteClub ? `
+        <!-- Favorite Club Stats -->
+        <div style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(139, 92, 246, 0.15));
+                    border: 2px solid rgba(168, 85, 247, 0.4); border-radius: 16px; padding: 30px;
+                    margin-bottom: 30px;">
+          <h3 style="color: #C084FC; margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 1.5em;">❤️</span>
+            Favorite Club: ${favoriteClub}
+          </h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
+            <div style="text-align: center; padding: 16px; background: rgba(15, 23, 42, 0.6); border-radius: 10px;">
+              <div style="color: #60A5FA; font-size: 1.8em; font-weight: 700; margin-bottom: 5px;">
+                ${favoriteClubMatches}
+              </div>
+              <div style="color: #94A3B8; font-size: 0.9em;">Matches</div>
+            </div>
+            <div style="text-align: center; padding: 16px; background: rgba(15, 23, 42, 0.6); border-radius: 10px;">
+              <div style="color: #10B981; font-size: 1.8em; font-weight: 700; margin-bottom: 5px;">
+                ${favoriteClubWins}
+              </div>
+              <div style="color: #94A3B8; font-size: 0.9em;">Wins</div>
+            </div>
+            <div style="text-align: center; padding: 16px; background: rgba(15, 23, 42, 0.6); border-radius: 10px;">
+              <div style="color: #FBBF24; font-size: 1.8em; font-weight: 700; margin-bottom: 5px;">
+                ${favoriteClubMatches > 0 ? ((favoriteClubWins / favoriteClubMatches) * 100).toFixed(1) : 0}%
+              </div>
+              <div style="color: #94A3B8; font-size: 0.9em;">Win Rate</div>
+            </div>
+            <div style="text-align: center; padding: 16px; background: rgba(15, 23, 42, 0.6); border-radius: 10px;">
+              <div style="color: #C084FC; font-size: 1.8em; font-weight: 700; margin-bottom: 5px;">
+                +${Math.floor(favoriteClubWins * 15)}
+              </div>
+              <div style="color: #94A3B8; font-size: 0.9em;">Bonus XP</div>
+            </div>
+          </div>
+          <div style="margin-top: 20px; padding: 16px; background: rgba(168, 85, 247, 0.1);
+                      border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 10px; text-align: center;">
+            <div style="color: #C084FC; font-weight: 600;">
+              💡 Playing with ${favoriteClub} gives +50% bonus XP on wins!
+            </div>
+          </div>
         </div>
+      ` : `
+        <!-- Set Favorite Club -->
+        <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(71, 85, 105, 0.3);
+                    border-radius: 16px; padding: 30px; margin-bottom: 30px; text-align: center;">
+          <div style="font-size: 3em; margin-bottom: 15px; opacity: 0.5;">❤️</div>
+          <h3 style="color: #94A3B8; margin-bottom: 15px;">No Favorite Club Set</h3>
+          <p style="color: #64748B; margin-bottom: 20px;">
+            Choose a favorite club to earn bonus XP when playing with them!
+          </p>
+          <button onclick="selectFavoriteClub()" class="btn-primary"
+                  style="padding: 14px 28px; font-weight: 600;">
+            Choose Favorite Club
+          </button>
+        </div>
+      `}
 
-        <div id="recentAchievements"></div>
-      </div>
-
-      <div style="text-align: center; margin-top: 30px;">
-        <button onclick="showMainMenu()" class="btn-secondary"
-                style="padding: 14px 28px; font-weight: 600;">
-          ← Back
-        </button>
+      <!-- Recent Achievements -->
+      <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(71, 85, 105, 0.4);
+                  border-radius: 16px; padding: 30px;">
+        <h3 style="color: #FBBF24; margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+          <span style="font-size: 1.5em;">🏆</span>
+          Recent Achievements
+        </h3>
+        <div id="recentAchievements">
+          <!-- Will be populated by loadRecentAchievements() -->
+        </div>
       </div>
     </div>
   `;
+
+  // Add pulse animation if not already added
+  if (!document.getElementById('pulseAnimation')) {
+    const style = document.createElement('style');
+    style.id = 'pulseAnimation';
+    style.textContent = `
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); opacity: 0.5; }
+        50% { transform: scale(1.05); opacity: 0.7; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
 
   // Load recent achievements
   loadRecentAchievements();
@@ -16548,6 +19057,184 @@ function showAllAchievements() {
       </div>
     </div>
   `;
+}
+
+// ========================================
+// FAVORITE CLUB & PROFILE EDITING FUNCTIONS
+// ========================================
+
+function selectFavoriteClub() {
+  const modal = document.createElement('div');
+  modal.className = 'modal-backdrop active';
+  modal.style.zIndex = '10005';
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width: 800px;">
+      <div class="modal-head">
+        <h2 style="color: #C084FC;">❤️ Choose Your Favorite Club</h2>
+        <button class="modal-close" onclick="this.closest('.modal-backdrop').remove()">✕</button>
+      </div>
+
+      <div style="padding: 30px;">
+        <p style="color: #94A3B8; margin-bottom: 20px;">
+          Select a club to earn +50% bonus XP when managing them in matches and tournaments!
+        </p>
+
+        <!-- Search -->
+        <input type="text" id="clubSearch" placeholder="Search for a club..."
+               oninput="filterClubList(this.value)"
+               style="width: 100%; padding: 12px; background: rgba(30, 41, 59, 0.8);
+                      border: 1px solid rgba(71, 85, 105, 0.4); border-radius: 8px;
+                      color: #F1F5F9; margin-bottom: 20px; font-size: 1em;">
+
+        <!-- Club List -->
+        <div id="clubListContainer" style="max-height: 400px; overflow-y: auto; display: grid;
+                                            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;">
+          ${ALL_TEAMS.slice(0, 50).map(team => `
+            <button onclick="setFavoriteClub('${team.name}')"
+                    class="club-select-btn"
+                    style="padding: 16px; background: rgba(15, 23, 42, 0.6);
+                           border: 1px solid rgba(71, 85, 105, 0.3); border-radius: 10px;
+                           text-align: left; cursor: pointer; transition: all 0.2s;"
+                    onmouseover="this.style.borderColor='#C084FC'; this.style.background='rgba(168, 85, 247, 0.1)'"
+                    onmouseout="this.style.borderColor='rgba(71, 85, 105, 0.3)'; this.style.background='rgba(15, 23, 42, 0.6)'">
+              <div style="font-weight: 700; color: #F1F5F9; margin-bottom: 5px;">${team.name}</div>
+              <div style="color: #94A3B8; font-size: 0.85em;">Rating: ${team.strength}</div>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+}
+
+function filterClubList(searchTerm) {
+  const container = document.getElementById('clubListContainer');
+  if (!container) return;
+
+  const filtered = ALL_TEAMS.filter(team =>
+    team.name.toLowerCase().includes(searchTerm.toLowerCase())
+  ).slice(0, 50);
+
+  container.innerHTML = filtered.map(team => `
+    <button onclick="setFavoriteClub('${team.name}')"
+            class="club-select-btn"
+            style="padding: 16px; background: rgba(15, 23, 42, 0.6);
+                   border: 1px solid rgba(71, 85, 105, 0.3); border-radius: 10px;
+                   text-align: left; cursor: pointer; transition: all 0.2s;"
+            onmouseover="this.style.borderColor='#C084FC'; this.style.background='rgba(168, 85, 247, 0.1)'"
+            onmouseout="this.style.borderColor='rgba(71, 85, 105, 0.3)'; this.style.background='rgba(15, 23, 42, 0.6)'">
+      <div style="font-weight: 700; color: #F1F5F9; margin-bottom: 5px;">${team.name}</div>
+      <div style="color: #94A3B8; font-size: 0.85em;">Rating: ${team.strength}</div>
+    </button>
+  `).join('');
+}
+
+function setFavoriteClub(clubName) {
+  MANAGER_STATE.favoriteClub = clubName;
+
+  // Initialize club-specific stats if not exists
+  if (!MANAGER_STATE.statistics.clubSpecificStats) {
+    MANAGER_STATE.statistics.clubSpecificStats = {};
+  }
+  if (!MANAGER_STATE.statistics.clubSpecificStats[clubName]) {
+    MANAGER_STATE.statistics.clubSpecificStats[clubName] = {
+      matches: 0,
+      wins: 0,
+      draws: 0,
+      losses: 0,
+      goalsScored: 0,
+      goalsConceded: 0
+    };
+  }
+
+  // Save
+  if (typeof AUTO_SAVE !== 'undefined' && AUTO_SAVE.save) {
+    AUTO_SAVE.save();
+  }
+
+  // Close modal
+  const modal = document.querySelector('.modal-backdrop');
+  if (modal) modal.remove();
+
+  showNotification('success', 'Favorite Club Set!',
+    `${clubName} is now your favorite club. Earn +50% bonus XP!`, 3000);
+
+  // Refresh profile
+  displayManagerProfile();
+}
+
+function editManagerProfile() {
+  const modal = document.createElement('div');
+  modal.className = 'modal-backdrop active';
+  modal.style.zIndex = '10005';
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-head">
+        <h2 style="color: #10B981;">✏️ Edit Profile</h2>
+        <button class="modal-close" onclick="this.closest('.modal-backdrop').remove()">✕</button>
+      </div>
+
+      <div style="padding: 30px;">
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; color: #94A3B8; margin-bottom: 8px; font-weight: 600;">
+            Manager Name
+          </label>
+          <input type="text" id="editManagerName" value="${MANAGER_STATE.managerName}"
+                 style="width: 100%; padding: 12px; background: rgba(30, 41, 59, 0.8);
+                        border: 1px solid rgba(71, 85, 105, 0.4); border-radius: 8px;
+                        color: #F1F5F9; font-size: 1em;">
+        </div>
+
+        <div style="margin-bottom: 25px;">
+          <label style="display: block; color: #94A3B8; margin-bottom: 8px; font-weight: 600;">
+            Team Name
+          </label>
+          <input type="text" id="editTeamName" value="${MANAGER_STATE.teamName}"
+                 style="width: 100%; padding: 12px; background: rgba(30, 41, 59, 0.8);
+                        border: 1px solid rgba(71, 85, 105, 0.4); border-radius: 8px;
+                        color: #F1F5F9; font-size: 1em;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <button onclick="saveProfileEdits()" class="btn-primary"
+                  style="padding: 14px; font-weight: 600;">
+            Save Changes
+          </button>
+          <button onclick="this.closest('.modal-backdrop').remove()" class="btn-secondary"
+                  style="padding: 14px; font-weight: 600;">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+}
+
+function saveProfileEdits() {
+  const managerName = document.getElementById('editManagerName').value.trim();
+  const teamName = document.getElementById('editTeamName').value.trim();
+
+  if (!managerName) {
+    showNotification('error', 'Invalid Name', 'Manager name cannot be empty', 2000);
+    return;
+  }
+
+  MANAGER_STATE.managerName = managerName;
+  MANAGER_STATE.teamName = teamName || 'My Team';
+
+  if (typeof AUTO_SAVE !== 'undefined' && AUTO_SAVE.save) {
+    AUTO_SAVE.save();
+  }
+
+  const modal = document.querySelector('.modal-backdrop');
+  if (modal) modal.remove();
+
+  showNotification('success', 'Profile Updated!', 'Your changes have been saved', 2000);
+  displayManagerProfile();
 }
 
 // ========================================
@@ -20587,24 +23274,55 @@ function renderGroupResults(groupResults) {
   }
 
   let html = `
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <h2>📊 Group Stage Results</h2>
-      <div style="display: flex; gap: 8px;">
-        <button onclick="showMatchWeeks()" class="btn-secondary" style="padding: 8px 12px;">
-          📅 Matchdays
-        </button>
-        <button onclick="showPlayerStats()" class="btn-secondary" style="padding: 8px 12px;">
-          📈 Statistics
+    <div style="max-width: 1400px; margin: 0 auto;">
+      <!-- Header with Controls -->
+      <div style="background: linear-gradient(135deg, var(--cardBg), rgba(15, 23, 42, 0.9));
+                  border: 2px solid var(--cardBorder); border-radius: 16px; padding: 30px;
+                  margin-bottom: 30px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+          <div>
+            <h1 style="color: var(--primary); margin-bottom: 8px; font-size: 2.5em;">
+              📋 Group Stage Results
+            </h1>
+            <p style="color: var(--textSecondary); font-size: 1.1em;">
+              ${Object.keys(groupResults).length} groups completed • All matches finished
+            </p>
+          </div>
+
+          <!-- Action Buttons -->
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <button onclick="showMatchWeeks()" class="btn-secondary"
+                    style="padding: 12px 20px; font-weight: 600;">
+              📅 Matchdays
+            </button>
+            <button onclick="showPlayerStats()" class="btn-secondary"
+                    style="padding: 12px 20px; font-weight: 600;">
+              📈 Statistics
+            </button>
+            <button onclick="confirmResimulateGroups()" class="btn-warning"
+                    style="padding: 12px 20px; font-weight: 600; background: linear-gradient(135deg, #F59E0B, #D97706);">
+              🔄 Re-simulate Groups
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Success Message -->
+      <div style="background: rgba(16, 185, 129, 0.1); padding: 16px; border-radius: 12px;
+                  margin-bottom: 30px; border-left: 4px solid #10b981; display: flex;
+                  justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <strong style="color: #10b981; font-size: 1.1em;">✅ Group stage completed!</strong>
+          <span style="color: #e2e8f0; margin-left: 10px;">All groups have finished their matches.</span>
+        </div>
+        <button onclick="proceedToKnockout()" class="btn-primary"
+                style="padding: 12px 24px; font-weight: 600;">
+          Continue to Knockout Stage →
         </button>
       </div>
-    </div>
 
-    <div style="background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #10b981;">
-      <strong style="color: #10b981;">✅ Group stage completed!</strong>
-      <span style="color: #e2e8f0; margin-left: 10px;">All groups have finished their matches. Proceed to knockouts.</span>
-    </div>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px;">
+      <!-- Groups Grid -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px;">
   `;
 
   Object.entries(groupResults).forEach(([groupName, data]) => {
@@ -20661,7 +23379,10 @@ function renderGroupResults(groupResults) {
     `;
   });
 
-  html += `</div>`;
+  html += `
+      </div>
+    </div>
+  `;
   out.innerHTML = html;
 }
  function renderGroups(groups) {
@@ -21655,6 +24376,76 @@ function simulateGroupStage(groups) {
 
   console.log("🎉 Group stage simulation completed!");
   return results;
+}
+
+// Group re-simulation confirmation and functions
+function confirmResimulateGroups() {
+  const modal = document.createElement('div');
+  modal.className = 'modal-backdrop active';
+  modal.style.zIndex = '10005';
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width: 500px; text-align: center;">
+      <div style="padding: 40px;">
+        <div style="font-size: 4em; margin-bottom: 20px;">⚠️</div>
+        <h2 style="color: #F59E0B; margin-bottom: 15px;">Re-simulate Groups?</h2>
+        <p style="color: var(--textSecondary); margin-bottom: 25px; line-height: 1.6;">
+          This will reset all group stage results and simulate new matches.
+          This action cannot be undone.
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <button onclick="this.closest('.modal-backdrop').remove()" class="btn-secondary"
+                  style="padding: 14px; font-weight: 600;">
+            Cancel
+          </button>
+          <button onclick="resimulateGroups(); this.closest('.modal-backdrop').remove()"
+                  class="btn-warning"
+                  style="padding: 14px; font-weight: 600; background: linear-gradient(135deg, #F59E0B, #D97706);">
+            Re-simulate
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+}
+
+function resimulateGroups() {
+  // Reset group results
+  window.GROUP_RESULTS = null;
+
+  // Reset all group stats if they exist
+  if (window.GROUPS && Array.isArray(window.GROUPS)) {
+    window.GROUPS.forEach(group => {
+      if (group && group.teams && Array.isArray(group.teams)) {
+        group.teams.forEach(team => {
+          if (team) {
+            team.played = 0;
+            team.wins = 0;
+            team.draws = 0;
+            team.losses = 0;
+            team.goalsFor = 0;
+            team.goalsAgainst = 0;
+            team.points = 0;
+            team.goalDifference = 0;
+          }
+        });
+      }
+    });
+  }
+
+  // Clear match schedule for group stage
+  if (window.MATCH_SCHEDULE) {
+    window.MATCH_SCHEDULE.groupStage = [];
+  }
+
+  showNotification('info', 'Groups Reset', 'Ready to simulate again', 2000);
+
+  // Re-render the groups in their initial state
+  if (window.GROUPS) {
+    renderGroupDrawResults(window.GROUPS);
+  }
 }
 
 // Async non-blocking version of group stage simulation
@@ -30171,6 +32962,267 @@ window.applyStrengthTheme = applyStrengthTheme;
 window.THEME_MANAGER = THEME_MANAGER;
 
 console.log('🎨 Aesthetic enhancement functions loaded!');
+
+// ========================================
+// ENSURE SEASONS IN SIDEBAR
+// ========================================
+
+function updateSidebarWithAllFeatures() {
+  const sidebar = document.querySelector('.sidebar');
+  if (!sidebar) return;
+
+  // Check if Seasons button already exists
+  const existingSeasonsBtn = Array.from(sidebar.querySelectorAll('.ctrl-btn')).find(btn =>
+    btn.textContent.includes('Seasons') || btn.onclick && btn.onclick.toString().includes('displaySeasonMode')
+  );
+
+  if (existingSeasonsBtn) {
+    console.log('✓ Seasons button already present in sidebar');
+    return;
+  }
+
+  // Find the Views tab content
+  const viewsTab = document.getElementById('tab-views');
+  if (!viewsTab) return;
+
+  // Create Seasons button
+  const seasonsBtn = document.createElement('button');
+  seasonsBtn.className = 'ctrl-btn';
+  seasonsBtn.onclick = function() { if (typeof displaySeasonMode === 'function') displaySeasonMode(); };
+  seasonsBtn.style.cssText = `
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.2));
+    border: 1px solid rgba(16, 185, 129, 0.4);
+  `;
+
+  seasonsBtn.innerHTML = `
+    <div class="ctrl-btn-main">
+      <span class="ctrl-btn-title">🏆 Seasons</span>
+      <span class="ctrl-btn-subtitle">Play league season</span>
+    </div>
+    <span class="ctrl-btn-tag">⚽</span>
+  `;
+
+  // Add to Views tab
+  const controlColumn = viewsTab.querySelector('.control-column');
+  if (controlColumn) {
+    controlColumn.appendChild(seasonsBtn);
+    console.log('✓ Seasons button added to sidebar');
+  }
+}
+
+// Call on page load
+window.addEventListener('DOMContentLoaded', () => {
+  updateSidebarWithAllFeatures();
+});
+
+// Also call immediately in case DOM is already loaded
+if (document.readyState === 'loading') {
+  // DOM is still loading, event listener will handle it
+} else {
+  // DOM is already loaded
+  updateSidebarWithAllFeatures();
+}
+
+// ========================================
+// COMPREHENSIVE DEBUGGER & LOGIC ANALYZER
+// ========================================
+
+const SYSTEM_DEBUGGER = {
+  issues: [], warnings: [], fixes: [],
+
+  async runFullDiagnostic() {
+    console.log('🔍 Starting comprehensive system diagnostic...');
+    console.log('='.repeat(70));
+    this.issues = []; this.warnings = []; this.fixes = [];
+
+    await this.checkGlobalVariables();
+    await this.checkFunctionIntegrity();
+    await this.checkDataStructures();
+    await this.checkStorageIntegrity();
+    await this.checkUIElements();
+    await this.checkFeatureIntegration();
+    await this.attemptAutoFixes();
+    this.generateReport();
+
+    console.log('='.repeat(70));
+    console.log('✓ Diagnostic complete');
+
+    return { issues: this.issues, warnings: this.warnings, fixes: this.fixes, passed: this.issues.length === 0 };
+  },
+
+  async checkGlobalVariables() {
+    console.log('📋 Checking global variables...');
+    const required = ['MANAGER_STATE', 'TOURNAMENT_HISTORY_ENHANCED', 'SEASON_STATE', 'PREDICTION_STATE', 'ALL_TEAMS', 'THEMES', 'STORAGE_MANAGER'];
+    required.forEach(v => {
+      if (typeof window[v] === 'undefined') this.issues.push({severity: 'critical', category: 'Variables', message: `${v} is undefined`, fix: `Initialize ${v}`});
+      else console.log(`  ✓ ${v} exists`);
+    });
+  },
+
+  async checkFunctionIntegrity() {
+    console.log('🔧 Checking function integrity...');
+    const required = ['displayManagerProfile', 'displaySeasonMode', 'displayHallOfFame', 'displayEnhancedTournamentStats', 'loadTournamentTemplate', 'applyTheme', 'enablePredictionsForMatch'];
+    required.forEach(f => {
+      if (typeof window[f] !== 'function') this.issues.push({severity: 'critical', category: 'Functions', message: `${f} not defined`, fix: `Define ${f}`});
+      else console.log(`  ✓ ${f} defined`);
+    });
+  },
+
+  async checkDataStructures() {
+    console.log('📊 Checking data structures...');
+    if (window.MANAGER_STATE) {
+      ['active', 'level', 'xp', 'managerName'].forEach(f => {
+        if (!(f in MANAGER_STATE)) this.warnings.push({category: 'Data', message: `MANAGER_STATE missing ${f}`});
+      });
+    }
+    if (window.TOURNAMENT_HISTORY_ENHANCED && !Array.isArray(TOURNAMENT_HISTORY_ENHANCED.tournaments)) {
+      this.issues.push({severity: 'high', category: 'Data', message: 'TOURNAMENT_HISTORY_ENHANCED.tournaments not array', fix: 'Initialize as array'});
+    }
+    console.log('  ✓ Data structures checked');
+  },
+
+  async checkStorageIntegrity() {
+    console.log('💾 Checking storage...');
+    try {
+      localStorage.setItem('_test_', '1'); localStorage.removeItem('_test_');
+      console.log('  ✓ localStorage accessible');
+      if (typeof STORAGE_MANAGER !== 'undefined') {
+        console.log(`  ✓ Storage: ${STORAGE_MANAGER.getUsageMB()} MB`);
+        if (STORAGE_MANAGER.isNearLimit()) this.warnings.push({category: 'Storage', message: 'Near limit', suggestion: 'Run STORAGE_MANAGER.smartCleanup()'});
+      }
+    } catch (e) {
+      this.issues.push({severity: 'critical', category: 'Storage', message: `localStorage error: ${e.message}`, fix: 'Enable localStorage'});
+    }
+  },
+
+  async checkUIElements() {
+    console.log('🎨 Checking UI...');
+    if (!document.querySelector('#output, #content')) this.issues.push({severity: 'critical', category: 'UI', message: 'Main container missing', fix: 'Add #output or #content'});
+    else console.log('  ✓ Main container exists');
+    const modals = document.querySelectorAll('.modal-backdrop');
+    if (modals.length > 3) this.warnings.push({category: 'UI', message: `${modals.length} modals open`, suggestion: 'Close unused modals'});
+  },
+
+  async checkFeatureIntegration() {
+    console.log('🔗 Checking features...');
+    const features = [
+      {name: 'Predictions', check: () => typeof PREDICTION_STATE !== 'undefined' && typeof enablePredictionsForMatch === 'function'},
+      {name: 'Themes', check: () => typeof THEMES !== 'undefined' && typeof applyTheme === 'function'},
+      {name: 'Seasons', check: () => typeof SEASON_STATE !== 'undefined' && typeof displaySeasonMode === 'function'},
+      {name: 'Hall of Fame', check: () => typeof HALL_OF_FAME !== 'undefined' && typeof displayHallOfFame === 'function'}
+    ];
+    features.forEach(f => {
+      if (f.check()) console.log(`  ✓ ${f.name} integrated`);
+      else this.warnings.push({category: 'Integration', message: `${f.name} incomplete`});
+    });
+  },
+
+  async attemptAutoFixes() {
+    console.log('🔧 Auto-fixing...');
+    const oldModals = document.querySelectorAll('.modal-backdrop');
+    if (oldModals.length > 0) {
+      oldModals.forEach(m => m.remove());
+      this.fixes.push(`Removed ${oldModals.length} orphaned modals`);
+    }
+    console.log(`  ✓ Applied ${this.fixes.length} fixes`);
+  },
+
+  generateReport() {
+    const r = {summary: {critical: this.issues.filter(i => i.severity === 'critical').length, high: this.issues.filter(i => i.severity === 'high').length, warnings: this.warnings.length, fixes: this.fixes.length}, issues: this.issues, warnings: this.warnings, fixes: this.fixes};
+    console.log('\n📋 DIAGNOSTIC REPORT');
+    console.log('='.repeat(70));
+    console.log(`Critical: ${r.summary.critical} | High: ${r.summary.high} | Warnings: ${r.summary.warnings} | Fixes: ${r.summary.fixes}`);
+    console.log('='.repeat(70));
+    if (this.issues.length > 0) {
+      console.log('\n❌ ISSUES:');
+      this.issues.forEach((i, idx) => console.log(`${idx+1}. [${i.severity}] ${i.category}: ${i.message}${i.fix ? '\n   Fix: ' + i.fix : ''}`));
+    }
+    if (this.warnings.length > 0) {
+      console.log('\n⚠️  WARNINGS:');
+      this.warnings.forEach((w, idx) => console.log(`${idx+1}. [${w.category}] ${w.message}${w.suggestion ? '\n   Suggestion: ' + w.suggestion : ''}`));
+    }
+    if (this.fixes.length > 0) {
+      console.log('\n✅ AUTO-FIXES:');
+      this.fixes.forEach((f, idx) => console.log(`${idx+1}. ${f}`));
+    }
+    if (this.issues.length === 0 && this.warnings.length === 0) console.log('\n🎉 ALL SYSTEMS OPERATIONAL!');
+    return r;
+  },
+
+  showVisualReport() {
+    this.runFullDiagnostic().then(report => {
+      const modal = document.createElement('div');
+      modal.className = 'modal-backdrop active';
+      modal.style.zIndex = '10007';
+      const color = report.summary.critical > 0 ? '#EF4444' : report.summary.high > 0 ? '#F59E0B' : report.summary.warnings > 0 ? '#3B82F6' : '#10B981';
+      const icon = report.summary.critical > 0 ? '❌' : report.summary.high > 0 ? '⚠️' : report.summary.warnings > 0 ? 'ℹ️' : '✅';
+      modal.innerHTML = `<div class="modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;"><div class="modal-head" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.2));"><h2 style="color: #60A5FA;">🔍 System Diagnostic Report</h2><button class="modal-close" onclick="this.closest('.modal-backdrop').remove()">✕</button></div><div style="padding: 30px;"><div style="text-align: center; margin-bottom: 30px; padding: 30px; background: var(--cardBg); border: 2px solid ${color}; border-radius: 16px;"><div style="font-size: 5em; margin-bottom: 15px;">${icon}</div><h3 style="color: ${color}; font-size: 2em; margin-bottom: 20px;">${report.summary.critical === 0 && report.summary.high === 0 ? 'System Healthy' : 'Issues Detected'}</h3><div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;"><div style="padding: 16px; background: rgba(239, 68, 68, 0.1); border-radius: 10px;"><div style="color: #EF4444; font-size: 2em; font-weight: 900;">${report.summary.critical}</div><div style="color: var(--textSecondary); font-size: 0.9em;">Critical</div></div><div style="padding: 16px; background: rgba(245, 158, 11, 0.1); border-radius: 10px;"><div style="color: #F59E0B; font-size: 2em; font-weight: 900;">${report.summary.high}</div><div style="color: var(--textSecondary); font-size: 0.9em;">High</div></div><div style="padding: 16px; background: rgba(59, 130, 246, 0.1); border-radius: 10px;"><div style="color: #3B82F6; font-size: 2em; font-weight: 900;">${report.summary.warnings}</div><div style="color: var(--textSecondary); font-size: 0.9em;">Warnings</div></div><div style="padding: 16px; background: rgba(16, 185, 129, 0.1); border-radius: 10px;"><div style="color: #10B981; font-size: 2em; font-weight: 900;">${report.summary.fixes}</div><div style="color: var(--textSecondary); font-size: 0.9em;">Fixed</div></div></div></div>${report.issues.length > 0 ? `<div style="background: var(--cardBg); border: 1px solid var(--cardBorder); border-radius: 12px; padding: 24px; margin-bottom: 20px;"><h4 style="color: #EF4444; margin-bottom: 20px;">❌ Issues</h4><div style="display: grid; gap: 12px;">${report.issues.map(i => `<div style="padding: 16px; background: rgba(239, 68, 68, 0.1); border-left: 4px solid #EF4444; border-radius: 8px;"><span style="padding: 4px 8px; background: rgba(239, 68, 68, 0.2); border-radius: 4px; font-size: 0.75em; font-weight: 700; color: #EF4444; text-transform: uppercase;">${i.severity}</span> <span style="color: var(--textSecondary);">${i.category}</span><div style="color: var(--text); margin: 8px 0;">${i.message}</div>${i.fix ? `<div style="color: #10B981;"><strong>Fix:</strong> ${i.fix}</div>` : ''}</div>`).join('')}</div></div>` : ''}${report.warnings.length > 0 ? `<div style="background: var(--cardBg); border: 1px solid var(--cardBorder); border-radius: 12px; padding: 24px; margin-bottom: 20px;"><h4 style="color: #F59E0B; margin-bottom: 20px;">⚠️ Warnings</h4><div style="display: grid; gap: 12px;">${report.warnings.map(w => `<div style="padding: 16px; background: rgba(245, 158, 11, 0.1); border-left: 4px solid #F59E0B; border-radius: 8px;"><span style="color: var(--textSecondary);">${w.category}</span><div style="color: var(--text); margin: 8px 0;">${w.message}</div>${w.suggestion ? `<div style="color: #60A5FA;"><strong>Suggestion:</strong> ${w.suggestion}</div>` : ''}</div>`).join('')}</div></div>` : ''}${report.fixes.length > 0 ? `<div style="background: var(--cardBg); border: 1px solid var(--cardBorder); border-radius: 12px; padding: 24px;"><h4 style="color: #10B981; margin-bottom: 20px;">✅ Auto-Fixes</h4><div style="display: grid; gap: 8px;">${report.fixes.map((f, i) => `<div style="padding: 12px; background: rgba(16, 185, 129, 0.1); border-radius: 6px;"><span style="color: #10B981; font-weight: 700;">${i+1}.</span> ${f}</div>`).join('')}</div></div>` : ''}<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 30px;"><button onclick="console.log('Full Report:', ${JSON.stringify(report).replace(/"/g, '&quot;').replace(/'/g, '\\&apos;')})" class="btn-secondary" style="padding: 14px;">📋 Log Report</button><button onclick="this.closest('.modal-backdrop').remove()" class="btn-primary" style="padding: 14px;">Close</button></div></div></div>`;
+      document.body.appendChild(modal);
+    });
+  }
+};
+
+window.runDiagnostic = () => SYSTEM_DEBUGGER.showVisualReport();
+window.addEventListener('error', e => { console.error('💥 Error:', e.error); console.log('💡 Run runDiagnostic()'); });
+
+// ========================================
+// FINAL INTEGRATION VALIDATOR
+// ========================================
+
+function validateAllIntegrations() {
+  console.log('🎯 Running final integration validation...');
+  const tests = [
+    {name: 'Manager Profile', test: () => typeof displayManagerProfile === 'function' && typeof selectFavoriteClub === 'function'},
+    {name: 'Theme System', test: () => typeof THEMES !== 'undefined' && typeof applyTheme === 'function' && Object.keys(THEMES).length >= 6},
+    {name: 'Seasons', test: () => typeof SEASON_STATE !== 'undefined' && typeof displaySeasonMode === 'function'},
+    {name: 'Hall of Fame', test: () => typeof HALL_OF_FAME !== 'undefined' && typeof displayHallOfFame === 'function'},
+    {name: 'Storage Management', test: () => typeof STORAGE_MANAGER !== 'undefined' && typeof STORAGE_MANAGER.safeSet === 'function'},
+    {name: 'Tournament Stats', test: () => typeof displayEnhancedTournamentStats === 'function'},
+    {name: 'Predictions', test: () => typeof PREDICTION_STATE !== 'undefined' && typeof enablePredictionsForMatch === 'function'},
+    {name: 'Templates', test: () => typeof loadTournamentTemplate === 'function'}
+  ];
+
+  const results = tests.map(t => {
+    try { return {name: t.name, passed: t.test(), error: null}; }
+    catch (e) { return {name: t.name, passed: false, error: e.message}; }
+  });
+
+  console.log('\n📊 INTEGRATION TEST RESULTS');
+  console.log('='.repeat(70));
+  results.forEach((r, i) => {
+    console.log(`${i+1}. ${r.passed ? '✅' : '❌'} ${r.name}`);
+    if (r.error) console.log(`   Error: ${r.error}`);
+  });
+
+  const pass = results.filter(r => r.passed).length;
+  const total = results.length;
+  const pct = ((pass / total) * 100).toFixed(1);
+
+  console.log('='.repeat(70));
+  console.log(`\n✨ FINAL SCORE: ${pass}/${total} (${pct}%)`);
+  if (pass === total) {
+    console.log('🎉 ALL INTEGRATIONS PASSED!');
+    console.log('✨ System fully operational!');
+  } else {
+    console.log(`⚠️  ${total - pass} integration(s) failed`);
+    console.log('💡 Run runDiagnostic() for details');
+  }
+
+  return {passed: pass, total: total, percentage: pct, allPassed: pass === total, results: results};
+}
+
+window.validateAll = validateAllIntegrations;
+
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    console.log('\n🚀 Running automatic system validation...\n');
+    validateAllIntegrations();
+    console.log('\n💡 Available commands:');
+    console.log('  - validateAll()     : Run integration tests');
+    console.log('  - runDiagnostic()   : Full system diagnostic');
+    console.log('\n');
+  }, 2000);
+});
 
 </script>
 <script>

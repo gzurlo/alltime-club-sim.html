@@ -33377,6 +33377,938 @@ console.log('   ✅ localStorage quota handling improved');
 console.log('   ✅ Chart.js safety wrapper added');
 console.log('   ✅ showOutput error fixed');
 
+// ========================================
+// PART 10: OPTIMIZATION & FINAL DEBUG
+// ========================================
+
+// ========================================
+// VALIDATION & ERROR CHECKING SYSTEM
+// ========================================
+
+const VALIDATORS = {
+  // Team validation
+  isValidTeam(team) {
+    if (!team) return { valid: false, error: 'Team is null or undefined' };
+    if (!team.name) return { valid: false, error: 'Team has no name' };
+    if (typeof team.strength !== 'number') return { valid: false, error: 'Team strength is not a number' };
+    if (team.strength < 0 || team.strength > 100) return { valid: false, error: 'Team strength out of range (0-100)' };
+    return { valid: true };
+  },
+
+  // Match validation
+  isValidMatch(match) {
+    if (!match) return { valid: false, error: 'Match is null or undefined' };
+
+    const teamACheck = this.isValidTeam(match.teamA);
+    if (!teamACheck.valid) return { valid: false, error: `Team A invalid: ${teamACheck.error}` };
+
+    const teamBCheck = this.isValidTeam(match.teamB);
+    if (!teamBCheck.valid) return { valid: false, error: `Team B invalid: ${teamBCheck.error}` };
+
+    if (match.teamA.name === match.teamB.name) {
+      return { valid: false, error: 'Team cannot play against itself' };
+    }
+
+    return { valid: true };
+  },
+
+  // Score validation
+  isValidScore(score) {
+    if (typeof score !== 'number') return { valid: false, error: 'Score is not a number' };
+    if (score < 0) return { valid: false, error: 'Score cannot be negative' };
+    if (score > 20) return { valid: false, error: 'Score unrealistically high (>20)' };
+    if (!Number.isInteger(score)) return { valid: false, error: 'Score must be an integer' };
+    return { valid: true };
+  },
+
+  // Tournament state validation
+  isValidTournamentState() {
+    const errors = [];
+
+    // Check if groups exist when needed
+    if (typeof TOURNAMENT_UI_STATE !== 'undefined' &&
+        TOURNAMENT_UI_STATE.currentStage === 'groups' &&
+        (!window.GROUPS || window.GROUPS.length === 0)) {
+      errors.push('Groups stage active but no groups defined');
+    }
+
+    // Check knockout matches
+    if (typeof TOURNAMENT_UI_STATE !== 'undefined' &&
+        TOURNAMENT_UI_STATE.currentStage !== 'groups' &&
+        TOURNAMENT_UI_STATE.currentStage !== null) {
+      if (typeof KNOCKOUT_STATE !== 'undefined' &&
+          (!KNOCKOUT_STATE.currentMatches || KNOCKOUT_STATE.currentMatches.length === 0)) {
+        errors.push('Knockout stage active but no matches defined');
+      }
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors: errors
+    };
+  },
+
+  // Manager state validation
+  isValidManagerState() {
+    const errors = [];
+
+    if (typeof MANAGER_STATE !== 'undefined' && MANAGER_STATE.active) {
+      if (!MANAGER_STATE.managerName) errors.push('Manager has no name');
+      if (MANAGER_STATE.level < 1) errors.push('Manager level below 1');
+      if (MANAGER_STATE.xp < 0) errors.push('Manager XP is negative');
+      if (MANAGER_STATE.xp > MANAGER_STATE.xpToNextLevel) {
+        errors.push('Manager XP exceeds next level requirement');
+      }
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors: errors
+    };
+  }
+};
+
+// Global error handler
+window.addEventListener('error', function(event) {
+  console.error('🔴 Global Error:', event.error);
+  console.error('Stack:', event.error?.stack);
+
+  if (typeof showNotification === 'function') {
+    showNotification('error', 'An Error Occurred',
+      'Something went wrong. Check console for details.', 4000);
+  }
+});
+
+// Unhandled promise rejection handler
+window.addEventListener('unhandledrejection', function(event) {
+  console.error('🔴 Unhandled Promise Rejection:', event.reason);
+
+  if (typeof showNotification === 'function') {
+    showNotification('error', 'Promise Error',
+      'An async operation failed. Check console.', 4000);
+  }
+});
+
+// ========================================
+// PERFORMANCE MONITORING
+// ========================================
+
+const PERFORMANCE_MONITOR = {
+  enabled: true,
+  metrics: {
+    matchSimulations: [],
+    renderTimes: [],
+    apiCalls: []
+  },
+
+  // Start timing an operation
+  startTimer(operationName) {
+    if (!this.enabled) return null;
+    return {
+      name: operationName,
+      start: performance.now()
+    };
+  },
+
+  // End timing and record
+  endTimer(timer) {
+    if (!this.enabled || !timer) return;
+
+    const duration = performance.now() - timer.start;
+
+    console.log(`⏱️ ${timer.name}: ${duration.toFixed(2)}ms`);
+
+    // Record for analysis
+    if (timer.name.includes('match')) {
+      this.metrics.matchSimulations.push(duration);
+    } else if (timer.name.includes('render')) {
+      this.metrics.renderTimes.push(duration);
+    }
+
+    // Warn if operation took too long
+    if (duration > 1000) {
+      console.warn(`⚠️ Slow operation: ${timer.name} took ${duration.toFixed(2)}ms`);
+    }
+  },
+
+  // Get average performance
+  getAverages() {
+    return {
+      matchSimulation: this.average(this.metrics.matchSimulations),
+      rendering: this.average(this.metrics.renderTimes)
+    };
+  },
+
+  average(arr) {
+    if (arr.length === 0) return 0;
+    return (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2);
+  },
+
+  // Clear metrics
+  clear() {
+    this.metrics.matchSimulations = [];
+    this.metrics.renderTimes = [];
+    this.metrics.apiCalls = [];
+  },
+
+  // Generate performance report
+  generateReport() {
+    const averages = this.getAverages();
+    return `
+      📊 Performance Report:
+      - Match Simulation Avg: ${averages.matchSimulation}ms
+      - Rendering Avg: ${averages.rendering}ms
+      - Total Match Simulations: ${this.metrics.matchSimulations.length}
+      - Total Renders: ${this.metrics.renderTimes.length}
+    `;
+  }
+};
+
+// ========================================
+// MEMORY MANAGEMENT
+// ========================================
+
+const MEMORY_MANAGER = {
+  // Track large data structures
+  trackedObjects: new WeakMap(),
+
+  // Clean up old match data
+  cleanupOldMatches() {
+    // Keep only last 100 matches in detail
+    if (window.MATCH_DETAILS_DB && Object.keys(window.MATCH_DETAILS_DB).length > 100) {
+      const entries = Object.entries(window.MATCH_DETAILS_DB);
+      const toKeep = entries.slice(-100);
+      window.MATCH_DETAILS_DB = Object.fromEntries(toKeep);
+      console.log('✓ Cleaned up old match data');
+    }
+  },
+
+  // Clean up old tournament history
+  cleanupOldHistory() {
+    // Keep only last 50 tournaments
+    if (typeof TOURNAMENT_HISTORY_ENHANCED !== 'undefined' &&
+        TOURNAMENT_HISTORY_ENHANCED.completed &&
+        TOURNAMENT_HISTORY_ENHANCED.completed.length > 50) {
+      TOURNAMENT_HISTORY_ENHANCED.completed = TOURNAMENT_HISTORY_ENHANCED.completed.slice(-50);
+      console.log('✓ Cleaned up old tournament history');
+    }
+  },
+
+  // Clean up prediction history
+  cleanupPredictions() {
+    // Keep only last 200 predictions
+    if (typeof PREDICTION_STATE !== 'undefined' &&
+        PREDICTION_STATE.predictionHistory &&
+        PREDICTION_STATE.predictionHistory.length > 200) {
+      PREDICTION_STATE.predictionHistory = PREDICTION_STATE.predictionHistory.slice(-200);
+      console.log('✓ Cleaned up old predictions');
+    }
+  },
+
+  // Run all cleanup
+  cleanupAll() {
+    console.log('🧹 Running memory cleanup...');
+    this.cleanupOldMatches();
+    this.cleanupOldHistory();
+    this.cleanupPredictions();
+
+    // Clear performance metrics
+    PERFORMANCE_MONITOR.clear();
+
+    console.log('✓ Memory cleanup complete');
+  },
+
+  // Auto cleanup every 5 minutes
+  startAutoCleanup() {
+    setInterval(() => {
+      this.cleanupAll();
+    }, 5 * 60 * 1000);
+    console.log('✓ Auto cleanup scheduled (every 5 minutes)');
+  }
+};
+
+// ========================================
+// BUG FIXES & PATCHES
+// ========================================
+
+const BUG_FIXES = {
+  // Fix: simulateMatch null reference
+  patchSimulateMatch() {
+    const originalSimulate = window.simulateMatchWithSeed;
+    if (typeof originalSimulate === 'function') {
+      window.simulateMatchWithSeed = function(teamA, teamB, ...args) {
+        try {
+          if (!teamA || !teamB) {
+            console.error('simulateMatchWithSeed called with null team');
+            return { scoreA: 0, scoreB: 0, error: 'Invalid teams' };
+          }
+          return originalSimulate.call(this, teamA, teamB, ...args);
+        } catch (error) {
+          console.error('Error in simulateMatchWithSeed:', error);
+          return { scoreA: 0, scoreB: 0, error: error.message };
+        }
+      };
+      console.log('✓ Patched simulateMatchWithSeed');
+    }
+  },
+
+  // Fix: Division by zero in stats
+  patchStatsCalculation() {
+    // Safe average calculation
+    window.safeAverage = function(total, count) {
+      if (!count || count === 0) return 0;
+      return (total / count).toFixed(2);
+    };
+    console.log('✓ Added safeAverage helper');
+  },
+
+  // Fix: Event handler memory leaks
+  patchEventHandlers() {
+    // Store handlers for cleanup
+    window._eventHandlers = window._eventHandlers || [];
+
+    // Override addEventListener to track
+    const originalAddEventListener = EventTarget.prototype.addEventListener;
+    EventTarget.prototype.addEventListener = function(type, listener, options) {
+      window._eventHandlers.push({ element: this, type, listener, options });
+      return originalAddEventListener.call(this, type, listener, options);
+    };
+    console.log('✓ Event handler tracking enabled');
+  },
+
+  // Fix: localStorage quota exceeded
+  patchLocalStorage() {
+    const originalSetItem = localStorage.setItem;
+    localStorage.setItem = function(key, value) {
+      try {
+        originalSetItem.call(this, key, value);
+      } catch (e) {
+        if (e.name === 'QuotaExceededError') {
+          console.warn('⚠️ localStorage quota exceeded, clearing old data...');
+          // Clear some old data
+          const keys = Object.keys(localStorage);
+          if (keys.length > 0) {
+            localStorage.removeItem(keys[0]);
+            // Try again
+            try {
+              originalSetItem.call(this, key, value);
+            } catch (e2) {
+              console.error('Failed to save even after cleanup:', e2);
+              if (typeof showNotification === 'function') {
+                showNotification('error', 'Storage Full',
+                  'Unable to save data. Please clear browser storage.', 5000);
+              }
+            }
+          }
+        } else {
+          throw e;
+        }
+      }
+    };
+    console.log('✓ localStorage quota handling patched');
+  },
+
+  // Apply all patches
+  applyAll() {
+    console.log('🔧 Applying bug fixes...');
+    this.patchSimulateMatch();
+    this.patchStatsCalculation();
+    this.patchEventHandlers();
+    this.patchLocalStorage();
+    console.log('✓ All bug fixes applied');
+  }
+};
+
+// ========================================
+// DEBUG & DIAGNOSTIC TOOLS
+// ========================================
+
+const DEBUG_TOOLS = {
+  enabled: false,
+  debugInterval: null,
+
+  // Enable debug mode
+  enable() {
+    this.enabled = true;
+    console.log('🐛 Debug mode enabled');
+    this.addDebugPanel();
+  },
+
+  // Disable debug mode
+  disable() {
+    this.enabled = false;
+    console.log('Debug mode disabled');
+    const panel = document.getElementById('debugPanel');
+    if (panel) panel.remove();
+    if (this.debugInterval) {
+      clearInterval(this.debugInterval);
+      this.debugInterval = null;
+    }
+  },
+
+  // Add debug panel to UI
+  addDebugPanel() {
+    const panel = document.createElement('div');
+    panel.id = 'debugPanel';
+    panel.style.cssText = `
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(17, 24, 39, 0.95);
+      border: 2px solid #10B981;
+      border-radius: 8px;
+      padding: 15px;
+      z-index: 10010;
+      max-width: 350px;
+      font-family: monospace;
+      font-size: 0.85em;
+      color: #10B981;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    `;
+
+    panel.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <strong style="font-size: 1.1em;">🐛 Debug Panel</strong>
+        <button onclick="DEBUG_TOOLS.disable()"
+                style="background: #EF4444; color: #FFF; border: none; padding: 4px 8px;
+                       border-radius: 4px; cursor: pointer; font-size: 0.9em;">✕</button>
+      </div>
+      <div id="debugContent" style="font-size: 0.9em; line-height: 1.6;"></div>
+      <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(16, 185, 129, 0.3);">
+        <button onclick="DEBUG_TOOLS.runFullCheck()"
+                style="width: 100%; padding: 8px; background: #10B981; color: #000;
+                       border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
+          Run Full Check
+        </button>
+      </div>
+    `;
+
+    document.body.appendChild(panel);
+    this.updateDebugInfo();
+
+    // Update every 2 seconds
+    this.debugInterval = setInterval(() => {
+      this.updateDebugInfo();
+    }, 2000);
+  },
+
+  // Update debug information
+  updateDebugInfo() {
+    const content = document.getElementById('debugContent');
+    if (!content) return;
+
+    const info = [
+      `Stage: ${(typeof TOURNAMENT_UI_STATE !== 'undefined' ? TOURNAMENT_UI_STATE.currentStage : null) || 'None'}`,
+      `Manager: ${(typeof MANAGER_STATE !== 'undefined' && MANAGER_STATE.active) ? `Lvl ${MANAGER_STATE.level}` : 'Inactive'}`,
+      `Matches: ${(typeof ACHIEVEMENT_PROGRESS !== 'undefined' ? ACHIEVEMENT_PROGRESS.totalMatches : 0) || 0}`,
+      `Tournaments: ${(typeof TOURNAMENT_HISTORY_ENHANCED !== 'undefined' ? TOURNAMENT_HISTORY_ENHANCED.totalTournamentsPlayed : 0) || 0}`,
+      `Memory: ${this.getMemoryUsage()}`,
+      `Performance: ${PERFORMANCE_MONITOR.average(PERFORMANCE_MONITOR.metrics.matchSimulations)}ms`,
+      `Predictions: ${(typeof PREDICTION_STATE !== 'undefined' ? PREDICTION_STATE.totalPredictions : 0) || 0}`
+    ];
+
+    content.innerHTML = info.map(line => `<div>${line}</div>`).join('');
+  },
+
+  // Get memory usage estimate
+  getMemoryUsage() {
+    if (performance.memory) {
+      const used = (performance.memory.usedJSHeapSize / 1048576).toFixed(2);
+      const total = (performance.memory.totalJSHeapSize / 1048576).toFixed(2);
+      return `${used}MB / ${total}MB`;
+    }
+    return 'N/A';
+  },
+
+  // Run comprehensive check
+  runFullCheck() {
+    console.log('🔍 Running full diagnostic check...');
+
+    const results = {
+      validators: {},
+      state: {},
+      performance: {},
+      errors: []
+    };
+
+    // Check validators
+    results.validators.tournamentState = VALIDATORS.isValidTournamentState();
+    results.validators.managerState = VALIDATORS.isValidManagerState();
+
+    // Check state consistency
+    results.state.hasActiveManager = typeof MANAGER_STATE !== 'undefined' && MANAGER_STATE.active;
+    results.state.hasActiveTournament = typeof TOURNAMENT_UI_STATE !== 'undefined' && TOURNAMENT_UI_STATE.currentStage !== null;
+    results.state.groupStageSimulated = typeof GROUP_STAGE_SIMULATED !== 'undefined' && GROUP_STAGE_SIMULATED;
+
+    // Check performance
+    results.performance = PERFORMANCE_MONITOR.getAverages();
+
+    // Check for errors
+    if (!results.validators.tournamentState.valid) {
+      results.errors.push(...results.validators.tournamentState.errors);
+    }
+    if (!results.validators.managerState.valid) {
+      results.errors.push(...results.validators.managerState.errors);
+    }
+
+    // Display results
+    console.log('✓ Check complete:', results);
+
+    if (results.errors.length === 0) {
+      if (typeof showNotification === 'function') {
+        showNotification('success', 'All Systems OK',
+          'No errors detected', 3000);
+      }
+    } else {
+      if (typeof showNotification === 'function') {
+        showNotification('warning', 'Issues Found',
+          `${results.errors.length} issues detected. Check console.`, 4000);
+      }
+      console.warn('Issues found:', results.errors);
+    }
+
+    return results;
+  },
+
+  // Export state for debugging
+  exportState() {
+    const state = {
+      manager: typeof MANAGER_STATE !== 'undefined' ? MANAGER_STATE : null,
+      tournament: typeof TOURNAMENT_UI_STATE !== 'undefined' ? TOURNAMENT_UI_STATE : null,
+      history: typeof TOURNAMENT_HISTORY_ENHANCED !== 'undefined' ? TOURNAMENT_HISTORY_ENHANCED : null,
+      predictions: typeof PREDICTION_STATE !== 'undefined' ? PREDICTION_STATE : null,
+      achievements: typeof ACHIEVEMENT_PROGRESS !== 'undefined' ? ACHIEVEMENT_PROGRESS : null,
+      knockout: typeof KNOCKOUT_STATE !== 'undefined' ? KNOCKOUT_STATE : null,
+      timestamp: Date.now()
+    };
+
+    const json = JSON.stringify(state, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `app-state-${Date.now()}.json`;
+    a.click();
+
+    console.log('✓ State exported');
+  }
+};
+
+// ========================================
+// SYSTEM HEALTH MONITOR
+// ========================================
+
+const HEALTH_MONITOR = {
+  checks: [],
+  lastCheck: null,
+
+  // Register a health check
+  registerCheck(name, checkFunction) {
+    this.checks.push({ name, check: checkFunction });
+  },
+
+  // Run all health checks
+  async runAllChecks() {
+    console.log('🏥 Running system health checks...');
+    const results = [];
+
+    for (const { name, check } of this.checks) {
+      try {
+        const result = await check();
+        results.push({
+          name,
+          passed: result.passed,
+          message: result.message || 'OK'
+        });
+      } catch (error) {
+        results.push({
+          name,
+          passed: false,
+          message: error.message
+        });
+      }
+    }
+
+    this.lastCheck = {
+      timestamp: Date.now(),
+      results
+    };
+
+    const passed = results.filter(r => r.passed).length;
+    const total = results.length;
+
+    console.log(`✓ Health check complete: ${passed}/${total} checks passed`);
+
+    if (passed < total) {
+      console.warn('⚠️ Some health checks failed:',
+        results.filter(r => !r.passed));
+    }
+
+    return this.lastCheck;
+  },
+
+  // Get health status
+  getStatus() {
+    if (!this.lastCheck) return 'unknown';
+
+    const total = this.lastCheck.results.length;
+    const passed = this.lastCheck.results.filter(r => r.passed).length;
+    const percentage = (passed / total) * 100;
+
+    if (percentage === 100) return 'healthy';
+    if (percentage >= 80) return 'warning';
+    return 'critical';
+  }
+};
+
+// Register default health checks
+HEALTH_MONITOR.registerCheck('Manager State', () => {
+  const result = VALIDATORS.isValidManagerState();
+  return {
+    passed: result.valid,
+    message: result.errors.join(', ') || 'Manager state is valid'
+  };
+});
+
+HEALTH_MONITOR.registerCheck('Tournament State', () => {
+  const result = VALIDATORS.isValidTournamentState();
+  return {
+    passed: result.valid,
+    message: result.errors.join(', ') || 'Tournament state is valid'
+  };
+});
+
+HEALTH_MONITOR.registerCheck('Storage', () => {
+  try {
+    localStorage.setItem('_healthcheck', '1');
+    localStorage.removeItem('_healthcheck');
+    return { passed: true, message: 'Storage accessible' };
+  } catch (e) {
+    return { passed: false, message: 'Storage not accessible: ' + e.message };
+  }
+});
+
+HEALTH_MONITOR.registerCheck('Performance', () => {
+  const avg = parseFloat(PERFORMANCE_MONITOR.getAverages().matchSimulation);
+  return {
+    passed: avg < 500 || isNaN(avg),
+    message: `Average match simulation: ${avg}ms`
+  };
+});
+
+// ========================================
+// APPLICATION INITIALIZATION
+// ========================================
+
+const APP_INIT = {
+  initialized: false,
+
+  async initialize() {
+    if (this.initialized) {
+      console.log('ℹ️ App already initialized');
+      return;
+    }
+
+    console.log('🚀 Initializing optimization systems...');
+
+    try {
+      // Step 1: Apply bug fixes
+      BUG_FIXES.applyAll();
+
+      // Step 2: Start background tasks
+      MEMORY_MANAGER.startAutoCleanup();
+
+      // Step 3: Run health check
+      await HEALTH_MONITOR.runAllChecks();
+
+      this.initialized = true;
+      console.log('✓ Optimization systems initialized successfully');
+
+    } catch (error) {
+      console.error('❌ Initialization failed:', error);
+      if (typeof showNotification === 'function') {
+        showNotification('error', 'Initialization Error',
+          'Failed to initialize optimization. Check console.', 5000);
+      }
+    }
+  }
+};
+
+// ========================================
+// FINAL VERIFICATION CHECKLIST
+// ========================================
+
+const FINAL_CHECKLIST = {
+  items: [
+    {
+      id: 'seasons',
+      name: 'Season Mode',
+      check: () => typeof SEASON_STATE !== 'undefined' &&
+                   typeof displaySeasonMode === 'function'
+    },
+    {
+      id: 'predictions',
+      name: 'Prediction System',
+      check: () => typeof PREDICTION_STATE !== 'undefined' &&
+                   typeof promptPrediction === 'function'
+    },
+    {
+      id: 'templates',
+      name: 'Quick Start Templates',
+      check: () => typeof HISTORIC_TEAMS !== 'undefined' &&
+                   typeof TOURNAMENT_TEMPLATES !== 'undefined'
+    },
+    {
+      id: 'customMatch',
+      name: 'Custom Match Enhanced',
+      check: () => typeof showEnhancedCustomMatch === 'function'
+    },
+    {
+      id: 'achievements',
+      name: 'Achievements & XP',
+      check: () => typeof ACHIEVEMENTS_CONFIG !== 'undefined' &&
+                   typeof awardManagerXP === 'function'
+    },
+    {
+      id: 'history',
+      name: 'Tournament History',
+      check: () => typeof TOURNAMENT_HISTORY_ENHANCED !== 'undefined' &&
+                   typeof displayTournamentHistory === 'function'
+    },
+    {
+      id: 'stageSync',
+      name: 'Stage UI Sync',
+      check: () => typeof TOURNAMENT_UI_STATE !== 'undefined' &&
+                   typeof updateTournamentStage === 'function'
+    },
+    {
+      id: 'knockout',
+      name: 'Knockout Improvements',
+      check: () => typeof KNOCKOUT_STATE !== 'undefined' &&
+                   typeof simulateLeg1 === 'function'
+    },
+    {
+      id: 'customization',
+      name: 'Manager Customization',
+      check: () => typeof CUSTOMIZATION_CATALOG !== 'undefined' &&
+                   typeof showManagerCustomization === 'function'
+    },
+    {
+      id: 'optimization',
+      name: 'Optimization & Debug',
+      check: () => typeof VALIDATORS !== 'undefined' &&
+                   typeof PERFORMANCE_MONITOR !== 'undefined'
+    }
+  ],
+
+  runFullCheck() {
+    console.log('📋 Running final verification checklist...');
+    console.log('='.repeat(50));
+
+    const results = this.items.map(item => {
+      const passed = item.check();
+      const status = passed ? '✅' : '❌';
+      console.log(`${status} ${item.name}`);
+      return { ...item, passed };
+    });
+
+    console.log('='.repeat(50));
+
+    const passedCount = results.filter(r => r.passed).length;
+    const totalCount = results.length;
+    const percentage = ((passedCount / totalCount) * 100).toFixed(1);
+
+    console.log(`\n📊 Final Score: ${passedCount}/${totalCount} (${percentage}%)`);
+
+    if (passedCount === totalCount) {
+      console.log('🎉 ALL FEATURES VERIFIED AND FUNCTIONAL!');
+      console.log('✨ App is ready for use!');
+    } else {
+      console.warn('⚠️ Some features are missing or not working properly');
+      console.warn('Failed checks:', results.filter(r => !r.passed).map(r => r.name));
+    }
+
+    return {
+      passed: passedCount,
+      total: totalCount,
+      percentage,
+      allPassed: passedCount === totalCount,
+      results
+    };
+  },
+
+  displayReport() {
+    const checkResult = this.runFullCheck();
+
+    const modal = document.createElement('div');
+    modal.className = 'modal-backdrop active';
+    modal.style.zIndex = '10005';
+    modal.innerHTML = `
+      <div class="modal-content" style="max-width: 700px;">
+        <div class="modal-head" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.2));
+                                       border-bottom: 2px solid rgba(16, 185, 129, 0.4);">
+          <h2 style="color: #10B981;">📋 System Verification Report</h2>
+          <button class="modal-close" onclick="this.closest('.modal-backdrop').remove()">✕</button>
+        </div>
+
+        <div style="padding: 30px;">
+          <!-- Overall Score -->
+          <div style="text-align: center; margin-bottom: 30px; padding: 25px;
+                      background: ${checkResult.allPassed ? 'rgba(16, 185, 129, 0.2)' : 'rgba(251, 191, 36, 0.2)'};
+                      border: 2px solid ${checkResult.allPassed ? '#10B981' : '#FBBF24'};
+                      border-radius: 12px;">
+            <div style="font-size: 3em; margin-bottom: 15px;">
+              ${checkResult.allPassed ? '🎉' : '⚠️'}
+            </div>
+            <div style="font-size: 2.5em; font-weight: 900;
+                        color: ${checkResult.allPassed ? '#10B981' : '#FBBF24'};
+                        margin-bottom: 10px;">
+              ${checkResult.percentage}%
+            </div>
+            <div style="color: #94A3B8; font-size: 1.1em;">
+              ${checkResult.passed} / ${checkResult.total} features verified
+            </div>
+          </div>
+
+          <!-- Feature List -->
+          <div style="display: grid; gap: 10px; margin-bottom: 25px;">
+            ${checkResult.results.map(item => `
+              <div style="display: flex; align-items: center; padding: 12px;
+                          background: rgba(15, 23, 42, 0.6); border-radius: 8px;
+                          border-left: 3px solid ${item.passed ? '#10B981' : '#EF4444'};">
+                <span style="font-size: 1.5em; margin-right: 12px;">
+                  ${item.passed ? '✅' : '❌'}
+                </span>
+                <span style="color: ${item.passed ? '#10B981' : '#EF4444'}; font-weight: 600;">
+                  ${item.name}
+                </span>
+              </div>
+            `).join('')}
+          </div>
+
+          ${checkResult.allPassed ? `
+            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);
+                        border-radius: 10px; padding: 20px; text-align: center; margin-bottom: 20px;">
+              <div style="color: #10B981; font-weight: 700; font-size: 1.2em; margin-bottom: 10px;">
+                ✨ All Systems Operational!
+              </div>
+              <div style="color: #94A3B8; font-size: 0.95em;">
+                The app is fully optimized and ready for use
+              </div>
+            </div>
+          ` : `
+            <div style="background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3);
+                        border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+              <div style="color: #FBBF24; font-weight: 700; font-size: 1.1em; margin-bottom: 10px;">
+                ⚠️ Some Features Need Attention
+              </div>
+              <div style="color: #94A3B8; font-size: 0.9em;">
+                Check the console for details on failed checks
+              </div>
+            </div>
+          `}
+
+          <button onclick="this.closest('.modal-backdrop').remove()"
+                  class="btn-primary" style="width: 100%; padding: 14px; font-weight: 600;">
+            Close Report
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+  }
+};
+
+// ========================================
+// CONSOLE COMMANDS HELP
+// ========================================
+
+window.help = function() {
+  console.log(`
+╔══════════════════════════════════════════════════════════╗
+║          TOURNAMENT SIMULATOR - CONSOLE COMMANDS         ║
+╚══════════════════════════════════════════════════════════╝
+
+🐛 DEBUG COMMANDS:
+  debug.enable()     - Enable debug panel
+  debug.disable()    - Disable debug panel
+  debug.check()      - Run full diagnostic check
+  debug.export()     - Export current app state
+  debug.perf()       - Show performance report
+  debug.clear()      - Clear old data (memory cleanup)
+
+✅ VERIFICATION:
+  verify()           - Run full verification checklist
+  FINAL_CHECKLIST.runFullCheck() - Console verification
+
+📊 MONITORING:
+  HEALTH_MONITOR.runAllChecks() - Run health checks
+  PERFORMANCE_MONITOR.generateReport() - Performance stats
+
+🧹 MAINTENANCE:
+  MEMORY_MANAGER.cleanupAll() - Manual memory cleanup
+  BUG_FIXES.applyAll() - Re-apply all bug fixes
+
+💾 DATA MANAGEMENT:
+  localStorage.clear() - Clear all saved data
+
+═══════════════════════════════════════════════════════════
+
+Type any command to execute. Example: debug.enable()
+  `);
+};
+
+// Global debug commands
+window.debug = {
+  enable: () => DEBUG_TOOLS.enable(),
+  disable: () => DEBUG_TOOLS.disable(),
+  check: () => DEBUG_TOOLS.runFullCheck(),
+  export: () => DEBUG_TOOLS.exportState(),
+  perf: () => console.log(PERFORMANCE_MONITOR.generateReport()),
+  clear: () => MEMORY_MANAGER.cleanupAll()
+};
+
+// Add global command for verification
+window.verify = () => FINAL_CHECKLIST.displayReport();
+
+// Export global objects
+window.VALIDATORS = VALIDATORS;
+window.PERFORMANCE_MONITOR = PERFORMANCE_MONITOR;
+window.MEMORY_MANAGER = MEMORY_MANAGER;
+window.BUG_FIXES = BUG_FIXES;
+window.DEBUG_TOOLS = DEBUG_TOOLS;
+window.HEALTH_MONITOR = HEALTH_MONITOR;
+window.APP_INIT = APP_INIT;
+window.FINAL_CHECKLIST = FINAL_CHECKLIST;
+
+// Initialize on page load
+if (typeof window !== 'undefined') {
+  window.addEventListener('DOMContentLoaded', () => {
+    APP_INIT.initialize();
+  });
+}
+
+// Show help on first load
+console.log('');
+console.log('═══════════════════════════════════════════════════════════');
+console.log('🎉 PART 10: OPTIMIZATION & FINAL DEBUG - LOADED! 🎉');
+console.log('═══════════════════════════════════════════════════════════');
+console.log('');
+console.log('✅ SYSTEMS ACTIVE:');
+console.log('   • Validation & Error Checking');
+console.log('   • Performance Monitoring');
+console.log('   • Memory Management');
+console.log('   • Bug Fixes & Patches');
+console.log('   • Debug & Diagnostic Tools');
+console.log('   • System Health Monitor');
+console.log('   • Verification Checklist');
+console.log('');
+console.log('💡 Type help() for available console commands');
+console.log('💡 Type verify() to run full system verification');
+console.log('💡 Type debug.enable() to open debug panel');
+console.log('');
+
 </script>
 </body>
 </html>

@@ -10986,51 +10986,9 @@ function exportTournament() {
     showUtilityMessage("Failed to export tournament.", "error");
   }
 }
-function downloadTournamentExport(encodedData) {
-  try {
-    // Decode the base64 data
-    const jsonString = atob(encodedData);
-    const blob = new Blob([jsonString], { type: 'application/json' });
-    
-    // Create download link
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `tournament-export-${new Date().toISOString().slice(0, 10)}.json`;
-    
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    
-    URL.revokeObjectURL(url);
-    
-    showUtilityMessage('✅ Tournament exported successfully!', 'success');
-    console.log('✅ Tournament data downloaded');
-    
-  } catch (error) {
-    console.error('❌ Export download error:', error);
-    showUtilityMessage('❌ Export failed: ' + error.message, 'error');
-  }
-}
+// downloadTournamentExport is defined later in the file with enhanced implementation (line 28117)
+// copyExportToClipboard is defined later in the file with enhanced implementation (line 28137)
 
-function copyExportToClipboard(encodedData) {
-  try {
-    // Decode the base64 data for clipboard
-    const jsonString = atob(encodedData);
-    
-    navigator.clipboard.writeText(jsonString).then(() => {
-      showUtilityMessage('✅ Export data copied to clipboard!', 'success');
-      console.log('✅ Export data copied to clipboard');
-    }).catch(err => {
-      console.error('❌ Clipboard copy error:', err);
-      showUtilityMessage('❌ Failed to copy to clipboard', 'error');
-    });
-    
-  } catch (error) {
-    console.error('❌ Copy error:', error);
-    showUtilityMessage('❌ Copy failed: ' + error.message, 'error');
-  }
-}
 function resetTournament() {
   if (confirm("Are you sure you want to reset the tournament? All current progress will be lost.")) {
     performReset();
@@ -11721,20 +11679,7 @@ Generated with All-Time Football Simulator
   });
 }
 
-function getTopScorer() {
-  if (!PLAYER_DB) return null;
-  let topScorer = null;
-  let maxGoals = 0;
-
-  Object.values(PLAYER_DB).forEach(player => {
-    if (player.goals > maxGoals) {
-      maxGoals = player.goals;
-      topScorer = player;
-    }
-  });
-
-  return topScorer;
-}
+// getTopScorer is defined later in the file with enhanced return format (line 15175)
 
 // Historical "What If" Matchups
 function showClassicMatchups() {
@@ -11919,30 +11864,65 @@ function checkPlayerMilestones(player) {
   return notifications;
 }
 
-function showMilestoneNotification(message) {
-  const notification = document.createElement('div');
-  notification.className = 'milestone-notification';
-  notification.style.cssText = `
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: linear-gradient(135deg, #10b981, #34d399);
-    color: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4);
-    z-index: 10000;
-    animation: slideIn 0.5s ease-out;
-    font-weight: bold;
-    font-size: 1.1em;
-  `;
-  notification.textContent = message;
-  document.body.appendChild(notification);
+function showMilestoneNotification(messageOrMilestones) {
+  // Handle both string messages and milestone arrays
+  if (Array.isArray(messageOrMilestones)) {
+    // Use modal version for milestone arrays (full version at line 20915)
+    const modal = document.createElement('div');
+    modal.id = 'milestone-modal';
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85); display: flex; align-items: center;
+      justify-content: center; z-index: 10001; animation: fadeIn 0.3s;
+    `;
 
-  setTimeout(() => {
-    notification.style.animation = 'slideOut 0.5s ease-out';
-    setTimeout(() => notification.remove(), 500);
-  }, 3000);
+    const content = `
+      <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px; border-radius: 16px; max-width: 600px; width: 90%; box-shadow: 0 25px 50px rgba(0,0,0,0.5);">
+        <h2 style="margin: 0 0 20px 0; color: #ffd700; font-size: 32px; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+          🏆 MILESTONE ACHIEVED! 🏆
+        </h2>
+        <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+          ${messageOrMilestones.map(m => `
+            <div style="color: white; font-size: 20px; margin: 15px 0; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px; border-left: 4px solid #ffd700;">
+              <strong>${m.type || m}</strong>
+              ${m.season ? `<div style="font-size: 14px; margin-top: 5px; opacity: 0.9;">Season ${m.season}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+        <button onclick="closeMilestoneModal()" style="width: 100%; background: #ffd700; color: #1a1a2e; border: none; padding: 16px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 18px;">
+          Continue
+        </button>
+      </div>
+    `;
+
+    modal.innerHTML = content;
+    document.body.appendChild(modal);
+  } else {
+    // Simple notification for string messages
+    const notification = document.createElement('div');
+    notification.className = 'milestone-notification';
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #10b981, #34d399);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4);
+      z-index: 10000;
+      animation: slideIn 0.5s ease-out;
+      font-weight: bold;
+      font-size: 1.1em;
+    `;
+    notification.textContent = messageOrMilestones;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.style.animation = 'slideOut 0.5s ease-out';
+      setTimeout(() => notification.remove(), 500);
+    }, 3000);
+  }
 }
 
 // Tournament Templates
@@ -12101,8 +12081,9 @@ function startKnockoutOnlyWithTeams(teams, tournamentName) {
   else {
     // Pad to nearest power of 2
     const target = [2, 4, 8, 16, 32].find(n => n >= teams.length) || 16;
-    while (teams.length < target) {
-      const randomTeam = (ALL_TEAMS || [])[Math.floor(Math.random() * (ALL_TEAMS || []).length)];
+    const allTeams = window.ALL_TEAMS || window.TEAMS || [];
+    while (teams.length < target && allTeams.length > 0) {
+      const randomTeam = allTeams[Math.floor(Math.random() * allTeams.length)];
       if (randomTeam && !teams.find(t => t.name === randomTeam.name)) {
         teams.push(randomTeam);
       }
@@ -12132,8 +12113,9 @@ function startQuickTournamentWithTeams(teams, tournamentName) {
   const targetCount = groupCount * 4;
 
   // Pad with random teams if needed
-  while (teams.length < targetCount) {
-    const randomTeam = (ALL_TEAMS || [])[Math.floor(Math.random() * (ALL_TEAMS || []).length)];
+  const allTeams = window.ALL_TEAMS || window.TEAMS || [];
+  while (teams.length < targetCount && allTeams.length > 0) {
+    const randomTeam = allTeams[Math.floor(Math.random() * allTeams.length)];
     if (randomTeam && !teams.find(t => t.name === randomTeam.name)) {
       teams.push(randomTeam);
     }
@@ -13800,30 +13782,7 @@ async function runFullTournament() {
 
 /************* ENHANCED STATS VIEW (MAIN PANEL) *************/
 
-function showEnhancedStatistics() {
-  const out = document.getElementById("output");
-  if (!out) return;
-
-  out.innerHTML = `
-    <div class="group-card">
-      <div class="group-title">📊 Enhanced Statistics</div>
-      <div style="padding: 20px; text-align: center;">
-        <div style="font-size: 48px; margin-bottom: 12px;">📈</div>
-        <p style="font-size: 1.05em; margin-bottom: 6px;">
-          <strong>Advanced analytics and player comparisons coming soon!</strong>
-        </p>
-        <p class="output-sub" style="margin-bottom: 16px;">
-          For now, you can still view basic top scorers and match summaries from the Stats panel.
-        </p>
-        ${
-          typeof showPlayerStats === "function"
-            ? `<button onclick="showPlayerStats()" class="btn-primary">View Basic Statistics</button>`
-            : `<span style="font-size: 0.9em; color: #9ca3af;">(Basic stats view not wired yet.)</span>`
-        }
-      </div>
-    </div>
-  `;
-}
+// showEnhancedStatistics is defined later in the file with full functionality (line 31874)
 
 /************* TEAM / PLAYER VIEWS *************/
 
@@ -15190,15 +15149,7 @@ function closeSeasonSummary() {
   if (modal) modal.remove();
 }
 
-function startNewSeason() {
-  closeSeasonSummary();
-  // Reinitialize with same teams
-  if (SEASON_STATE.teams && SEASON_STATE.teams.length > 0) {
-    initializeSeasonMode(SEASON_STATE.teams);
-    showUtilityMessage(`Season ${SEASON_STATE.seasonNumber} started!`, 'success');
-    showLeagueTable();
-  }
-}
+// startNewSeason is defined later in the file with enhanced implementation (line 15455)
 
 function getTopScorer() {
   // Get top scorer from player database
@@ -15502,7 +15453,13 @@ function startNewSeason() {
   }
 
   // Get top teams by rating
-  const topTeams = ALL_TEAMS.slice(0, teamCount);
+  const allTeams = window.ALL_TEAMS || window.TEAMS || [];
+  if (allTeams.length === 0) {
+    showNotification('error', 'No Teams Available', 'Please generate groups first', 3000);
+    return;
+  }
+
+  const topTeams = allTeams.slice(0, Math.min(teamCount, allTeams.length));
 
   const success = initializeSeasonMode(topTeams);
   if (success) {
@@ -15977,7 +15934,133 @@ function viewSeasonFixtures() {
 }
 
 function viewSeasonStats() {
-  showNotification('info', 'Coming Soon', 'Season statistics coming soon', 2000);
+  const out = document.getElementById('output');
+  if (!out || !SEASON_STATE.active) return;
+
+  out.innerHTML = `
+    <div style="max-width: 1200px; margin: 0 auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="color: #10b981; margin: 0;">📈 Season Statistics</h2>
+        <button onclick="displaySeasonMode()" class="btn-secondary">← Back</button>
+      </div>
+
+      <!-- Top Scorers -->
+      <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(71, 85, 105, 0.3);
+                  border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+        <h3 style="color: #10b981; margin-bottom: 15px;">⚽ Top Scorers</h3>
+        <div style="display: grid; gap: 8px;">
+          ${getSeasonTopScorers(15).map((scorer, idx) => `
+            <div style="display: flex; align-items: center; gap: 12px; padding: 12px;
+                        background: ${idx < 3 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(15, 23, 42, 0.4)'};
+                        border-left: 3px solid ${idx === 0 ? '#FBBF24' : idx === 1 ? '#94A3B8' : idx === 2 ? '#CD7F32' : 'rgba(71, 85, 105, 0.3)'};
+                        border-radius: 6px;">
+              <div style="width: 35px; text-align: center; font-weight: 700; font-size: 1.1em; color: ${idx < 3 ? (idx === 0 ? '#FBBF24' : idx === 1 ? '#C0C0C0' : '#CD7F32') : '#64748B'};">
+                ${idx < 3 ? ['🥇','🥈','🥉'][idx] : idx + 1}
+              </div>
+              <div style="flex: 1;">
+                <div style="color: #f1f5f9; font-weight: 600;">${scorer.name}</div>
+                <div style="color: #94a3b8; font-size: 0.85em;">${scorer.team}</div>
+              </div>
+              <div style="display: flex; gap: 20px;">
+                <div style="text-align: center;">
+                  <div style="color: #10b981; font-weight: 700; font-size: 1.2em;">${scorer.goals}</div>
+                  <div style="color: #64748b; font-size: 0.75em;">Goals</div>
+                </div>
+                <div style="text-align: center;">
+                  <div style="color: #3b82f6; font-weight: 700;">${scorer.assists || 0}</div>
+                  <div style="color: #64748b; font-size: 0.75em;">Assists</div>
+                </div>
+                <div style="text-align: center;">
+                  <div style="color: #8b5cf6; font-weight: 700;">${(scorer.goals * 1 + (scorer.assists || 0) * 0.5).toFixed(1)}</div>
+                  <div style="color: #64748b; font-size: 0.75em;">Points</div>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Team Stats -->
+      <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(71, 85, 105, 0.3);
+                  border-radius: 12px; padding: 20px;">
+        <h3 style="color: #10b981; margin-bottom: 15px;">📊 Team Statistics</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+          ${getSeasonTeamStats().map(stat => `
+            <div style="padding: 16px; background: rgba(15, 23, 42, 0.6); border-radius: 8px;">
+              <div style="color: #94a3b8; font-size: 0.9em; margin-bottom: 8px;">${stat.label}</div>
+              <div style="color: #f1f5f9; font-weight: 700; font-size: 1.3em;">${stat.team}</div>
+              <div style="color: #10b981; font-weight: 600; margin-top: 5px;">${stat.value}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function getSeasonTopScorers(limit) {
+  const scorers = {};
+
+  // Collect scorers from all played fixtures
+  if (SEASON_STATE.fixtures) {
+    SEASON_STATE.fixtures.forEach(fixture => {
+      if (fixture.played && fixture.scorers) {
+        fixture.scorers.forEach(s => {
+          const key = `${s.name}_${s.team}`;
+          if (!scorers[key]) {
+            scorers[key] = { name: s.name, team: s.team, goals: 0, assists: 0 };
+          }
+          scorers[key].goals += s.goals || 1;
+          if (s.assists) scorers[key].assists += s.assists;
+        });
+      }
+    });
+  }
+
+  // If no scorers from fixtures, try to extract from PLAYER_DB
+  if (Object.keys(scorers).length === 0 && window.PLAYER_DB) {
+    Object.values(PLAYER_DB).forEach(player => {
+      if (player.goals > 0) {
+        const key = `${player.name}_${player.team}`;
+        scorers[key] = {
+          name: player.name,
+          team: player.team,
+          goals: player.goals,
+          assists: player.assists || 0
+        };
+      }
+    });
+  }
+
+  return Object.values(scorers)
+    .sort((a, b) => b.goals - a.goals || (b.assists || 0) - (a.assists || 0))
+    .slice(0, limit);
+}
+
+function getSeasonTeamStats() {
+  if (!SEASON_STATE.table || SEASON_STATE.table.length === 0) {
+    return [
+      { label: 'Most Goals Scored', team: 'N/A', value: '0 goals' },
+      { label: 'Best Defense', team: 'N/A', value: '0 conceded' },
+      { label: 'Best Form', team: 'N/A', value: '0 wins' }
+    ];
+  }
+
+  const table = [...SEASON_STATE.table];
+
+  const topScoring = table.sort((a, b) => b.goalsFor - a.goalsFor)[0];
+  const bestDefense = table.sort((a, b) => a.goalsAgainst - b.goalsAgainst)[0];
+  const bestForm = table.sort((a, b) => {
+    const winsA = (a.form || []).filter(r => r === 'W').length;
+    const winsB = (b.form || []).filter(r => r === 'W').length;
+    return winsB - winsA;
+  })[0];
+
+  return [
+    { label: 'Most Goals Scored', team: topScoring.team.name, value: topScoring.goalsFor + ' goals' },
+    { label: 'Best Defense', team: bestDefense.team.name, value: 'Only ' + bestDefense.goalsAgainst + ' conceded' },
+    { label: 'Best Form', team: bestForm.team.name, value: (bestForm.form || []).filter(r => r === 'W').length + ' wins in last 5' }
+  ];
 }
 
 // ========================================
@@ -16342,14 +16425,126 @@ function createMomentsTab() {
 }
 
 function createLegendsTab() {
+  const legends = getPlayerLegends();
+
+  if (legends.length === 0) {
+    return `
+      <div style="text-align: center; padding: 80px 20px; background: var(--cardBg);
+                  border-radius: 16px; border: 1px solid var(--cardBorder);">
+        <div style="font-size: 5em; margin-bottom: 20px; opacity: 0.5;">🎖️</div>
+        <h3 style="color: var(--textSecondary); margin-bottom: 15px;">No Legends Yet</h3>
+        <p style="color: var(--textMuted);">Complete tournaments to create legendary players</p>
+      </div>
+    `;
+  }
+
   return `
-    <div style="text-align: center; padding: 80px 20px; background: var(--cardBg);
-                border-radius: 16px; border: 1px solid var(--cardBorder);">
-      <div style="font-size: 5em; margin-bottom: 20px; opacity: 0.5;">🎖️</div>
-      <h3 style="color: var(--textSecondary); margin-bottom: 15px;">Legends Coming Soon</h3>
-      <p style="color: var(--textMuted);">Individual player statistics and legends will be tracked in future updates</p>
+    <div>
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h3 style="color: #FBBF24; margin-bottom: 10px;">🎖️ Hall of Fame Players</h3>
+        <p style="color: var(--textMuted);">Top performers across all tournaments</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 24px;">
+        ${legends.map((player, idx) => `
+          <div style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.1));
+                      border: 2px solid rgba(251, 191, 36, 0.3); border-radius: 16px; padding: 24px;
+                      transition: all 0.3s; cursor: pointer;"
+               onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 10px 30px rgba(251, 191, 36, 0.3)'"
+               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+              <div style="font-size: 3em;">${idx < 3 ? ['🥇','🥈','🥉'][idx] : '🎖️'}</div>
+              <div style="flex: 1;">
+                <div style="color: var(--text); font-weight: 700; font-size: 1.3em;">${player.name}</div>
+                <div style="color: #FBBF24; font-size: 0.9em;">${player.team}</div>
+              </div>
+              <div style="text-align: center; padding: 8px 12px; background: rgba(251, 191, 36, 0.2);
+                          border-radius: 8px;">
+                <div style="color: #FBBF24; font-weight: 700; font-size: 1.1em;">#${idx + 1}</div>
+                <div style="color: var(--textMuted); font-size: 0.7em;">RANK</div>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px;">
+              <div style="text-align: center; padding: 12px; background: rgba(15, 23, 42, 0.6); border-radius: 8px;">
+                <div style="color: #10B981; font-size: 1.5em; font-weight: 700;">${player.goals || 0}</div>
+                <div style="color: #94A3B8; font-size: 0.8em;">Goals</div>
+              </div>
+              <div style="text-align: center; padding: 12px; background: rgba(15, 23, 42, 0.6); border-radius: 8px;">
+                <div style="color: #3B82F6; font-size: 1.5em; font-weight: 700;">${player.assists || 0}</div>
+                <div style="color: #94A3B8; font-size: 0.8em;">Assists</div>
+              </div>
+              <div style="text-align: center; padding: 12px; background: rgba(15, 23, 42, 0.6); border-radius: 8px;">
+                <div style="color: #F59E0B; font-size: 1.5em; font-weight: 700;">${player.apps || 0}</div>
+                <div style="color: #94A3B8; font-size: 0.8em;">Appearances</div>
+              </div>
+              <div style="text-align: center; padding: 12px; background: rgba(15, 23, 42, 0.6); border-radius: 8px;">
+                <div style="color: #8B5CF6; font-size: 1.5em; font-weight: 700;">${player.avgRating ? player.avgRating.toFixed(1) : 'N/A'}</div>
+                <div style="color: #94A3B8; font-size: 0.8em;">Avg Rating</div>
+              </div>
+            </div>
+
+            <div style="padding-top: 12px; border-top: 1px solid rgba(251, 191, 36, 0.2);">
+              <div style="display: flex; justify-content: space-between; font-size: 0.85em;">
+                <span style="color: var(--textMuted);">Goals/Game</span>
+                <span style="color: #10B981; font-weight: 600;">${player.apps > 0 ? (player.goals / player.apps).toFixed(2) : '0.00'}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.85em; margin-top: 6px;">
+                <span style="color: var(--textMuted);">Contributions</span>
+                <span style="color: #3B82F6; font-weight: 600;">${(player.goals || 0) + (player.assists || 0)}</span>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
     </div>
   `;
+}
+
+function getPlayerLegends() {
+  const players = [];
+
+  // Collect from PLAYER_DB if available
+  if (window.PLAYER_DB) {
+    Object.values(PLAYER_DB).forEach(player => {
+      if (player.apps >= 3) {  // Minimum 3 appearances to be considered
+        players.push({
+          name: player.name,
+          team: player.team,
+          goals: player.goals || 0,
+          assists: player.assists || 0,
+          apps: player.apps || 0,
+          avgRating: player.avgRating || (player.ratings ? player.ratings.reduce((a, b) => a + b, 0) / player.ratings.length : null)
+        });
+      }
+    });
+  }
+
+  // Collect from ALL_TIME_PLAYER_DB if available
+  if (window.ALL_TIME_PLAYER_DB && players.length === 0) {
+    Object.values(ALL_TIME_PLAYER_DB).forEach(player => {
+      if (player.apps >= 3) {
+        players.push({
+          name: player.name,
+          team: player.team,
+          goals: player.goals || 0,
+          assists: player.assists || 0,
+          apps: player.apps || 0,
+          avgRating: player.avgRating || null
+        });
+      }
+    });
+  }
+
+  // Sort by total contributions (goals + assists), then by goals
+  return players
+    .sort((a, b) => {
+      const contribA = (a.goals || 0) + (a.assists || 0);
+      const contribB = (b.goals || 0) + (b.assists || 0);
+      return contribB - contribA || b.goals - a.goals;
+    })
+    .slice(0, 12);  // Top 12 legends
 }
 
 function switchHallOfFameTab(tabId) {
@@ -17244,7 +17439,8 @@ function showPredictionResultModal(correct, prediction, actualResult) {
   }, 5000);
 }
 
-function checkPredictionAchievements() {
+// checkPredictionAchievements is defined later with enhanced implementation (line 18180)
+function checkPredictionAchievements_SIMPLE() {
   // Check for achievements
   if (PREDICTION_STATE.correctPredictions >= 10 && ACHIEVEMENT_PROGRESS && !ACHIEVEMENT_PROGRESS.unlockedAchievements.includes('prediction_novice')) {
     const achievement = ACHIEVEMENTS_CONFIG && ACHIEVEMENTS_CONFIG.predictions ? ACHIEVEMENTS_CONFIG.predictions.find(a => a.id === 'novice') : null;
@@ -18928,9 +19124,7 @@ function createManagerProfile() {
   displayManagerProfile();
 }
 
-function showManagerCustomization() {
-  showNotification('info', 'Coming Soon', 'Manager customization will be available in the next update!', 3000);
-}
+// showManagerCustomization is defined later in the file with full functionality
 
 function showManagerStats() {
   const out = document.getElementById('content');
@@ -19685,6 +19879,11 @@ function displayKnockoutStage(stage) {
 
   const out = document.getElementById('output');
   if (!out) return;
+
+  // Update tournament progress timeline
+  if (typeof updateTournamentProgress === 'function') {
+    updateTournamentProgress(stage);
+  }
 
   // Get matches for this stage
   const stageMatches = KNOCKOUT_STATE.currentMatches.filter(m =>
@@ -20901,37 +21100,7 @@ function checkCareerMilestones() {
 /**
  * Show milestone notification
  */
-function showMilestoneNotification(milestones) {
-  const modal = document.createElement('div');
-  modal.id = 'milestone-modal';
-  modal.style.cssText = `
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.85); display: flex; align-items: center;
-    justify-content: center; z-index: 10001; animation: fadeIn 0.3s;
-  `;
-
-  const content = `
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px; border-radius: 16px; max-width: 600px; width: 90%; box-shadow: 0 25px 50px rgba(0,0,0,0.5);">
-      <h2 style="margin: 0 0 20px 0; color: #ffd700; font-size: 32px; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
-        🏆 MILESTONE ACHIEVED! 🏆
-      </h2>
-      <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
-        ${milestones.map(m => `
-          <div style="color: white; font-size: 20px; margin: 15px 0; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px; border-left: 4px solid #ffd700;">
-            <strong>${m.type}</strong>
-            <div style="font-size: 14px; margin-top: 5px; opacity: 0.9;">Season ${m.season}</div>
-          </div>
-        `).join('')}
-      </div>
-      <button onclick="closeMilestoneModal()" style="width: 100%; background: #ffd700; color: #1a1a2e; border: none; padding: 16px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 18px;">
-        Continue
-      </button>
-    </div>
-  `;
-
-  modal.innerHTML = content;
-  document.body.appendChild(modal);
-}
+// showMilestoneNotification is defined earlier in the file with unified functionality (line 11922)
 
 function closeMilestoneModal() {
   const modal = document.getElementById('milestone-modal');
@@ -28258,7 +28427,8 @@ function formatFileSize(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-function getCustomMatchesHistory() {
+// getCustomMatchesHistory is defined later with enhanced implementation (line 31206)
+function getCustomMatchesHistory_SIMPLE() {
   try {
     return JSON.parse(localStorage.getItem('savedCustomMatches') || '[]');
   } catch {
@@ -35791,7 +35961,7 @@ function loadRivalryMatch(teamAName, teamBName) {
 // ======================
 
 function showEnhancedCustomMatch() {
-  const content = document.getElementById('content');
+  const content = document.getElementById('content') || document.getElementById('output');
   if (!content) return;
 
   // Initialize CUSTOM_MATCH_STATE if needed
@@ -36282,8 +36452,11 @@ function simulateCustomMatchEnhanced() {
   }
 }
 
-function displayCustomMatchResult(result, teamA, teamB) {
-  const content = document.getElementById('content');
+// displayCustomMatchResult is defined earlier in the file with full functionality (line 27381)
+// This duplicate has been removed to avoid conflicts
+
+function displayCustomMatchResult_EnhancedVersion(result, teamA, teamB) {
+  const content = document.getElementById('content') || document.getElementById('output');
   if (!content) return;
 
   // Trigger confetti for exciting results

@@ -4963,7 +4963,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">📊</span>
           </button>
 
-          <button class="ctrl-btn btn-purple" id="btnPredictionToggle" onclick="togglePredictions()">
+          <button disabled style="opacity: 0.5; cursor: not-allowed;" title="Predictions not applicable to simulations" class="ctrl-btn btn-purple" id="btnPredictionToggle" onclick="togglePredictions()">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title" id="predictionToggleTitle">🔮 Predictions: ON</span>
               <span class="ctrl-btn-subtitle" id="predictionToggleSubtitle">Making predictions</span>
@@ -4971,7 +4971,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">🔮</span>
           </button>
 
-          <button class="ctrl-btn btn-purple" id="btnPredictionStats" onclick="displayPredictionStats()">
+          <button disabled style="opacity: 0.5; cursor: not-allowed;" title="Predictions not applicable to simulations" class="ctrl-btn btn-purple" id="btnPredictionStats" onclick="displayPredictionStats()">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">📊 Prediction Stats</span>
               <span class="ctrl-btn-subtitle">View your accuracy</span>
@@ -5361,6 +5361,10 @@ button:focus, input:focus, select:focus {
   </div>
 
 <script>
+    // Debug configuration - set to false to reduce console spam
+    window.DEBUG_MODE = false;
+    window.VERBOSE_LOGGING = false;
+
     window.TEAM_POOL = [
       {
         name: "2009 Barcelona",
@@ -8258,7 +8262,7 @@ function applyTheme(themeName) {
   // Save preference
   localStorage.setItem('selectedTheme', themeName);
 
-  console.log(`✓ Theme applied: ${theme.name}`);
+  if (window.VERBOSE_LOGGING) console.log(`✓ Theme applied: ${theme.name}`);
   showNotification('success', 'Theme Changed',
     `Switched to ${theme.name}`, 2000);
 }
@@ -8469,7 +8473,7 @@ function markStageComplete(stage) {
   const stageKey = mapStageToKey(stage);
   if (TOURNAMENT_HISTORY_ENHANCED.currentTournament.stages[stageKey]) {
     TOURNAMENT_HISTORY_ENHANCED.currentTournament.stages[stageKey].completed = true;
-    console.log(`✓ Stage complete: ${stage}`);
+    if (window.VERBOSE_LOGGING) console.log(`✓ Stage complete: ${stage}`);
   }
 }
 
@@ -8541,7 +8545,7 @@ function completeTournament(champion, runnerUp, topScorer) {
   }
 
   console.log(`✓ Tournament completed: ${TOURNAMENT_HISTORY_ENHANCED.currentTournament.name}`);
-  console.log(`Champion: ${champion}`);
+  if (window.VERBOSE_LOGGING) console.log(`Champion: ${champion}`);
 
   // Clear current tournament
   TOURNAMENT_HISTORY_ENHANCED.currentTournament = null;
@@ -8636,7 +8640,7 @@ function initializeKnockoutStage(teams, stage, useTwoLegs = false) {
     }
   }
 
-  console.log(`✓ Initialized ${KNOCKOUT_STATE.currentMatches.length} knockout matches for ${stage}`);
+  if (window.VERBOSE_LOGGING) console.log(`✓ Initialized ${KNOCKOUT_STATE.currentMatches.length} knockout matches for ${stage}`);
   console.log(`Two-leg format: ${useTwoLegs}`);
 }
 
@@ -8979,7 +8983,7 @@ function checkStageCompletion(stage) {
   const allComplete = stageMatches.every(m => m.completed);
 
   if (allComplete) {
-    console.log(`✓ All matches in ${stage} complete`);
+    if (window.VERBOSE_LOGGING) console.log(`✓ All matches in ${stage} complete`);
     if (typeof markStageComplete === 'function') {
       markStageComplete(stage);
     }
@@ -9786,34 +9790,7 @@ function updateAchievementsDisplay() {
 }
 
 // Award XP to manager
-function awardManagerXP(xp, reason) {
-  // Apply difficulty multiplier
-  const difficulty = getCurrentDifficulty();
-  const multiplier = difficulty.xpMultiplier || 1.0;
-  const adjustedXP = Math.floor(xp * multiplier);
-
-  MANAGER_PROFILE.xp += adjustedXP;
-  console.log(`📈 +${adjustedXP} XP: ${reason}${multiplier !== 1.0 ? ` (${multiplier}x multiplier)` : ''}`);
-
-  // Check for level up
-  while (MANAGER_PROFILE.xp >= MANAGER_PROFILE.xpToNextLevel) {
-    MANAGER_PROFILE.level++;
-    MANAGER_PROFILE.xp -= MANAGER_PROFILE.xpToNextLevel;
-    MANAGER_PROFILE.xpToNextLevel = Math.floor(MANAGER_PROFILE.xpToNextLevel * 1.5);
-
-    // Show level up notification
-    if (typeof showNotification === 'function') {
-      showNotification('success',
-        `🎉 Level Up!`,
-        `Congratulations! You've reached Level ${MANAGER_PROFILE.level}!`,
-        4000);
-    }
-
-    console.log(`🎉 Level Up! Now level ${MANAGER_PROFILE.level}`);
-  }
-
-  saveManagerProfile();
-}
+// Removed duplicate: function awardManagerXP - see later definition
 
 // Update manager stats after tournament
 function updateManagerStats(tournamentData) {
@@ -9960,7 +9937,7 @@ function setDifficulty(difficultyId) {
   }
 
   const difficulty = DIFFICULTY_MODES[difficultyId];
-  console.log(`🎯 Difficulty set to: ${difficulty.name}`);
+  if (window.VERBOSE_LOGGING) console.log(`🎯 Difficulty set to: ${difficulty.name}`);
 
   // Update RNG settings based on difficulty
   RNG_SETTINGS.groupChaos = difficulty.upsetFactor;
@@ -10732,19 +10709,7 @@ function checkAchievement(achievementId, data = {}) {
 }
 
 // Unlock an achievement
-function unlockAchievement(achievementId) {
-  const achievement = ACHIEVEMENTS[achievementId];
-  if (!achievement) return;
-
-  window.ACHIEVEMENTS_DATA.unlocked[achievementId] = {
-    unlockedAt: new Date().toISOString(),
-    timestamp: Date.now()
-  };
-
-  saveAchievements();
-  showAchievementNotification(achievement);
-  console.log(`🏆 Achievement Unlocked: ${achievement.name}`);
-}
+// Removed duplicate: function unlockAchievement - see later definition
 
 // Show achievement unlock notification
 function showAchievementNotification(achievement) {
@@ -10923,18 +10888,18 @@ function filterAchievements(filter) {
 /************* TOURNAMENT STAGE FUNCTIONS *************/
 /************* MATCH DISPLAY FUNCTIONS *************/
 function displayMatchWeekResults() {
-  console.log("Displaying match week results...");
+  if (window.VERBOSE_LOGGING) console.log("Displaying match week results...");
   // Placeholder for future detailed week-by-week view
 }
 
 function displayKnockoutRound() {
-  console.log("Displaying knockout round...");
+  if (window.VERBOSE_LOGGING) console.log("Displaying knockout round...");
   // Placeholder for future knockout bracket view
 }
 
 /************* UTILITY / CORE FUNCTIONS *************/
 function exportTournament() {
-  console.log("Exporting tournament...");
+  if (window.VERBOSE_LOGGING) console.log("Exporting tournament...");
 
   const exportPayload = {
     metadata: {
@@ -10995,7 +10960,7 @@ function resetTournament() {
   }
 }
 function handleImport() {
-  console.log("Handling import...");
+  if (window.VERBOSE_LOGGING) console.log("Handling import...");
 
   const input = document.getElementById("importSave");
   if (!input || !input.files || input.files.length === 0) {
@@ -11086,7 +11051,7 @@ function legacyImportData(parsed) {
 }
 
 function setRNGPreset(value, element) {
-  console.log("Setting RNG preset:", value);
+  if (window.VERBOSE_LOGGING) console.log("Setting RNG preset:", value);
   const slider = document.getElementById("rngSlider");
   if (slider) {
     slider.value = value;
@@ -11103,26 +11068,7 @@ function setRNGPreset(value, element) {
 }
 
 /************* MATCH SUMMARY / CONTENT HELPERS *************/
-function generateMatchSummary(matchData, teamA, teamB) {
-  if (!matchData || !teamA || !teamB) {
-    return "An exciting match between two competitive teams.";
-  }
-
-  const scoreA = matchData.scoreA ?? 0;
-  const scoreB = matchData.scoreB ?? 0;
-  const totalGoals = scoreA + scoreB;
-  const goalDiff = Math.abs(scoreA - scoreB);
-
-  if (totalGoals === 0) {
-    return "A tactical battle where both defenses prevailed in a goalless draw.";
-  } else if (goalDiff === 1) {
-    return `A closely contested match decided by a single goal in a ${totalGoals}-goal thriller.`;
-  } else if (goalDiff >= 3) {
-    return `A dominant performance with a convincing ${goalDiff}-goal margin in this ${totalGoals}-goal encounter.`;
-  } else {
-    return `An entertaining ${totalGoals}-goal match that showcased quality football from both sides.`;
-  }
-}
+// Removed duplicate: function generateMatchSummary - see later definition
 
 /************* NEW FEATURE FUNCTIONS *************/
 
@@ -11348,7 +11294,7 @@ function showTournamentStatsSummary() {
 // ========================================
 
 function displayEnhancedTournamentStats() {
-  const out = document.getElementById('content') || document.getElementById('output');
+  const out = document.getElementById('content') || document.getElementById('output') || document.getElementById('output');
   if (!out) return;
 
   out.innerHTML = `
@@ -11730,7 +11676,7 @@ function simulateClassicMatchup(teamAName, teamBName, matchupName) {
     return;
   }
 
-  console.log(`🎭 Simulating classic matchup: ${matchupName}`);
+  if (window.VERBOSE_LOGGING) console.log(`🎭 Simulating classic matchup: ${matchupName}`);
 
   try {
     // Close any open modals first
@@ -12793,23 +12739,10 @@ function hideModal(id) {
   if (el) el.classList.remove("active");
 }
 
-function openCustomMatch() {
-  console.log("🎮 Opening custom match modal");
-  try {
-    if (typeof openCustomMatchModal === 'function') {
-      openCustomMatchModal();
-    } else {
-      console.error('❌ openCustomMatchModal function not found');
-      showUtilityMessage('Error opening custom match', 'error');
-    }
-  } catch (error) {
-    console.error('❌ Error opening custom match:', error);
-    showUtilityMessage('Error opening custom match: ' + error.message, 'error');
-  }
-}
+// Removed duplicate: function openCustomMatch - see later definition
 
 function closeCustomMatch() {
-  console.log("Closing custom match modal");
+  if (window.VERBOSE_LOGGING) console.log("Closing custom match modal");
   const modal = document.getElementById("customMatchModal");
   if (modal) {
     modal.classList.remove("active");
@@ -12819,7 +12752,7 @@ function closeCustomMatch() {
 
 // Manager Edit Modal Functions
 function openManagerEditModal() {
-  console.log('👤 Opening manager edit modal...');
+  if (window.VERBOSE_LOGGING) console.log('👤 Opening manager edit modal...');
   const modal = document.getElementById("managerEditModal");
   const input = document.getElementById("managerNameInput");
   const teamSelect = document.getElementById("managerFavoriteTeamSelect");
@@ -12936,7 +12869,7 @@ function matchInvolvesTrackedTeam(match) {
 }
 
 function showTrackTeamModal() {
-  console.log('🎯 Opening track team modal...');
+  if (window.VERBOSE_LOGGING) console.log('🎯 Opening track team modal...');
   const modal = document.getElementById("trackTeamModal");
   const select = document.getElementById("trackTeamSelect");
 
@@ -12956,12 +12889,12 @@ function showTrackTeamModal() {
 
   // Use DRAWN_TEAMS if available, otherwise use all teams from TEAM_POOL
   let teams = window.DRAWN_TEAMS || [];
-  console.log(`📊 DRAWN_TEAMS has ${teams.length} teams`);
+  if (window.VERBOSE_LOGGING) console.log(`📊 DRAWN_TEAMS has ${teams.length} teams`);
 
   // If no drawn teams yet, use full team pool
   if (teams.length === 0) {
     teams = window.TEAM_POOL || [];
-    console.log(`📊 TEAM_POOL has ${teams.length} teams`);
+    if (window.VERBOSE_LOGGING) console.log(`📊 TEAM_POOL has ${teams.length} teams`);
 
     if (teams.length === 0) {
       console.warn('⚠️ No teams available in TEAM_POOL or DRAWN_TEAMS');
@@ -13035,7 +12968,7 @@ function confirmTrackedTeam() {
 }
 
 function closeAllModals() {
-  console.log("Closing all modals");
+  if (window.VERBOSE_LOGGING) console.log("Closing all modals");
   document.querySelectorAll(".modal-backdrop").forEach((el) => {
     el.classList.remove("active");
     el.style.display = "none";
@@ -13148,7 +13081,7 @@ function simulateMatchWithWeather(teamA, teamB, isHome, importance, weather) {
   const effect = weatherEffects[weather] || weatherEffects.clear;
   const adjustedImportance = importance * effect.chaos;
 
-  console.log(`🌤️ ${effect.description} (chaos: ${effect.chaos}x)`);
+  if (window.VERBOSE_LOGGING) console.log(`🌤️ ${effect.description} (chaos: ${effect.chaos}x)`);
 
   // Use existing simulateMatch function with adjusted parameters
   const result = simulateMatch(teamA, teamB, isHome, adjustedImportance, weather);
@@ -13190,7 +13123,7 @@ function updateSimSpeed(value) {
   // Save to localStorage
   try {
     localStorage.setItem('simSpeed', v.toString());
-    console.log(`⚡ Simulation speed set to: ${labels[v]} (${SIM_SPEED_SETTINGS.speeds[v]}ms)`);
+    if (window.VERBOSE_LOGGING) console.log(`⚡ Simulation speed set to: ${labels[v]} (${SIM_SPEED_SETTINGS.speeds[v]}ms)`);
   } catch (e) {
     console.error('Failed to save simulation speed:', e);
   }
@@ -13262,7 +13195,7 @@ function simulateCustomMatch() {
     return;
   }
 
-  console.log(`🎮 Simulating custom match: ${teamA.name} vs ${teamB.name}`);
+  if (window.VERBOSE_LOGGING) console.log(`🎮 Simulating custom match: ${teamA.name} vs ${teamB.name}`);
 
   try {
     // Close the modal first
@@ -13300,7 +13233,7 @@ function simulateCustomMatch() {
     const importanceSlider = document.getElementById('customImportance');
     const importance = importanceSlider ? parseFloat(importanceSlider.value) : 1.5;
 
-    console.log(`🌤️ Weather: ${weather}, 📊 Importance: ${importance}`);
+    if (window.VERBOSE_LOGGING) console.log(`🌤️ Weather: ${weather}, 📊 Importance: ${importance}`);
 
     // Simulate the match with custom settings
     const result = simulateMatchWithWeather(teamA, teamB, isHome, importance, weather);
@@ -13338,7 +13271,7 @@ function simulateRematch() {
 
   const { teamA, teamB, matchType } = window.LAST_CUSTOM_MATCH;
   
-  console.log(`🔄 Simulating rematch: ${teamA.name} vs ${teamB.name}`);
+  if (window.VERBOSE_LOGGING) console.log(`🔄 Simulating rematch: ${teamA.name} vs ${teamB.name}`);
   
   try {
     showUtilityMessage('⚽ Simulating rematch...', 'info');
@@ -13364,81 +13297,9 @@ function simulateRematch() {
   }
 }
 
-function saveCustomMatch(matchId) {
-  if (!matchId) {
-    showUtilityMessage('No match to save', 'warning');
-    return;
-  }
+// Removed duplicate: function saveCustomMatch - see later definition
 
-  try {
-    const match = MATCH_DETAILS_DB[matchId];
-    if (!match) {
-      showUtilityMessage('Match not found', 'error');
-      return;
-    }
-
-    // Initialize custom match history if it doesn't exist
-    if (!window.CUSTOM_MATCH_HISTORY) {
-      window.CUSTOM_MATCH_HISTORY = [];
-    }
-
-    // Add to history
-    window.CUSTOM_MATCH_HISTORY.push({
-      matchId: matchId,
-      timestamp: new Date().toISOString(),
-      teamA: match.teamA,
-      teamB: match.teamB,
-      scoreA: match.scoreA,
-      scoreB: match.scoreB,
-      stage: match.stage
-    });
-
-    console.log('✅ Custom match saved to history:', matchId);
-    showUtilityMessage('✅ Match saved to history', 'success');
-
-  } catch (error) {
-    console.error('Error saving custom match:', error);
-    showUtilityMessage('❌ Failed to save match', 'error');
-  }
-}
-
-function shareMatchResult(matchId) {
-  if (!matchId) {
-    showUtilityMessage('No match to share', 'warning');
-    return;
-  }
-
-  try {
-    const match = MATCH_DETAILS_DB[matchId];
-    if (!match) {
-      showUtilityMessage('Match not found', 'error');
-      return;
-    }
-
-    // Create shareable text
-    const shareText = `
-🏆 ${match.stage || 'Custom Match'}
-${match.teamA} ${match.scoreA} - ${match.scoreB} ${match.teamB}
-
-${match.playerOfTheGame ? `⭐ Player of the Match: ${match.playerOfTheGame.player} (${match.playerOfTheGame.rating}/10)` : ''}
-
-${match.events.goals.length > 0 ? `⚽ Goals:\n${match.events.goals.map(g => `${g.minute}' ${g.player} (${g.team})`).join('\n')}` : ''}
-    `.trim();
-
-    // Copy to clipboard
-    navigator.clipboard.writeText(shareText).then(() => {
-      showUtilityMessage('✅ Match result copied to clipboard!', 'success');
-    }).catch(err => {
-      console.error('Failed to copy:', err);
-      // Fallback: show in modal
-      showShareModal(shareText);
-    });
-
-  } catch (error) {
-    console.error('Error sharing match result:', error);
-    showUtilityMessage('❌ Failed to share match', 'error');
-  }
-}
+// Removed duplicate: function shareMatchResult - see later definition
 
 function showShareModal(text) {
   const modal = document.createElement('div');
@@ -13473,76 +13334,13 @@ function showShareModal(text) {
   document.body.appendChild(modal);
 }
 
-function updateTeamComparison(teamAName, teamBName) {
-  if (!teamAName || !teamBName) {
-    console.log('No teams provided for comparison');
-    return;
-  }
-
-  const teamA = window.DRAWN_TEAMS?.find(t => t.name === teamAName);
-  const teamB = window.DRAWN_TEAMS?.find(t => t.name === teamBName);
-
-  if (!teamA || !teamB) {
-    console.log('Teams not found for comparison');
-    return;
-  }
-
-  const comparison = {
-    teamA: {
-      name: teamA.name,
-      overall: teamA.overall,
-      strength: teamA.strength,
-      season: teamA.season,
-      players: teamA.players?.length || 0
-    },
-    teamB: {
-      name: teamB.name,
-      overall: teamB.overall,
-      strength: teamB.strength,
-      season: teamB.season,
-      players: teamB.players?.length || 0
-    },
-    difference: Math.abs(teamA.strength - teamB.strength),
-    favorite: teamA.strength > teamB.strength ? teamA.name : teamB.name
-  };
-
-  console.log('📊 Team Comparison:', comparison);
-
-  // Display comparison in UI
-  const comparisonHTML = `
-    <div style="background: rgba(30, 41, 59, 0.5); padding: 12px; border-radius: 6px; margin-top: 10px; border: 1px solid #475569;">
-      <div style="color: #94a3b8; font-size: 0.9em; margin-bottom: 8px; text-align: center; font-weight: 600;">
-        📊 Team Comparison
-      </div>
-      <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center;">
-        <div style="text-align: center;">
-          <div style="color: #e2e8f0; font-weight: bold; margin-bottom: 4px;">${teamA.name}</div>
-          <div style="color: #60a5fa; font-size: 1.2em; font-weight: bold;">${teamA.overall}</div>
-          <div style="color: #94a3b8; font-size: 0.8em;">${teamA.season}</div>
-        </div>
-        <div style="text-align: center; color: #64748b;">
-          <div style="font-size: 1.5em;">⚔️</div>
-        </div>
-        <div style="text-align: center;">
-          <div style="color: #e2e8f0; font-weight: bold; margin-bottom: 4px;">${teamB.name}</div>
-          <div style="color: #60a5fa; font-size: 1.2em; font-weight: bold;">${teamB.overall}</div>
-          <div style="color: #94a3b8; font-size: 0.8em;">${teamB.season}</div>
-        </div>
-      </div>
-      <div style="text-align: center; margin-top: 8px; color: #f59e0b; font-size: 0.85em;">
-        ${comparison.favorite} favored by ${comparison.difference.toFixed(1)} pts
-      </div>
-    </div>
-  `;
-
-  return comparisonHTML;
-}
+// Removed duplicate: function updateTeamComparison - see later definition
 /************* EXPORT / BACKUP FUNCTIONS *************/
 // backupToLocalStorage and restorePreResetBackup are defined later in the file
 
 /************* THEME & BUTTON STATE *************/
 function initializeTheme() {
-  console.log("Initializing theme...");
+  if (window.VERBOSE_LOGGING) console.log("Initializing theme...");
 
   const stored = localStorage.getItem("allTimeSimTheme");
   const prefersLight = window.matchMedia &&
@@ -13738,7 +13536,7 @@ function injectAllStyles() {
 
 // Run entire tournament in one go (draw → groups → knockouts → overview)
 async function runFullTournament() {
-  console.log("🚀 Running full tournament...");
+  if (window.VERBOSE_LOGGING) console.log("🚀 Running full tournament...");
 
   try {
     // 1) Draw groups if not already drawn
@@ -13975,9 +13773,9 @@ async function initTeamsAndPlayers() {
     }
   }
 
-  console.log("🏁 Teams initialized from TEAM_POOL:", TEAM_POOL.length);
+  if (window.VERBOSE_LOGGING) console.log("🏁 Teams initialized from TEAM_POOL:", TEAM_POOL.length);
   console.log("✅ Valid teams registered in TEAM_MAP:", validCount);
-  console.log("👥 Players tracked in PLAYER_DB:", Object.keys(PLAYER_DB).length);
+  if (window.VERBOSE_LOGGING) console.log("👥 Players tracked in PLAYER_DB:", Object.keys(PLAYER_DB).length);
 }
 
 /**
@@ -14104,7 +13902,7 @@ function replayMatch(matchId) {
     return null;
   }
 
-  console.log(`🔄 Replaying match: ${matchData.teamA} vs ${matchData.teamB} with seed ${matchData.seed}`);
+  if (window.VERBOSE_LOGGING) console.log(`🔄 Replaying match: ${matchData.teamA} vs ${matchData.teamB} with seed ${matchData.seed}`);
 
   // Find teams in TEAM_MAP
   const teamA = TEAM_MAP.get(matchData.teamA);
@@ -14210,7 +14008,7 @@ function simulateMatchWithSeed(teamA, teamB, isHome, matchImportance = 1.0, weat
     storeMatchForReplay(matchId, matchSeed, result);
   }
 
-  console.log(`⚽ Match simulated (seed: ${matchSeed}): ${teamA.name} ${finalGoalsA}-${finalGoalsB} ${teamB.name} ${isHome ? "(H)" : "(A)"}`);
+  if (window.VERBOSE_LOGGING) console.log(`⚽ Match simulated (seed: ${matchSeed}): ${teamA.name} ${finalGoalsA}-${finalGoalsB} ${teamB.name} ${isHome ? "(H)" : "(A)"}`);
 
   return result;
 }
@@ -14829,7 +14627,7 @@ function initializeSeasonMode(teams) {
     startDate: new Date().toISOString()
   };
 
-  console.log(`⚽ Season ${SEASON_STATE.seasonNumber} initialized with ${seasonTeams.length} teams`);
+  if (window.VERBOSE_LOGGING) console.log(`⚽ Season ${SEASON_STATE.seasonNumber} initialized with ${seasonTeams.length} teams`);
   console.log(`📅 Total matchdays: ${SEASON_STATE.totalMatchdays}`);
 
   return true;
@@ -14893,56 +14691,7 @@ function generateSeasonFixtures(teams) {
   return [...fixtures, ...reverseFixtures];
 }
 
-function simulateMatchday(matchdayIndex) {
-  // Simulate all matches in a matchday
-  if (!SEASON_STATE.active) {
-    showUtilityMessage('No active season', 'error');
-    return;
-  }
-
-  if (matchdayIndex === undefined) {
-    matchdayIndex = SEASON_STATE.currentMatchday;
-  }
-
-  if (matchdayIndex >= SEASON_STATE.fixtures.length) {
-    showUtilityMessage('All matchdays completed!', 'info');
-    endSeason();
-    return;
-  }
-
-  const matchday = SEASON_STATE.fixtures[matchdayIndex];
-  const results = [];
-
-  matchday.forEach(fixture => {
-    if (!fixture.played) {
-      // Simulate match
-      const isHome = true;
-      const result = simulateMatchWithSeed(
-        fixture.home,
-        fixture.away,
-        isHome,
-        1.0, // Standard importance
-        'normal'
-      );
-
-      fixture.played = true;
-      fixture.result = result;
-      results.push(result);
-
-      // Update table
-      updateTableWithResult(result, fixture.home, fixture.away);
-    }
-  });
-
-  SEASON_STATE.currentMatchday = matchdayIndex + 1;
-
-  console.log(`✅ Matchday ${matchdayIndex + 1} completed`);
-
-  // Sort table
-  sortTable();
-
-  return results;
-}
+// Removed duplicate: function simulateMatchday - see later definition
 
 function updateTableWithResult(result, homeTeam, awayTeam) {
   // Update league table with match result
@@ -15038,7 +14787,7 @@ function endSeason() {
   const champion = SEASON_STATE.table[0];
   const relegated = SEASON_STATE.table.slice(-3); // Bottom 3 teams
 
-  console.log(`🏆 Season ${SEASON_STATE.seasonNumber} Champion: ${champion.team.name}`);
+  if (window.VERBOSE_LOGGING) console.log(`🏆 Season ${SEASON_STATE.seasonNumber} Champion: ${champion.team.name}`);
   console.log(`📉 Relegated: ${relegated.map(t => t.team.name).join(', ')}`);
 
   // Update Career Mode if active
@@ -15396,8 +15145,8 @@ function displaySeasonMode() {
         </div>
         <div style="display: flex; gap: 10px;">
           <button onclick="displaySeasonTable()" class="btn-secondary">📊 Table</button>
-          <button onclick="displaySeasonFixtures()" class="btn-secondary">📅 Fixtures</button>
-          <button onclick="displaySeasonStats()" class="btn-secondary">📈 Stats</button>
+          <button onclick="viewSeasonFixtures()" class="btn-secondary">📅 Fixtures</button>
+          <button onclick="viewSeasonStats()" class="btn-secondary">📈 Stats</button>
         </div>
       </div>
 
@@ -15651,6 +15400,15 @@ function displaySeasonTable() {
 
 function completeSeasonFinale() {
   if (!SEASON_STATE.active || SEASON_STATE.currentMatchday < SEASON_STATE.totalMatchdays) return;
+
+  // Ensure table is sorted before determining champion
+  SEASON_STATE.table.sort((a, b) => {
+    if (b.points !== a.points) return b.points - a.points;
+    const gdDiff = (b.goalsFor - b.goalsAgainst) - (a.goalsFor - a.goalsAgainst);
+    if (gdDiff !== 0) return gdDiff;
+    if (b.goalsFor !== a.goalsFor) return b.goalsFor - a.goalsFor;
+    return a.team.name.localeCompare(b.team.name);
+  });
 
   const champion = SEASON_STATE.table[0];
   const topScorer = getSeasonTopScorer();
@@ -15930,7 +15688,81 @@ function abandonSeason() {
 }
 
 function viewSeasonFixtures() {
-  showNotification('info', 'Coming Soon', 'Full fixtures view coming soon', 2000);
+  const out = document.getElementById('output');
+  if (!out || !SEASON_STATE.active) {
+    showNotification('error', 'No Active Season', 'Please start a season first', 2000);
+    return;
+  }
+
+  if (!SEASON_STATE.fixtures || SEASON_STATE.fixtures.length === 0) {
+    showNotification('error', 'No Fixtures', 'No fixtures available', 2000);
+    return;
+  }
+
+  // Group fixtures by matchday
+  const matchdayGroups = {};
+  SEASON_STATE.fixtures.forEach(fixture => {
+    const md = fixture.matchday || 1;
+    if (!matchdayGroups[md]) matchdayGroups[md] = [];
+    matchdayGroups[md].push(fixture);
+  });
+
+  const matchdayKeys = Object.keys(matchdayGroups).sort((a, b) => Number(a) - Number(b));
+
+  out.innerHTML = `
+    <div style="max-width: 1200px; margin: 0 auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="color: #10b981; margin: 0;">📅 Season Fixtures</h2>
+        <button onclick="displaySeasonMode()" class="btn-secondary">← Back</button>
+      </div>
+
+      ${matchdayKeys.map(mdKey => {
+        const fixtures = matchdayGroups[mdKey];
+        const allPlayed = fixtures.every(f => f.played);
+
+        return `
+          <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(71, 85, 105, 0.3);
+                      border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
+              <h3 style="color: ${allPlayed ? '#10b981' : '#f59e0b'}; margin: 0;">
+                Matchday ${mdKey} ${allPlayed ? '✓' : '⏳'}
+              </h3>
+              ${!allPlayed ? `<span style="color: #94a3b8; font-size: 0.9em;">(Not yet played)</span>` : ''}
+            </div>
+
+            <div style="display: grid; gap: 12px;">
+              ${fixtures.map(fixture => `
+                <div style="display: flex; align-items: center; justify-content: space-between;
+                            padding: 12px; background: rgba(15, 23, 42, 0.6); border-radius: 8px;
+                            border-left: 3px solid ${fixture.played ? (fixture.homeScore > fixture.awayScore ? '#10b981' : fixture.homeScore < fixture.awayScore ? '#ef4444' : '#94a3b8') : 'rgba(71, 85, 105, 0.3)'};">
+
+                  <div style="flex: 1; text-align: right; padding-right: 20px;">
+                    <div style="color: #f1f5f9; font-weight: 600;">${fixture.home}</div>
+                  </div>
+
+                  <div style="min-width: 80px; text-align: center;">
+                    ${fixture.played ? `
+                      <div style="background: rgba(16, 185, 129, 0.15); padding: 8px 16px; border-radius: 6px;">
+                        <span style="color: #10b981; font-weight: 700; font-size: 1.2em;">
+                          ${fixture.homeScore} - ${fixture.awayScore}
+                        </span>
+                      </div>
+                    ` : `
+                      <div style="color: #94a3b8; font-weight: 500;">vs</div>
+                    `}
+                  </div>
+
+                  <div style="flex: 1; text-align: left; padding-left: 20px;">
+                    <div style="color: #f1f5f9; font-weight: 600;">${fixture.away}</div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
 }
 
 function viewSeasonStats() {
@@ -16585,9 +16417,7 @@ function switchHallOfFameTab(tabId) {
   }
 }
 
-function viewTournamentDetails(idx) {
-  showNotification('info', 'Coming Soon', 'Detailed tournament view coming soon', 2000);
-}
+// Removed duplicate: function viewTournamentDetails - see later definition
 
 // ========================================
 // STORAGE MANAGEMENT - FIX QUOTA ISSUES
@@ -16715,7 +16545,7 @@ const STORAGE_MANAGER = {
   },
 
   smartCleanup() {
-    console.log('Running smart cleanup...');
+    if (window.VERBOSE_LOGGING) console.log('Running smart cleanup...');
 
     // 1. Remove old auto-backups (keep only last 3)
     this.cleanOldBackups();
@@ -16726,7 +16556,7 @@ const STORAGE_MANAGER = {
       if (history && history.length > 50) {
         const trimmed = history.slice(-50);
         this.safeSet('tournamentHistory', trimmed);
-        console.log(`Trimmed tournament history from ${history.length} to 50`);
+        if (window.VERBOSE_LOGGING) console.log(`Trimmed tournament history from ${history.length} to 50`);
       }
     } catch (e) {
       console.error('Failed to trim history:', e);
@@ -16738,7 +16568,7 @@ const STORAGE_MANAGER = {
       if (enhanced && enhanced.tournaments && enhanced.tournaments.length > 50) {
         enhanced.tournaments = enhanced.tournaments.slice(-50);
         this.safeSet('tournamentHistoryEnhanced', enhanced);
-        console.log('Trimmed enhanced tournament history to 50');
+        if (window.VERBOSE_LOGGING) console.log('Trimmed enhanced tournament history to 50');
       }
     } catch (e) {
       console.error('Failed to trim enhanced history:', e);
@@ -16746,7 +16576,7 @@ const STORAGE_MANAGER = {
   },
 
   aggressiveCleanup() {
-    console.log('Running aggressive cleanup...');
+    if (window.VERBOSE_LOGGING) console.log('Running aggressive cleanup...');
 
     // Remove all backups except current state
     for (let key in localStorage) {
@@ -16797,7 +16627,7 @@ const STORAGE_MANAGER = {
       for (let i = 3; i < backupKeys.length; i++) {
         localStorage.removeItem(backupKeys[i]);
       }
-      console.log(`Removed ${backupKeys.length - 3} old backups`);
+      if (window.VERBOSE_LOGGING) console.log(`Removed ${backupKeys.length - 3} old backups`);
     }
   },
 
@@ -16872,7 +16702,7 @@ const STORAGE_MANAGER = {
 
     const statusColor = percentage > 80 ? '#EF4444' : percentage > 60 ? '#F59E0B' : '#10B981';
 
-    const out = document.getElementById('content') || document.getElementById('output');
+    const out = document.getElementById('content') || document.getElementById('output') || document.getElementById('output');
     if (!out) return;
 
     out.innerHTML = `
@@ -16955,7 +16785,7 @@ if (typeof AUTO_SAVE !== 'undefined') {
     const success = STORAGE_MANAGER.safeSet('managerState', MANAGER_STATE);
     if (success) {
       this.lastSave = Date.now();
-      console.log('✓ Auto-saved with compression at', new Date().toLocaleTimeString());
+      if (window.VERBOSE_LOGGING) console.log('✓ Auto-saved with compression at', new Date().toLocaleTimeString());
     }
   };
 
@@ -16964,7 +16794,7 @@ if (typeof AUTO_SAVE !== 'undefined') {
     const saved = STORAGE_MANAGER.safeGet('managerState');
     if (saved) {
       Object.assign(MANAGER_STATE, saved);
-      console.log('✓ Loaded manager state from compressed storage');
+      if (window.VERBOSE_LOGGING) console.log('✓ Loaded manager state from compressed storage');
       return true;
     }
     return false;
@@ -17037,7 +16867,7 @@ function enablePredictionsForMatch(teamA, teamB, stage, matchId) {
 
   // Check if already predicted
   if (PREDICTION_STATE.predictions[matchId]) {
-    console.log('Match already predicted');
+    if (window.VERBOSE_LOGGING) console.log('Match already predicted');
     return Promise.resolve(PREDICTION_STATE.predictions[matchId]);
   }
 
@@ -18430,7 +18260,7 @@ function awardManagerXP(amount, reason = '') {
   MANAGER_STATE.xp += amount;
   MANAGER_STATE.totalXP += amount;
 
-  console.log(`✨ +${amount} XP awarded${reason ? ': ' + reason : ''}`);
+  if (window.VERBOSE_LOGGING) console.log(`✨ +${amount} XP awarded${reason ? ': ' + reason : ''}`);
 
   // Check for level up
   let leveledUp = false;
@@ -18692,7 +18522,7 @@ function unlockAchievement(achievementId, achievementData) {
   achievementData.unlocked = true;
   ACHIEVEMENT_PROGRESS.unlockedAchievements.push(achievementId);
 
-  console.log(`🏆 Achievement Unlocked: ${achievementData.name}`);
+  if (window.VERBOSE_LOGGING) console.log(`🏆 Achievement Unlocked: ${achievementData.name}`);
 
   // Award XP
   if (achievementData.xpReward && MANAGER_STATE.active) {
@@ -18781,7 +18611,7 @@ function displayManagerProfile() {
     return;
   }
 
-  const out = document.getElementById('content') || document.getElementById('output');
+  const out = document.getElementById('content') || document.getElementById('output') || document.getElementById('output');
   if (!out) return;
 
   // Calculate progress percentage
@@ -19055,7 +18885,7 @@ function loadRecentAchievements() {
 }
 
 function showManagerSetup() {
-  const out = document.getElementById('content');
+  const out = document.getElementById('content') || document.getElementById('output');
   if (!out) return;
 
   out.innerHTML = `
@@ -19127,7 +18957,7 @@ function createManagerProfile() {
 // showManagerCustomization is defined later in the file with full functionality
 
 function showManagerStats() {
-  const out = document.getElementById('content');
+  const out = document.getElementById('content') || document.getElementById('output');
   if (!out) return;
 
   out.innerHTML = `
@@ -19192,7 +19022,7 @@ function showManagerStats() {
 }
 
 function showAllAchievements() {
-  const out = document.getElementById('content');
+  const out = document.getElementById('content') || document.getElementById('output');
   if (!out) return;
 
   const allAchievements = [];
@@ -19283,7 +19113,7 @@ function selectFavoriteClub() {
         <!-- Club List -->
         <div id="clubListContainer" style="max-height: 400px; overflow-y: auto; display: grid;
                                             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;">
-          ${ALL_TEAMS.slice(0, 50).map(team => `
+          ${(window.ALL_TEAMS || window.TEAMS || []).slice(0, 50).map(team => `
             <button onclick="setFavoriteClub('${team.name}')"
                     class="club-select-btn"
                     style="padding: 16px; background: rgba(15, 23, 42, 0.6);
@@ -19307,7 +19137,8 @@ function filterClubList(searchTerm) {
   const container = document.getElementById('clubListContainer');
   if (!container) return;
 
-  const filtered = ALL_TEAMS.filter(team =>
+  const allTeams = window.ALL_TEAMS || window.TEAMS || [];
+  const filtered = allTeams.filter(team =>
     team.name.toLowerCase().includes(searchTerm.toLowerCase())
   ).slice(0, 50);
 
@@ -19436,7 +19267,7 @@ function saveProfileEdits() {
 // ========================================
 
 function displayTournamentHistory() {
-  const out = document.getElementById('content');
+  const out = document.getElementById('content') || document.getElementById('output');
   if (!out) return;
 
   const completed = TOURNAMENT_HISTORY_ENHANCED.completed || [];
@@ -19508,7 +19339,7 @@ function viewTournamentDetails(index) {
     return;
   }
 
-  const out = document.getElementById('content');
+  const out = document.getElementById('content') || document.getElementById('output');
   if (!out) return;
 
   const startDate = new Date(tournament.startDate).toLocaleDateString();
@@ -20791,7 +20622,7 @@ function selectCustomization(category, itemId) {
     switchCustomizationTab(tabId);
   }
 
-  console.log(`Selected ${category}: ${itemId}`);
+  if (window.VERBOSE_LOGGING) console.log(`Selected ${category}: ${itemId}`);
 }
 
 function showLockMessage(levelRequired) {
@@ -21012,6 +20843,8 @@ function updateCareerRecords(seasonResults) {
  */
 function checkHallOfFameInductions(seasonResults) {
   // Induct top performers into Hall of Fame
+  if (!seasonResults || !seasonResults.topScorer) return;
+  if (!seasonResults || !seasonResults.topScorer) return;
   if (seasonResults.topScorer && seasonResults.topScorer.goals >= 30) {
     const existing = CAREER_STATE.hallOfFame.find(p => p.name === seasonResults.topScorer.name);
 
@@ -23204,7 +23037,7 @@ function createPots() {
     const pot3 = sorted.slice(32, 48);
     const pot4 = sorted.slice(48, 64);
 
-    console.log(
+    if (window.VERBOSE_LOGGING) console.log(
       `🏆 Pots created: Pot1(${pot1.length}), Pot2(${pot2.length}), Pot3(${pot3.length}), Pot4(${pot4.length})`
     );
 
@@ -23266,17 +23099,17 @@ function createPots() {
     // RENDER THE GROUPS IMMEDIATELY
     renderGroupDrawResults(groups);
 
-    console.log("🔍 [generateGroups] About to update button states...");
+    if (window.VERBOSE_LOGGING) console.log("🔍 [generateGroups] About to update button states...");
 
     // Update button states
     updateButtonStates();
 
-    console.log("🔍 [generateGroups] Button states updated, showing message...");
+    if (window.VERBOSE_LOGGING) console.log("🔍 [generateGroups] Button states updated, showing message...");
 
     // Show success message
     showUtilityMessage('✅ Groups generated successfully!', 'success');
 
-    console.log("🔍 [generateGroups] Returning groups...");
+    if (window.VERBOSE_LOGGING) console.log("🔍 [generateGroups] Returning groups...");
 
     return groups;
     
@@ -23302,7 +23135,7 @@ async function handleGenerateGroups() {
   isGeneratingGroups = true;
 
   try {
-    console.log("🎲 Generating groups...");
+    if (window.VERBOSE_LOGGING) console.log("🎲 Generating groups...");
 
     const groups = generateGroups();
 
@@ -23328,7 +23161,7 @@ async function handleGenerateGroups() {
     // RENDER IMMEDIATELY
     renderGroupDrawResults(groups);
 
-    console.log("🔍 About to update button states...");
+    if (window.VERBOSE_LOGGING) console.log("🔍 About to update button states...");
 
     // Yield to let the browser render
     await new Promise(resolve => setTimeout(resolve, 0));
@@ -23336,11 +23169,11 @@ async function handleGenerateGroups() {
     // Update buttons
     updateButtonStates();
 
-    console.log("🔍 Button states updated, showing message...");
+    if (window.VERBOSE_LOGGING) console.log("🔍 Button states updated, showing message...");
 
     showUtilityMessage('✅ Groups generated successfully!', 'success');
 
-    console.log("🔍 handleGenerateGroups completed!");
+    if (window.VERBOSE_LOGGING) console.log("🔍 handleGenerateGroups completed!");
   } else {
     showUtilityMessage('❌ Failed to generate groups', 'error');
   }
@@ -23349,7 +23182,7 @@ async function handleGenerateGroups() {
   }
 }
 function renderGroupDrawResults(groups) {
-  console.log("📊 Rendering group draw results:", groups);
+  if (window.VERBOSE_LOGGING) console.log("📊 Rendering group draw results:", groups);
   
   const out = document.getElementById('output');
   if (!out) {
@@ -24235,7 +24068,7 @@ function generateMatchSummary(matchData, teamA, teamB) {
     weather: weather
   };
 
-  console.log(
+  if (window.VERBOSE_LOGGING) console.log(
     `⚽ Match simulated: ${teamA.name} ${finalGoalsA}-${finalGoalsB} ${teamB.name} ${
       isHome ? "(H)" : "(A)"
     }`
@@ -24429,7 +24262,7 @@ function simulateGroupStage(groups) {
   const results = {};
   MATCH_SCHEDULE.groupStage = [];
 
-  console.log(`🏁 Starting group stage simulation for ${groups.length} groups`);
+  if (window.VERBOSE_LOGGING) console.log(`🏁 Starting group stage simulation for ${groups.length} groups`);
 
   groups.forEach((group, groupIndex) => {
     if (!group || !group.name || !group.teams) {
@@ -24438,7 +24271,7 @@ function simulateGroupStage(groups) {
     }
 
     const groupName = group.name;
-    console.log(`📊 Simulating ${groupName}...`);
+    if (window.VERBOSE_LOGGING) console.log(`📊 Simulating ${groupName}...`);
 
     results[groupName] = {
       name: groupName,
@@ -24534,7 +24367,7 @@ function simulateGroupStage(groups) {
         results[groupName].matches,
         teams
       );
-      console.log(
+      if (window.VERBOSE_LOGGING) console.log(
         `✅ ${groupName} completed: ${results[groupName].matches.length} matches simulated`
       );
     } catch (error) {
@@ -24634,7 +24467,7 @@ async function simulateGroupStageAsync(groups, onProgress) {
 
   let matchesSimulated = 0;
 
-  console.log(`🏁 Starting async group stage simulation for ${groups.length} groups`);
+  if (window.VERBOSE_LOGGING) console.log(`🏁 Starting async group stage simulation for ${groups.length} groups`);
 
   for (const group of groups) {
     if (!group || !group.name || !group.teams) {
@@ -24643,7 +24476,7 @@ async function simulateGroupStageAsync(groups, onProgress) {
     }
 
     const groupName = group.name;
-    console.log(`📊 Simulating ${groupName}...`);
+    if (window.VERBOSE_LOGGING) console.log(`📊 Simulating ${groupName}...`);
 
     results[groupName] = {
       name: groupName,
@@ -24744,7 +24577,7 @@ async function simulateGroupStageAsync(groups, onProgress) {
         results[groupName].matches,
         teams
       );
-      console.log(
+      if (window.VERBOSE_LOGGING) console.log(
         `✅ ${groupName} completed: ${results[groupName].matches.length} matches simulated`
       );
     } catch (error) {
@@ -24829,7 +24662,7 @@ function organizeGroupMatchesIntoWeeks(matches, groupName) {
     }
   }
 
-  console.log(`📅 Organized ${matches.length} matches into ${matchdays.length} matchdays for ${groupName}`);
+  if (window.VERBOSE_LOGGING) console.log(`📅 Organized ${matches.length} matches into ${matchdays.length} matchdays for ${groupName}`);
   return matchdays;
 }
 function calculateMatchWeek(matchData) {
@@ -24902,7 +24735,7 @@ function getQualifiedTeams(groupResults) {
     topTeams.forEach((teamData, teamIndex) => {
       if (teamData && teamData.team) {
         qualified.push(teamData.team);
-        console.log(
+        if (window.VERBOSE_LOGGING) console.log(
           `✅ ${group.name}: ${teamData.team.name} qualified (Position ${teamIndex + 1})`
         );
       } else {
@@ -24913,7 +24746,7 @@ function getQualifiedTeams(groupResults) {
     });
   });
 
-  console.log(`🎯 Total qualified teams: ${qualified.length}`);
+  if (window.VERBOSE_LOGGING) console.log(`🎯 Total qualified teams: ${qualified.length}`);
   return qualified;
 }
 
@@ -24936,7 +24769,7 @@ async function simulateKnockoutRoundAsync(teams, roundName, matchImportance = 1.
   const matches = [];
   const shuffled = shuffleArray([...teams]);
 
-  console.log(`⚔️ Simulating ${roundName} with ${shuffled.length} teams...`);
+  if (window.VERBOSE_LOGGING) console.log(`⚔️ Simulating ${roundName} with ${shuffled.length} teams...`);
 
   for (let i = 0; i < shuffled.length; i += 2) {
     if (i + 1 >= shuffled.length) break;
@@ -24949,7 +24782,7 @@ async function simulateKnockoutRoundAsync(teams, roundName, matchImportance = 1.
       continue;
     }
 
-    console.log(`🎯 ${roundName} Match: ${teamA.name} vs ${teamB.name}`);
+    if (window.VERBOSE_LOGGING) console.log(`🎯 ${roundName} Match: ${teamA.name} vs ${teamB.name}`);
 
     if (roundName === "Final") {
       try {
@@ -24969,7 +24802,7 @@ async function simulateKnockoutRoundAsync(teams, roundName, matchImportance = 1.
           winner = penaltyResult.winner;
           penaltyScoreA = penaltyResult.scoreA;
           penaltyScoreB = penaltyResult.scoreB;
-          console.log(`🎯 Final went to penalties: ${winner.name} wins ${penaltyScoreA}-${penaltyScoreB}`);
+          if (window.VERBOSE_LOGGING) console.log(`🎯 Final went to penalties: ${winner.name} wins ${penaltyScoreA}-${penaltyScoreB}`);
         }
 
         const match = {
@@ -24990,7 +24823,7 @@ async function simulateKnockoutRoundAsync(teams, roundName, matchImportance = 1.
           MATCH_DETAILS_DB[finalMatchLight.matchId].round = roundName;
         }
         matches.push(match);
-        console.log(
+        if (window.VERBOSE_LOGGING) console.log(
           `🏆 Final: ${teamA.name} ${finalMatchLight.scoreA}-${finalMatchLight.scoreB} ${teamB.name}, Winner: ${match.winner.name}`
         );
       } catch (error) {
@@ -25027,7 +24860,7 @@ async function simulateKnockoutRoundAsync(teams, roundName, matchImportance = 1.
             winner = penaltyResult.winner;
             penaltyScoreA = penaltyResult.scoreA;
             penaltyScoreB = penaltyResult.scoreB;
-            console.log(`🎯 ${roundName} went to penalties: ${winner.name} wins ${penaltyScoreA}-${penaltyScoreB}`);
+            if (window.VERBOSE_LOGGING) console.log(`🎯 ${roundName} went to penalties: ${winner.name} wins ${penaltyScoreA}-${penaltyScoreB}`);
           }
         }
 
@@ -25055,7 +24888,7 @@ async function simulateKnockoutRoundAsync(teams, roundName, matchImportance = 1.
         }
         matches.push(match);
 
-        console.log(
+        if (window.VERBOSE_LOGGING) console.log(
           `🔀 ${roundName}: ${teamA.name} ${aggScoreA}-${aggScoreB} ${teamB.name} (agg), Winner: ${winner.name}`
         );
       } catch (error) {
@@ -25092,7 +24925,7 @@ async function simulateKnockoutRoundsAsync(teams, onProgress) {
     };
   }
 
-  console.log("🏆 Starting async knockout tournament simulation...");
+  if (window.VERBOSE_LOGGING) console.log("🏆 Starting async knockout tournament simulation...");
   console.log(`🎯 Teams in knockout stage: ${teams.length}`);
 
   MATCH_SCHEDULE.knockoutStage = [];
@@ -25199,12 +25032,12 @@ async function simulateKnockoutRoundsAsync(teams, onProgress) {
       // Save tournament history to localStorage
       try {
         localStorage.setItem('tournamentHistory', JSON.stringify(TOURNAMENT_HISTORY));
-        console.log(`💾 Tournament history saved to localStorage`);
+        if (window.VERBOSE_LOGGING) console.log(`💾 Tournament history saved to localStorage`);
       } catch (e) {
         console.error('❌ Failed to save tournament history:', e);
       }
 
-      console.log(`📊 Tournament added to history. Total tournaments: ${TOURNAMENT_HISTORY.length}`);
+      if (window.VERBOSE_LOGGING) console.log(`📊 Tournament added to history. Total tournaments: ${TOURNAMENT_HISTORY.length}`);
 
       // Track tournament win for achievements
       if (MANAGER_STATE.active) {
@@ -25275,7 +25108,7 @@ function simulateKnockoutRound(teams, roundName, matchImportance = 1.5) {
   const matches = [];
   const shuffled = shuffleArray([...teams]);
 
-  console.log(`⚔️ Simulating ${roundName} with ${shuffled.length} teams...`);
+  if (window.VERBOSE_LOGGING) console.log(`⚔️ Simulating ${roundName} with ${shuffled.length} teams...`);
 
   for (let i = 0; i < shuffled.length; i += 2) {
     if (i + 1 >= shuffled.length) break;
@@ -25288,7 +25121,7 @@ function simulateKnockoutRound(teams, roundName, matchImportance = 1.5) {
       continue;
     }
 
-    console.log(`🎯 ${roundName} Match: ${teamA.name} vs ${teamB.name}`);
+    if (window.VERBOSE_LOGGING) console.log(`🎯 ${roundName} Match: ${teamA.name} vs ${teamB.name}`);
 
     if (roundName === "Final") {
         try {
@@ -25309,7 +25142,7 @@ function simulateKnockoutRound(teams, roundName, matchImportance = 1.5) {
             winner = penaltyResult.winner;
             penaltyScoreA = penaltyResult.scoreA;
             penaltyScoreB = penaltyResult.scoreB;
-            console.log(`🎯 Final went to penalties: ${winner.name} wins ${penaltyScoreA}-${penaltyScoreB}`);
+            if (window.VERBOSE_LOGGING) console.log(`🎯 Final went to penalties: ${winner.name} wins ${penaltyScoreA}-${penaltyScoreB}`);
           }
 
           const match = {
@@ -25330,7 +25163,7 @@ function simulateKnockoutRound(teams, roundName, matchImportance = 1.5) {
           MATCH_DETAILS_DB[finalMatchLight.matchId].round = roundName;
         }
         matches.push(match);
-        console.log(
+        if (window.VERBOSE_LOGGING) console.log(
           `🏆 Final: ${teamA.name} ${finalMatchLight.scoreA}-${finalMatchLight.scoreB} ${teamB.name}, Winner: ${match.winner.name}`
         );
       } catch (error) {
@@ -25370,7 +25203,7 @@ function simulateKnockoutRound(teams, roundName, matchImportance = 1.5) {
             winner = penaltyResult.winner;
             penaltyScoreA = penaltyResult.scoreA;
             penaltyScoreB = penaltyResult.scoreB;
-            console.log(`🎯 ${roundName} went to penalties: ${winner.name} wins ${penaltyScoreA}-${penaltyScoreB}`);
+            if (window.VERBOSE_LOGGING) console.log(`🎯 ${roundName} went to penalties: ${winner.name} wins ${penaltyScoreA}-${penaltyScoreB}`);
           }
         }
 
@@ -25398,7 +25231,7 @@ function simulateKnockoutRound(teams, roundName, matchImportance = 1.5) {
         }
         matches.push(match);
 
-        console.log(
+        if (window.VERBOSE_LOGGING) console.log(
           `🔀 ${roundName}: ${teamA.name} ${aggScoreA}-${aggScoreB} ${teamB.name} (agg), Winner: ${winner.name}`
         );
       } catch (error) {
@@ -25462,7 +25295,7 @@ function simulateKnockoutRounds(teams) {
     };
   }
 
-  console.log("🏆 Starting knockout tournament simulation...");
+  if (window.VERBOSE_LOGGING) console.log("🏆 Starting knockout tournament simulation...");
   console.log(`🎯 Teams in knockout stage: ${teams.length}`);
 
   MATCH_SCHEDULE.knockoutStage = [];
@@ -25597,7 +25430,7 @@ function organizeKnockoutMatches(results) {
 
   let currentWeek = 7; // group stage used 1–6
 
-  console.log("🗓️ Organizing knockout matches into schedule...");
+  if (window.VERBOSE_LOGGING) console.log("🗓️ Organizing knockout matches into schedule...");
 
   const createLegSchedule = (matches, round, legType, week) => {
     if (!matches || !Array.isArray(matches)) return [];
@@ -25737,7 +25570,7 @@ function organizeKnockoutMatches(results) {
     currentWeek++;
   }
 
-  console.log(
+  if (window.VERBOSE_LOGGING) console.log(
     `✅ Knockout schedule organized: ${MATCH_SCHEDULE.knockoutStage.length} weeks`
   );
 }
@@ -25750,7 +25583,7 @@ function updateClubLegacyFromResults(results) {
 
   // Avoid double-counting if called again on same object
   if (results._legacyUpdated) {
-    console.log("ℹ️ Club legacy already updated for this tournament object");
+    if (window.VERBOSE_LOGGING) console.log("ℹ️ Club legacy already updated for this tournament object");
     return;
   }
   results._legacyUpdated = true;
@@ -25768,7 +25601,7 @@ function updateClubLegacyFromResults(results) {
     (CLUB_LEGACY_DB.champions[champion] || 0) + 1;
   CLUB_LEGACY_DB.totalWins[champion] =
     (CLUB_LEGACY_DB.totalWins[champion] || 0) + 1;
-  console.log(`🏆 ${champion} added to champions legacy`);
+  if (window.VERBOSE_LOGGING) console.log(`🏆 ${champion} added to champions legacy`);
 
   // Runner-up
   if (results.final) {
@@ -25780,7 +25613,7 @@ function updateClubLegacyFromResults(results) {
       (CLUB_LEGACY_DB.finals[runnerUp] || 0) + 1;
     CLUB_LEGACY_DB.totalWins[runnerUp] =
       (CLUB_LEGACY_DB.totalWins[runnerUp] || 0) + 1;
-    console.log(`🥈 ${runnerUp} added to finals legacy`);
+    if (window.VERBOSE_LOGGING) console.log(`🥈 ${runnerUp} added to finals legacy`);
   }
 
   // Semi-finalists
@@ -25796,7 +25629,7 @@ function updateClubLegacyFromResults(results) {
         }
       });
     });
-    console.log("🥉 Semi-finalists updated");
+    if (window.VERBOSE_LOGGING) console.log("🥉 Semi-finalists updated");
   }
 
   // Quarter-finalists
@@ -25810,7 +25643,7 @@ function updateClubLegacyFromResults(results) {
           (CLUB_LEGACY_DB.totalWins[team] || 0) + 1;
       });
     });
-    console.log("🎯 Quarter-finalists updated");
+    if (window.VERBOSE_LOGGING) console.log("🎯 Quarter-finalists updated");
   }
 
   console.log("✅ Club legacy database updated");
@@ -26006,7 +25839,7 @@ function updateClubLegacyFromResults(results) {
 }
 /************* ENHANCED MAIN BUTTON FUNCTIONS *************/
 async function startTournament() {
-  console.log("🏁 Starting tournament...");
+  if (window.VERBOSE_LOGGING) console.log("🏁 Starting tournament...");
 
   // Show loading overlay
   if (typeof showLoading === "function") showLoading("Initializing tournament...");
@@ -26108,7 +25941,7 @@ async function runGroupStage() {
   }
   isGroupStageRunning = true;
 
-  console.log("⚽ Starting group stage simulation...");
+  if (window.VERBOSE_LOGGING) console.log("⚽ Starting group stage simulation...");
 
   const btnGroup = document.getElementById("btnGroupStage");
   const btnKO = document.getElementById("btnKnockouts");
@@ -26163,7 +25996,7 @@ async function runGroupStage() {
   await new Promise(resolve => setTimeout(resolve, 100));
 
   try {
-    console.log("🎯 Simulating group stage matches...");
+    if (window.VERBOSE_LOGGING) console.log("🎯 Simulating group stage matches...");
 
     const groupResults = await simulateGroupStageAsync(window.GROUPS, updateLoadingProgress);
 
@@ -26252,12 +26085,12 @@ async function runGroupStage() {
 async function runKnockouts() {
   // Prevent duplicate runs (silent mode to avoid console spam)
   if (isKnockoutRunning) {
-    console.log("⏸️ Knockout stage already running - request ignored");
+    if (window.VERBOSE_LOGGING) console.log("⏸️ Knockout stage already running - request ignored");
     return;
   }
   isKnockoutRunning = true;
 
-  console.log("🎯 Starting knockout stage...");
+  if (window.VERBOSE_LOGGING) console.log("🎯 Starting knockout stage...");
 
   const btnKO = document.getElementById("btnKnockouts");
   const btnGroup = document.getElementById("btnGroupStage");
@@ -26318,14 +26151,14 @@ async function runKnockouts() {
   await new Promise(resolve => setTimeout(resolve, 100));
 
   try {
-    console.log("🎯 Getting qualified teams...");
+    if (window.VERBOSE_LOGGING) console.log("🎯 Getting qualified teams...");
     const qualifiedTeams = getQualifiedTeams(window.GROUP_RESULTS);
 
     if (!qualifiedTeams || qualifiedTeams.length === 0) {
       throw new Error("No qualified teams found for knockout stage");
     }
 
-    console.log(
+    if (window.VERBOSE_LOGGING) console.log(
       `🎯 Simulating knockout rounds with ${qualifiedTeams.length} teams...`
     );
     const knockoutResults = await simulateKnockoutRoundsAsync(qualifiedTeams, updateKnockoutProgress);
@@ -26340,6 +26173,20 @@ async function runKnockouts() {
 
       // Legacy is now handled by renderKnockoutResults via updateClubLegacyFromResults
       renderKnockoutResults(knockoutResults);
+
+      // Save tournament to history
+      if (!window.TOURNAMENT_HISTORY) window.TOURNAMENT_HISTORY = [];
+      window.TOURNAMENT_HISTORY.push({
+        date: new Date().toISOString(),
+        champion: knockoutResults.champion,
+        runnerUp: knockoutResults.runnerUp || null,
+        results: knockoutResults
+      });
+      // Save to localStorage
+      try {
+        localStorage.setItem('tournamentHistory', JSON.stringify(window.TOURNAMENT_HISTORY));
+      } catch(e) { console.error('Failed to save history:', e); }
+
 
       // Update UI state
       setTimeout(() => {
@@ -26570,7 +26417,7 @@ const ModalManager = {
     modal.addEventListener('click', clickHandler);
 
     this.addEscapeListener();
-    console.log(`Modal opened: ${modalId}`, data);
+    if (window.VERBOSE_LOGGING) console.log(`Modal opened: ${modalId}`, data);
   },
 
   close(modalId = null) {
@@ -26600,7 +26447,7 @@ const ModalManager = {
       this.removeEscapeListener();
     }
 
-    console.log(`Modal closed: ${targetModalId}`);
+    if (window.VERBOSE_LOGGING) console.log(`Modal closed: ${targetModalId}`);
   },
 
   closeAll() {
@@ -27919,7 +27766,7 @@ function showCustomMatchMessage(message, type = "info") {
 }
 
 function updateCustomMatchHistory(match, teamA, teamB) {
-  console.log(`Custom match recorded: ${teamA.name} ${match.scoreA}-${match.scoreB} ${teamB.name}`);
+  if (window.VERBOSE_LOGGING) console.log(`Custom match recorded: ${teamA.name} ${match.scoreA}-${match.scoreB} ${teamB.name}`);
 }
 
 // Initialize custom match interface
@@ -28656,7 +28503,7 @@ function performReset() {
 
   updateButtonStates();
   showUtilityMessage('Tournament reset successfully. All-time records preserved.', 'success');
-  console.log('Tournament reset performed. Current season data cleared.');
+  if (window.VERBOSE_LOGGING) console.log('Tournament reset performed. Current season data cleared.');
 }
 
 function createPreResetBackup() {
@@ -29162,7 +29009,7 @@ function updateKnockoutProgress(roundName, done, total) {
 }
 
 function openCustomMatchModal(preselectA = null, preselectB = null) {
-  console.log('📋 Opening custom match modal...', { preselectA, preselectB });
+  if (window.VERBOSE_LOGGING) console.log('📋 Opening custom match modal...', { preselectA, preselectB });
 
   try {
     // Populate dropdowns first
@@ -29257,7 +29104,7 @@ function simulateCustomMatchHandler_OLD() {
 
   // Simulate the match
   if (typeof simulateMatch === 'function') {
-    console.log(`⚽ Simulating: ${teamAName} vs ${teamBName}`);
+    if (window.VERBOSE_LOGGING) console.log(`⚽ Simulating: ${teamAName} vs ${teamBName}`);
 
     const result = simulateMatch(teamA, teamB, false, 1.0, 'clear');
 
@@ -29297,7 +29144,7 @@ function runCustomMatch() {
   // Close modal first
   closeCustomMatch();
   
-  console.log(`🎮 Simulating: ${teamA.name} vs ${teamB.name}`);
+  if (window.VERBOSE_LOGGING) console.log(`🎮 Simulating: ${teamA.name} vs ${teamB.name}`);
   showUtilityMessage('⚽ Simulating match...', 'info');
 
   // Simulate with delay to prevent freezing
@@ -29937,7 +29784,7 @@ function showModalMessage(message, type = 'info') {
 
 function initializeModalSystem() {
   injectModalStyles();
-  console.log('Modal system initialized');
+  if (window.VERBOSE_LOGGING) console.log('Modal system initialized');
 }
 
 function injectModalStyles() {
@@ -30109,7 +29956,7 @@ function injectModalStyles() {
 /************* MATCH RESULTS VIEWS *************/
 
 function showMatchResults() {
-  console.log('Showing match results...');
+  if (window.VERBOSE_LOGGING) console.log('Showing match results...');
   const out = document.getElementById('output');
   if (!out) return;
 
@@ -30128,7 +29975,7 @@ function showMatchWeeks() {
   const out = document.getElementById('output');
   if (!out) return;
 
-  console.log("📅 Loading matchdays...");
+  if (window.VERBOSE_LOGGING) console.log("📅 Loading matchdays...");
 
   const groupMatches = [];
   const knockoutMatches = [];
@@ -30428,7 +30275,7 @@ function updateTournamentLegacy(tournamentResults) {
     CLUB_LEGACY_DB.champions[champion] = 1;
     CLUB_LEGACY_DB.totalWins[champion] = (CLUB_LEGACY_DB.totalWins[champion] || 0) + 1;
 
-    console.log(`🏆 ${champion} added to champions legacy`);
+    if (window.VERBOSE_LOGGING) console.log(`🏆 ${champion} added to champions legacy`);
 
     if (tournamentResults.final) {
       const runnerUp =
@@ -30438,7 +30285,7 @@ function updateTournamentLegacy(tournamentResults) {
 
       CLUB_LEGACY_DB.finals[runnerUp] = (CLUB_LEGACY_DB.finals[runnerUp] || 0) + 1;
       CLUB_LEGACY_DB.totalWins[runnerUp] = (CLUB_LEGACY_DB.totalWins[runnerUp] || 0) + 1;
-      console.log(`🥈 ${runnerUp} added to finals legacy`);
+      if (window.VERBOSE_LOGGING) console.log(`🥈 ${runnerUp} added to finals legacy`);
     }
 
     if (tournamentResults.semiFinals) {
@@ -30456,12 +30303,12 @@ function updateTournamentLegacy(tournamentResults) {
           }
         });
       });
-      console.log('🥉 Semi-finalists updated');
+      if (window.VERBOSE_LOGGING) console.log('🥉 Semi-finalists updated');
     }
 
     console.log('✅ Club legacy database updated (no duplicates)');
   } else {
-    console.log('ℹ️ Legacy already updated for this tournament, skipping duplicate');
+    if (window.VERBOSE_LOGGING) console.log('ℹ️ Legacy already updated for this tournament, skipping duplicate');
   }
 }
 
@@ -30472,7 +30319,7 @@ function initializeCoreSystems() {
   const hasData = window.GROUP_RESULTS || window.TOURNAMENT;
 
   if (!hasData && hasBackup) {
-    console.log('📦 Found existing backup, offering restore...');
+    if (window.VERBOSE_LOGGING) console.log('📦 Found existing backup, offering restore...');
     setTimeout(() => {
       if (confirm('A previous tournament backup was found. Would you like to restore it?')) {
         restoreFromBackup();
@@ -30486,7 +30333,7 @@ function initializeCoreSystems() {
     }
   }, 2 * 60 * 1000);
 
-  console.log('🔧 Core systems initialized');
+  if (window.VERBOSE_LOGGING) console.log('🔧 Core systems initialized');
 }
 
 /************* GLOBAL ERROR HANDLERS *************/
@@ -31605,7 +31452,7 @@ function showSimpleBracket() {
 // showCustomMatchInterface is defined earlier in the file
 
 function filterHistoryContent(filter) {
-  console.log('Filtering history with:', filter);
+  if (window.VERBOSE_LOGGING) console.log('Filtering history with:', filter);
 }
 
 function openTeamDetail(teamName) {
@@ -31634,7 +31481,7 @@ function updateClubLegacy(tournamentResults) {
   CLUB_LEGACY_DB.champions[champion] = (CLUB_LEGACY_DB.champions[champion] || 0) + 1;
   CLUB_LEGACY_DB.totalWins[champion] = (CLUB_LEGACY_DB.totalWins[champion] || 0) + 1;
 
-  console.log(`🏆 ${champion} added to champions legacy`);
+  if (window.VERBOSE_LOGGING) console.log(`🏆 ${champion} added to champions legacy`);
 }
 
 /************* MOBILE TOUCH GESTURES *************/
@@ -31728,7 +31575,7 @@ function switchToNextTab() {
 /************* MASTER DOM INITIALIZER *************/
 
 document.addEventListener('DOMContentLoaded', async function () {
-  console.log("🏁 Initializing All-Time Football Simulator...");
+  if (window.VERBOSE_LOGGING) console.log("🏁 Initializing All-Time Football Simulator...");
 
   // Load tournament history from localStorage
   try {
@@ -31738,7 +31585,7 @@ document.addEventListener('DOMContentLoaded', async function () {
       if (Array.isArray(parsedHistory)) {
         TOURNAMENT_HISTORY.length = 0;
         TOURNAMENT_HISTORY.push(...parsedHistory);
-        console.log(`📊 Loaded ${TOURNAMENT_HISTORY.length} tournaments from localStorage`);
+        if (window.VERBOSE_LOGGING) console.log(`📊 Loaded ${TOURNAMENT_HISTORY.length} tournaments from localStorage`);
       }
     }
   } catch (e) {
@@ -31794,7 +31641,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     newButton.addEventListener('click', (e) => {
       e.preventDefault();
-      console.log(`${name} button clicked`);
+      if (window.VERBOSE_LOGGING) console.log(`${name} button clicked`);
 
       if (typeof fn === 'function') {
         try {
@@ -31900,7 +31747,7 @@ function fixDuplicateButtons() {
       const existing = seen.get(text);
       if (existing.onclick === btn.onclick && existing.parentElement === btn.parentElement) {
         btn.remove();
-        console.log('Removed duplicate button:', text);
+        if (window.VERBOSE_LOGGING) console.log('Removed duplicate button:', text);
       }
     } else if (text) {
       seen.set(text, btn);
@@ -33131,7 +32978,7 @@ window.applyStageTheme = applyStageTheme;
 window.applyStrengthTheme = applyStrengthTheme;
 window.THEME_MANAGER = THEME_MANAGER;
 
-console.log('🎨 Aesthetic enhancement functions loaded!');
+if (window.VERBOSE_LOGGING) console.log('🎨 Aesthetic enhancement functions loaded!');
 
 // ========================================
 // ENSURE SEASONS IN SIDEBAR
@@ -33147,7 +32994,7 @@ function updateSidebarWithAllFeatures() {
   );
 
   if (existingSeasonsBtn) {
-    console.log('✓ Seasons button already present in sidebar');
+    if (window.VERBOSE_LOGGING) console.log('✓ Seasons button already present in sidebar');
     return;
   }
 
@@ -33176,7 +33023,7 @@ function updateSidebarWithAllFeatures() {
   const controlColumn = viewsTab.querySelector('.control-column');
   if (controlColumn) {
     controlColumn.appendChild(seasonsBtn);
-    console.log('✓ Seasons button added to sidebar');
+    if (window.VERBOSE_LOGGING) console.log('✓ Seasons button added to sidebar');
   }
 }
 
@@ -33201,7 +33048,7 @@ const SYSTEM_DEBUGGER = {
   issues: [], warnings: [], fixes: [],
 
   async runFullDiagnostic() {
-    console.log('🔍 Starting comprehensive system diagnostic...');
+    if (window.VERBOSE_LOGGING) console.log('🔍 Starting comprehensive system diagnostic...');
     console.log('='.repeat(70));
     this.issues = []; this.warnings = []; this.fixes = [];
 
@@ -33214,32 +33061,38 @@ const SYSTEM_DEBUGGER = {
     await this.attemptAutoFixes();
     this.generateReport();
 
-    console.log('='.repeat(70));
+    if (window.VERBOSE_LOGGING) console.log('='.repeat(70));
     console.log('✓ Diagnostic complete');
 
     return { issues: this.issues, warnings: this.warnings, fixes: this.fixes, passed: this.issues.length === 0 };
   },
 
   async checkGlobalVariables() {
-    console.log('📋 Checking global variables...');
+    if (window.VERBOSE_LOGGING) console.log('📋 Checking global variables...');
     const required = ['MANAGER_STATE', 'TOURNAMENT_HISTORY_ENHANCED', 'SEASON_STATE', 'PREDICTION_STATE', 'ALL_TEAMS', 'THEMES', 'STORAGE_MANAGER'];
     required.forEach(v => {
-      if (typeof window[v] === 'undefined') this.issues.push({severity: 'critical', category: 'Variables', message: `${v} is undefined`, fix: `Initialize ${v}`});
-      else console.log(`  ✓ ${v} exists`);
+      if (typeof window[v] === 'undefined') {
+        this.issues.push({severity: 'critical', category: 'Variables', message: `${v} is undefined`, fix: `Initialize ${v}`});
+      } else if (window.VERBOSE_LOGGING) {
+        console.log(`  ✓ ${v} exists`);
+      }
     });
   },
 
   async checkFunctionIntegrity() {
-    console.log('🔧 Checking function integrity...');
+    if (window.VERBOSE_LOGGING) console.log('🔧 Checking function integrity...');
     const required = ['displayManagerProfile', 'displaySeasonMode', 'displayHallOfFame', 'displayEnhancedTournamentStats', 'loadTournamentTemplate', 'applyTheme', 'enablePredictionsForMatch'];
     required.forEach(f => {
-      if (typeof window[f] !== 'function') this.issues.push({severity: 'critical', category: 'Functions', message: `${f} not defined`, fix: `Define ${f}`});
-      else console.log(`  ✓ ${f} defined`);
+      if (typeof window[f] !== 'function') {
+        this.issues.push({severity: 'critical', category: 'Functions', message: `${f} not defined`, fix: `Define ${f}`});
+      } else if (window.VERBOSE_LOGGING) {
+        console.log(`  ✓ ${f} defined`);
+      }
     });
   },
 
   async checkDataStructures() {
-    console.log('📊 Checking data structures...');
+    if (window.VERBOSE_LOGGING) console.log('📊 Checking data structures...');
     if (window.MANAGER_STATE) {
       ['active', 'level', 'xp', 'managerName'].forEach(f => {
         if (!(f in MANAGER_STATE)) this.warnings.push({category: 'Data', message: `MANAGER_STATE missing ${f}`});
@@ -33248,16 +33101,16 @@ const SYSTEM_DEBUGGER = {
     if (window.TOURNAMENT_HISTORY_ENHANCED && !Array.isArray(TOURNAMENT_HISTORY_ENHANCED.tournaments)) {
       this.issues.push({severity: 'high', category: 'Data', message: 'TOURNAMENT_HISTORY_ENHANCED.tournaments not array', fix: 'Initialize as array'});
     }
-    console.log('  ✓ Data structures checked');
+    if (window.VERBOSE_LOGGING) console.log('  ✓ Data structures checked');
   },
 
   async checkStorageIntegrity() {
-    console.log('💾 Checking storage...');
+    if (window.VERBOSE_LOGGING) console.log('💾 Checking storage...');
     try {
       localStorage.setItem('_test_', '1'); localStorage.removeItem('_test_');
-      console.log('  ✓ localStorage accessible');
+      if (window.VERBOSE_LOGGING) console.log('  ✓ localStorage accessible');
       if (typeof STORAGE_MANAGER !== 'undefined') {
-        console.log(`  ✓ Storage: ${STORAGE_MANAGER.getUsageMB()} MB`);
+        if (window.VERBOSE_LOGGING) console.log(`  ✓ Storage: ${STORAGE_MANAGER.getUsageMB()} MB`);
         if (STORAGE_MANAGER.isNearLimit()) this.warnings.push({category: 'Storage', message: 'Near limit', suggestion: 'Run STORAGE_MANAGER.smartCleanup()'});
       }
     } catch (e) {
@@ -33266,15 +33119,18 @@ const SYSTEM_DEBUGGER = {
   },
 
   async checkUIElements() {
-    console.log('🎨 Checking UI...');
-    if (!document.querySelector('#output, #content')) this.issues.push({severity: 'critical', category: 'UI', message: 'Main container missing', fix: 'Add #output or #content'});
-    else console.log('  ✓ Main container exists');
+    if (window.VERBOSE_LOGGING) console.log('🎨 Checking UI...');
+    if (!document.querySelector('#output, #content')) {
+      this.issues.push({severity: 'critical', category: 'UI', message: 'Main container missing', fix: 'Add #output or #content'});
+    } else if (window.VERBOSE_LOGGING) {
+      console.log('  ✓ Main container exists');
+    }
     const modals = document.querySelectorAll('.modal-backdrop');
     if (modals.length > 3) this.warnings.push({category: 'UI', message: `${modals.length} modals open`, suggestion: 'Close unused modals'});
   },
 
   async checkFeatureIntegration() {
-    console.log('🔗 Checking features...');
+    if (window.VERBOSE_LOGGING) console.log('🔗 Checking features...');
     const features = [
       {name: 'Predictions', check: () => typeof PREDICTION_STATE !== 'undefined' && typeof enablePredictionsForMatch === 'function'},
       {name: 'Themes', check: () => typeof THEMES !== 'undefined' && typeof applyTheme === 'function'},
@@ -33282,30 +33138,30 @@ const SYSTEM_DEBUGGER = {
       {name: 'Hall of Fame', check: () => typeof HALL_OF_FAME !== 'undefined' && typeof displayHallOfFame === 'function'}
     ];
     features.forEach(f => {
-      if (f.check()) console.log(`  ✓ ${f.name} integrated`);
+      if (window.VERBOSE_LOGGING) if (f.check()) console.log(`  ✓ ${f.name} integrated`);
       else this.warnings.push({category: 'Integration', message: `${f.name} incomplete`});
     });
   },
 
   async attemptAutoFixes() {
-    console.log('🔧 Auto-fixing...');
+    if (window.VERBOSE_LOGGING) console.log('🔧 Auto-fixing...');
     const oldModals = document.querySelectorAll('.modal-backdrop');
     if (oldModals.length > 0) {
       oldModals.forEach(m => m.remove());
       this.fixes.push(`Removed ${oldModals.length} orphaned modals`);
     }
-    console.log(`  ✓ Applied ${this.fixes.length} fixes`);
+    if (window.VERBOSE_LOGGING) console.log(`  ✓ Applied ${this.fixes.length} fixes`);
   },
 
   generateReport() {
     const r = {summary: {critical: this.issues.filter(i => i.severity === 'critical').length, high: this.issues.filter(i => i.severity === 'high').length, warnings: this.warnings.length, fixes: this.fixes.length}, issues: this.issues, warnings: this.warnings, fixes: this.fixes};
-    console.log('\n📋 DIAGNOSTIC REPORT');
+    if (window.VERBOSE_LOGGING) console.log('\n📋 DIAGNOSTIC REPORT');
     console.log('='.repeat(70));
     console.log(`Critical: ${r.summary.critical} | High: ${r.summary.high} | Warnings: ${r.summary.warnings} | Fixes: ${r.summary.fixes}`);
-    console.log('='.repeat(70));
+    if (window.VERBOSE_LOGGING) console.log('='.repeat(70));
     if (this.issues.length > 0) {
       console.log('\n❌ ISSUES:');
-      this.issues.forEach((i, idx) => console.log(`${idx+1}. [${i.severity}] ${i.category}: ${i.message}${i.fix ? '\n   Fix: ' + i.fix : ''}`));
+      if (window.VERBOSE_LOGGING) this.issues.forEach((i, idx) => console.log(`${idx+1}. [${i.severity}] ${i.category}: ${i.message}${i.fix ? '\n   Fix: ' + i.fix : ''}`));
     }
     if (this.warnings.length > 0) {
       console.log('\n⚠️  WARNINGS:');
@@ -33313,7 +33169,7 @@ const SYSTEM_DEBUGGER = {
     }
     if (this.fixes.length > 0) {
       console.log('\n✅ AUTO-FIXES:');
-      this.fixes.forEach((f, idx) => console.log(`${idx+1}. ${f}`));
+      if (window.VERBOSE_LOGGING) this.fixes.forEach((f, idx) => console.log(`${idx+1}. ${f}`));
     }
     if (this.issues.length === 0 && this.warnings.length === 0) console.log('\n🎉 ALL SYSTEMS OPERATIONAL!');
     return r;
@@ -33340,7 +33196,7 @@ window.addEventListener('error', e => { console.error('💥 Error:', e.error); c
 // ========================================
 
 function validateAllIntegrations() {
-  console.log('🎯 Running final integration validation...');
+  if (window.VERBOSE_LOGGING) console.log('🎯 Running final integration validation...');
   const tests = [
     {name: 'Manager Profile', test: () => typeof displayManagerProfile === 'function' && typeof selectFavoriteClub === 'function'},
     {name: 'Theme System', test: () => typeof THEMES !== 'undefined' && typeof applyTheme === 'function' && Object.keys(THEMES).length >= 6},
@@ -33357,7 +33213,7 @@ function validateAllIntegrations() {
     catch (e) { return {name: t.name, passed: false, error: e.message}; }
   });
 
-  console.log('\n📊 INTEGRATION TEST RESULTS');
+  if (window.VERBOSE_LOGGING) console.log('\n📊 INTEGRATION TEST RESULTS');
   console.log('='.repeat(70));
   results.forEach((r, i) => {
     console.log(`${i+1}. ${r.passed ? '✅' : '❌'} ${r.name}`);
@@ -33368,14 +33224,14 @@ function validateAllIntegrations() {
   const total = results.length;
   const pct = ((pass / total) * 100).toFixed(1);
 
-  console.log('='.repeat(70));
+  if (window.VERBOSE_LOGGING) console.log('='.repeat(70));
   console.log(`\n✨ FINAL SCORE: ${pass}/${total} (${pct}%)`);
   if (pass === total) {
     console.log('🎉 ALL INTEGRATIONS PASSED!');
-    console.log('✨ System fully operational!');
+    if (window.VERBOSE_LOGGING) console.log('✨ System fully operational!');
   } else {
     console.log(`⚠️  ${total - pass} integration(s) failed`);
-    console.log('💡 Run runDiagnostic() for details');
+    if (window.VERBOSE_LOGGING) console.log('💡 Run runDiagnostic() for details');
   }
 
   return {passed: pass, total: total, percentage: pct, allPassed: pass === total, results: results};
@@ -33385,11 +33241,11 @@ window.validateAll = validateAllIntegrations;
 
 window.addEventListener('load', () => {
   setTimeout(() => {
-    console.log('\n🚀 Running automatic system validation...\n');
+    if (window.VERBOSE_LOGGING) console.log('\n🚀 Running automatic system validation...\n');
     validateAllIntegrations();
-    console.log('\n💡 Available commands:');
+    if (window.VERBOSE_LOGGING) console.log('\n💡 Available commands:');
     console.log('  - validateAll()     : Run integration tests');
-    console.log('  - runDiagnostic()   : Full system diagnostic');
+    if (window.VERBOSE_LOGGING) console.log('  - runDiagnostic()   : Full system diagnostic');
     console.log('\n');
   }, 2000);
 });
@@ -33482,7 +33338,7 @@ function closeNotification(closeBtn) {
 // Function wrapping with proper timing - wrapped in load event to ensure functions exist
 // Safe deferred initialization to prevent race conditions
 (function initializeFunctionWrappersSafely() {
-  'use strict';
+  "use strict";
 
   const MAX_RETRIES = 50;
   const RETRY_DELAY = 100; // ms
@@ -33491,9 +33347,9 @@ function closeNotification(closeBtn) {
   function attemptInitialization() {
     // Check if required functions exist
     const requiredFunctions = [
-      'simulateGroupStage',
-      'simulateKnockoutRounds',
-      'handleGenerateGroups'
+      "simulateGroupStage",
+      "simulateKnockoutRounds",
+      "handleGenerateGroups"
     ];
 
     const allExist = requiredFunctions.every(fn => typeof window[fn] === 'function');
@@ -33702,7 +33558,7 @@ const AUTO_SAVE = {
       };
 
       localStorage.setItem(this.key, JSON.stringify(state));
-      console.log('✓ Auto-saved at', new Date().toLocaleTimeString());
+      if (window.VERBOSE_LOGGING) console.log('✓ Auto-saved at', new Date().toLocaleTimeString());
     } catch (e) {
       console.error('Auto-save failed:', e);
 
@@ -33761,7 +33617,7 @@ const AUTO_SAVE = {
         HALL_OF_FAME.records = state.hallOfFame;
       }
 
-      console.log('✓ State restored from', new Date(state.timestamp).toLocaleString());
+      if (window.VERBOSE_LOGGING) console.log('✓ State restored from', new Date(state.timestamp).toLocaleString());
       return true;
     } catch (e) {
       console.error('Restore failed:', e);
@@ -33794,14 +33650,14 @@ const AUTO_SAVE = {
       }
     }, this.saveIntervalMs);
 
-    console.log('✓ Auto-save started (every 30 seconds)');
+    if (window.VERBOSE_LOGGING) console.log('✓ Auto-save started (every 30 seconds)');
   },
 
   stopAutoSave() {
     if (this.interval) {
       clearInterval(this.interval);
       this.interval = null;
-      console.log('✓ Auto-save stopped');
+      if (window.VERBOSE_LOGGING) console.log('✓ Auto-save stopped');
     }
   },
 
@@ -33811,14 +33667,14 @@ const AUTO_SAVE = {
     keys.forEach(key => {
       if (key.startsWith('tournament_autosave_') && key !== this.key) {
         localStorage.removeItem(key);
-        console.log('Cleaned up old save:', key);
+        if (window.VERBOSE_LOGGING) console.log('Cleaned up old save:', key);
       }
     });
   },
 
   clear() {
     localStorage.removeItem(this.key);
-    console.log('✓ Auto-save cleared');
+    if (window.VERBOSE_LOGGING) console.log('✓ Auto-save cleared');
   }
 };
 
@@ -34239,7 +34095,7 @@ const HISTORY_MANAGER = {
       }
 
       this.updateUI();
-      console.log('✓ State saved to history. Total states:', this.past.length);
+      if (window.VERBOSE_LOGGING) console.log('✓ State saved to history. Total states:', this.past.length);
     } catch (e) {
       console.error('Failed to save state:', e);
     }
@@ -34355,7 +34211,7 @@ const HISTORY_MANAGER = {
     this.past = [];
     this.future = [];
     this.updateUI();
-    console.log('✓ History cleared');
+    if (window.VERBOSE_LOGGING) console.log('✓ History cleared');
   }
 };
 
@@ -34391,7 +34247,7 @@ const SOUND_SYSTEM = {
   init() {
     try {
       this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      console.log('✓ Sound system initialized');
+      if (window.VERBOSE_LOGGING) console.log('✓ Sound system initialized');
     } catch (e) {
       console.warn('Web Audio API not supported:', e);
     }
@@ -34577,7 +34433,7 @@ const QUICK_START_PRESETS = {
         SOUND_SYSTEM.play('success');
       }
 
-      console.log(`✓ Applied template: ${template.name}`);
+      if (window.VERBOSE_LOGGING) console.log(`✓ Applied template: ${template.name}`);
     } catch (e) {
       console.error('Failed to apply template:', e);
       if (typeof showNotification === 'function') {
@@ -35040,7 +34896,7 @@ if (window.QUICK_START_PRESETS) {
           `${template.name} tournament created with ${selectedTeams.length} teams`, 3000);
       }
 
-      console.log(`✓ Applied template: ${template.name} with ${selectedTeams.length} teams`);
+      if (window.VERBOSE_LOGGING) console.log(`✓ Applied template: ${template.name} with ${selectedTeams.length} teams`);
     } catch (e) {
       console.error('Failed to apply template:', e);
       if (typeof showNotification === 'function') {
@@ -35791,7 +35647,7 @@ function clearTeamSelection(team) {
 
 function updateMatchSetting(setting, value) {
   window.CUSTOM_MATCH_STATE[setting] = value;
-  console.log(`Updated ${setting} to:`, value);
+  if (window.VERBOSE_LOGGING) console.log(`Updated ${setting} to:`, value);
 }
 
 function updateMatchType(type) {
@@ -35864,7 +35720,12 @@ function calculateWinProbability(teamA, teamB) {
 
 function quickRandomMatch() {
   // Select two random teams
-  const allTeams = [...ALL_TEAMS];
+  const allTeams = [...(window.ALL_TEAMS || window.TEAMS || [])];
+  if (allTeams.length < 2) {
+    showNotification('error', 'Not Enough Teams', 'Need at least 2 teams', 2000);
+    return;
+  }
+
   const randomA = allTeams[Math.floor(Math.random() * allTeams.length)];
   let randomB;
 
@@ -35903,8 +35764,9 @@ function showClassicRivalries() {
       <div style="padding: 30px;">
         <div style="display: grid; gap: 16px;">
           ${rivalries.map(rivalry => {
-            const teamA = ALL_TEAMS.find(t => t.name === rivalry.teamA);
-            const teamB = ALL_TEAMS.find(t => t.name === rivalry.teamB);
+            const allTeams = window.ALL_TEAMS || window.TEAMS || [];
+            const teamA = allTeams.find(t => t.name === rivalry.teamA);
+            const teamB = allTeams.find(t => t.name === rivalry.teamB);
 
             if (!teamA || !teamB) return '';
 
@@ -35941,8 +35803,9 @@ function showClassicRivalries() {
 }
 
 function loadRivalryMatch(teamAName, teamBName) {
-  const teamA = ALL_TEAMS.find(t => t.name === teamAName);
-  const teamB = ALL_TEAMS.find(t => t.name === teamBName);
+  const allTeams = window.ALL_TEAMS || window.TEAMS || [];
+  const teamA = allTeams.find(t => t.name === teamAName);
+  const teamB = allTeams.find(t => t.name === teamBName);
 
   if (teamA && teamB) {
     window.CUSTOM_MATCH_STATE.teamA = teamA;
@@ -35961,7 +35824,7 @@ function loadRivalryMatch(teamAName, teamBName) {
 // ======================
 
 function showEnhancedCustomMatch() {
-  const content = document.getElementById('content') || document.getElementById('output');
+  const content = document.getElementById('content') || document.getElementById('output') || document.getElementById('output');
   if (!content) return;
 
   // Initialize CUSTOM_MATCH_STATE if needed
@@ -36456,7 +36319,7 @@ function simulateCustomMatchEnhanced() {
 // This duplicate has been removed to avoid conflicts
 
 function displayCustomMatchResult_EnhancedVersion(result, teamA, teamB) {
-  const content = document.getElementById('content') || document.getElementById('output');
+  const content = document.getElementById('content') || document.getElementById('output') || document.getElementById('output');
   if (!content) return;
 
   // Trigger confetti for exciting results
@@ -36585,17 +36448,17 @@ window.TEMPLATE_TEAMS = TEMPLATE_TEAMS;
 window.CONFETTI_MANAGER = CONFETTI_MANAGER;
 
 console.log('🚀 ALL NEW FEATURES LOADED SUCCESSFULLY!');
-console.log('   ✓ Live Match Simulation');
+if (window.VERBOSE_LOGGING) console.log('   ✓ Live Match Simulation');
 console.log('   ✓ Export & Share System');
-console.log('   ✓ Undo/Redo System');
+if (window.VERBOSE_LOGGING) console.log('   ✓ Undo/Redo System');
 console.log('   ✓ Sound Effects');
-console.log('   ✓ Quick Start Templates (with 64 teams)');
+if (window.VERBOSE_LOGGING) console.log('   ✓ Quick Start Templates (with 64 teams)');
 console.log('   ✓ Enhanced Prediction System');
-console.log('   ✓ Hall of Fame Auto-Induction');
+if (window.VERBOSE_LOGGING) console.log('   ✓ Hall of Fame Auto-Induction');
 console.log('   ✓ Feature Guides');
-console.log('   ✓ Print Support');
+if (window.VERBOSE_LOGGING) console.log('   ✓ Print Support');
 console.log('');
-console.log('🔧 CRITICAL FIXES APPLIED:');
+if (window.VERBOSE_LOGGING) console.log('🔧 CRITICAL FIXES APPLIED:');
 console.log('   ✅ Function wrapping race condition fixed');
 console.log('   ✅ Confetti memory management added');
 console.log('   ✅ localStorage quota handling improved');
@@ -36741,7 +36604,7 @@ const PERFORMANCE_MONITOR = {
 
     const duration = performance.now() - timer.start;
 
-    console.log(`⏱️ ${timer.name}: ${duration.toFixed(2)}ms`);
+    if (window.VERBOSE_LOGGING) console.log(`⏱️ ${timer.name}: ${duration.toFixed(2)}ms`);
 
     // Record for analysis
     if (timer.name.includes('match')) {
@@ -36804,7 +36667,7 @@ const MEMORY_MANAGER = {
       const entries = Object.entries(window.MATCH_DETAILS_DB);
       const toKeep = entries.slice(-100);
       window.MATCH_DETAILS_DB = Object.fromEntries(toKeep);
-      console.log('✓ Cleaned up old match data');
+      if (window.VERBOSE_LOGGING) console.log('✓ Cleaned up old match data');
     }
   },
 
@@ -36815,7 +36678,7 @@ const MEMORY_MANAGER = {
         TOURNAMENT_HISTORY_ENHANCED.completed &&
         TOURNAMENT_HISTORY_ENHANCED.completed.length > 50) {
       TOURNAMENT_HISTORY_ENHANCED.completed = TOURNAMENT_HISTORY_ENHANCED.completed.slice(-50);
-      console.log('✓ Cleaned up old tournament history');
+      if (window.VERBOSE_LOGGING) console.log('✓ Cleaned up old tournament history');
     }
   },
 
@@ -36826,13 +36689,13 @@ const MEMORY_MANAGER = {
         PREDICTION_STATE.predictionHistory &&
         PREDICTION_STATE.predictionHistory.length > 200) {
       PREDICTION_STATE.predictionHistory = PREDICTION_STATE.predictionHistory.slice(-200);
-      console.log('✓ Cleaned up old predictions');
+      if (window.VERBOSE_LOGGING) console.log('✓ Cleaned up old predictions');
     }
   },
 
   // Run all cleanup
   cleanupAll() {
-    console.log('🧹 Running memory cleanup...');
+    if (window.VERBOSE_LOGGING) console.log('🧹 Running memory cleanup...');
     this.cleanupOldMatches();
     this.cleanupOldHistory();
     this.cleanupPredictions();
@@ -36840,7 +36703,7 @@ const MEMORY_MANAGER = {
     // Clear performance metrics
     PERFORMANCE_MONITOR.clear();
 
-    console.log('✓ Memory cleanup complete');
+    if (window.VERBOSE_LOGGING) console.log('✓ Memory cleanup complete');
   },
 
   // Auto cleanup every 5 minutes
@@ -36848,7 +36711,7 @@ const MEMORY_MANAGER = {
     setInterval(() => {
       this.cleanupAll();
     }, 5 * 60 * 1000);
-    console.log('✓ Auto cleanup scheduled (every 5 minutes)');
+    if (window.VERBOSE_LOGGING) console.log('✓ Auto cleanup scheduled (every 5 minutes)');
   }
 };
 
@@ -36873,7 +36736,7 @@ const BUG_FIXES = {
           return { scoreA: 0, scoreB: 0, error: error.message };
         }
       };
-      console.log('✓ Patched simulateMatchWithSeed');
+      if (window.VERBOSE_LOGGING) console.log('✓ Patched simulateMatchWithSeed');
     }
   },
 
@@ -36884,7 +36747,7 @@ const BUG_FIXES = {
       if (!count || count === 0) return 0;
       return (total / count).toFixed(2);
     };
-    console.log('✓ Added safeAverage helper');
+    if (window.VERBOSE_LOGGING) console.log('✓ Added safeAverage helper');
   },
 
   // Fix: Event handler memory leaks
@@ -36898,7 +36761,7 @@ const BUG_FIXES = {
       window._eventHandlers.push({ element: this, type, listener, options });
       return originalAddEventListener.call(this, type, listener, options);
     };
-    console.log('✓ Event handler tracking enabled');
+    if (window.VERBOSE_LOGGING) console.log('✓ Event handler tracking enabled');
   },
 
   // Fix: localStorage quota exceeded
@@ -36930,17 +36793,17 @@ const BUG_FIXES = {
         }
       }
     };
-    console.log('✓ localStorage quota handling patched');
+    if (window.VERBOSE_LOGGING) console.log('✓ localStorage quota handling patched');
   },
 
   // Apply all patches
   applyAll() {
-    console.log('🔧 Applying bug fixes...');
+    if (window.VERBOSE_LOGGING) console.log('🔧 Applying bug fixes...');
     this.patchSimulateMatch();
     this.patchStatsCalculation();
     this.patchEventHandlers();
     this.patchLocalStorage();
-    console.log('✓ All bug fixes applied');
+    if (window.VERBOSE_LOGGING) console.log('✓ All bug fixes applied');
   }
 };
 
@@ -36955,14 +36818,14 @@ const DEBUG_TOOLS = {
   // Enable debug mode
   enable() {
     this.enabled = true;
-    console.log('🐛 Debug mode enabled');
+    if (window.VERBOSE_LOGGING) console.log('🐛 Debug mode enabled');
     this.addDebugPanel();
   },
 
   // Disable debug mode
   disable() {
     this.enabled = false;
-    console.log('Debug mode disabled');
+    if (window.VERBOSE_LOGGING) console.log('Debug mode disabled');
     const panel = document.getElementById('debugPanel');
     if (panel) panel.remove();
     if (this.debugInterval) {
@@ -37047,7 +36910,7 @@ const DEBUG_TOOLS = {
 
   // Run comprehensive check
   runFullCheck() {
-    console.log('🔍 Running full diagnostic check...');
+    if (window.VERBOSE_LOGGING) console.log('🔍 Running full diagnostic check...');
 
     const results = {
       validators: {},
@@ -37077,7 +36940,7 @@ const DEBUG_TOOLS = {
     }
 
     // Display results
-    console.log('✓ Check complete:', results);
+    if (window.VERBOSE_LOGGING) console.log('✓ Check complete:', results);
 
     if (results.errors.length === 0) {
       if (typeof showNotification === 'function') {
@@ -37115,7 +36978,7 @@ const DEBUG_TOOLS = {
     a.download = `app-state-${Date.now()}.json`;
     a.click();
 
-    console.log('✓ State exported');
+    if (window.VERBOSE_LOGGING) console.log('✓ State exported');
   }
 };
 
@@ -37134,7 +36997,7 @@ const HEALTH_MONITOR = {
 
   // Run all health checks
   async runAllChecks() {
-    console.log('🏥 Running system health checks...');
+    if (window.VERBOSE_LOGGING) console.log('🏥 Running system health checks...');
     const results = [];
 
     for (const { name, check } of this.checks) {
@@ -37162,7 +37025,7 @@ const HEALTH_MONITOR = {
     const passed = results.filter(r => r.passed).length;
     const total = results.length;
 
-    console.log(`✓ Health check complete: ${passed}/${total} checks passed`);
+    if (window.VERBOSE_LOGGING) console.log(`✓ Health check complete: ${passed}/${total} checks passed`);
 
     if (passed < total) {
       console.warn('⚠️ Some health checks failed:',
@@ -37230,11 +37093,11 @@ const APP_INIT = {
 
   async initialize() {
     if (this.initialized) {
-      console.log('ℹ️ App already initialized');
+      if (window.VERBOSE_LOGGING) console.log('ℹ️ App already initialized');
       return;
     }
 
-    console.log('🚀 Initializing optimization systems...');
+    if (window.VERBOSE_LOGGING) console.log('🚀 Initializing optimization systems...');
 
     try {
       // Step 1: Apply bug fixes
@@ -37327,27 +37190,27 @@ const FINAL_CHECKLIST = {
   ],
 
   runFullCheck() {
-    console.log('📋 Running final verification checklist...');
+    if (window.VERBOSE_LOGGING) console.log('📋 Running final verification checklist...');
     console.log('='.repeat(50));
 
     const results = this.items.map(item => {
       const passed = item.check();
       const status = passed ? '✅' : '❌';
-      console.log(`${status} ${item.name}`);
+      if (window.VERBOSE_LOGGING) console.log(`${status} ${item.name}`);
       return { ...item, passed };
     });
 
-    console.log('='.repeat(50));
+    if (window.VERBOSE_LOGGING) console.log('='.repeat(50));
 
     const passedCount = results.filter(r => r.passed).length;
     const totalCount = results.length;
     const percentage = ((passedCount / totalCount) * 100).toFixed(1);
 
-    console.log(`\n📊 Final Score: ${passedCount}/${totalCount} (${percentage}%)`);
+    if (window.VERBOSE_LOGGING) console.log(`\n📊 Final Score: ${passedCount}/${totalCount} (${percentage}%)`);
 
     if (passedCount === totalCount) {
       console.log('🎉 ALL FEATURES VERIFIED AND FUNCTIONAL!');
-      console.log('✨ App is ready for use!');
+      if (window.VERBOSE_LOGGING) console.log('✨ App is ready for use!');
     } else {
       console.warn('⚠️ Some features are missing or not working properly');
       console.warn('Failed checks:', results.filter(r => !r.passed).map(r => r.name));
@@ -37450,7 +37313,7 @@ const FINAL_CHECKLIST = {
 // ========================================
 
 window.help = function() {
-  console.log(`
+  if (window.VERBOSE_LOGGING) console.log(`
 ╔══════════════════════════════════════════════════════════╗
 ║          TOURNAMENT SIMULATOR - CONSOLE COMMANDS         ║
 ╚══════════════════════════════════════════════════════════╝
@@ -37490,7 +37353,7 @@ window.debug = {
   disable: () => DEBUG_TOOLS.disable(),
   check: () => DEBUG_TOOLS.runFullCheck(),
   export: () => DEBUG_TOOLS.exportState(),
-  perf: () => console.log(PERFORMANCE_MONITOR.generateReport()),
+  perf: () => { if (window.VERBOSE_LOGGING) console.log(PERFORMANCE_MONITOR.generateReport()); },
   clear: () => MEMORY_MANAGER.cleanupAll()
 };
 
@@ -37515,24 +37378,112 @@ if (typeof window !== 'undefined') {
 }
 
 // Show help on first load
-console.log('');
+if (window.VERBOSE_LOGGING) console.log('');
 console.log('═══════════════════════════════════════════════════════════');
 console.log('🎉 PART 10: OPTIMIZATION & FINAL DEBUG - LOADED! 🎉');
-console.log('═══════════════════════════════════════════════════════════');
+if (window.VERBOSE_LOGGING) console.log('═══════════════════════════════════════════════════════════');
 console.log('');
 console.log('✅ SYSTEMS ACTIVE:');
 console.log('   • Validation & Error Checking');
-console.log('   • Performance Monitoring');
+if (window.VERBOSE_LOGGING) console.log('   • Performance Monitoring');
 console.log('   • Memory Management');
-console.log('   • Bug Fixes & Patches');
+if (window.VERBOSE_LOGGING) console.log('   • Bug Fixes & Patches');
 console.log('   • Debug & Diagnostic Tools');
-console.log('   • System Health Monitor');
+if (window.VERBOSE_LOGGING) console.log('   • System Health Monitor');
 console.log('   • Verification Checklist');
-console.log('');
+if (window.VERBOSE_LOGGING) console.log('');
 console.log('💡 Type help() for available console commands');
-console.log('💡 Type verify() to run full system verification');
+if (window.VERBOSE_LOGGING) console.log('💡 Type verify() to run full system verification');
 console.log('💡 Type debug.enable() to open debug panel');
-console.log('');
+if (window.VERBOSE_LOGGING) console.log('');
+
+
+function viewSeasonResults() {
+  if (!SEASON_STATE.active && SEASON_STATE.currentMatchday === 0) {
+    showUtilityMessage('No season results available', 'error');
+    return;
+  }
+
+  const output = document.getElementById('output');
+  if (!output) return;
+
+  let html = '<div class="results-container" style="padding: 20px;">';
+  html += '<h2 style="margin-bottom: 20px;">🏆 Season Final Results</h2>';
+
+  const sortedTable = [...SEASON_STATE.table].sort((a, b) => {
+    if (b.points !== a.points) return b.points - a.points;
+    if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
+    return b.goalsFor - a.goalsFor;
+  });
+
+  html += '<table class="league-table" style="width: 100%; border-collapse: collapse;"><thead><tr>';
+  html += '<th style="padding: 10px;">Pos</th><th style="padding: 10px; text-align: left;">Team</th>';
+  html += '<th style="padding: 10px;">P</th><th style="padding: 10px;">W</th><th style="padding: 10px;">D</th><th style="padding: 10px;">L</th>';
+  html += '<th style="padding: 10px;">GF</th><th style="padding: 10px;">GA</th><th style="padding: 10px;">GD</th>';
+  html += '<th style="padding: 10px;">Pts</th></tr></thead><tbody>';
+
+  sortedTable.forEach((entry, idx) => {
+    const rowColor = idx === 0 ? 'rgba(16, 185, 129, 0.2)' : idx < 4 ? 'rgba(59, 130, 246, 0.1)' : '';
+    html += `<tr style="background: ${rowColor}; border-bottom: 1px solid #374151;">`;
+    html += `<td style="padding: 10px; text-align: center;">${idx+1}</td>`;
+    html += `<td style="padding: 10px; font-weight: 500;">${entry.team.name}</td>`;
+    html += `<td style="padding: 10px; text-align: center;">${entry.played}</td>`;
+    html += `<td style="padding: 10px; text-align: center; color: #10b981;">${entry.wins}</td>`;
+    html += `<td style="padding: 10px; text-align: center; color: #f59e0b;">${entry.draws}</td>`;
+    html += `<td style="padding: 10px; text-align: center; color: #ef4444;">${entry.losses}</td>`;
+    html += `<td style="padding: 10px; text-align: center;">${entry.goalsFor}</td>`;
+    html += `<td style="padding: 10px; text-align: center;">${entry.goalsAgainst}</td>`;
+    html += `<td style="padding: 10px; text-align: center; color: ${entry.goalDifference >= 0 ? '#10b981' : '#ef4444'};">${entry.goalDifference >= 0 ? '+' : ''}${entry.goalDifference}</td>`;
+    html += `<td style="padding: 10px; text-align: center; font-weight: bold; color: #fbbf24;">${entry.points}</td>`;
+    html += '</tr>';
+  });
+
+  html += '</tbody></table></div>';
+  output.innerHTML = html;
+}
+
+
+function resetSeason() {
+  if (!confirm('Start a new season? Current season will be saved to history.')) {
+    return;
+  }
+
+  if (SEASON_STATE.active) {
+    if (!SEASON_STATE.seasonHistory) SEASON_STATE.seasonHistory = [];
+    SEASON_STATE.seasonHistory.push({
+      seasonNumber: SEASON_STATE.seasonNumber,
+      standings: [...SEASON_STATE.table],
+      champion: SEASON_STATE.table[0],
+      endDate: new Date().toISOString()
+    });
+  }
+
+  const teams = SEASON_STATE.teams;
+  SEASON_STATE.currentMatchday = 0;
+  SEASON_STATE.seasonNumber++;
+  SEASON_STATE.active = false;
+
+  if (teams && teams.length >= 4) {
+    initializeSeasonMode(teams);
+    displaySeasonMode();
+    showUtilityMessage(`🎉 Season ${SEASON_STATE.seasonNumber} started!`, 'success');
+  } else {
+    showUtilityMessage('Cannot reset season - no teams available', 'error');
+  }
+}
+
+
+// Stats view mode toggle
+let STATS_VIEW_MODE = 'detailed';
+
+function setStatsView(mode) {
+  STATS_VIEW_MODE = mode;
+  // Re-render current view
+  if (typeof showEnhancedStatistics === 'function') {
+    showEnhancedStatistics();
+  }
+  showUtilityMessage(`View mode: ${mode}`, 'success');
+}
 
 </script>
 </body>

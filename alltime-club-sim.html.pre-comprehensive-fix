@@ -4891,6 +4891,14 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">🏆</span>
           </button>
 
+          <button class="ctrl-btn btn-purple" id="btnHistory" onclick="openHistory()">
+            <div class="ctrl-btn-main">
+              <span class="ctrl-btn-title">Tournament History</span>
+              <span class="ctrl-btn-subtitle">Past champions</span>
+            </div>
+            <span class="ctrl-btn-tag">Log</span>
+          </button>
+
           <button class="ctrl-btn btn-blue" id="btnTournamentStats" onclick="showTournamentStatsSummary()">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Tournament Stats</span>
@@ -4955,7 +4963,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">📊</span>
           </button>
 
-          <button class="ctrl-btn btn-purple" id="btnPredictionToggle" onclick="togglePredictions()">
+          <button disabled style="opacity: 0.5; cursor: not-allowed;" title="Predictions not applicable to simulations" class="ctrl-btn btn-purple" id="btnPredictionToggle" onclick="togglePredictions()">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title" id="predictionToggleTitle">🔮 Predictions: ON</span>
               <span class="ctrl-btn-subtitle" id="predictionToggleSubtitle">Making predictions</span>
@@ -4963,7 +4971,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">🔮</span>
           </button>
 
-          <button class="ctrl-btn btn-purple" id="btnPredictionStats" onclick="displayPredictionStats()">
+          <button disabled style="opacity: 0.5; cursor: not-allowed;" title="Predictions not applicable to simulations" class="ctrl-btn btn-purple" id="btnPredictionStats" onclick="displayPredictionStats()">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">📊 Prediction Stats</span>
               <span class="ctrl-btn-subtitle">View your accuracy</span>
@@ -5245,78 +5253,39 @@ button:focus, input:focus, select:focus {
   <!-- Manager Edit Modal -->
   <div id="managerEditModal" class="modal-backdrop" onclick="closeManagerEditModal()">
     <div class="modal" onclick="event.stopPropagation()">
-      <div class="modal-content" style="max-width: 600px;">
-        <div class="modal-head" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.2));
-                                         border-bottom: 2px solid rgba(59, 130, 246, 0.5);">
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <div style="font-size: 2em;">👤</div>
-            <h3 style="margin: 0; color: #60A5FA;">Edit Manager Profile</h3>
-          </div>
+      <div class="modal-content">
+        <div class="modal-head">
+          <h3>Edit Manager Profile</h3>
           <button class="modal-close" onclick="closeManagerEditModal()">✕</button>
         </div>
-        <div class="modal-body" style="padding: 30px;">
-          <!-- Manager Name Section -->
-          <div style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1));
-                      border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-            <label for="managerNameInput" style="display: block; margin-bottom: 10px; color: #60A5FA; font-weight: 700;
-                                                  font-size: 0.95em; text-transform: uppercase; letter-spacing: 0.5px;">
-              👤 Manager Name
-            </label>
-            <input id="managerNameInput" type="text" placeholder="Enter your name"
-                   style="width: 100%; padding: 14px 16px; border-radius: 10px; border: 2px solid rgba(59, 130, 246, 0.4);
-                          background: rgba(15, 23, 42, 0.6); color: #F1F5F9; font-size: 1.1rem; font-weight: 500;
-                          transition: all 0.3s;"
-                   onfocus="this.style.borderColor='#60A5FA'; this.style.background='rgba(15, 23, 42, 0.8)'"
-                   onblur="this.style.borderColor='rgba(59, 130, 246, 0.4)'; this.style.background='rgba(15, 23, 42, 0.6)'"/>
-          </div>
+        <div class="modal-body">
+          <label for="managerNameInput" style="display: block; margin-bottom: 8px; color: #e2e8f0; font-weight: 600;">Manager Name</label>
+          <input id="managerNameInput" type="text" placeholder="Enter your name"
+                 style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);
+                        background: rgba(0, 0, 0, 0.3); color: #e2e8f0; font-size: 1rem; margin-bottom: 20px;"/>
 
-          <!-- Favorite Team Section -->
-          <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
-                      border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-            <label for="managerFavoriteTeamSearch" style="display: block; margin-bottom: 10px; color: #10B981; font-weight: 700;
-                                                          font-size: 0.95em; text-transform: uppercase; letter-spacing: 0.5px;">
-              ⚽ Favorite Team <span style="font-size: 0.8em; color: #94A3B8; font-weight: 400;">(Optional - Links to Stats)</span>
-            </label>
-            <input id="managerFavoriteTeamSearch" type="text" placeholder="🔍 Search teams..."
-                   style="width: 100%; padding: 14px 16px; border-radius: 10px; border: 2px solid rgba(16, 185, 129, 0.4);
-                          background: rgba(15, 23, 42, 0.6); color: #F1F5F9; font-size: 1rem; margin-bottom: 12px;
-                          transition: all 0.3s;"
-                   onfocus="this.style.borderColor='#10B981'; this.style.background='rgba(15, 23, 42, 0.8)'"
-                   onblur="this.style.borderColor='rgba(16, 185, 129, 0.4)'; this.style.background='rgba(15, 23, 42, 0.6)'"
-                   oninput="filterManagerFavoriteTeams(this.value)">
-            <select id="managerFavoriteTeamSelect"
-                    size="6"
-                    style="width: 100%; padding: 12px; border-radius: 10px; border: 2px solid rgba(16, 185, 129, 0.4);
-                           background: rgba(15, 23, 42, 0.6); color: #F1F5F9; font-size: 1rem; min-height: 160px;
-                           transition: all 0.3s;"
-                    onfocus="this.style.borderColor='#10B981'"
-                    onblur="this.style.borderColor='rgba(16, 185, 129, 0.4)'">
-              <option value="">-- No team selected --</option>
-            </select>
-            <div style="margin-top: 12px; padding: 12px; background: rgba(16, 185, 129, 0.1); border-radius: 8px;
-                        border-left: 3px solid #10B981;">
-              <div style="font-size: 0.85em; color: #BBF7D0;">
-                💡 <strong>Pro Tip:</strong> Selecting a favorite team links your manager stats to their performance in tournaments!
-              </div>
-            </div>
-          </div>
+          <label for="managerFavoriteTeamSearch" style="display: block; margin-bottom: 8px; color: #e2e8f0; font-weight: 600;">Favorite Team (Optional)</label>
+          <input id="managerFavoriteTeamSearch" type="text" placeholder="🔍 Search teams..."
+                 style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);
+                        background: rgba(0, 0, 0, 0.3); color: #e2e8f0; font-size: 1rem; margin-bottom: 12px;"
+                 oninput="filterManagerFavoriteTeams(this.value)">
+          <select id="managerFavoriteTeamSelect"
+                  size="6"
+                  style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);
+                         background: rgba(0, 0, 0, 0.3); color: #e2e8f0; font-size: 1rem; margin-bottom: 20px; min-height: 150px;">
+            <option value="">-- No team selected --</option>
+          </select>
 
-          <!-- Action Buttons -->
-          <div style="display: flex; gap: 12px; margin-top: 30px;">
+          <div style="display: flex; gap: 10px;">
             <button onclick="saveManagerEdits()"
-                    style="flex: 1; padding: 16px; background: linear-gradient(135deg, #10b981, #059669);
-                           border: none; border-radius: 10px; color: white; font-weight: 700; cursor: pointer;
-                           font-size: 1.05em; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); transition: all 0.3s;"
-                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(16, 185, 129, 0.5)'"
-                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.4)'">
-              ✅ Save Changes
+                    style="flex: 1; padding: 12px; background: linear-gradient(135deg, #10b981, #059669);
+                           border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer;">
+              Save Changes
             </button>
             <button onclick="closeManagerEditModal()"
-                    style="flex: 1; padding: 16px; background: rgba(71, 85, 105, 0.3);
-                           border: 2px solid rgba(148, 163, 184, 0.4); border-radius: 10px; color: #E2E8F0;
-                           font-weight: 700; cursor: pointer; font-size: 1.05em; transition: all 0.3s;"
-                    onmouseover="this.style.borderColor='#94A3B8'; this.style.background='rgba(71, 85, 105, 0.4)'"
-                    onmouseout="this.style.borderColor='rgba(148, 163, 184, 0.4)'; this.style.background='rgba(71, 85, 105, 0.3)'">
+                    style="flex: 1; padding: 12px; background: rgba(100, 100, 100, 0.3);
+                           border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: #e2e8f0;
+                           font-weight: 600; cursor: pointer;">
               Cancel
             </button>
           </div>
@@ -8159,23 +8128,21 @@ const THEMES = {
     name: 'Light Mode',
     icon: '☀️',
     colors: {
-      primary: '#047857',
-      secondary: '#1D4ED8',
-      accent: '#6D28D9',
-      warning: '#B45309',
-      danger: '#B91C1C',
-      background: 'linear-gradient(135deg, #FFFFFF 0%, #F1F5F9 100%)',
-      cardBg: 'linear-gradient(135deg, #FFFFFF, #FEFEFE)',
-      cardBorder: 'rgba(148, 163, 184, 0.3)',
-      text: '#0F172A',
-      textSecondary: '#334155',
-      textMuted: '#475569',
+      primary: '#059669',
+      secondary: '#2563EB',
+      accent: '#7C3AED',
+      warning: '#D97706',
+      danger: '#DC2626',
+      background: 'linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%)',
+      cardBg: 'linear-gradient(135deg, #FFFFFF, #F8FAFC)',
+      cardBorder: 'rgba(203, 213, 225, 0.6)',
+      text: '#1E293B',
+      textSecondary: '#475569',
+      textMuted: '#64748B',
       sidebarBg: 'rgba(255, 255, 255, 0.98)',
-      headerBg: 'linear-gradient(135deg, #FAFAFA, #F5F5F5)',
-      inputBg: 'rgba(255, 255, 255, 0.95)',
-      hoverEffect: 'rgba(4, 120, 87, 0.08)',
-      shadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-      strongText: '#020617'
+      headerBg: 'rgba(248, 250, 252, 0.95)',
+      inputBg: 'rgba(248, 250, 252, 0.9)',
+      hoverEffect: 'rgba(5, 150, 105, 0.1)'
     }
   },
 
@@ -8264,74 +8231,6 @@ const THEMES = {
       headerBg: 'rgba(91, 33, 182, 0.95)',
       inputBg: 'rgba(76, 29, 149, 0.8)',
       hoverEffect: 'rgba(139, 92, 246, 0.2)'
-    }
-  },
-
-  stadium: {
-    name: 'Stadium Night',
-    icon: '🏟️',
-    colors: {
-      primary: '#22C55E',
-      secondary: '#3B82F6',
-      accent: '#FBBF24',
-      warning: '#F59E0B',
-      danger: '#EF4444',
-      background: 'radial-gradient(ellipse at center, #1A4D2E 0%, #0F2818 50%, #050A08 100%)',
-      cardBg: 'linear-gradient(135deg, rgba(26, 77, 46, 0.85), rgba(15, 40, 24, 0.95))',
-      cardBorder: 'rgba(34, 197, 94, 0.4)',
-      text: '#F0FDF4',
-      textSecondary: '#BBF7D0',
-      textMuted: '#86EFAC',
-      sidebarBg: 'linear-gradient(180deg, rgba(15, 40, 24, 0.98), rgba(5, 10, 8, 0.98))',
-      headerBg: 'linear-gradient(90deg, rgba(26, 77, 46, 0.95), rgba(15, 40, 24, 0.95))',
-      inputBg: 'rgba(15, 40, 24, 0.9)',
-      hoverEffect: 'rgba(34, 197, 94, 0.25)',
-      grassPattern: 'repeating-linear-gradient(0deg, rgba(34, 197, 94, 0.05) 0px, transparent 2px, transparent 4px, rgba(34, 197, 94, 0.05) 6px)',
-      floodlight: 'radial-gradient(ellipse at top, rgba(251, 191, 36, 0.15) 0%, transparent 70%)'
-    }
-  },
-
-  classic: {
-    name: 'Classic Football',
-    icon: '⚽',
-    colors: {
-      primary: '#DC2626',
-      secondary: '#FFFFFF',
-      accent: '#1E3A8A',
-      warning: '#F59E0B',
-      danger: '#B91C1C',
-      background: 'linear-gradient(135deg, #450A0A 0%, #7F1D1D 50%, #991B1B 100%)',
-      cardBg: 'linear-gradient(135deg, rgba(127, 29, 29, 0.95), rgba(69, 10, 10, 0.95))',
-      cardBorder: 'rgba(220, 38, 38, 0.4)',
-      text: '#FEF2F2',
-      textSecondary: '#FECACA',
-      textMuted: '#FCA5A5',
-      sidebarBg: 'rgba(69, 10, 10, 0.98)',
-      headerBg: 'rgba(127, 29, 29, 0.95)',
-      inputBg: 'rgba(69, 10, 10, 0.9)',
-      hoverEffect: 'rgba(220, 38, 38, 0.25)'
-    }
-  },
-
-  champions: {
-    name: 'Champions Gold',
-    icon: '🏆',
-    colors: {
-      primary: '#EAB308',
-      secondary: '#F59E0B',
-      accent: '#FBBF24',
-      warning: '#DC2626',
-      danger: '#B91C1C',
-      background: 'linear-gradient(135deg, #713F12 0%, #854D0E 50%, #A16207 100%)',
-      cardBg: 'linear-gradient(135deg, rgba(133, 77, 14, 0.95), rgba(113, 63, 18, 0.95))',
-      cardBorder: 'rgba(234, 179, 8, 0.5)',
-      text: '#FFFBEB',
-      textSecondary: '#FDE68A',
-      textMuted: '#FCD34D',
-      sidebarBg: 'rgba(113, 63, 18, 0.98)',
-      headerBg: 'rgba(133, 77, 14, 0.95)',
-      inputBg: 'rgba(113, 63, 18, 0.9)',
-      hoverEffect: 'rgba(234, 179, 8, 0.3)'
     }
   }
 };
@@ -12333,8 +12232,8 @@ function showTournamentHighlights() {
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 25px;">
         <div style="padding: 15px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);">
           <div style="color: #94a3b8; font-size: 0.9em; margin-bottom: 5px;">⚽ Top Scorer</div>
-          <div style="color: #e5e7eb; font-weight: 600;">${topScorer && topScorer.name ? topScorer.name : 'No data'}</div>
-          <div style="color: #60a5fa; font-size: 0.9em;">${topScorer && topScorer.goals ? topScorer.goals + ' goals' : '—'}</div>
+          <div style="color: #e5e7eb; font-weight: 600;">${topScorer ? topScorer.name : 'Unknown'}</div>
+          <div style="color: #60a5fa; font-size: 0.9em;">${topScorer ? topScorer.goals + ' goals' : ''}</div>
         </div>
         <div style="padding: 15px; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3);">
           <div style="color: #94a3b8; font-size: 0.9em; margin-bottom: 5px;">📊 Goals Per Game</div>
@@ -13888,12 +13787,6 @@ async function initTeamsAndPlayers() {
   if (window.VERBOSE_LOGGING) console.log("🏁 Teams initialized from TEAM_POOL:", TEAM_POOL.length);
   console.log("✅ Valid teams registered in TEAM_MAP:", validCount);
   if (window.VERBOSE_LOGGING) console.log("👥 Players tracked in PLAYER_DB:", Object.keys(PLAYER_DB).length);
-
-  // 🔥 FIX: Initialize ALL_TEAMS for Season Mode and other features
-  if (!window.ALL_TEAMS || window.ALL_TEAMS.length === 0) {
-    window.ALL_TEAMS = Array.from(TEAM_MAP.values());
-    if (window.VERBOSE_LOGGING) console.log("✅ ALL_TEAMS initialized with", window.ALL_TEAMS.length, "teams");
-  }
 }
 
 /**
@@ -16022,16 +15915,6 @@ function getSeasonTeamStats() {
 function displayHallOfFame() {
   const out = document.getElementById('output');
   if (!out) return;
-
-  // 🔥 LOAD Hall of Fame data from localStorage
-  if (!window.HALL_OF_FAME_DATA) {
-    try {
-      const saved = localStorage.getItem('hallOfFameData');
-      window.HALL_OF_FAME_DATA = saved ? JSON.parse(saved) : { teams: [], players: [], tournaments: [] };
-    } catch (e) {
-      window.HALL_OF_FAME_DATA = { teams: [], players: [], tournaments: [] };
-    }
-  }
 
   out.innerHTML = `
     <div style="max-width: 1400px; margin: 0 auto;">
@@ -23236,13 +23119,10 @@ function createPots() {
     }
 
     console.log("✅ Groups generated successfully:", groups.length);
-
-    // 🔥 FIX: Update tournament progress timeline
-    if (typeof updateTournamentProgress === 'function') updateTournamentProgress('groups');
-
+    
     // Store groups globally
     window.GROUPS = groups;
-
+    
     // Also store all drawn teams for custom match feature
     window.DRAWN_TEAMS = [];
     const teamNames = new Set();
@@ -25102,7 +24982,6 @@ async function simulateKnockoutRoundsAsync(teams, onProgress) {
   try {
     // Round of 32
     if (onProgress) onProgress("Round of 32", 0, 0);
-    if (typeof updateTournamentProgress === 'function') updateTournamentProgress('r32');
     results.roundOf32 = await simulateKnockoutRoundAsync(teams, "Round of 32", 1.2, onProgress);
     results.bracket.push({ round: "Round of 32", matches: results.roundOf32 });
 
@@ -25113,21 +24992,18 @@ async function simulateKnockoutRoundsAsync(teams, onProgress) {
     // Round of 16
     const roundOf16Teams = results.roundOf32.map((m) => m && m.winner).filter(Boolean);
     if (onProgress) onProgress("Round of 16", 0, 0);
-    if (typeof updateTournamentProgress === 'function') updateTournamentProgress('r16');
     results.roundOf16 = await simulateKnockoutRoundAsync(roundOf16Teams, "Round of 16", 1.4, onProgress);
     results.bracket.push({ round: "Round of 16", matches: results.roundOf16 });
 
     // Quarter Finals
     const quarterTeams = results.roundOf16.map((m) => m && m.winner).filter(Boolean);
     if (onProgress) onProgress("Quarter Finals", 0, 0);
-    if (typeof updateTournamentProgress === 'function') updateTournamentProgress('qf');
     results.quarterFinals = await simulateKnockoutRoundAsync(quarterTeams, "Quarter Finals", 1.6, onProgress);
     results.bracket.push({ round: "Quarter Finals", matches: results.quarterFinals });
 
     // Semi Finals
     const semiTeams = results.quarterFinals.map((m) => m && m.winner).filter(Boolean);
     if (onProgress) onProgress("Semi Finals", 0, 0);
-    if (typeof updateTournamentProgress === 'function') updateTournamentProgress('sf');
     results.semiFinals = await simulateKnockoutRoundAsync(semiTeams, "Semi Finals", 1.8, onProgress);
     results.bracket.push({ round: "Semi Finals", matches: results.semiFinals });
 
@@ -25135,7 +25011,6 @@ async function simulateKnockoutRoundsAsync(teams, onProgress) {
     const finalTeams = results.semiFinals.map((m) => m && m.winner).filter(Boolean);
     if (finalTeams.length >= 2) {
       if (onProgress) onProgress("Final", 0, 0);
-      if (typeof updateTournamentProgress === 'function') updateTournamentProgress('final');
       const finalMatches = await simulateKnockoutRoundAsync(finalTeams, "Final", 2.0, onProgress);
       results.final = finalMatches[0] || null;
     } else {
@@ -25811,94 +25686,6 @@ function updateClubLegacyFromResults(results) {
   }
 
   console.log("✅ Club legacy database updated");
-
-  // 🔥 CRITICAL FIX: Auto-populate Hall of Fame after tournament
-  // Prevent duplicate entries if called multiple times
-  if (results._hofUpdated) {
-    if (window.VERBOSE_LOGGING) console.log("ℹ️ Hall of Fame already updated for this tournament");
-    return;
-  }
-  results._hofUpdated = true;
-
-  if (!window.HALL_OF_FAME_DATA) {
-    window.HALL_OF_FAME_DATA = { teams: [], players: [], tournaments: [] };
-  }
-
-  // Calculate champion stats from match results
-  const championStats = { goalsScored: 0, wins: 0, matchesPlayed: 0 };
-  const allKnockoutMatches = [
-    ...(results.roundOf32 || []),
-    ...(results.roundOf16 || []),
-    ...(results.quarterFinals || []),
-    ...(results.semiFinals || []),
-    results.final
-  ].filter(Boolean);
-
-  allKnockoutMatches.forEach(match => {
-    if (!match || !match.winner) return;
-    if ((match.winner.name || match.winner) === champion) {
-      championStats.wins++;
-      championStats.matchesPlayed++;
-      // Get goals from MATCH_DETAILS_DB
-      const matchDetail = MATCH_DETAILS_DB[match.matchId];
-      if (matchDetail) {
-        championStats.goalsScored += (matchDetail.teamA === champion ? matchDetail.scoreA : matchDetail.scoreB);
-      }
-    }
-  });
-
-  // Add champion team to Hall of Fame
-  HALL_OF_FAME_DATA.teams.push({
-    name: champion,
-    tournament: 'Tournament',
-    date: new Date().toISOString(),
-    goalsScored: championStats.goalsScored,
-    wins: championStats.wins
-  });
-
-  // Add top 5 scorers to Hall of Fame
-  if (window.PLAYER_DB) {
-    const topScorers = Object.values(PLAYER_DB)
-      .filter(p => p.goals > 0)
-      .sort((a, b) => b.goals - a.goals)
-      .slice(0, 5);
-
-    topScorers.forEach(scorer => {
-      HALL_OF_FAME_DATA.players.push({
-        name: scorer.name,
-        team: scorer.team,
-        goals: scorer.goals,
-        assists: scorer.assists || 0,
-        tournament: 'Tournament',
-        date: new Date().toISOString()
-      });
-    });
-  }
-
-  // Save Hall of Fame to localStorage
-  try {
-    localStorage.setItem('hallOfFameData', JSON.stringify(HALL_OF_FAME_DATA));
-    if (window.VERBOSE_LOGGING) console.log('✅ Hall of Fame updated with tournament data');
-  } catch (e) {
-    console.error('Failed to save Hall of Fame:', e);
-  }
-
-  // 🔥 CRITICAL: Complete tournament tracking for TOURNAMENT_HISTORY_ENHANCED
-  const topScorerData = window.PLAYER_DB ?
-    Object.values(PLAYER_DB).filter(p => p.goals > 0).sort((a, b) => b.goals - a.goals)[0] : null;
-
-  // Safely extract runner-up team name
-  let runnerUpTeam = null;
-  if (results.final) {
-    const winnerName = results.final.winner?.name || results.final.winner;
-    const teamAName = results.final.teamA?.name || results.final.teamA;
-    const teamBName = results.final.teamB?.name || results.final.teamB;
-    runnerUpTeam = (winnerName === champion) ? teamBName : teamAName;
-  }
-
-  if (typeof completeTournament === 'function') {
-    completeTournament(champion, runnerUpTeam, topScorerData);
-  }
 }
 
 /**

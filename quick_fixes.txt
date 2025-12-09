@@ -1,0 +1,12 @@
+PRIORITIZED FIXES - Do in This Order:
+
+1. Hall of Fame Auto-Population (CRITICAL - user complaint #1)
+2. Season Mode Group Generation (CRITICAL - broken feature)  
+3. Tournament Timeline (HIGH - visual bug)
+4. Tournament History Display (HIGH - broken button)
+5. Quick Tournament Undefined (MEDIUM - visual bug)
+6. Prediction Buttons (MEDIUM - feature request)
+7. Manager XP Display (check if already working)
+8. Themes/UI improvements (LOWER priority)
+
+Let me start with the CRITICAL issues first.

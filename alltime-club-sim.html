@@ -4748,20 +4748,20 @@ button:focus, input:focus, select:focus {
       </div>
 
       <!-- Tab Navigation -->
-      <div class="sidebar-tabs">
-        <button class="sidebar-tab active" data-tab="tournament" onclick="switchTab('tournament')">
+      <div class="sidebar-tabs" role="tablist" aria-label="Main navigation">
+        <button class="sidebar-tab active" data-tab="tournament" onclick="switchTab('tournament')" role="tab" aria-label="Tournament controls" aria-selected="true">
           ⚽ Tournament
         </button>
-        <button class="sidebar-tab" data-tab="views" onclick="switchTab('views')">
+        <button class="sidebar-tab" data-tab="views" onclick="switchTab('views')" role="tab" aria-label="View tournament data" aria-selected="false">
           📊 Views
         </button>
-        <button class="sidebar-tab" data-tab="tools" onclick="switchTab('tools')">
+        <button class="sidebar-tab" data-tab="tools" onclick="switchTab('tools')" role="tab" aria-label="Tournament tools" aria-selected="false">
           🛠️ Tools
         </button>
-        <button class="sidebar-tab" data-tab="profile" onclick="switchTab('profile')">
+        <button class="sidebar-tab" data-tab="profile" onclick="switchTab('profile')" role="tab" aria-label="Manager profile" aria-selected="false">
           👤 Profile
         </button>
-        <button class="sidebar-tab" data-tab="settings" onclick="switchTab('settings')">
+        <button class="sidebar-tab" data-tab="settings" onclick="switchTab('settings')" role="tab" aria-label="Settings" aria-selected="false">
           ⚙️ Settings
         </button>
       </div>
@@ -4769,7 +4769,7 @@ button:focus, input:focus, select:focus {
       <!-- Tournament Tab -->
       <div class="tab-content active" id="tab-tournament">
         <div class="control-column">
-          <button class="ctrl-btn btn-green" id="btnDraw">
+          <button class="ctrl-btn btn-green" id="btnDraw" aria-label="Generate tournament groups from seeded pots" title="Draw 16 teams into groups using seeded pots">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Generate Groups</span>
               <span class="ctrl-btn-subtitle">Draw all 16 groups from seeded pots</span>
@@ -4777,7 +4777,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">Draw</span>
           </button>
 
-          <button class="ctrl-btn btn-blue" id="btnGroupStage" disabled>
+          <button class="ctrl-btn btn-blue" id="btnGroupStage" disabled aria-label="Simulate group stage matches" title="Simulate all group stage matches with home-and-away format">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Simulate Group Stage</span>
               <span class="ctrl-btn-subtitle">Home-and-away round-robin</span>
@@ -4785,7 +4785,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">Play</span>
           </button>
 
-          <button class="ctrl-btn btn-orange" id="btnKnockouts" disabled>
+          <button class="ctrl-btn btn-orange" id="btnKnockouts" disabled aria-label="Simulate knockout rounds" title="Run all knockout rounds from Round of 32 to the Final">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Run Knockouts</span>
               <span class="ctrl-btn-subtitle">R32 → R16 → QF → SF → Final</span>
@@ -4793,7 +4793,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">KO</span>
           </button>
 
-          <button class="ctrl-btn btn-red" id="resetTournamentBtn" onclick="showResetConfirmationModal()">
+          <button class="ctrl-btn btn-red" id="resetTournamentBtn" onclick="showResetConfirmationModal()" aria-label="Reset tournament" title="Clear all tournament data and start fresh">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Reset Tournament</span>
               <span class="ctrl-btn-subtitle">Clear and start fresh</span>
@@ -4806,7 +4806,7 @@ button:focus, input:focus, select:focus {
       <!-- Views Tab -->
       <div class="tab-content" id="tab-views">
         <div class="control-column">
-          <button class="ctrl-btn btn-purple" id="btnStats" disabled onclick="showPlayerStats()">
+          <button class="ctrl-btn btn-purple" id="btnStats" disabled onclick="showPlayerStats()" aria-label="View player and match statistics" title="View top scorers and complete tournament match log">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Player & Match Stats</span>
               <span class="ctrl-btn-subtitle">Top scorers & tournament log</span>
@@ -4814,7 +4814,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">View</span>
           </button>
 
-          <button class="ctrl-btn btn-purple" id="btnAllMatches" disabled onclick="showTournamentOverview()">
+          <button class="ctrl-btn btn-purple" id="btnAllMatches" disabled onclick="showTournamentOverview()" aria-label="View all tournament matches" title="See complete results for all tournament matches">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">All Matches</span>
               <span class="ctrl-btn-subtitle">Complete match results</span>
@@ -4822,7 +4822,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">View</span>
           </button>
 
-          <button class="ctrl-btn btn-purple" id="btnMatchWeeks" disabled onclick="showMatchWeeks()">
+          <button class="ctrl-btn btn-purple" id="btnMatchWeeks" disabled onclick="showMatchWeeks()" aria-label="View matches by matchday" title="Browse tournament matches organized by matchday">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Matchdays</span>
               <span class="ctrl-btn-subtitle">View by matchday</span>
@@ -4830,7 +4830,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">View</span>
           </button>
 
-          <button class="ctrl-btn btn-purple" id="btnBracket" disabled onclick="showTournamentBracket()">
+          <button class="ctrl-btn btn-purple" id="btnBracket" disabled onclick="showTournamentBracket()" aria-label="View tournament bracket" title="View knockout stage bracket tree">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Tournament Bracket</span>
               <span class="ctrl-btn-subtitle">Knockout tree view</span>
@@ -4838,7 +4838,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">View</span>
           </button>
 
-          <button class="ctrl-btn btn-purple" id="btnSimpleBracket" disabled onclick="showSimpleBracket()">
+          <button class="ctrl-btn btn-purple" id="btnSimpleBracket" disabled onclick="showSimpleBracket()" aria-label="View simple bracket" title="View NCAA-style simplified tournament bracket">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Simple Bracket</span>
               <span class="ctrl-btn-subtitle">NCAA-style tree view</span>
@@ -4846,7 +4846,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">🏀</span>
           </button>
 
-          <button class="ctrl-btn btn-purple" id="btnClubLegacy" onclick="showClubLegacy()">
+          <button class="ctrl-btn btn-purple" id="btnClubLegacy" onclick="showClubLegacy()" aria-label="View club legacy" title="View all-time achievements and records for all clubs">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Club Legacy</span>
               <span class="ctrl-btn-subtitle">All-time achievements</span>
@@ -4854,7 +4854,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">Legacy</span>
           </button>
 
-          <button class="ctrl-btn btn-orange" id="btnHallOfFame" onclick="showHallOfFame()">
+          <button class="ctrl-btn btn-orange" id="btnHallOfFame" onclick="showHallOfFame()" aria-label="View Hall of Fame" title="View legendary players and all-time tournament records">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Hall of Fame</span>
               <span class="ctrl-btn-subtitle">Legends & all-time records</span>
@@ -4862,7 +4862,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">🏛️</span>
           </button>
 
-          <button class="ctrl-btn btn-blue" id="btnTopPerformers" onclick="showTopPerformersCarousel()">
+          <button class="ctrl-btn btn-blue" id="btnTopPerformers" onclick="showTopPerformersCarousel()" aria-label="View top performers" title="Browse carousel of best performing players">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Top Performers</span>
               <span class="ctrl-btn-subtitle">Best players carousel</span>
@@ -4875,7 +4875,7 @@ button:focus, input:focus, select:focus {
       <!-- Tools Tab -->
       <div class="tab-content" id="tab-tools">
         <div class="control-column">
-          <button class="ctrl-btn btn-purple" id="customMatchBtn" onclick="showEnhancedCustomMatch()">
+          <button class="ctrl-btn btn-purple" id="customMatchBtn" onclick="showEnhancedCustomMatch()" aria-label="Create custom match" title="Simulate any custom matchup between two teams">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Custom Match</span>
               <span class="ctrl-btn-subtitle">Simulate any matchup</span>
@@ -4883,7 +4883,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">Friendly</span>
           </button>
 
-          <button class="ctrl-btn btn-orange" id="btnAchievements" onclick="showTrophyCabinet()">
+          <button class="ctrl-btn btn-orange" id="btnAchievements" onclick="showTrophyCabinet()" aria-label="View trophy cabinet" title="View all unlocked achievements and trophies">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Trophy Cabinet</span>
               <span class="ctrl-btn-subtitle">Unlocked achievements</span>
@@ -4891,7 +4891,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">🏆</span>
           </button>
 
-          <button class="ctrl-btn btn-blue" id="btnTournamentStats" onclick="showTournamentStatsSummary()">
+          <button class="ctrl-btn btn-blue" id="btnTournamentStats" onclick="showTournamentStatsSummary()" aria-label="View tournament statistics" title="View goals, upsets, and tournament records">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Tournament Stats</span>
               <span class="ctrl-btn-subtitle">Goals, upsets, records</span>
@@ -4899,7 +4899,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">📊</span>
           </button>
 
-          <button class="ctrl-btn btn-red" id="btnMedicalRoom" onclick="showMedicalRoom()">
+          <button class="ctrl-btn btn-red" id="btnMedicalRoom" onclick="showMedicalRoom()" aria-label="View medical room" title="View player injuries and suspensions">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Medical Room</span>
               <span class="ctrl-btn-subtitle">Injuries & suspensions</span>
@@ -4907,7 +4907,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">🏥</span>
           </button>
 
-          <button class="ctrl-btn btn-green" id="btnClassicMatchups" onclick="showClassicMatchups()">
+          <button class="ctrl-btn btn-green" id="btnClassicMatchups" onclick="showClassicMatchups()" aria-label="View classic matchups" title='Simulate historic "What If" battles between legendary teams'>
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Classic Matchups</span>
               <span class="ctrl-btn-subtitle">Historic "What If" battles</span>
@@ -4915,7 +4915,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">🎭</span>
           </button>
 
-          <button class="ctrl-btn btn-blue" id="btnShareResults" onclick="shareResultsToClipboard()">
+          <button class="ctrl-btn btn-blue" id="btnShareResults" onclick="shareResultsToClipboard()" aria-label="Share results" title="Copy tournament results to clipboard for sharing">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Share Results</span>
               <span class="ctrl-btn-subtitle">Copy to clipboard</span>
@@ -4923,7 +4923,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">📋</span>
           </button>
 
-          <button class="ctrl-btn btn-purple" id="btnQuickTournament" onclick="quickTournamentMode()">
+          <button class="ctrl-btn btn-purple" id="btnQuickTournament" onclick="quickTournamentMode()" aria-label="Start quick tournament" title="Run a fast-forward tournament simulation">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Quick Tournament</span>
               <span class="ctrl-btn-subtitle">Fast-forward simulation</span>
@@ -4931,7 +4931,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">⚡</span>
           </button>
 
-          <button class="ctrl-btn btn-orange" id="btnTemplates" onclick="showTemplateManager()">
+          <button class="ctrl-btn btn-orange" id="btnTemplates" onclick="showTemplateManager()" aria-label="Manage tournament templates" title="Save or load tournament setup templates">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Tournament Templates</span>
               <span class="ctrl-btn-subtitle">Save/Load setups</span>
@@ -4939,7 +4939,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">💾</span>
           </button>
 
-          <button class="ctrl-btn btn-green" id="btnSaveTemplate" onclick="saveTournamentTemplate()">
+          <button class="ctrl-btn btn-green" id="btnSaveTemplate" onclick="saveTournamentTemplate()" aria-label="Save tournament template" title="Store current tournament setup as a template">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Save Template</span>
               <span class="ctrl-btn-subtitle">Store current setup</span>
@@ -4947,7 +4947,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">💾</span>
           </button>
 
-          <button class="ctrl-btn btn-blue" id="btnCompareTournaments" onclick="showTournamentComparison()">
+          <button class="ctrl-btn btn-blue" id="btnCompareTournaments" onclick="showTournamentComparison()" aria-label="Compare tournaments" title="View side-by-side comparison of tournament statistics">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">Compare Tournaments</span>
               <span class="ctrl-btn-subtitle">Side-by-side stats</span>
@@ -4955,7 +4955,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">📊</span>
           </button>
 
-          <button class="ctrl-btn btn-purple" id="btnPredictionToggle" onclick="togglePredictions()">
+          <button class="ctrl-btn btn-purple" id="btnPredictionToggle" onclick="togglePredictions()" aria-label="Toggle predictions" title="Enable or disable match prediction mode">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title" id="predictionToggleTitle">🔮 Predictions: ON</span>
               <span class="ctrl-btn-subtitle" id="predictionToggleSubtitle">Making predictions</span>
@@ -4963,7 +4963,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">🔮</span>
           </button>
 
-          <button class="ctrl-btn btn-purple" id="btnPredictionStats" onclick="displayPredictionStats()">
+          <button class="ctrl-btn btn-purple" id="btnPredictionStats" onclick="displayPredictionStats()" aria-label="View prediction statistics" title="View your prediction accuracy and statistics">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">📊 Prediction Stats</span>
               <span class="ctrl-btn-subtitle">View your accuracy</span>
@@ -4971,7 +4971,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">📈</span>
           </button>
 
-          <button class="ctrl-btn btn-gold" id="btnManagerProfile" onclick="displayManagerProfile()">
+          <button class="ctrl-btn btn-gold" id="btnManagerProfile" onclick="displayManagerProfile()" aria-label="View manager profile" title="View your manager statistics and progress">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">👤 Manager Profile</span>
               <span class="ctrl-btn-subtitle">View stats & progress</span>
@@ -4979,7 +4979,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">⭐</span>
           </button>
 
-          <button class="ctrl-btn btn-purple" id="btnManagerCustomization" onclick="showManagerCustomization()">
+          <button class="ctrl-btn btn-purple" id="btnManagerCustomization" onclick="showManagerCustomization()" aria-label="Customize manager" title="Personalize your manager appearance and details">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">👔 Customize Manager</span>
               <span class="ctrl-btn-subtitle">Personalize appearance</span>
@@ -4987,7 +4987,7 @@ button:focus, input:focus, select:focus {
             <span class="ctrl-btn-tag">✨</span>
           </button>
 
-          <button class="ctrl-btn btn-purple" id="btnTournamentHistory" onclick="displayTournamentHistory()">
+          <button class="ctrl-btn btn-purple" id="btnTournamentHistory" onclick="displayTournamentHistory()" aria-label="View tournament history" title="Browse history of all past tournaments">
             <div class="ctrl-btn-main">
               <span class="ctrl-btn-title">📚 Tournament History</span>
               <span class="ctrl-btn-subtitle">View past tournaments</span>
@@ -5001,17 +5001,17 @@ button:focus, input:focus, select:focus {
       <div class="tab-content" id="tab-settings">
         <div class="control-column">
           <div class="file-row">
-            <input id="importSave" type="file" class="file-input" accept=".json">
-            <button class="small-btn" type="button" id="importSaveBtn">📂 Load Save</button>
+            <input id="importSave" type="file" class="file-input" accept=".json" aria-label="Choose save file to import">
+            <button class="small-btn" type="button" id="importSaveBtn" aria-label="Load saved tournament data" title="Import previously saved tournament data from JSON file">📂 Load Save</button>
           </div>
 
           <div class="rng-block">
             <label for="difficultySelect">Difficulty Mode</label>
-            <div class="rng-presets" style="margin-top: 8px;">
-              <button class="rng-pill" type="button" data-difficulty="easy" onclick="setDifficulty('easy')">⭐ Beginner</button>
-              <button class="rng-pill active" type="button" data-difficulty="normal" onclick="setDifficulty('normal')">⭐⭐ Normal</button>
-              <button class="rng-pill" type="button" data-difficulty="hard" onclick="setDifficulty('hard')">⭐⭐⭐ Expert</button>
-              <button class="rng-pill" type="button" data-difficulty="legendary" onclick="setDifficulty('legendary')">⭐⭐⭐⭐ Legend</button>
+            <div class="rng-presets" style="margin-top: 8px;" role="group" aria-label="Difficulty level selection">
+              <button class="rng-pill" type="button" data-difficulty="easy" onclick="setDifficulty('easy')" aria-label="Beginner difficulty" title="Easier matches, lower AI quality">⭐ Beginner</button>
+              <button class="rng-pill active" type="button" data-difficulty="normal" onclick="setDifficulty('normal')" aria-label="Normal difficulty" title="Balanced experience" aria-pressed="true">⭐⭐ Normal</button>
+              <button class="rng-pill" type="button" data-difficulty="hard" onclick="setDifficulty('hard')" aria-label="Expert difficulty" title="Harder matches, higher AI quality">⭐⭐⭐ Expert</button>
+              <button class="rng-pill" type="button" data-difficulty="legendary" onclick="setDifficulty('legendary')" aria-label="Legend difficulty" title="Maximum challenge, legendary AI performance">⭐⭐⭐⭐ Legend</button>
             </div>
             <div style="font-size: 0.8em; color: var(--text-muted); margin-top: 6px;" id="difficultyDescription">
               Balanced experience
@@ -5022,14 +5022,14 @@ button:focus, input:focus, select:focus {
             <label for="rngSlider">Upset factor</label>
             <div class="rng-row">
               <input id="rngSlider" type="range" min="0.5" max="2.0" step="0.05" value="1.0"
-                     oninput="updateRNG(this.value)">
+                     oninput="updateRNG(this.value)" aria-label="Upset factor slider" title="Adjust randomness - lower is more predictable, higher is more chaotic">
               <span id="rngLabel">Balanced</span>
             </div>
-            <div class="rng-presets">
-              <button class="rng-pill" type="button" data-rng-value="0.6">Tight</button>
-              <button class="rng-pill active" type="button" data-rng-value="1.0">Balanced</button>
-              <button class="rng-pill" type="button" data-rng-value="1.3">Chaos</button>
-              <button class="rng-pill" type="button" data-rng-value="1.7">Extreme</button>
+            <div class="rng-presets" role="group" aria-label="Upset factor presets">
+              <button class="rng-pill" type="button" data-rng-value="0.6" aria-label="Tight upset factor" title="Low randomness, matches follow team quality closely">Tight</button>
+              <button class="rng-pill active" type="button" data-rng-value="1.0" aria-label="Balanced upset factor" title="Normal randomness, balanced simulation" aria-pressed="true">Balanced</button>
+              <button class="rng-pill" type="button" data-rng-value="1.3" aria-label="Chaos upset factor" title="High randomness, frequent upsets">Chaos</button>
+              <button class="rng-pill" type="button" data-rng-value="1.7" aria-label="Extreme upset factor" title="Very high randomness, maximum unpredictability">Extreme</button>
             </div>
           </div>
 
@@ -5262,12 +5262,16 @@ button:focus, input:focus, select:focus {
                                                   font-size: 0.95em; text-transform: uppercase; letter-spacing: 0.5px;">
               👤 Manager Name
             </label>
-            <input id="managerNameInput" type="text" placeholder="Enter your name"
+            <input id="managerNameInput" type="text" placeholder="Enter your name" maxlength="30"
                    style="width: 100%; padding: 14px 16px; border-radius: 10px; border: 2px solid rgba(59, 130, 246, 0.4);
                           background: rgba(15, 23, 42, 0.6); color: #F1F5F9; font-size: 1.1rem; font-weight: 500;
                           transition: all 0.3s;"
                    onfocus="this.style.borderColor='#60A5FA'; this.style.background='rgba(15, 23, 42, 0.8)'"
-                   onblur="this.style.borderColor='rgba(59, 130, 246, 0.4)'; this.style.background='rgba(15, 23, 42, 0.6)'"/>
+                   onblur="validateManagerName(this)"
+                   oninput="validateManagerNameInput(this)"
+                   aria-describedby="manager-name-help"/>
+            <div id="manager-name-validation" style="margin-top: 6px; font-size: 0.85em; min-height: 18px;"></div>
+            <div id="manager-name-help" style="color: #94a3b8; font-size: 0.85em; margin-top: 4px;">Max 30 characters. Letters, numbers, and spaces allowed.</div>
           </div>
 
           <!-- Favorite Team Section -->
@@ -5359,6 +5363,37 @@ button:focus, input:focus, select:focus {
                            border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: #e2e8f0;
                            font-weight: 600; cursor: pointer;">
               Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Universal Confirmation Modal -->
+  <div id="confirmationModal" class="modal-backdrop" onclick="closeConfirmationModal()">
+    <div class="modal" onclick="event.stopPropagation()" style="max-width: 500px;">
+      <div class="modal-content">
+        <div class="modal-head">
+          <h3 id="confirmationTitle">Confirm Action</h3>
+          <button class="modal-close" onclick="closeConfirmationModal()" aria-label="Close confirmation dialog">✕</button>
+        </div>
+        <div class="modal-body">
+          <p id="confirmationMessage" style="font-size: 1.1rem; color: #e2e8f0; margin-bottom: 24px; line-height: 1.6;">
+            Are you sure you want to proceed?
+          </p>
+          <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <button id="confirmCancelBtn" onclick="closeConfirmationModal()"
+                    class="small-btn"
+                    style="background: rgba(100, 100, 100, 0.3); border: 1px solid rgba(255, 255, 255, 0.2);"
+                    aria-label="Cancel action">
+              Cancel
+            </button>
+            <button id="confirmOkBtn" onclick="executeConfirmation()"
+                    class="small-btn"
+                    style="background: linear-gradient(135deg, #ef4444, #dc2626); font-weight: 600;"
+                    aria-label="Confirm action">
+              Confirm
             </button>
           </div>
         </div>
@@ -11074,9 +11109,13 @@ function exportTournament() {
 // copyExportToClipboard is defined later in the file with enhanced implementation (line 28137)
 
 function resetTournament() {
-  if (confirm("Are you sure you want to reset the tournament? All current progress will be lost.")) {
-    performReset();
-  }
+  showConfirmation(
+    'Reset Tournament',
+    'Are you sure you want to reset the tournament? All current progress will be lost.',
+    () => performReset(),
+    'Reset Tournament',
+    true
+  );
 }
 function handleImport() {
   if (window.VERBOSE_LOGGING) console.log("Handling import...");
@@ -12869,6 +12908,77 @@ function closeCustomMatch() {
   }
 }
 
+// Inline Form Validation Functions
+function validateManagerNameInput(input) {
+  const value = input.value;
+  const validationEl = document.getElementById('manager-name-validation');
+  const helpEl = document.getElementById('manager-name-help');
+
+  if (!validationEl) return;
+
+  // Show character count
+  const charCount = value.length;
+  const maxLength = 30;
+  helpEl.innerHTML = `${charCount}/${maxLength} characters. Letters, numbers, and spaces allowed.`;
+
+  // Validate in real-time
+  if (charCount === 0) {
+    validationEl.innerHTML = '';
+    input.style.borderColor = 'rgba(59, 130, 246, 0.4)';
+    return;
+  }
+
+  // Check for invalid characters
+  const validPattern = /^[a-zA-Z0-9\s]+$/;
+  if (!validPattern.test(value)) {
+    validationEl.innerHTML = '<span style="color: #ef4444;">⚠️ Only letters, numbers, and spaces allowed</span>';
+    input.style.borderColor = '#ef4444';
+    return;
+  }
+
+  // Check minimum length
+  if (charCount < 2) {
+    validationEl.innerHTML = '<span style="color: #f59e0b;">⚠️ Name too short (min 2 characters)</span>';
+    input.style.borderColor = '#f59e0b';
+    return;
+  }
+
+  // Valid input
+  validationEl.innerHTML = '<span style="color: #10b981;">✓ Valid name</span>';
+  input.style.borderColor = '#10b981';
+}
+
+function validateManagerName(input) {
+  const value = input.value.trim();
+  const validationEl = document.getElementById('manager-name-validation');
+
+  if (!validationEl) return true;
+
+  // Reset border color on blur
+  input.style.borderColor = 'rgba(59, 130, 246, 0.4)';
+  input.style.background = 'rgba(15, 23, 42, 0.6)';
+
+  if (value.length === 0) {
+    validationEl.innerHTML = '';
+    return true; // Empty is allowed
+  }
+
+  // Validate pattern
+  const validPattern = /^[a-zA-Z0-9\s]+$/;
+  if (!validPattern.test(value)) {
+    validationEl.innerHTML = '<span style="color: #ef4444;">⚠️ Invalid characters detected</span>';
+    return false;
+  }
+
+  if (value.length < 2) {
+    validationEl.innerHTML = '<span style="color: #f59e0b;">⚠️ Name too short</span>';
+    return false;
+  }
+
+  validationEl.innerHTML = '';
+  return true;
+}
+
 // Manager Edit Modal Functions
 function openManagerEditModal() {
   if (window.VERBOSE_LOGGING) console.log('👤 Opening manager edit modal...');
@@ -13788,11 +13898,17 @@ function deleteSavedMatch(matchId) {
 }
 
 function clearCustomMatchHistory() {
-  if (confirm("Are you sure you want to clear all saved custom matches?")) {
-    localStorage.removeItem("savedCustomMatches");
-    showCustomMatchHistory();
-    showUtilityMessage("Custom match history cleared!", "success");
-  }
+  showConfirmation(
+    'Clear Custom Match History',
+    'Are you sure you want to clear all saved custom matches? This cannot be undone.',
+    () => {
+      localStorage.removeItem("savedCustomMatches");
+      showCustomMatchHistory();
+      showUtilityMessage("Custom match history cleared!", "success");
+    },
+    'Clear History',
+    true
+  );
 }
 
 /************* HISTORY / SETTINGS / STATISTICS MODAL CONTENT *************/
@@ -15774,11 +15890,19 @@ function simulateRestOfSeason() {
     return;
   }
 
-  if (!confirm('Simulate all remaining matchdays? This cannot be undone.')) {
-    return;
-  }
+  showConfirmation(
+    'Simulate All Matchdays',
+    'Simulate all remaining matchdays? This will complete the entire season.',
+    () => {
+      showLoading('Simulating rest of season...');
+      continueSimulateAllMatchdays();
+    },
+    'Simulate All',
+    false
+  );
+}
 
-  showLoading('Simulating rest of season...');
+function continueSimulateAllMatchdays() {
 
   setTimeout(() => {
     while (SEASON_STATE.currentMatchday < SEASON_STATE.totalMatchdays &&
@@ -15823,11 +15947,19 @@ function simulateRestOfSeason() {
 }
 
 function abandonSeason() {
-  if (!confirm('Are you sure you want to abandon this season? All progress will be lost.')) {
-    return;
-  }
+  showConfirmation(
+    'Abandon Season',
+    'Are you sure you want to abandon this season? All progress will be lost and cannot be recovered.',
+    () => {
+      SEASON_STATE.active = false;
+      continueAbandonSeason();
+    },
+    'Abandon Season',
+    true
+  );
+}
 
-  SEASON_STATE.active = false;
+function continueAbandonSeason() {
   SEASON_STATE.currentMatchday = 0;
   SEASON_STATE.standings = [];
   SEASON_STATE.fixtures = [];
@@ -16903,7 +17035,7 @@ const STORAGE_MANAGER = {
               🧹 Smart Cleanup
             </button>
 
-            <button onclick="if(confirm('Remove old backups and trim history to last 20 tournaments?')) { STORAGE_MANAGER.aggressiveCleanup(); STORAGE_MANAGER.displayStorageInfo(); }"
+            <button onclick="showConfirmation('Aggressive Cleanup', 'Remove old backups and trim history to last 20 tournaments? This will free up significant storage space.', () => { STORAGE_MANAGER.aggressiveCleanup(); STORAGE_MANAGER.displayStorageInfo(); }, 'Cleanup Now', true)"
                     class="btn-danger" style="padding: 12px;">
               🔥 Aggressive Cleanup
             </button>
@@ -20858,10 +20990,18 @@ function saveCustomization() {
 }
 
 function resetCustomization() {
-  if (!confirm('Reset all customization to default? This cannot be undone.')) {
-    return;
-  }
+  showConfirmation(
+    'Reset Customization',
+    'Reset all manager customization to default settings? This cannot be undone.',
+    () => {
+      resetCustomizationConfirmed();
+    },
+    'Reset to Default',
+    true
+  );
+}
 
+function resetCustomizationConfirmed() {
   MANAGER_STATE.customization = {
     skinTone: 'light',
     hairStyle: 'short',
@@ -28726,9 +28866,13 @@ function initializeExportFeatures() {
   const hasBackup = localStorage.getItem('tournamentBackup');
   if (hasBackup && !window.TOURNAMENT && !window.GROUP_RESULTS) {
     setTimeout(() => {
-      if (confirm('A previous tournament backup was found. Would you like to restore it?')) {
-        restoreFromBackup();
-      }
+      showConfirmation(
+        'Restore Backup',
+        'A previous tournament backup was found. Would you like to restore it?',
+        () => restoreFromBackup(),
+        'Restore',
+        false
+      );
     }, 1000);
   }
   
@@ -29681,6 +29825,62 @@ function closeStatistics() {
 }
 
 // closeAllModals is defined earlier in the file - uses querySelectorAll approach
+
+// Universal Confirmation Modal System
+let confirmationCallback = null;
+
+function showConfirmation(title, message, onConfirm, confirmButtonText = 'Confirm', dangerMode = true) {
+  const modal = document.getElementById('confirmationModal');
+  const titleEl = document.getElementById('confirmationTitle');
+  const messageEl = document.getElementById('confirmationMessage');
+  const confirmBtn = document.getElementById('confirmOkBtn');
+
+  if (!modal || !titleEl || !messageEl || !confirmBtn) {
+    console.error('Confirmation modal elements not found');
+    return;
+  }
+
+  titleEl.textContent = title;
+  messageEl.textContent = message;
+  confirmBtn.textContent = confirmButtonText;
+  confirmationCallback = onConfirm;
+
+  // Style the confirm button based on danger mode
+  if (dangerMode) {
+    confirmBtn.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+  } else {
+    confirmBtn.style.background = 'linear-gradient(135deg, #3b82f6, #2563eb)';
+  }
+
+  // Show modal
+  modal.classList.add('active');
+  modal.style.display = 'flex';
+  modal.style.opacity = '1';
+  modal.style.visibility = 'visible';
+
+  // Focus on cancel button for accessibility
+  setTimeout(() => {
+    document.getElementById('confirmCancelBtn')?.focus();
+  }, 100);
+}
+
+function closeConfirmationModal() {
+  const modal = document.getElementById('confirmationModal');
+  if (modal) {
+    modal.classList.remove('active');
+    modal.style.display = 'none';
+    modal.style.opacity = '0';
+    modal.style.visibility = 'hidden';
+  }
+  confirmationCallback = null;
+}
+
+function executeConfirmation() {
+  if (confirmationCallback && typeof confirmationCallback === 'function') {
+    confirmationCallback();
+  }
+  closeConfirmationModal();
+}
 
 function populateMatchDetailModal(match) {
   const modal = document.getElementById('matchDetailModal');
@@ -30683,9 +30883,13 @@ function initializeCoreSystems() {
   if (!hasData && hasBackup) {
     if (window.VERBOSE_LOGGING) console.log('📦 Found existing backup, offering restore...');
     setTimeout(() => {
-      if (confirm('A previous tournament backup was found. Would you like to restore it?')) {
-        restoreFromBackup();
-      }
+      showConfirmation(
+        'Restore Backup',
+        'A previous tournament backup was found. Would you like to restore it?',
+        () => restoreFromBackup(),
+        'Restore',
+        false
+      );
     }, 2000);
   }
 
@@ -32724,6 +32928,16 @@ function showHallOfFame() {
 // KEYBOARD SHORTCUTS
 // ========================================
 document.addEventListener('keydown', (e) => {
+  // Handle Escape key for confirmation modal (priority)
+  if (e.key === 'Escape') {
+    const confirmModal = document.getElementById('confirmationModal');
+    if (confirmModal && confirmModal.classList.contains('active')) {
+      e.preventDefault();
+      closeConfirmationModal();
+      return;
+    }
+  }
+
   // Only if not typing in input or textarea
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
@@ -32755,8 +32969,15 @@ document.addEventListener('keydown', (e) => {
     'KeyH': () => {
       e.preventDefault();
       showHallOfFame();
+    },
+    'Slash': () => {
+      // Check if shift is pressed (? key is Shift+/)
+      if (e.shiftKey) {
+        e.preventDefault();
+        showKeyboardShortcuts();
+      }
     }
-    // Note: Escape key handled by global escape handler below
+    // Note: Escape key handled by global escape handler above
   };
 
   if (e.ctrlKey || e.metaKey) {
@@ -32776,47 +32997,99 @@ document.addEventListener('keydown', (e) => {
 
 function showKeyboardShortcuts() {
   const modal = `
-    <div class="modal-backdrop" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 10000; display: flex; align-items: center; justify-content: center;" onclick="this.remove()">
-      <div class="modal" style="max-width: 500px; width: 90%; background: #1e293b; border-radius: 16px; padding: 30px; border: 1px solid rgba(16, 185, 129, 0.3);" onclick="event.stopPropagation()">
-        <h3 style="color: #10b981; margin-bottom: 20px; font-size: 1.5em;">⌨️ Keyboard Shortcuts</h3>
-        <table style="width: 100%; color: #f7fafc; font-size: 0.95em;">
-          <tr style="border-bottom: 1px solid rgba(71, 85, 105, 0.3);">
-            <td style="padding: 12px 8px; font-weight: 600; color: #fbbf24;">Space</td>
-            <td style="padding: 12px 8px; color: #cbd5e1;">Simulate next match</td>
-          </tr>
-          <tr style="border-bottom: 1px solid rgba(71, 85, 105, 0.3);">
-            <td style="padding: 12px 8px; font-weight: 600; color: #fbbf24;">S</td>
-            <td style="padding: 12px 8px; color: #cbd5e1;">Quick save</td>
-          </tr>
-          <tr style="border-bottom: 1px solid rgba(71, 85, 105, 0.3);">
-            <td style="padding: 12px 8px; font-weight: 600; color: #fbbf24;">R</td>
-            <td style="padding: 12px 8px; color: #cbd5e1;">View results/standings</td>
-          </tr>
-          <tr style="border-bottom: 1px solid rgba(71, 85, 105, 0.3);">
-            <td style="padding: 12px 8px; font-weight: 600; color: #fbbf24;">P</td>
-            <td style="padding: 12px 8px; color: #cbd5e1;">View player stats</td>
-          </tr>
-          <tr style="border-bottom: 1px solid rgba(71, 85, 105, 0.3);">
-            <td style="padding: 12px 8px; font-weight: 600; color: #fbbf24;">H</td>
-            <td style="padding: 12px 8px; color: #cbd5e1;">Hall of Fame</td>
-          </tr>
-          <tr style="border-bottom: 1px solid rgba(71, 85, 105, 0.3);">
-            <td style="padding: 12px 8px; font-weight: 600; color: #fbbf24;">ESC</td>
-            <td style="padding: 12px 8px; color: #cbd5e1;">Close modals</td>
-          </tr>
-          <tr>
-            <td style="padding: 12px 8px; font-weight: 600; color: #fbbf24;">Ctrl+S</td>
-            <td style="padding: 12px 8px; color: #cbd5e1;">Export tournament</td>
-          </tr>
-        </table>
-        <button onclick="this.closest('.modal-backdrop').remove()" style="width: 100%; margin-top: 20px; background: #10b981; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600;">
-          Got it!
+    <div class="modal-backdrop" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 10000; display: flex; align-items: center; justify-content: center;" onclick="this.remove()" role="dialog" aria-labelledby="shortcuts-title" aria-modal="true">
+      <div class="modal" style="max-width: 700px; width: 90%; max-height: 85vh; overflow-y: auto; background: #1e293b; border-radius: 16px; padding: 30px; border: 1px solid rgba(16, 185, 129, 0.3);" onclick="event.stopPropagation()">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+          <h3 id="shortcuts-title" style="color: #10b981; margin: 0; font-size: 1.5em;">⌨️ Keyboard Shortcuts</h3>
+          <button onclick="this.closest('.modal-backdrop').remove()" style="background: transparent; border: none; color: #94a3b8; font-size: 1.5em; cursor: pointer; padding: 4px 12px;" aria-label="Close shortcuts dialog">✕</button>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <h4 style="color: #3b82f6; font-size: 1.1em; margin-bottom: 12px;">🎮 Tournament Actions</h4>
+          <table style="width: 100%; color: #f7fafc; font-size: 0.95em;">
+            <tr style="border-bottom: 1px solid rgba(71, 85, 105, 0.3);">
+              <td style="padding: 10px 8px; font-weight: 600; color: #fbbf24; width: 30%;">
+                <kbd style="background: rgba(251, 191, 36, 0.1); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(251, 191, 36, 0.3);">Space</kbd>
+              </td>
+              <td style="padding: 10px 8px; color: #cbd5e1;">Simulate next matchday</td>
+            </tr>
+            <tr style="border-bottom: 1px solid rgba(71, 85, 105, 0.3);">
+              <td style="padding: 10px 8px; font-weight: 600; color: #fbbf24;">
+                <kbd style="background: rgba(251, 191, 36, 0.1); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(251, 191, 36, 0.3);">S</kbd>
+              </td>
+              <td style="padding: 10px 8px; color: #cbd5e1;">Quick save tournament</td>
+            </tr>
+            <tr style="border-bottom: 1px solid rgba(71, 85, 105, 0.3);">
+              <td style="padding: 10px 8px; font-weight: 600; color: #fbbf24;">
+                <kbd style="background: rgba(251, 191, 36, 0.1); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(251, 191, 36, 0.3);">Ctrl+S</kbd> or <kbd style="background: rgba(251, 191, 36, 0.1); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(251, 191, 36, 0.3);">⌘+S</kbd>
+              </td>
+              <td style="padding: 10px 8px; color: #cbd5e1;">Export tournament to file</td>
+            </tr>
+          </table>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <h4 style="color: #a855f7; font-size: 1.1em; margin-bottom: 12px;">📊 View Actions</h4>
+          <table style="width: 100%; color: #f7fafc; font-size: 0.95em;">
+            <tr style="border-bottom: 1px solid rgba(71, 85, 105, 0.3);">
+              <td style="padding: 10px 8px; font-weight: 600; color: #fbbf24; width: 30%;">
+                <kbd style="background: rgba(251, 191, 36, 0.1); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(251, 191, 36, 0.3);">R</kbd>
+              </td>
+              <td style="padding: 10px 8px; color: #cbd5e1;">View results and standings</td>
+            </tr>
+            <tr style="border-bottom: 1px solid rgba(71, 85, 105, 0.3);">
+              <td style="padding: 10px 8px; font-weight: 600; color: #fbbf24;">
+                <kbd style="background: rgba(251, 191, 36, 0.1); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(251, 191, 36, 0.3);">P</kbd>
+              </td>
+              <td style="padding: 10px 8px; color: #cbd5e1;">View player statistics</td>
+            </tr>
+            <tr style="border-bottom: 1px solid rgba(71, 85, 105, 0.3);">
+              <td style="padding: 10px 8px; font-weight: 600; color: #fbbf24;">
+                <kbd style="background: rgba(251, 191, 36, 0.1); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(251, 191, 36, 0.3);">H</kbd>
+              </td>
+              <td style="padding: 10px 8px; color: #cbd5e1;">Open Hall of Fame</td>
+            </tr>
+          </table>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <h4 style="color: #10b981; font-size: 1.1em; margin-bottom: 12px;">🔧 System Actions</h4>
+          <table style="width: 100%; color: #f7fafc; font-size: 0.95em;">
+            <tr style="border-bottom: 1px solid rgba(71, 85, 105, 0.3);">
+              <td style="padding: 10px 8px; font-weight: 600; color: #fbbf24; width: 30%;">
+                <kbd style="background: rgba(251, 191, 36, 0.1); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(251, 191, 36, 0.3);">Esc</kbd>
+              </td>
+              <td style="padding: 10px 8px; color: #cbd5e1;">Close open modals/dialogs</td>
+            </tr>
+            <tr style="border-bottom: 1px solid rgba(71, 85, 105, 0.3);">
+              <td style="padding: 10px 8px; font-weight: 600; color: #fbbf24;">
+                <kbd style="background: rgba(251, 191, 36, 0.1); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(251, 191, 36, 0.3);">?</kbd>
+              </td>
+              <td style="padding: 10px 8px; color: #cbd5e1;">Show this help dialog</td>
+            </tr>
+          </table>
+        </div>
+
+        <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; padding: 16px; margin-top: 20px;">
+          <p style="color: #cbd5e1; margin: 0; font-size: 0.9em; line-height: 1.5;">
+            <strong style="color: #3b82f6;">💡 Pro Tip:</strong> Keyboard shortcuts don't work when typing in text fields. Press <kbd style="background: rgba(251, 191, 36, 0.1); padding: 2px 6px; border-radius: 3px; font-size: 0.85em;">?</kbd> anytime to show this help screen.
+          </p>
+        </div>
+
+        <button onclick="this.closest('.modal-backdrop').remove()" style="width: 100%; margin-top: 20px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1em;" aria-label="Close shortcuts dialog">
+          Got it! 👍
         </button>
       </div>
     </div>
   `;
 
   document.body.insertAdjacentHTML('beforeend', modal);
+
+  // Focus the close button for accessibility
+  setTimeout(() => {
+    const closeBtn = document.querySelector('.modal-backdrop button[aria-label="Close shortcuts dialog"]');
+    if (closeBtn) closeBtn.focus();
+  }, 100);
 }
 
 // ========================================
@@ -34040,14 +34313,23 @@ const AUTO_SAVE = {
     if (saved && saved.timestamp) {
       const ageMinutes = Math.floor((Date.now() - saved.timestamp) / 60000);
 
-      if (ageMinutes < 60 && confirm(`Resume tournament from ${ageMinutes} minute${ageMinutes !== 1 ? 's' : ''} ago?`)) {
-        if (this.restore(saved)) {
-          // Refresh UI if functions exist
-          if (typeof renderGroups === 'function') renderGroups();
-          if (typeof updateTournamentBracket === 'function') updateTournamentBracket();
+      if (ageMinutes < 60) {
+        const self = this;
+        showConfirmation(
+          'Resume Tournament',
+          `Resume tournament from ${ageMinutes} minute${ageMinutes !== 1 ? 's' : ''} ago?`,
+          () => {
+            if (self.restore(saved)) {
+              // Refresh UI if functions exist
+              if (typeof renderGroups === 'function') renderGroups();
+              if (typeof updateTournamentBracket === 'function') updateTournamentBracket();
 
-          showNotification('success', 'Tournament Restored', 'Your progress has been restored', 3000);
-        }
+              showNotification('success', 'Tournament Restored', 'Your progress has been restored', 3000);
+            }
+          },
+          'Resume',
+          false
+        );
       }
     }
 
@@ -37860,10 +38142,18 @@ function viewSeasonResults() {
 
 
 function resetSeason() {
-  if (!confirm('Start a new season? Current season will be saved to history.')) {
-    return;
-  }
+  showConfirmation(
+    'Start New Season',
+    'Start a new season? Current season will be saved to history.',
+    () => {
+      resetSeasonConfirmed();
+    },
+    'Start New Season',
+    false
+  );
+}
 
+function resetSeasonConfirmed() {
   if (SEASON_STATE.active) {
     if (!SEASON_STATE.seasonHistory) SEASON_STATE.seasonHistory = [];
     SEASON_STATE.seasonHistory.push({

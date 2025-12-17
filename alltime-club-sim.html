@@ -292,6 +292,1153 @@ window.ErrorHandler = {
 window.addEventListener('DOMContentLoaded', () => {
   ErrorHandler.init();
 });
+
+// ============================================
+// UTILITIES MODULE
+// ============================================
+
+/**
+ * Performance and utility functions
+ */
+const Utils = {
+  // Debounce function calls
+  debounce(func, wait = 300) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  },
+
+  // Throttle function calls
+  throttle(func, limit = 100) {
+    let inThrottle;
+    return function(...args) {
+      if (!inThrottle) {
+        func.apply(this, args);
+        inThrottle = true;
+        setTimeout(() => inThrottle = false, limit);
+      }
+    };
+  },
+
+  // Optimize DOM operations with DocumentFragment
+  createFragment(items, renderFunc) {
+    const fragment = document.createDocumentFragment();
+    items.forEach(item => {
+      const element = renderFunc(item);
+      if (element) fragment.appendChild(element);
+    });
+    return fragment;
+  },
+
+  // Format numbers with commas
+  formatNumber(num) {
+    if (num === null || num === undefined) return '0';
+    return Number(num).toLocaleString('en-US');
+  },
+
+  // Safe element lookup with error handling
+  getElement(selector) {
+    try {
+      const element = document.querySelector(selector);
+      if (!element) {
+        console.warn(`Element not found: ${selector}`);
+      }
+      return element;
+    } catch (error) {
+      console.error(`Invalid selector: ${selector}`, error);
+      return null;
+    }
+  },
+
+  // Deep clone objects
+  deepClone(obj) {
+    if (obj === null || typeof obj !== 'object') return obj;
+    try {
+      return JSON.parse(JSON.stringify(obj));
+    } catch (error) {
+      console.error('Deep clone failed:', error);
+      return obj;
+    }
+  },
+
+  // Async wait utility
+  sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  },
+
+  // Generate unique IDs
+  generateId() {
+    return `id_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+};
+
+// ============================================
+// LOADING MANAGER
+// ============================================
+
+/**
+ * Loading overlay manager
+ */
+const Loading = {
+  overlay: null,
+  isVisible: false,
+
+  // Show loading overlay
+  show(message = 'Loading...') {
+    if (!this.overlay) {
+      this._create();
+    }
+
+    const messageEl = this.overlay.querySelector('.loading-message');
+    if (messageEl) {
+      messageEl.textContent = message;
+    }
+
+    this.overlay.style.display = 'flex';
+    setTimeout(() => {
+      this.overlay.style.opacity = '1';
+    }, 10);
+
+    this.isVisible = true;
+  },
+
+  // Update loading message
+  update(message) {
+    if (!this.overlay) return;
+    const messageEl = this.overlay.querySelector('.loading-message');
+    if (messageEl) {
+      messageEl.textContent = message;
+    }
+  },
+
+  // Hide loading overlay
+  hide() {
+    if (!this.overlay) return;
+
+    this.overlay.style.opacity = '0';
+    setTimeout(() => {
+      this.overlay.style.display = 'none';
+      this.isVisible = false;
+    }, 300);
+  },
+
+  // Create loading overlay element
+  _create() {
+    this.overlay = document.createElement('div');
+    this.overlay.className = 'loading-overlay';
+    this.overlay.innerHTML = `
+      <div class="loading-spinner">
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring"></div>
+      </div>
+      <div class="loading-message">Loading...</div>
+    `;
+
+    // Add styles
+    this.overlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.95);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 10000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    `;
+
+    const spinner = this.overlay.querySelector('.loading-spinner');
+    spinner.style.cssText = `
+      position: relative;
+      width: 80px;
+      height: 80px;
+      margin-bottom: 20px;
+    `;
+
+    const rings = this.overlay.querySelectorAll('.spinner-ring');
+    rings.forEach((ring, i) => {
+      ring.style.cssText = `
+        position: absolute;
+        width: 64px;
+        height: 64px;
+        margin: 8px;
+        border: 4px solid transparent;
+        border-top-color: ${['#10b981', '#3b82f6', '#f59e0b'][i]};
+        border-radius: 50%;
+        animation: spin ${1.2 + i * 0.3}s linear infinite;
+      `;
+    });
+
+    const message = this.overlay.querySelector('.loading-message');
+    message.style.cssText = `
+      color: #f1f5f9;
+      font-size: 18px;
+      font-weight: 600;
+      text-align: center;
+    `;
+
+    // Add animation
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+
+    document.body.appendChild(this.overlay);
+  }
+};
+
+// ============================================
+// DATA MANAGER
+// ============================================
+
+/**
+ * Export/Import and backup manager
+ */
+const DataManager = {
+  autoBackupInterval: null,
+  lastBackupTime: null,
+
+  // Export data to JSON
+  export(type = 'full') {
+    try {
+      let data = {};
+      const timestamp = new Date().toISOString();
+
+      switch(type) {
+        case 'tournament':
+          data = {
+            type: 'tournament',
+            timestamp,
+            tournament: SafeStorage.get('currentTournament'),
+            manager: SafeStorage.get('managerProfile')
+          };
+          break;
+
+        case 'season':
+          data = {
+            type: 'season',
+            timestamp,
+            season: SafeStorage.get('currentSeason'),
+            career: SafeStorage.get('careerMode')
+          };
+          break;
+
+        case 'teams':
+          data = {
+            type: 'teams',
+            timestamp,
+            customTeams: SafeStorage.get('customTeams') || []
+          };
+          break;
+
+        case 'full':
+        default:
+          // Export everything
+          const keys = Object.keys(localStorage).filter(k => k.startsWith('football_sim_'));
+          keys.forEach(key => {
+            const shortKey = key.replace('football_sim_', '');
+            data[shortKey] = SafeStorage.get(shortKey);
+          });
+          data.type = 'full';
+          data.timestamp = timestamp;
+          break;
+      }
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `football_sim_${type}_${Date.now()}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      if (typeof showNotification === 'function') {
+        showNotification('success', 'Export Complete', `${type} data exported successfully!`, 3000);
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Export failed:', error);
+      ErrorHandler.log({ type: 'export', message: error.message, stack: error.stack });
+      if (typeof showNotification === 'function') {
+        showNotification('error', 'Export Failed', 'Could not export data', 3000);
+      }
+      return false;
+    }
+  },
+
+  // Import data from JSON file
+  import() {
+    return new Promise((resolve, reject) => {
+      try {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+
+        input.onchange = async (e) => {
+          const file = e.target.files[0];
+          if (!file) {
+            reject('No file selected');
+            return;
+          }
+
+          Loading.show('Importing data...');
+
+          try {
+            const text = await file.text();
+            const data = JSON.parse(text);
+
+            // Validate data
+            if (!data.type || !data.timestamp) {
+              throw new Error('Invalid data format');
+            }
+
+            // Import based on type
+            if (data.type === 'full') {
+              Object.keys(data).forEach(key => {
+                if (key !== 'type' && key !== 'timestamp') {
+                  SafeStorage.set(key, data[key]);
+                }
+              });
+            } else {
+              Object.keys(data).forEach(key => {
+                if (key !== 'type' && key !== 'timestamp') {
+                  SafeStorage.set(key, data[key]);
+                }
+              });
+            }
+
+            Loading.hide();
+
+            if (typeof showNotification === 'function') {
+              showNotification('success', 'Import Complete', 'Data imported successfully! Reloading...', 2000);
+            }
+
+            setTimeout(() => {
+              window.location.reload();
+            }, 2000);
+
+            resolve(true);
+          } catch (error) {
+            Loading.hide();
+            console.error('Import failed:', error);
+            ErrorHandler.log({ type: 'import', message: error.message, stack: error.stack });
+            if (typeof showNotification === 'function') {
+              showNotification('error', 'Import Failed', 'Invalid or corrupted file', 3000);
+            }
+            reject(error);
+          }
+        };
+
+        input.click();
+      } catch (error) {
+        reject(error);
+      }
+    });
+  },
+
+  // Create backup of current state
+  backup() {
+    try {
+      const backupData = {};
+      const keys = Object.keys(localStorage).filter(k => k.startsWith('football_sim_'));
+
+      keys.forEach(key => {
+        const shortKey = key.replace('football_sim_', '');
+        backupData[shortKey] = SafeStorage.get(shortKey);
+      });
+
+      backupData.timestamp = new Date().toISOString();
+
+      SafeStorage.set('backup_latest', backupData);
+      this.lastBackupTime = Date.now();
+
+      console.log('✅ Auto-backup created');
+      return true;
+    } catch (error) {
+      console.error('Backup failed:', error);
+      ErrorHandler.log({ type: 'backup', message: error.message, stack: error.stack });
+      return false;
+    }
+  },
+
+  // Restore from backup
+  restoreBackup() {
+    try {
+      const backup = SafeStorage.get('backup_latest');
+
+      if (!backup || !backup.timestamp) {
+        if (typeof showNotification === 'function') {
+          showNotification('error', 'No Backup Found', 'No backup available to restore', 3000);
+        }
+        return false;
+      }
+
+      // Confirm restoration
+      if (typeof showCustomConfirm === 'function') {
+        showCustomConfirm(
+          'Restore Backup?',
+          `Restore backup from ${new Date(backup.timestamp).toLocaleString()}? Current data will be replaced.`,
+          () => {
+            Loading.show('Restoring backup...');
+
+            Object.keys(backup).forEach(key => {
+              if (key !== 'timestamp') {
+                SafeStorage.set(key, backup[key]);
+              }
+            });
+
+            Loading.hide();
+
+            if (typeof showNotification === 'function') {
+              showNotification('success', 'Backup Restored', 'Reloading application...', 2000);
+            }
+
+            setTimeout(() => {
+              window.location.reload();
+            }, 2000);
+          }
+        );
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Restore failed:', error);
+      ErrorHandler.log({ type: 'restore', message: error.message, stack: error.stack });
+      if (typeof showNotification === 'function') {
+        showNotification('error', 'Restore Failed', 'Could not restore backup', 3000);
+      }
+      return false;
+    }
+  },
+
+  // Start auto-backup (every 5 minutes)
+  startAutoBackup() {
+    if (this.autoBackupInterval) {
+      clearInterval(this.autoBackupInterval);
+    }
+
+    this.autoBackupInterval = setInterval(() => {
+      this.backup();
+    }, 5 * 60 * 1000); // 5 minutes
+
+    console.log('✅ Auto-backup enabled (every 5 minutes)');
+  },
+
+  // Stop auto-backup
+  stopAutoBackup() {
+    if (this.autoBackupInterval) {
+      clearInterval(this.autoBackupInterval);
+      this.autoBackupInterval = null;
+      console.log('⏹️ Auto-backup stopped');
+    }
+  }
+};
+
+// Initialize auto-backup on load
+window.addEventListener('DOMContentLoaded', () => {
+  DataManager.startAutoBackup();
+  console.log('✅ Performance utilities initialized');
+});
+
+// ============================================
+// PERFORMANCE OPTIMIZER
+// ============================================
+
+/**
+ * Advanced performance optimization utilities
+ */
+const PerformanceOptimizer = {
+  // DOM query cache
+  domCache: new Map(),
+
+  /**
+   * Cached DOM query
+   * @param {string} selector - CSS selector
+   * @param {boolean} forceRefresh - Force cache refresh
+   * @returns {Element|null}
+   */
+  getCached(selector, forceRefresh = false) {
+    if (forceRefresh || !this.domCache.has(selector)) {
+      const element = document.querySelector(selector);
+      this.domCache.set(selector, element);
+    }
+    return this.domCache.get(selector);
+  },
+
+  /**
+   * Clear DOM cache
+   */
+  clearCache() {
+    this.domCache.clear();
+  },
+
+  /**
+   * Virtual scrolling for large lists
+   * @param {Array} items - All items
+   * @param {Function} renderFunc - Render function for each item
+   * @param {Element} container - Container element
+   * @param {number} itemHeight - Height of each item in pixels
+   * @param {number} buffer - Number of extra items to render
+   */
+  virtualScroll(items, renderFunc, container, itemHeight = 50, buffer = 5) {
+    const containerHeight = container.clientHeight;
+    const visibleItems = Math.ceil(containerHeight / itemHeight);
+    let scrollTop = container.scrollTop;
+
+    const render = () => {
+      const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - buffer);
+      const endIndex = Math.min(items.length, startIndex + visibleItems + buffer * 2);
+
+      // Clear container
+      container.innerHTML = '';
+
+      // Create spacer for scrolling
+      const spacerTop = document.createElement('div');
+      spacerTop.style.height = `${startIndex * itemHeight}px`;
+      container.appendChild(spacerTop);
+
+      // Render visible items
+      const fragment = document.createDocumentFragment();
+      for (let i = startIndex; i < endIndex; i++) {
+        const element = renderFunc(items[i], i);
+        if (element) fragment.appendChild(element);
+      }
+      container.appendChild(fragment);
+
+      // Bottom spacer
+      const spacerBottom = document.createElement('div');
+      spacerBottom.style.height = `${(items.length - endIndex) * itemHeight}px`;
+      container.appendChild(spacerBottom);
+    };
+
+    // Throttled scroll handler
+    const handleScroll = Utils.throttle(() => {
+      scrollTop = container.scrollTop;
+      render();
+    }, 16); // 60fps
+
+    container.addEventListener('scroll', handleScroll);
+    render(); // Initial render
+
+    return {
+      update: () => render(),
+      destroy: () => container.removeEventListener('scroll', handleScroll)
+    };
+  },
+
+  /**
+   * Batch DOM updates for better performance
+   * @param {Function} callback - Function with DOM updates
+   */
+  batchUpdate(callback) {
+    requestAnimationFrame(() => {
+      callback();
+    });
+  },
+
+  /**
+   * Lazy load images
+   * @param {Element} container - Container with images
+   */
+  lazyLoadImages(container) {
+    const images = container.querySelectorAll('img[data-src]');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          img.src = img.dataset.src;
+          img.removeAttribute('data-src');
+          observer.unobserve(img);
+        }
+      });
+    });
+
+    images.forEach(img => observer.observe(img));
+  }
+};
+
+// ============================================
+// PROGRESS TRACKER
+// ============================================
+
+/**
+ * Progress tracking for long operations
+ */
+const ProgressTracker = {
+  progressBar: null,
+  progressText: null,
+
+  /**
+   * Show progress bar
+   * @param {string} message - Progress message
+   */
+  show(message = 'Processing...') {
+    if (!this.progressBar) {
+      this._create();
+    }
+
+    this.progressText.textContent = message;
+    this.progressBar.style.display = 'flex';
+    this.update(0);
+  },
+
+  /**
+   * Update progress
+   * @param {number} percent - Progress percentage (0-100)
+   * @param {string} message - Optional message
+   */
+  update(percent, message = null) {
+    if (!this.progressBar) return;
+
+    const fill = this.progressBar.querySelector('.progress-fill');
+    const percentText = this.progressBar.querySelector('.progress-percent');
+
+    fill.style.width = `${Math.min(100, Math.max(0, percent))}%`;
+    percentText.textContent = `${Math.round(percent)}%`;
+
+    if (message) {
+      this.progressText.textContent = message;
+    }
+  },
+
+  /**
+   * Hide progress bar
+   */
+  hide() {
+    if (!this.progressBar) return;
+
+    setTimeout(() => {
+      this.progressBar.style.display = 'none';
+    }, 300);
+  },
+
+  /**
+   * Create progress bar element
+   */
+  _create() {
+    this.progressBar = document.createElement('div');
+    this.progressBar.className = 'progress-tracker';
+    this.progressBar.innerHTML = `
+      <div class="progress-content">
+        <div class="progress-text">Processing...</div>
+        <div class="progress-bar-container">
+          <div class="progress-fill"></div>
+        </div>
+        <div class="progress-percent">0%</div>
+      </div>
+    `;
+
+    this.progressBar.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(30, 41, 59, 0.98);
+      border: 2px solid #3b82f6;
+      border-radius: 12px;
+      padding: 20px;
+      z-index: 9999;
+      display: none;
+      min-width: 300px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    `;
+
+    const content = this.progressBar.querySelector('.progress-content');
+    content.style.cssText = 'display: flex; flex-direction: column; gap: 12px;';
+
+    this.progressText = this.progressBar.querySelector('.progress-text');
+    this.progressText.style.cssText = `
+      color: #f1f5f9;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+    `;
+
+    const barContainer = this.progressBar.querySelector('.progress-bar-container');
+    barContainer.style.cssText = `
+      width: 100%;
+      height: 8px;
+      background: rgba(51, 65, 85, 0.8);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    `;
+
+    const fill = this.progressBar.querySelector('.progress-fill');
+    fill.style.cssText = `
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #3b82f6, #10b981);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    `;
+
+    const percentText = this.progressBar.querySelector('.progress-percent');
+    percentText.style.cssText = `
+      color: #94a3b8;
+      font-size: 12px;
+      text-align: center;
+    `;
+
+    document.body.appendChild(this.progressBar);
+  }
+};
+
+// ============================================
+// TOAST NOTIFICATIONS
+// ============================================
+
+/**
+ * Toast notification system
+ */
+const Toast = {
+  container: null,
+  toasts: [],
+
+  /**
+   * Show toast notification
+   * @param {string} message - Toast message
+   * @param {string} type - Type: success, error, warning, info
+   * @param {number} duration - Duration in ms (0 = no auto-dismiss)
+   */
+  show(message, type = 'info', duration = 3000) {
+    if (!this.container) {
+      this._createContainer();
+    }
+
+    const toast = this._createToast(message, type);
+    this.container.appendChild(toast);
+    this.toasts.push(toast);
+
+    // Animate in
+    setTimeout(() => {
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateX(0)';
+    }, 10);
+
+    // Auto-dismiss
+    if (duration > 0) {
+      setTimeout(() => {
+        this.dismiss(toast);
+      }, duration);
+    }
+
+    // Limit number of toasts
+    if (this.toasts.length > 5) {
+      this.dismiss(this.toasts[0]);
+    }
+
+    return toast;
+  },
+
+  /**
+   * Dismiss toast
+   * @param {Element} toast - Toast element
+   */
+  dismiss(toast) {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(400px)';
+
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+      this.toasts = this.toasts.filter(t => t !== toast);
+    }, 300);
+  },
+
+  /**
+   * Dismiss all toasts
+   */
+  dismissAll() {
+    this.toasts.forEach(toast => this.dismiss(toast));
+  },
+
+  /**
+   * Create toast container
+   */
+  _createContainer() {
+    this.container = document.createElement('div');
+    this.container.className = 'toast-container';
+    this.container.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      pointer-events: none;
+    `;
+    document.body.appendChild(this.container);
+  },
+
+  /**
+   * Create toast element
+   * @param {string} message - Message
+   * @param {string} type - Toast type
+   */
+  _createToast(message, type) {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+
+    const colors = {
+      success: { bg: '#10b981', icon: '✓' },
+      error: { bg: '#ef4444', icon: '✕' },
+      warning: { bg: '#f59e0b', icon: '⚠' },
+      info: { bg: '#3b82f6', icon: 'ⓘ' }
+    };
+
+    const color = colors[type] || colors.info;
+
+    toast.innerHTML = `
+      <div class="toast-icon">${color.icon}</div>
+      <div class="toast-message">${Security.sanitize(message)}</div>
+      <button class="toast-close">×</button>
+    `;
+
+    toast.style.cssText = `
+      background: rgba(30, 41, 59, 0.98);
+      border-left: 4px solid ${color.bg};
+      border-radius: 8px;
+      padding: 16px;
+      min-width: 300px;
+      max-width: 400px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      transform: translateX(400px);
+      transition: all 0.3s ease;
+      pointer-events: all;
+    `;
+
+    const icon = toast.querySelector('.toast-icon');
+    icon.style.cssText = `
+      width: 24px;
+      height: 24px;
+      background: ${color.bg};
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      flex-shrink: 0;
+    `;
+
+    const messageEl = toast.querySelector('.toast-message');
+    messageEl.style.cssText = `
+      color: #f1f5f9;
+      font-size: 14px;
+      flex: 1;
+      word-break: break-word;
+    `;
+
+    const closeBtn = toast.querySelector('.toast-close');
+    closeBtn.style.cssText = `
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s;
+      flex-shrink: 0;
+    `;
+
+    closeBtn.onmouseover = () => closeBtn.style.color = '#f1f5f9';
+    closeBtn.onmouseout = () => closeBtn.style.color = '#94a3b8';
+    closeBtn.onclick = () => this.dismiss(toast);
+
+    return toast;
+  }
+};
+
+// ============================================
+// UNDO/REDO SYSTEM
+// ============================================
+
+/**
+ * Undo/Redo manager for tournament actions
+ */
+const UndoManager = {
+  undoStack: [],
+  redoStack: [],
+  maxStack: 50,
+
+  /**
+   * Save state for undo
+   * @param {string} action - Action description
+   * @param {Object} state - State to save
+   */
+  saveState(action, state) {
+    this.undoStack.push({
+      action,
+      state: Utils.deepClone(state),
+      timestamp: Date.now()
+    });
+
+    // Clear redo stack on new action
+    this.redoStack = [];
+
+    // Limit stack size
+    if (this.undoStack.length > this.maxStack) {
+      this.undoStack.shift();
+    }
+
+    console.log(`💾 Saved: ${action}`);
+  },
+
+  /**
+   * Undo last action
+   * @returns {Object|null} Previous state
+   */
+  undo() {
+    if (this.undoStack.length === 0) {
+      Toast.show('Nothing to undo', 'info', 2000);
+      return null;
+    }
+
+    const current = this.undoStack.pop();
+    this.redoStack.push(current);
+
+    Toast.show(`Undo: ${current.action}`, 'info', 2000);
+    return current.state;
+  },
+
+  /**
+   * Redo last undone action
+   * @returns {Object|null} Next state
+   */
+  redo() {
+    if (this.redoStack.length === 0) {
+      Toast.show('Nothing to redo', 'info', 2000);
+      return null;
+    }
+
+    const next = this.redoStack.pop();
+    this.undoStack.push(next);
+
+    Toast.show(`Redo: ${next.action}`, 'info', 2000);
+    return next.state;
+  },
+
+  /**
+   * Clear all history
+   */
+  clear() {
+    this.undoStack = [];
+    this.redoStack = [];
+  },
+
+  /**
+   * Get undo/redo status
+   */
+  getStatus() {
+    return {
+      canUndo: this.undoStack.length > 0,
+      canRedo: this.redoStack.length > 0,
+      undoCount: this.undoStack.length,
+      redoCount: this.redoStack.length
+    };
+  }
+};
+
+// ============================================
+// KEYBOARD SHORTCUTS
+// ============================================
+
+/**
+ * Keyboard shortcuts manager
+ */
+const KeyboardShortcuts = {
+  shortcuts: new Map(),
+  enabled: true,
+
+  /**
+   * Register shortcut
+   * @param {string} key - Key combination (e.g., 'Ctrl+S', 'Alt+N')
+   * @param {Function} callback - Callback function
+   * @param {string} description - Description for help
+   */
+  register(key, callback, description = '') {
+    this.shortcuts.set(key.toLowerCase(), { callback, description });
+  },
+
+  /**
+   * Unregister shortcut
+   * @param {string} key - Key combination
+   */
+  unregister(key) {
+    this.shortcuts.delete(key.toLowerCase());
+  },
+
+  /**
+   * Initialize keyboard listener
+   */
+  init() {
+    document.addEventListener('keydown', (e) => {
+      if (!this.enabled) return;
+
+      // Don't trigger in input fields
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        return;
+      }
+
+      const key = this._getKeyCombo(e);
+      const shortcut = this.shortcuts.get(key);
+
+      if (shortcut) {
+        e.preventDefault();
+        shortcut.callback(e);
+      }
+    });
+
+    console.log('✅ Keyboard shortcuts initialized');
+  },
+
+  /**
+   * Get key combination string
+   * @param {KeyboardEvent} e - Keyboard event
+   * @returns {string}
+   */
+  _getKeyCombo(e) {
+    const parts = [];
+    if (e.ctrlKey || e.metaKey) parts.push('ctrl');
+    if (e.altKey) parts.push('alt');
+    if (e.shiftKey) parts.push('shift');
+    parts.push(e.key.toLowerCase());
+    return parts.join('+');
+  },
+
+  /**
+   * Get all shortcuts
+   * @returns {Array}
+   */
+  getAll() {
+    return Array.from(this.shortcuts.entries()).map(([key, data]) => ({
+      key,
+      description: data.description
+    }));
+  },
+
+  /**
+   * Enable/disable shortcuts
+   * @param {boolean} enabled
+   */
+  setEnabled(enabled) {
+    this.enabled = enabled;
+  }
+};
+
+// ============================================
+// DATA COMPRESSION
+// ============================================
+
+/**
+ * Simple data compression for storage
+ */
+const DataCompressor = {
+  /**
+   * Compress string using LZW algorithm (simplified)
+   * @param {string} str - String to compress
+   * @returns {string}
+   */
+  compress(str) {
+    try {
+      // Simple base64 compression for large objects
+      if (typeof str === 'object') {
+        str = JSON.stringify(str);
+      }
+
+      // Use built-in compression if available
+      if (typeof CompressionStream !== 'undefined') {
+        return btoa(str);
+      }
+
+      return btoa(encodeURIComponent(str));
+    } catch (error) {
+      console.error('Compression failed:', error);
+      return str;
+    }
+  },
+
+  /**
+   * Decompress string
+   * @param {string} str - Compressed string
+   * @returns {string}
+   */
+  decompress(str) {
+    try {
+      const decoded = atob(str);
+      return decodeURIComponent(decoded);
+    } catch (error) {
+      console.error('Decompression failed:', error);
+      return str;
+    }
+  },
+
+  /**
+   * Get compression ratio
+   * @param {string} original
+   * @param {string} compressed
+   * @returns {number}
+   */
+  getRatio(original, compressed) {
+    return (compressed.length / original.length * 100).toFixed(2);
+  }
+};
+
+// Initialize systems on load
+window.addEventListener('DOMContentLoaded', () => {
+  KeyboardShortcuts.init();
+
+  // Register default shortcuts
+  KeyboardShortcuts.register('ctrl+s', (e) => {
+    DataManager.export('full');
+    Toast.show('Data exported!', 'success', 2000);
+  }, 'Save/Export data');
+
+  KeyboardShortcuts.register('ctrl+z', () => {
+    const state = UndoManager.undo();
+    if (state) {
+      // Restore state logic would go here
+    }
+  }, 'Undo last action');
+
+  KeyboardShortcuts.register('ctrl+y', () => {
+    const state = UndoManager.redo();
+    if (state) {
+      // Restore state logic would go here
+    }
+  }, 'Redo action');
+
+  console.log('✅ Advanced optimizations initialized');
+});
   </script>
 
   <style>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Security Test</title>
+</head>
+<body>
+  <h1>XSS Security Test</h1>
+  <p>Open the console (F12) to see test results</p>
+  
+  <script>
+    console.log('=== SECURITY TEST SUITE ===');
+    
+    // Test 1: Verify Security object exists
+    console.log('\n1. Security utility available:', typeof Security !== 'undefined' ? '✅ PASS' : '❌ FAIL');
+    
+    // Test 2: Verify SafeStorage exists
+    console.log('2. SafeStorage available:', typeof SafeStorage !== 'undefined' ? '✅ PASS' : '❌ FAIL');
+    
+    // Test 3: Verify ErrorHandler exists
+    console.log('3. ErrorHandler available:', typeof ErrorHandler !== 'undefined' ? '✅ PASS' : '❌ FAIL');
+    
+    // Test 4: Test XSS prevention
+    if (typeof Security !== 'undefined') {
+      const maliciousInput = '<script>alert("XSS")</script><img src=x onerror=alert("XSS")>';
+      const sanitized = Security.sanitize(maliciousInput);
+      const isSecure = !sanitized.includes('<script>') && !sanitized.includes('onerror');
+      console.log('4. XSS prevention working:', isSecure ? '✅ PASS' : '❌ FAIL');
+      console.log('   Input:', maliciousInput);
+      console.log('   Output:', sanitized);
+    }
+    
+    // Test 5: Test SafeStorage
+    if (typeof SafeStorage !== 'undefined') {
+      const testKey = 'test_key_' + Date.now();
+      const testValue = { test: 'data', number: 123 };
+      const saveResult = SafeStorage.set(testKey, testValue);
+      const loadResult = SafeStorage.get(testKey);
+      const isWorking = saveResult && JSON.stringify(loadResult) === JSON.stringify(testValue);
+      console.log('5. SafeStorage working:', isWorking ? '✅ PASS' : '❌ FAIL');
+      SafeStorage.remove(testKey);
+    }
+    
+    console.log('\n=== TEST COMPLETE ===');
+  </script>
+  
+  <script src="alltime-club-sim.html"></script>
+</body>
+</html>

@@ -6,294 +6,7 @@
   <title>All-Time Football Simulator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Simulate epic football tournaments with all-time great teams. Create custom tournaments, track statistics, and crown champions in this comprehensive football simulator.">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:;">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
-
-  <script>
-// ============================================
-// SECURITY UTILITIES
-// ============================================
-
-/**
- * Security utilities for XSS prevention
- */
-const Security = {
-  // Sanitize HTML to prevent XSS
-  sanitize(html) {
-    if (!html) return '';
-    const div = document.createElement('div');
-    div.textContent = String(html);
-    return div.innerHTML;
-  },
-
-  // Sanitize but allow specific safe tags
-  sanitizeWithTags(html, allowedTags = ['b', 'i', 'strong', 'em']) {
-    if (!html) return '';
-
-    const div = document.createElement('div');
-    div.innerHTML = html;
-
-    // Remove dangerous elements
-    const dangerous = div.querySelectorAll('script, iframe, object, embed, link');
-    dangerous.forEach(el => el.remove());
-
-    // Remove all attributes except class and id
-    const allElements = div.querySelectorAll('*');
-    allElements.forEach(el => {
-      // Remove element if not in allowed list
-      if (!allowedTags.includes(el.tagName.toLowerCase())) {
-        while (el.firstChild) {
-          el.parentNode.insertBefore(el.firstChild, el);
-        }
-        el.remove();
-        return;
-      }
-
-      // Remove dangerous attributes
-      Array.from(el.attributes).forEach(attr => {
-        if (!['class', 'id'].includes(attr.name)) {
-          el.removeAttribute(attr.name);
-        }
-      });
-    });
-
-    return div.innerHTML;
-  },
-
-  // Safe innerHTML replacement
-  setHTML(element, html, allowTags = false) {
-    if (!element) return;
-    const sanitized = allowTags ?
-      this.sanitizeWithTags(html) :
-      this.sanitize(html);
-    element.innerHTML = sanitized;
-  },
-
-  // Safe text replacement
-  setText(element, text) {
-    if (!element) return;
-    element.textContent = String(text);
-  },
-
-  // Validate input patterns
-  validate: {
-    managerName(name) {
-      const pattern = /^[a-zA-Z0-9\s]+$/;
-      return pattern.test(name) && name.length >= 2 && name.length <= 30;
-    },
-
-    teamName(name) {
-      const pattern = /^[a-zA-Z0-9\s\-']+$/;
-      return pattern.test(name) && name.length <= 50;
-    },
-
-    number(value, min = 0, max = Infinity) {
-      const num = Number(value);
-      return !isNaN(num) && num >= min && num <= max;
-    }
-  }
-};
-
-// ============================================
-// SAFE STORAGE MANAGER
-// ============================================
-
-/**
- * Safe localStorage wrapper with quota handling
- */
-const SafeStorage = {
-  prefix: 'football_sim_',
-  quotaExceeded: false,
-
-  // Get item safely
-  get(key, defaultValue = null) {
-    try {
-      const fullKey = this.prefix + key;
-      const item = localStorage.getItem(fullKey);
-
-      if (item === null) return defaultValue;
-
-      try {
-        return JSON.parse(item);
-      } catch {
-        return item;
-      }
-    } catch (error) {
-      console.error(`Storage read error (${key}):`, error);
-      return defaultValue;
-    }
-  },
-
-  // Set item with quota handling
-  set(key, value, retryCount = 0) {
-    try {
-      const fullKey = this.prefix + key;
-      const serialized = typeof value === 'string' ? value : JSON.stringify(value);
-
-      localStorage.setItem(fullKey, serialized);
-      this.quotaExceeded = false;
-      return true;
-
-    } catch (error) {
-      if (error.name === 'QuotaExceededError' && retryCount < 3) {
-        this.quotaExceeded = true;
-        this.cleanup();
-        return this.set(key, value, retryCount + 1);
-      }
-
-      console.error(`Storage write error (${key}):`, error);
-
-      if (this.quotaExceeded && typeof showUtilityMessage === 'function') {
-        showUtilityMessage('Storage full. Please export and clear old data.', 'error');
-      }
-
-      return false;
-    }
-  },
-
-  // Remove item
-  remove(key) {
-    try {
-      const fullKey = this.prefix + key;
-      localStorage.removeItem(fullKey);
-      return true;
-    } catch (error) {
-      console.error(`Storage remove error (${key}):`, error);
-      return false;
-    }
-  },
-
-  // Clear all app data
-  clear() {
-    try {
-      Object.keys(localStorage).forEach(key => {
-        if (key.startsWith(this.prefix)) {
-          localStorage.removeItem(key);
-        }
-      });
-      return true;
-    } catch (error) {
-      console.error('Storage clear error:', error);
-      return false;
-    }
-  },
-
-  // Get storage usage
-  getUsage() {
-    let totalSize = 0;
-    Object.keys(localStorage).forEach(key => {
-      if (key.startsWith(this.prefix)) {
-        totalSize += new Blob([localStorage.getItem(key)]).size;
-      }
-    });
-    return {
-      bytes: totalSize,
-      kb: (totalSize / 1024).toFixed(2),
-      mb: (totalSize / 1024 / 1024).toFixed(2)
-    };
-  },
-
-  // Clean up largest items
-  cleanup() {
-    try {
-      const items = [];
-      Object.keys(localStorage).forEach(key => {
-        if (key.startsWith(this.prefix)) {
-          items.push({
-            key,
-            size: new Blob([localStorage.getItem(key)]).size
-          });
-        }
-      });
-
-      // Remove largest 20%
-      items.sort((a, b) => b.size - a.size);
-      const toRemove = Math.ceil(items.length * 0.2);
-      for (let i = 0; i < toRemove; i++) {
-        localStorage.removeItem(items[i].key);
-      }
-
-      console.log(`Cleaned up ${toRemove} items`);
-    } catch (error) {
-      console.error('Cleanup error:', error);
-    }
-  }
-};
-
-// ============================================
-// GLOBAL ERROR HANDLER
-// ============================================
-
-/**
- * Catch and log all errors
- */
-window.ErrorHandler = {
-  errors: [],
-  maxErrors: 100,
-
-  init() {
-    // Catch runtime errors
-    window.addEventListener('error', (event) => {
-      this.log({
-        type: 'runtime',
-        message: event.message,
-        source: event.filename,
-        line: event.lineno,
-        column: event.colno,
-        stack: event.error?.stack
-      });
-    });
-
-    // Catch promise rejections
-    window.addEventListener('unhandledrejection', (event) => {
-      this.log({
-        type: 'promise',
-        message: event.reason?.message || String(event.reason),
-        stack: event.reason?.stack
-      });
-    });
-
-    console.log('✅ Error handler initialized');
-  },
-
-  log(errorInfo) {
-    const error = {
-      ...errorInfo,
-      timestamp: new Date().toISOString(),
-      url: window.location.href
-    };
-
-    this.errors.push(error);
-
-    // Keep last 100 errors
-    if (this.errors.length > this.maxErrors) {
-      this.errors.shift();
-    }
-
-    // Log in development
-    if (window.location.hostname === 'localhost') {
-      console.error('❌ Error caught:', error);
-    }
-
-    // Save to storage for debugging
-    SafeStorage.set('last_error', error);
-  },
-
-  getErrors() {
-    return this.errors;
-  },
-
-  clearErrors() {
-    this.errors = [];
-  }
-};
-
-// Initialize on page load
-window.addEventListener('DOMContentLoaded', () => {
-  ErrorHandler.init();
-});
-  </script>
-
   <style>
     :root {
       /* Primary Actions */
@@ -13477,7 +13190,7 @@ function confirmTrackedTeam() {
     saveManagerProfile();
     updateManagerProfileUI();
     closeTrackTeamModal();
-    showUtilityMessage(`Now tracking ${Security.sanitize(teamName)}!`, "success");
+    showUtilityMessage(`Now tracking ${teamName}!`, "success");
   } else {
     showUtilityMessage("Please select a team", "error");
   }
@@ -14110,10 +13823,10 @@ function viewTeamPlayers(teamName) {
 
   let html = `
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-      <h2>👥 ${Security.sanitize(teamName)} Squad</h2>
+      <h2>👥 ${teamName} Squad</h2>
       ${
         typeof openTeamDetail === "function"
-          ? `<button onclick="openTeamDetail('${Security.sanitize(teamName.replace(/'/g, "\\'"))}')" class="btn-secondary">← Back to Team</button>`
+          ? `<button onclick="openTeamDetail('${teamName.replace(/'/g, "\\'")}')" class="btn-secondary">← Back to Team</button>`
           : `<button onclick="history.back()" class="btn-secondary">← Back</button>`
       }
     </div>
@@ -14141,7 +13854,7 @@ function viewTeamPlayers(teamName) {
     teamPlayers.forEach((player) => {
       html += `
         <tr>
-          <td><strong>${Security.sanitize(player.name)}</strong></td>
+          <td><strong>${player.name}</strong></td>
           <td>${player.goals ?? 0}</td>
           <td>${player.assists ?? 0}</td>
           <td>${player.apps ?? 0}</td>
@@ -14160,7 +13873,7 @@ function viewTeamPlayers(teamName) {
       <div style="padding: 30px 12px; text-align: center;">
         <div style="font-size: 40px; margin-bottom: 12px;">👥</div>
         <p><strong>No player data available</strong></p>
-        <p class="output-sub">Player statistics will appear after simulating matches involving ${Security.sanitize(teamName)}.</p>
+        <p class="output-sub">Player statistics will appear after simulating matches involving ${teamName}.</p>
       </div>
     `;
   }
@@ -19284,10 +18997,10 @@ function displayManagerProfile() {
           <!-- Info Column -->
           <div>
             <h1 style="color: #A78BFA; font-size: 2.5em; margin-bottom: 8px; font-weight: 900;">
-              ${Security.sanitize(MANAGER_STATE.managerName)}
+              ${MANAGER_STATE.managerName}
             </h1>
             <div style="color: #94A3B8; font-size: 1.2em; margin-bottom: 20px;">
-              ${Security.sanitize(MANAGER_STATE.teamName)}
+              ${MANAGER_STATE.teamName}
             </div>
 
             <!-- Reputation & Level -->
@@ -19307,7 +19020,7 @@ function displayManagerProfile() {
               ${favoriteClub ? `
                 <div style="padding: 8px 16px; background: rgba(168, 85, 247, 0.2);
                             border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 20px;">
-                  <span style="color: #C084FC; font-weight: 700;">❤️ ${Security.sanitize(favoriteClub)}</span>
+                  <span style="color: #C084FC; font-weight: 700;">❤️ ${favoriteClub}</span>
                 </div>
               ` : ''}
             </div>
@@ -19393,7 +19106,7 @@ function displayManagerProfile() {
                     margin-bottom: 30px;">
           <h3 style="color: #C084FC; margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
             <span style="font-size: 1.5em;">❤️</span>
-            Favorite Club: ${Security.sanitize(favoriteClub)}
+            Favorite Club: ${favoriteClub}
           </h3>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
             <div style="text-align: center; padding: 16px; background: rgba(15, 23, 42, 0.6); border-radius: 10px;">
@@ -19424,7 +19137,7 @@ function displayManagerProfile() {
           <div style="margin-top: 20px; padding: 16px; background: rgba(168, 85, 247, 0.1);
                       border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 10px; text-align: center;">
             <div style="color: #C084FC; font-weight: 600;">
-              💡 Playing with ${Security.sanitize(favoriteClub)} gives +50% bonus XP on wins!
+              💡 Playing with ${favoriteClub} gives +50% bonus XP on wins!
             </div>
           </div>
         </div>
@@ -19581,7 +19294,7 @@ function createManagerProfile() {
   }
 
   showNotification('success', 'Profile Created!',
-    `Welcome, ${Security.sanitize(MANAGER_STATE.managerName)}!`, 3000);
+    `Welcome, ${MANAGER_STATE.managerName}!`, 3000);
 
   displayManagerProfile();
 }
@@ -19597,7 +19310,7 @@ function showManagerStats() {
       <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                   padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 30px;">
         <h1 style="margin: 0; color: white; font-size: 2.5em;">📊 Manager Statistics</h1>
-        <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.9);">${Security.sanitize(MANAGER_STATE.managerName)}</p>
+        <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.9);">${MANAGER_STATE.managerName}</p>
       </div>
 
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
@@ -19838,7 +19551,7 @@ function editManagerProfile() {
           <label style="display: block; color: #94A3B8; margin-bottom: 8px; font-weight: 600;">
             Manager Name
           </label>
-          <input type="text" id="editManagerName" value="${Security.sanitize(MANAGER_STATE.managerName)}"
+          <input type="text" id="editManagerName" value="${MANAGER_STATE.managerName}"
                  style="width: 100%; padding: 12px; background: rgba(30, 41, 59, 0.8);
                         border: 1px solid rgba(71, 85, 105, 0.4); border-radius: 8px;
                         color: #F1F5F9; font-size: 1em;">
@@ -19848,7 +19561,7 @@ function editManagerProfile() {
           <label style="display: block; color: #94A3B8; margin-bottom: 8px; font-weight: 600;">
             Team Name
           </label>
-          <input type="text" id="editTeamName" value="${Security.sanitize(MANAGER_STATE.teamName)}"
+          <input type="text" id="editTeamName" value="${MANAGER_STATE.teamName}"
                  style="width: 100%; padding: 12px; background: rgba(30, 41, 59, 0.8);
                         border: 1px solid rgba(71, 85, 105, 0.4); border-radius: 8px;
                         color: #F1F5F9; font-size: 1em;">
@@ -20769,7 +20482,7 @@ function createManagerAvatar(size = 'medium', showDetails = false) {
       ${showDetails ? `
         <div style="margin-top: 15px; text-align: center;">
           <div style="font-weight: 700; font-size: 1.2em; color: #F1F5F9; margin-bottom: 5px;">
-            ${Security.sanitize(MANAGER_STATE.managerName)}
+            ${MANAGER_STATE.managerName}
           </div>
           <div style="color: #94A3B8; font-size: 0.9em;">
             ${MANAGER_STATE.reputation}
@@ -21613,7 +21326,7 @@ function showCareerDashboard() {
       <div style="border-bottom: 2px solid #667eea; padding-bottom: 20px; margin-bottom: 30px;">
         <h2 style="margin: 0 0 10px 0; color: #667eea; font-size: 32px;">Career Dashboard</h2>
         <div style="color: #888; font-size: 16px;">
-          <strong style="color: #ffd700;">${Security.sanitize(CAREER_STATE.managerName)}</strong> at <strong style="color: #10b981;">${Security.sanitize(CAREER_STATE.clubName)}</strong>
+          <strong style="color: #ffd700;">${CAREER_STATE.managerName}</strong> at <strong style="color: #10b981;">${CAREER_STATE.clubName}</strong>
         </div>
         <div style="color: #666; font-size: 14px; margin-top: 5px;">
           Season ${CAREER_STATE.currentSeason} • Started ${CAREER_STATE.startYear}
@@ -29901,7 +29614,7 @@ function showUtilityMessage(message, type = 'info') {
   messageDiv.innerHTML = `
     <div style="display: flex; align-items: center; gap: 10px; justify-content: center;">
       <span style="font-size: 1.2em;">${icons[type]}</span>
-      <strong>${Security.sanitize(message)}</strong>
+      <strong>${message}</strong>
     </div>
   `;
 
@@ -33758,7 +33471,7 @@ function showScorerPopup(scorer, origin, teamName) {
   popup.style.top = rect.top - 60 + 'px';
   popup.style.transform = 'translate(-50%, 0)';
 
-  popup.innerHTML = `⚽ ${Security.sanitize(scorer.name)} scores!`;
+  popup.innerHTML = `⚽ ${scorer.name} scores!`;
 
   document.body.appendChild(popup);
 

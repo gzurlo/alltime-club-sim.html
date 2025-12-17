@@ -24011,6 +24011,12 @@ function simulateTeamGoals(team, numGoals, matchEvents) {
     return;
   }
 
+  // Validate numGoals is within realistic bounds
+  const validatedGoals = Math.max(0, Math.min(5, Math.floor(numGoals || 0)));
+  if (validatedGoals !== numGoals) {
+    console.warn(`⚠️ Goals adjusted from ${numGoals} to ${validatedGoals} for realism`);
+  }
+
   const fieldPlayers = team.startingXI.filter((p) => p && p.pos !== "GK");
 
   if (fieldPlayers.length === 0) {
@@ -24018,7 +24024,7 @@ function simulateTeamGoals(team, numGoals, matchEvents) {
     return;
   }
 
-  for (let i = 0; i < numGoals; i++) {
+  for (let i = 0; i < validatedGoals; i++) {
     const scorer = selectPlayerByWeight(fieldPlayers, true);
     if (!scorer || !scorer.name) continue;
 
@@ -24052,7 +24058,7 @@ function simulateTeamGoals(team, numGoals, matchEvents) {
 
     // Update scorer stats
     PLAYER_DB[scorerKey].goals++;
-    PLAYER_DB[scorerKey].apps = (PLAYER_DB[scorerKey].apps || 0) + 1;
+    // Note: apps (appearances) should be tracked separately per match, not per goal
 
     // All-time stats
     if (!ALL_TIME_PLAYER_DB[scorerKey]) {
@@ -24066,7 +24072,7 @@ function simulateTeamGoals(team, numGoals, matchEvents) {
       };
     }
     ALL_TIME_PLAYER_DB[scorerKey].totalGoals++;
-    ALL_TIME_PLAYER_DB[scorerKey].totalApps++;
+    // Note: totalApps should be tracked separately per match, not per goal
 
     // Per-match performance stats
     if (matchEvents.playerPerformances[scorerKey]) {
@@ -24093,7 +24099,7 @@ function simulateTeamGoals(team, numGoals, matchEvents) {
       }
 
       PLAYER_DB[assisterKey].assists++;
-      PLAYER_DB[assisterKey].apps = (PLAYER_DB[assisterKey].apps || 0) + 1;
+      // Note: apps (appearances) should be tracked separately per match, not per assist
 
       if (!ALL_TIME_PLAYER_DB[assisterKey]) {
         ALL_TIME_PLAYER_DB[assisterKey] = {
@@ -24106,7 +24112,7 @@ function simulateTeamGoals(team, numGoals, matchEvents) {
         };
       }
       ALL_TIME_PLAYER_DB[assisterKey].totalAssists++;
-      ALL_TIME_PLAYER_DB[assisterKey].totalApps++;
+      // Note: totalApps is tracked in trackEnhancedPlayerStats initPerformance
 
       if (matchEvents.playerPerformances[assisterKey]) {
         matchEvents.playerPerformances[assisterKey].assists++;
@@ -24168,16 +24174,48 @@ function trackEnhancedPlayerStats(teamA, teamB, goalsA, goalsB) {
         formModifier: formModifier // Track for display
       };
 
-      // Check for injuries (only for starting XI)
+      // Track appearances for starting XI only (not bench)
       if (team.startingXI && team.startingXI.includes(player)) {
+        // Initialize player in database if needed
+        if (!PLAYER_DB[key]) {
+          PLAYER_DB[key] = {
+            id: key,
+            name: player.name,
+            team: team.name,
+            pos: player.pos || "Unknown",
+            quality: player.quality || 70,
+            apps: 0,
+            goals: 0,
+            assists: 0,
+            playerOfTheGame: 0,
+            avgRating: 0,
+            totalRating: 0
+          };
+        }
+
+        // Increment appearances (once per match)
+        PLAYER_DB[key].apps = (PLAYER_DB[key].apps || 0) + 1;
+
+        // Track all-time appearances
+        if (!ALL_TIME_PLAYER_DB[key]) {
+          ALL_TIME_PLAYER_DB[key] = {
+            ...PLAYER_DB[key],
+            totalApps: 0,
+            totalGoals: 0,
+            totalAssists: 0,
+            totalPlayerOfTheGame: 0,
+            tournaments: 0
+          };
+        }
+        ALL_TIME_PLAYER_DB[key].totalApps = (ALL_TIME_PLAYER_DB[key].totalApps || 0) + 1;
+
+        // Check for injuries (only for starting XI)
         const injury = checkForInjury(key, 0.7);
         if (injury) {
           matchEvents.injuries.push(injury);
         }
-      }
 
-      // Check for cards (starting XI only)
-      if (team.startingXI && team.startingXI.includes(player)) {
+        // Check for cards (starting XI only)
         const card = checkForCards(key, player.pos);
         if (card) {
           matchEvents.cards.push(card);
@@ -24367,6 +24405,99 @@ function generateMatchSummary(matchData, teamA, teamB) {
 }
 
 /**
+ * Validate and sanitize player statistics to ensure realism
+ * Prevents unrealistic stat accumulation and data corruption
+ *
+ * @param {Object} playerStats - Player statistics object
+ * @returns {Object} - Validated and sanitized stats
+ */
+function validatePlayerStats(playerStats) {
+  if (!playerStats) return null;
+
+  // Ensure all numeric fields are valid numbers
+  const sanitized = {
+    ...playerStats,
+    apps: Math.max(0, Math.floor(playerStats.apps || 0)),
+    goals: Math.max(0, Math.floor(playerStats.goals || 0)),
+    assists: Math.max(0, Math.floor(playerStats.assists || 0)),
+    playerOfTheGame: Math.max(0, Math.floor(playerStats.playerOfTheGame || 0)),
+    avgRating: Math.max(0, Math.min(10, parseFloat(playerStats.avgRating || 0))),
+    totalRating: Math.max(0, parseFloat(playerStats.totalRating || 0))
+  };
+
+  // Realistic bounds checking
+  if (sanitized.apps > 0) {
+    // Goals per match should not exceed 5 (max possible in our system)
+    const goalsPerMatch = sanitized.goals / sanitized.apps;
+    if (goalsPerMatch > 5) {
+      console.warn(`⚠️ Unrealistic goals/match ratio for ${playerStats.name}: ${goalsPerMatch.toFixed(2)}`);
+      sanitized.goals = Math.floor(sanitized.apps * 3); // Cap at 3 goals/match average
+    }
+
+    // Assists per match should not exceed 5
+    const assistsPerMatch = sanitized.assists / sanitized.apps;
+    if (assistsPerMatch > 5) {
+      console.warn(`⚠️ Unrealistic assists/match ratio for ${playerStats.name}: ${assistsPerMatch.toFixed(2)}`);
+      sanitized.assists = Math.floor(sanitized.apps * 2); // Cap at 2 assists/match average
+    }
+
+    // Average rating should be between 0-10
+    const calculatedAvg = sanitized.totalRating / sanitized.apps;
+    if (calculatedAvg > 10 || calculatedAvg < 0) {
+      console.warn(`⚠️ Invalid average rating for ${playerStats.name}: ${calculatedAvg.toFixed(2)}`);
+      sanitized.avgRating = Math.max(0, Math.min(10, calculatedAvg));
+    }
+  }
+
+  return sanitized;
+}
+
+/**
+ * Generate realistic goal count using Poisson-inspired distribution
+ * This creates realistic football scorelines where low scores are more common
+ *
+ * @param {number} expectedGoals - The expected number of goals (lambda parameter)
+ * @returns {number} - Realistic goal count (0-5)
+ */
+function generateRealisticGoals(expectedGoals) {
+  // Poisson distribution approximation for realistic goal scoring
+  // In real football, most matches have 0-3 total goals
+
+  // Use exponential decay probability for each goal count
+  const probabilities = [];
+  let sum = 0;
+
+  // Calculate probabilities for 0-8 goals using Poisson formula: P(k) = (λ^k * e^(-λ)) / k!
+  for (let k = 0; k <= 8; k++) {
+    let prob = Math.pow(expectedGoals, k) * Math.exp(-expectedGoals);
+    for (let i = 1; i <= k; i++) {
+      prob /= i; // Divide by k! (factorial)
+    }
+    probabilities.push(prob);
+    sum += prob;
+  }
+
+  // Normalize probabilities to sum to 1
+  for (let i = 0; i < probabilities.length; i++) {
+    probabilities[i] /= sum;
+  }
+
+  // Select goal count based on probability distribution
+  const random = Math.random();
+  let cumulative = 0;
+
+  for (let k = 0; k < probabilities.length; k++) {
+    cumulative += probabilities[k];
+    if (random <= cumulative) {
+      return k;
+    }
+  }
+
+  // Fallback (should rarely happen)
+  return Math.floor(expectedGoals);
+}
+
+/**
  * Core match simulation used for group stage (and can be reused for knockouts).
  */
  function simulateMatch(teamA, teamB, isHome, matchImportance = 1.0, weather = 'normal') {
@@ -24383,29 +24514,50 @@ function generateMatchSummary(matchData, teamA, teamB) {
   }
 
   const chaosFactor = RNG_SETTINGS.groupChaos || 1.0;
-  const homeAdvantage = isHome ? 0.3 : -0.3;
+  const homeAdvantage = isHome ? 0.15 : -0.15; // Reduced from 0.3 for realism
 
-  const baseScoreA =
-    Math.random() * ((teamA.strength || 70) / 25) * chaosFactor;
-  const baseScoreB =
-    Math.random() * ((teamB.strength || 70) / 25) * chaosFactor;
+  // Calculate expected goals using realistic football statistics
+  // Average team strength is 70, average goals per team per match is ~1.3
+  const strengthA = teamA.strength || 70;
+  const strengthB = teamB.strength || 70;
 
-  const adjustedScoreA = baseScoreA + homeAdvantage + matchImportance * 0.1;
-  const adjustedScoreB = baseScoreB - homeAdvantage + matchImportance * 0.1;
+  // Expected goals based on team strength (1.3 goals per match is realistic average)
+  const expectedGoalsA = (strengthA / 70) * 1.3 + homeAdvantage + (matchImportance * 0.05);
+  const expectedGoalsB = (strengthB / 70) * 1.3 - homeAdvantage + (matchImportance * 0.05);
 
-  const goalsA = Math.max(0, Math.floor(adjustedScoreA + Math.random() * chaosFactor));
-  const goalsB = Math.max(0, Math.floor(adjustedScoreB + Math.random() * chaosFactor));
+  // Apply chaos factor to expected goals (realistic range: 0.7-1.3)
+  const adjustedExpectedA = Math.max(0.2, expectedGoalsA * (0.85 + (chaosFactor - 1.0) * 0.3));
+  const adjustedExpectedB = Math.max(0.2, expectedGoalsB * (0.85 + (chaosFactor - 1.0) * 0.3));
 
-  const finalGoalsA = Math.min(goalsA, 7);
-  const finalGoalsB = Math.min(goalsB, 7);
+  // Use Poisson-inspired distribution for realistic goal counts
+  // This favors low-scoring matches (0-0, 1-0, 1-1, 2-1) like real football
+  const goalsA = generateRealisticGoals(adjustedExpectedA);
+  const goalsB = generateRealisticGoals(adjustedExpectedB);
+
+  // Realistic cap at 5 goals (6+ goal games are extremely rare in professional football)
+  const finalGoalsA = Math.min(goalsA, 5);
+  const finalGoalsB = Math.min(goalsB, 5);
 
   // trackEnhancedPlayerStats is expected later in your codebase
-  const matchEvents = trackEnhancedPlayerStats(
-    teamA,
-    teamB,
-    finalGoalsA,
-    finalGoalsB
-  );
+  let matchEvents;
+  try {
+    matchEvents = trackEnhancedPlayerStats(
+      teamA,
+      teamB,
+      finalGoalsA,
+      finalGoalsB
+    );
+  } catch (error) {
+    console.error('❌ Error tracking player stats:', error);
+    // Fallback to empty match events to prevent crash
+    matchEvents = {
+      goals: [],
+      assists: [],
+      playerPerformances: {},
+      injuries: [],
+      cards: []
+    };
+  }
 
   const matchId = `${teamA.name}_vs_${teamB.name}_${Date.now()}_${Math.random()
     .toString(36)
@@ -24448,8 +24600,9 @@ function generateMatchSummary(matchData, teamA, teamB) {
       }
     }
 
-    // Check for high-scoring match (5+ goals by winner)
-    if (finalGoalsA >= 5 || finalGoalsB >= 5) {
+    // Check for high-scoring match (4+ goals total is significant in realistic football)
+    const totalGoals = finalGoalsA + finalGoalsB;
+    if (totalGoals >= 5 || finalGoalsA >= 4 || finalGoalsB >= 4) {
       updateAchievementProgress('highScoring', 1);
     }
 

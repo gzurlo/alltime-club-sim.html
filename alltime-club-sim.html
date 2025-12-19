@@ -17988,6 +17988,43 @@ function createTableEntry(team) {
 // SEASON PLAYER STATISTICS SYSTEM
 // ========================================
 
+// Realistic player name lists
+const PLAYER_FIRST_NAMES = [
+  'Marco', 'David', 'Alex', 'Chris', 'James', 'Michael', 'Robert', 'Daniel',
+  'Carlos', 'Diego', 'Luis', 'Pablo', 'Andre', 'Thomas', 'Kevin', 'Ryan',
+  'Mohamed', 'Ahmed', 'Omar', 'Hassan', 'Pierre', 'Jean', 'Antoine', 'Lucas',
+  'Bruno', 'Paulo', 'Rafael', 'Gabriel', 'Mateo', 'Sebastian', 'Ivan', 'Sergei',
+  'Luca', 'Matteo', 'Francesco', 'Giorgio', 'Johan', 'Erik', 'Lars', 'Hans',
+  'Kai', 'Leon', 'Felix', 'Jamal', 'Kwame', 'Emmanuel', 'Joseph', 'Peter',
+  'Takumi', 'Kenji', 'Yuki', 'Hiroshi', 'Min-ho', 'Ji-sung', 'Dong-hyun',
+  'Antonio', 'Miguel', 'Fernando', 'Cristiano', 'Sergio', 'Andres', 'Ricardo',
+  'Harry', 'Jack', 'Mason', 'Marcus', 'Raheem', 'Dele', 'Jamie', 'Phil'
+];
+
+const PLAYER_LAST_NAMES = [
+  'Silva', 'Santos', 'Rodriguez', 'Garcia', 'Martinez', 'Fernandez', 'Lopez',
+  'Gonzalez', 'Perez', 'Sanchez', 'Ramirez', 'Torres', 'Flores', 'Rivera',
+  'Gomez', 'Diaz', 'Cruz', 'Morales', 'Reyes', 'Gutierrez', 'Ortiz', 'Mendoza',
+  'Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Davis', 'Miller', 'Wilson',
+  'Moore', 'Taylor', 'Anderson', 'Thomas', 'Jackson', 'White', 'Harris', 'Martin',
+  'Mueller', 'Schmidt', 'Schneider', 'Fischer', 'Weber', 'Meyer', 'Wagner',
+  'Becker', 'Schulz', 'Hoffmann', 'Koch', 'Bauer', 'Richter', 'Klein', 'Wolf',
+  'Rossi', 'Russo', 'Ferrari', 'Esposito', 'Bianchi', 'Romano', 'Colombo',
+  'Ricci', 'Marino', 'Greco', 'Bruno', 'Gallo', 'Conti', 'De Luca', 'Costa',
+  'Mancini', 'Giordano', 'Rizzo', 'Lombardi', 'Moretti', 'Barbieri', 'Fontana',
+  'Dubois', 'Lefebvre', 'Moreau', 'Laurent', 'Simon', 'Michel', 'Blanc', 'Bernard',
+  'Yamamoto', 'Tanaka', 'Suzuki', 'Takahashi', 'Watanabe', 'Ito', 'Nakamura',
+  'Kim', 'Lee', 'Park', 'Choi', 'Jung', 'Kang', 'Cho', 'Yoon', 'Jang',
+  'Oliveira', 'Alves', 'Ribeiro', 'Carvalho', 'Ferreira', 'Sousa', 'Rodrigues'
+];
+
+// Generate realistic player name
+function generatePlayerName() {
+  const firstName = PLAYER_FIRST_NAMES[Math.floor(Math.random() * PLAYER_FIRST_NAMES.length)];
+  const lastName = PLAYER_LAST_NAMES[Math.floor(Math.random() * PLAYER_LAST_NAMES.length)];
+  return `${firstName} ${lastName}`;
+}
+
 // Poisson-like random number generator for realistic goal distribution
 function poissonRandom(lambda) {
   const L = Math.exp(-lambda);
@@ -18019,7 +18056,7 @@ function generateSeasonPlayerStats(team, matchesPlayed = 0) {
     const baseAssists = 5 * strengthFactor * starLevel;
 
     players.push({
-      name: `${team.name} FW${i + 1}`,
+      name: generatePlayerName(),
       position: 'FW',
       team: team.name,
       appearances: matchesPlayed,
@@ -18038,7 +18075,7 @@ function generateSeasonPlayerStats(team, matchesPlayed = 0) {
     const baseAssists = 8 * strengthFactor * starLevel;
 
     players.push({
-      name: `${team.name} MF${i + 1}`,
+      name: generatePlayerName(),
       position: 'MF',
       team: team.name,
       appearances: matchesPlayed,
@@ -18057,7 +18094,7 @@ function generateSeasonPlayerStats(team, matchesPlayed = 0) {
     const baseAssists = 2 * strengthFactor * starLevel;
 
     players.push({
-      name: `${team.name} DF${i + 1}`,
+      name: generatePlayerName(),
       position: 'DF',
       team: team.name,
       appearances: matchesPlayed,
@@ -18074,7 +18111,7 @@ function generateSeasonPlayerStats(team, matchesPlayed = 0) {
   for (let i = 0; i < 2; i++) {
     const isMainGK = i === 0;
     players.push({
-      name: `${team.name} GK${i + 1}`,
+      name: generatePlayerName(),
       position: 'GK',
       team: team.name,
       appearances: isMainGK ? matchesPlayed : Math.floor(matchesPlayed * 0.2),
@@ -28727,22 +28764,32 @@ function showTournamentSetup(onComplete) {
         />
       </div>
 
-      <!-- Team Selection -->
+      <!-- Current Team Display (Read-Only) -->
       <div class="setup-section" style="margin-top: 20px;">
-        <label for="setupTeamSelect" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: var(--text); font-weight: 600;">
+        <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: var(--text); font-weight: 600;">
           <span>⚽</span>
-          Your Team (for predictions & stats)
+          Your Team
         </label>
-        <select id="setupTeamSelect" style="width: 100%; padding: 10px 12px; border: 2px solid rgba(71, 85, 105, 0.4); border-radius: 8px;
-                                             font-size: 1rem; background: rgba(30, 41, 59, 0.8); color: var(--text); cursor: pointer;">
-          <option value="">-- No Team (Skip) --</option>
-          ${allTeams.map(team =>
-            `<option value="${Security.sanitize(team.name)}" ${MANAGER_STATE.chosenTeam && MANAGER_STATE.chosenTeam.name === team.name ? 'selected' : ''}>
-              ${Security.sanitize(team.name)} (${team.strength || team.overallRating || 'N/A'})
-            </option>`
-          ).join('')}
-        </select>
-        <p style="font-size: 0.85em; color: #64748B; margin-top: 6px; font-style: italic;">Choose a team to track your performance and make predictions</p>
+        ${MANAGER_STATE.chosenTeam ? `
+          <div style="padding: 12px; background: rgba(59, 130, 246, 0.1); border: 2px solid rgba(59, 130, 246, 0.4); border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-weight: 600; color: var(--text);">${Security.sanitize(MANAGER_STATE.chosenTeam.name)}</div>
+              <div style="font-size: 0.85em; color: #94A3B8; margin-top: 4px;">Strength: ${MANAGER_STATE.chosenTeam.strength || MANAGER_STATE.chosenTeam.overallRating || 'N/A'}</div>
+            </div>
+            <button onclick="cancelTournamentSetup(); displayManagerProfile();" style="padding: 6px 12px; background: transparent; border: 1px solid rgba(71, 85, 105, 0.4); border-radius: 6px; color: #60A5FA; cursor: pointer; font-size: 0.9em;">
+              Change Team
+            </button>
+          </div>
+          <p style="font-size: 0.85em; color: #64748B; margin-top: 6px; font-style: italic;">Predictions will only show for this team's matches</p>
+        ` : `
+          <div style="padding: 15px; background: rgba(239, 68, 68, 0.1); border: 2px solid rgba(239, 68, 68, 0.4); border-radius: 8px;">
+            <div style="color: #EF4444; font-weight: 600; margin-bottom: 8px;">⚠️ No Team Selected</div>
+            <p style="font-size: 0.9em; color: #94A3B8; margin-bottom: 10px;">To use predictions and track stats, select your team in Manager Profile first</p>
+            <button onclick="cancelTournamentSetup(); displayManagerProfile();" style="padding: 8px 16px; background: #3b82f6; border: none; border-radius: 6px; color: white; cursor: pointer; font-weight: 600;">
+              Go to Manager Profile
+            </button>
+          </div>
+        `}
       </div>
 
       <!-- Predictions Toggle -->
@@ -28826,52 +28873,26 @@ function showTournamentSetup(onComplete) {
 }
 
 function startTournamentWithSetup() {
-  // Get all values from setup modal
+  // Get values from setup modal (team is now read-only, from MANAGER_STATE)
   const managerName = document.getElementById('setupManagerName').value.trim();
-  const teamName = document.getElementById('setupTeamSelect').value;
   const predictionsEnabled = document.getElementById('setupPredictions').checked;
   const difficulty = document.getElementById('setupDifficulty').value;
 
-  // Validate manager name if predictions enabled or team selected
-  if ((predictionsEnabled || teamName) && !managerName) {
-    showNotification('error', 'Name Required', 'Please enter your manager name', 3000);
-    return;
-  }
-
-  // Update MANAGER_STATE
+  // Update manager name if provided
   if (managerName) {
     MANAGER_STATE.managerName = managerName;
     MANAGER_STATE.active = true;
   }
 
+  // Update tournament settings
   MANAGER_STATE.predictionsEnabled = predictionsEnabled;
   MANAGER_STATE.difficulty = difficulty;
 
-  // Set chosen team
-  if (teamName) {
-    // Find team in all sources
-    let team = null;
-
-    if (HISTORIC_TEAMS) {
-      if (HISTORIC_TEAMS.worldCup) {
-        team = Object.values(HISTORIC_TEAMS.worldCup).find(t => t.name === teamName);
-      }
-      if (!team && HISTORIC_TEAMS.championsLeague) {
-        team = Object.values(HISTORIC_TEAMS.championsLeague).find(t => t.name === teamName);
-      }
-    }
-
-    if (!team && window.ALL_TEAMS) {
-      team = window.ALL_TEAMS.find(t => t.name === teamName);
-    }
-
-    if (team) {
-      MANAGER_STATE.chosenTeam = team;
-      MANAGER_STATE.teamName = team.name;
-    }
-  } else {
-    MANAGER_STATE.chosenTeam = null;
-    MANAGER_STATE.teamName = '';
+  // Warn if predictions enabled but no team selected
+  if (predictionsEnabled && !MANAGER_STATE.chosenTeam) {
+    showNotification('warning', 'No Team Selected',
+      'Predictions are enabled but you haven\'t selected a team in Manager Profile. Go to Manager Profile to select your team.', 4000);
+    // Don't block tournament start, just warn
   }
 
   // Save to storage
@@ -28885,6 +28906,9 @@ function startTournamentWithSetup() {
   let message = '⚙️ Tournament configured!';
   if (MANAGER_STATE.chosenTeam) {
     message += ` Managing ${MANAGER_STATE.chosenTeam.name}`;
+  }
+  if (predictionsEnabled && MANAGER_STATE.chosenTeam) {
+    message += ' (Predictions: ON)';
   }
   showNotification('success', 'Setup Complete', message, 3000);
 
@@ -32791,17 +32815,30 @@ function showExportPreviewModal(tournamentData, exportStr) {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 10000;
+    overflow-y: auto;
   `;
-  
+
+  // Close modal when clicking outside
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) {
+      modal.remove();
+      document.body.style.overflow = '';
+    }
+  });
+
+  // Prevent body scroll when modal is open
+  document.body.style.overflow = 'hidden';
+
   const encoded = btoa(unescape(encodeURIComponent(exportStr)));
   
   modal.innerHTML = `
     <div style="background: #1f2937; border-radius: 12px; padding: 25px; max-width: 90vw; max-height: 90vh; width: 600px; overflow-y: auto;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h3 style="margin: 0; color: #e5e7eb;">📤 Export Tournament Data</h3>
-        <button onclick="this.closest('.modal-overlay').remove()" 
-                style="background: none; border: none; color: #9ca3af; font-size: 1.5em; cursor: pointer;">×</button>
+        <button onclick="this.closest('.modal-overlay').remove(); document.body.style.overflow = '';"
+                style="background: none; border: none; color: #9ca3af; font-size: 1.5em; cursor: pointer; transition: color 0.2s;"
+                onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#9ca3af'">×</button>
       </div>
       
       <div style="background: #374151; padding: 15px; border-radius: 8px; margin-bottom: 20px;">

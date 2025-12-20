@@ -3434,7 +3434,7 @@ if (document.readyState === 'loading') {
       flex: 1;
       min-height: 0;
       padding-right: 4px;
-      padding-bottom: 8px;
+      padding-bottom: 60px;
     }
 
     .tab-content.active {
@@ -4285,7 +4285,7 @@ if (document.readyState === 'loading') {
 
     body.light {
       background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #cbd5e1 100%);
-      color: #0f172a;
+      color: #020617;
     }
 
     body.light::before {
@@ -4315,7 +4315,7 @@ if (document.readyState === 'loading') {
 
     body.light .subtitle,
     body.light .rng-mini {
-      color: #475569;
+      color: #334155;
     }
 
     body.light .chip {
@@ -4327,11 +4327,11 @@ if (document.readyState === 'loading') {
     body.light .sidebar,
     body.light .panel {
       background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.95));
-      border-color: rgba(59, 130, 246, 0.2);
+      border-color: rgba(59, 130, 246, 0.3);
       box-shadow:
-        0 4px 24px rgba(0, 0, 0, 0.08),
+        0 4px 24px rgba(0, 0, 0, 0.12),
         inset 0 1px 0 rgba(255, 255, 255, 0.5);
-      color: #0f172a;
+      color: #020617;
     }
 
     body.light .panel::before {
@@ -4339,15 +4339,15 @@ if (document.readyState === 'loading') {
     }
 
     body.light .team-row {
-      background: rgba(241, 245, 249, 0.8);
-      border-color: rgba(148, 163, 184, 0.3);
-      color: #0f172a;
+      background: rgba(241, 245, 249, 0.9);
+      border-color: rgba(100, 116, 139, 0.4);
+      color: #020617;
     }
 
     body.light table tr:nth-child(even) td,
     body.light table tr:nth-child(odd) td {
-      background: rgba(248, 250, 252, 0.8);
-      color: #0f172a;
+      background: rgba(248, 250, 252, 0.9);
+      color: #020617;
     }
 
     body.light tr:hover td {
@@ -4355,23 +4355,30 @@ if (document.readyState === 'loading') {
     }
 
     body.light .stat-card {
-      background: rgba(255, 255, 255, 0.95);
-      color: #0f172a;
+      background: rgba(255, 255, 255, 0.98);
+      color: #020617;
+      border: 1px solid rgba(100, 116, 139, 0.2);
     }
 
     body.light .modal-content {
       background: rgba(255, 255, 255, 0.98);
-      border-color: rgba(59, 130, 246, 0.2);
-      color: #0f172a;
+      border-color: rgba(59, 130, 246, 0.3);
+      color: #020617;
     }
 
     body.light .modal-close {
-      color: #0f172a;
+      color: #020617;
+      opacity: 0.8;
+    }
+
+    body.light .modal-close:hover {
+      opacity: 1;
     }
 
     body.light .history-card {
-      background: rgba(248, 250, 252, 0.8);
-      color: #0f172a;
+      background: rgba(248, 250, 252, 0.9);
+      color: #020617;
+      border: 1px solid rgba(100, 116, 139, 0.2);
     }
 
     body.light h2,
@@ -4383,17 +4390,18 @@ if (document.readyState === 'loading') {
     }
 
     body.light .ctrl-btn {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9));
-      color: #0f172a;
-      border-color: rgba(0, 0, 0, 0.15);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.95));
+      color: #020617;
+      border-color: rgba(0, 0, 0, 0.2);
       box-shadow:
-        0 2px 8px rgba(0, 0, 0, 0.1),
+        0 2px 8px rgba(0, 0, 0, 0.12),
         inset 0 1px 0 rgba(255, 255, 255, 0.8);
     }
 
     body.light .ctrl-btn:hover {
       background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(241, 245, 249, 1));
-      border-color: rgba(0, 0, 0, 0.2);
+      border-color: rgba(0, 0, 0, 0.25);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
     }
 
     body.light .sidebar-header-title {
@@ -4401,12 +4409,12 @@ if (document.readyState === 'loading') {
     }
 
     body.light .sidebar-tab {
-      color: #475569;
+      color: #334155;
     }
 
     body.light .sidebar-tab:hover {
-      background: rgba(59, 130, 246, 0.15);
-      color: #334155;
+      background: rgba(59, 130, 246, 0.2);
+      color: #1e293b;
     }
 
     body.light .sidebar-tab.active {
@@ -6807,7 +6815,7 @@ body[data-theme="stadium"] .page::after {
   border: 1px solid rgba(59, 130, 246, 0.3);
   border-radius: 12px;
   padding: 16px;
-  margin: 20px 0;
+  margin: 20px 0 30px 0;
   position: relative;
   z-index: 1;
 }
@@ -7504,6 +7512,14 @@ button:focus, input:focus, select:focus {
               <span class="ctrl-btn-subtitle">Home-and-away round-robin</span>
             </div>
             <span class="ctrl-btn-tag">Play</span>
+          </button>
+
+          <button class="ctrl-btn btn-secondary" id="btnViewGroupStage" disabled style="display: none;" aria-label="View group stage results" title="View the results from the completed group stage">
+            <div class="ctrl-btn-main">
+              <span class="ctrl-btn-title">View Group Stage</span>
+              <span class="ctrl-btn-subtitle">Go back to group results</span>
+            </div>
+            <span class="ctrl-btn-tag">📊</span>
           </button>
 
           <button class="ctrl-btn btn-orange" id="btnKnockouts" disabled aria-label="Simulate knockout rounds" title="Run all knockout rounds from Round of 32 to the Final">
@@ -12654,6 +12670,9 @@ function saveManagerProfile() {
 
 // Update manager profile UI
 function updateManagerProfileUI() {
+  // Use MANAGER_STATE if active, otherwise fallback to MANAGER_PROFILE
+  const profile = (MANAGER_STATE && MANAGER_STATE.active) ? MANAGER_STATE : MANAGER_PROFILE;
+
   // Update sidebar card
   const nameEl = document.getElementById('managerName');
   const levelEl = document.getElementById('managerLevel');
@@ -12663,18 +12682,25 @@ function updateManagerProfileUI() {
   const winRateEl = document.getElementById('managerWinRate');
   const goalsEl = document.getElementById('managerGoals');
 
-  if (nameEl) nameEl.textContent = MANAGER_PROFILE.name;
-  if (levelEl) levelEl.textContent = `Level ${MANAGER_PROFILE.level}`;
-  if (xpEl) xpEl.textContent = `${MANAGER_PROFILE.xp} / ${MANAGER_PROFILE.xpToNextLevel} XP`;
+  if (nameEl) nameEl.textContent = profile.managerName || profile.name || 'Manager';
+  if (levelEl) levelEl.textContent = `Level ${profile.level || 1}`;
+  if (xpEl) xpEl.textContent = `${profile.xp || 0} / ${profile.xpToNextLevel || 100} XP`;
 
   if (xpFillEl) {
-    const xpPercent = (MANAGER_PROFILE.xp / MANAGER_PROFILE.xpToNextLevel) * 100;
+    const xpPercent = ((profile.xp || 0) / (profile.xpToNextLevel || 100)) * 100;
     xpFillEl.style.width = `${xpPercent}%`;
   }
 
-  if (tournamentsEl) tournamentsEl.textContent = MANAGER_PROFILE.tournamentsPlayed;
-  if (winRateEl) winRateEl.textContent = `${MANAGER_PROFILE.winRate}%`;
-  if (goalsEl) goalsEl.textContent = MANAGER_PROFILE.totalGoals;
+  // Calculate stats from MANAGER_STATE.statistics if available
+  const stats = profile.statistics || {};
+  const tournamentsPlayed = stats.tournamentsPlayed || profile.tournamentsPlayed || 0;
+  const totalMatches = (stats.matchesWon || 0) + (stats.matchesDrawn || 0) + (stats.matchesLost || 0);
+  const winRate = totalMatches > 0 ? Math.round(((stats.matchesWon || 0) / totalMatches) * 100) : 0;
+  const totalGoals = stats.goalsScored || profile.totalGoals || 0;
+
+  if (tournamentsEl) tournamentsEl.textContent = tournamentsPlayed;
+  if (winRateEl) winRateEl.textContent = `${winRate}%`;
+  if (goalsEl) goalsEl.textContent = totalGoals;
 
   // Update profile tab if it exists
   const profileTournamentsWon = document.getElementById('profileTournamentsWon');
@@ -22861,6 +22887,9 @@ function displayManagerProfile() {
   if (!MANAGER_STATE.chosenTeam) {
     populateManagerTeamDropdown();
   }
+
+  // Update profile stats with latest data
+  setTimeout(() => updateProfileStats(), 100);
 }
 
 function populateManagerTeamDropdown() {
@@ -28492,6 +28521,41 @@ function generateRealisticGoals(expectedGoals) {
 // MANAGER TEAM TRACKING
 // ========================================
 
+/**
+ * Update the career stats display in the Profile tab with current MANAGER_STATE data
+ */
+function updateProfileStats() {
+  if (!MANAGER_STATE || !MANAGER_STATE.active) return;
+
+  const stats = MANAGER_STATE.statistics || {};
+
+  // Update Championships (tournaments won)
+  const tournamentsWonEl = document.getElementById('profileTournamentsWon');
+  if (tournamentsWonEl) {
+    tournamentsWonEl.textContent = stats.tournamentsWon || 0;
+  }
+
+  // Update Tournaments Played
+  const tournamentsPlayedEl = document.getElementById('profileTournamentsPlayed');
+  if (tournamentsPlayedEl) {
+    tournamentsPlayedEl.textContent = stats.tournamentsPlayed || 0;
+  }
+
+  // Update Total Goals
+  const totalGoalsEl = document.getElementById('profileTotalGoals');
+  if (totalGoalsEl) {
+    totalGoalsEl.textContent = stats.goalsScored || 0;
+  }
+
+  // Update Average Goals per Match
+  const avgGoalsEl = document.getElementById('profileAvgGoals');
+  if (avgGoalsEl) {
+    const totalMatches = (stats.matchesWon || 0) + (stats.matchesDrawn || 0) + (stats.matchesLost || 0);
+    const avgGoals = totalMatches > 0 ? (stats.goalsScored || 0) / totalMatches : 0;
+    avgGoalsEl.textContent = avgGoals.toFixed(1);
+  }
+}
+
 function updateManagerStatsAfterMatch(match) {
   // Only track if manager mode is active and a team is chosen
   if (!MANAGER_STATE || !MANAGER_STATE.active || !MANAGER_STATE.chosenTeam) {
@@ -28578,11 +28642,151 @@ function updateManagerStatsAfterMatch(match) {
   // Save state
   saveManagerState();
 
+  // Update profile stats display
+  if (typeof updateProfileStats === 'function') {
+    updateProfileStats();
+  }
+
+  // Update top-left manager widget
+  if (typeof updateManagerProfileUI === 'function') {
+    updateManagerProfileUI();
+  }
+
   // Show notification for significant results
   if (result === 'win' && goalsScored >= 3) {
     showNotification('success', 'Great Win!',
       `${chosenTeamName} won ${goalsScored}-${goalsConceded}! +${xpGained} XP`, 3000);
   }
+}
+
+/**
+ * Show level-up rewards modal with current level and all unlocked rewards
+ */
+function showLevelUpRewardsModal(newLevel) {
+  // Define rewards by level
+  const rewards = {
+    1: ['Basic Manager Avatar', 'Tournament Participation'],
+    5: ['Enhanced Stats Tracking', 'Promising Reputation'],
+    10: ['Advanced Customization', 'Experienced Reputation'],
+    15: ['Tournament History Export', 'Custom Match Builder'],
+    20: ['Hall of Fame Access', 'Renowned Reputation'],
+    25: ['Season Mode Unlock', 'Trophy Cabinet'],
+    30: ['Quick Templates', 'Elite Reputation'],
+    35: ['Advanced Predictions', 'Custom Themes'],
+    40: ['Tournament Comparison', 'World Class Reputation'],
+    45: ['Legacy Builder', 'All Avatar Options'],
+    50: ['Legendary Status', 'Complete Customization Access']
+  };
+
+  // Get all unlocked rewards (up to and including current level)
+  const unlockedRewards = [];
+  Object.keys(rewards).forEach(level => {
+    if (parseInt(level) <= newLevel) {
+      unlockedRewards.push({
+        level: parseInt(level),
+        items: rewards[level]
+      });
+    }
+  });
+
+  // Build rewards HTML - show current level prominently, then all unlocked below
+  const rewardsHTML = unlockedRewards.reverse().map((reward, index) => {
+    const isCurrent = reward.level === newLevel;
+    return `
+      <div style="
+        background: ${isCurrent ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.2))' : 'rgba(30, 41, 59, 0.4)'};
+        border: 2px solid ${isCurrent ? '#10B981' : 'rgba(71, 85, 105, 0.3)'};
+        border-radius: 12px;
+        padding: ${isCurrent ? '20px' : '16px'};
+        margin-bottom: 12px;
+        ${isCurrent ? 'box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);' : ''}
+      ">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: ${isCurrent ? '12px' : '8px'};">
+          <div style="color: ${isCurrent ? '#10B981' : '#94A3B8'}; font-weight: 700; font-size: ${isCurrent ? '1.3em' : '1.1em'};">
+            ${isCurrent ? '🎉 ' : ''}Level ${reward.level}${isCurrent ? ' - NEW!' : ''}
+          </div>
+          ${isCurrent ? '<div style="color: #10B981; font-size: 0.9em;">✨ Just Unlocked</div>' : ''}
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          ${reward.items.map(item => `
+            <div style="color: ${isCurrent ? '#F7FAFC' : '#94A3B8'}; font-size: 0.95em; padding-left: 8px;">
+              • ${item}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Create modal
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10001;
+    overflow-y: auto;
+  `;
+
+  modal.innerHTML = `
+    <div style="
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.98));
+      border: 2px solid rgba(16, 185, 129, 0.4);
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    ">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <div style="font-size: 4em; margin-bottom: 10px;">🎉</div>
+        <h2 style="color: #10B981; font-size: 2em; margin-bottom: 10px;">Level Up!</h2>
+        <div style="color: #F7FAFC; font-size: 1.3em; font-weight: 600;">
+          You've reached Level ${newLevel}
+        </div>
+      </div>
+
+      <div style="margin-bottom: 30px;">
+        <h3 style="color: #60A5FA; margin-bottom: 16px; font-size: 1.2em;">Your Unlocked Rewards</h3>
+        ${rewardsHTML}
+      </div>
+
+      <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()"
+              style="
+                width: 100%;
+                padding: 16px;
+                background: linear-gradient(135deg, #10B981, #059669);
+                border: none;
+                border-radius: 12px;
+                color: white;
+                font-weight: 700;
+                font-size: 1.1em;
+                cursor: pointer;
+                transition: all 0.3s;
+              "
+              onmouseover="this.style.transform='scale(1.02)'"
+              onmouseout="this.style.transform='scale(1)'">
+        Continue
+      </button>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  // Close on click outside
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.remove();
+    }
+  });
 }
 
 function checkManagerLevelUp() {
@@ -28597,8 +28801,8 @@ function checkManagerLevelUp() {
     MANAGER_STATE.xpToNextLevel = 100 + (MANAGER_STATE.level * 10);
 
     // Show level up notification
-    showNotification('success', '🎉 Level Up!',
-      `You reached Level ${MANAGER_STATE.level}!`, 4000);
+    // Show level-up rewards modal
+    showLevelUpRewardsModal(MANAGER_STATE.level);
 
     // Unlock new customization items based on level
     if (typeof unlockCustomizationItems === 'function') {
@@ -30976,17 +31180,16 @@ async function runGroupStage() {
         };
       }
 
+      // Hide Simulate button and show View button
       if (btnGroup) {
-        btnGroup.disabled = false;
-        btnGroup.style.background = "";
-        btnGroup.innerHTML = `
-          <div class="ctrl-btn-main">
-            <span class="ctrl-btn-title">View Group Stage</span>
-            <span class="ctrl-btn-subtitle">Go back to group results</span>
-          </div>
-          <span class="ctrl-btn-tag">📊</span>
-        `;
-        btnGroup.onclick = function () {
+        btnGroup.style.display = "none";
+      }
+
+      const btnViewGroup = document.getElementById("btnViewGroupStage");
+      if (btnViewGroup) {
+        btnViewGroup.style.display = "";
+        btnViewGroup.disabled = false;
+        btnViewGroup.onclick = function () {
           showGroupStageResults();
         };
       }
@@ -31171,17 +31374,16 @@ async function runKnockouts() {
     }
   });
 }, 100);
+      // Hide Simulate button and show View button
       if (btnGroup) {
-        btnGroup.disabled = false;
-        btnGroup.style.background = "";
-        btnGroup.innerHTML = `
-          <div class="ctrl-btn-main">
-            <span class="ctrl-btn-title">View Group Stage</span>
-            <span class="ctrl-btn-subtitle">Go back to group results</span>
-          </div>
-          <span class="ctrl-btn-tag">📊</span>
-        `;
-        btnGroup.onclick = function () {
+        btnGroup.style.display = "none";
+      }
+
+      const btnViewGroup = document.getElementById("btnViewGroupStage");
+      if (btnViewGroup) {
+        btnViewGroup.style.display = "";
+        btnViewGroup.disabled = false;
+        btnViewGroup.onclick = function () {
           showGroupStageResults();
         };
       }
